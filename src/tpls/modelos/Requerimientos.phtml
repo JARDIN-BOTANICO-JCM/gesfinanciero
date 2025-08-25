@@ -1,0 +1,428 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$l_paquetereqtipos_id = array();
+try {
+    $l_paquetereqtipos_id = OperacionesCtrl::paquetereqtipos_Obtener( array( 'ordenasc' => 1 ) );
+} catch (Exception $e) {
+    throw $e;
+}
+
+$l_reflista_id = array();
+try {
+    $l_reflista_id = OperacionesCtrl::reflista_Obtener( array( ) );
+} catch (Exception $e) {
+    throw $e;
+}
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+			<div class="row">
+				<div class="col-lg-12 col-md-12 col-12">
+					<div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+						<div class="mb-3 mb-lg-0">
+							<h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+									<li class="breadcrumb-item active" aria-current="page">
+										<?php echo $crum['l2']; ?>
+									</li>
+								</ol>
+							</nav>
+
+						</div>
+						
+						<div>
+							<button onclick="btnAgregarReg( this );" class="btn btn-primary">Agregar registro</button>
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-body">
+					<h4 class="mb-0">Control de requerimientos</h4>
+					<p class="mb-4">
+						Agregue los documentos que se le solicitar&aacute;n a los usuarios para iniciar procesos
+					</p>
+					
+					<div class="row">
+						<div class="col-12" id="contTb"></div>
+					</div>
+					
+				</div>
+			</div>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+    <form id="frmval" class="frmvalcls">
+    	<div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Informaci&oacute;n b&aacute;sica</h4>
+                </div>
+                <div class="row">
+                	<div class="mb-3 col-md-12">
+                        <label class="form-label" for="name">Nombre para el paquete de requisitos *</label>
+                        <input type="text" class="form-control" placeholder="Ejemplo: Documentos cuentas de cobro" id="name" name="name" required="required">
+                    </div>
+                </div>
+        
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Informaci&oacute;n que ver&aacute; el usuario</h4>
+                </div>
+                <div class="row">
+                	<div id="cntBtns" class="col-12"></div>
+                	<div class="mb-3 col-12 d-grid gap-2 mt-1">
+                		<button data-target="#cntBtns" class="btn btn-primary" type="button" rol="button" onclick="btnAddCampos( this );">Agregar campo</button>
+                	</div>
+                </div>
+            </div>
+        </div>
+        
+    </form>
+</div>
+
+<script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+<script type="application/javascript">
+let idMod = null;
+const modalFormulario = function ( d ) {
+    var opc = {
+            'id' : d['id'],
+            'title' : d['title'],
+            'btnCerrarX' : true,
+            'scrolling' : true,
+            'center' : true,
+            'size' : 'modal-xl',
+            'level' : 'l2'
+    };
+    return mngModal.dibujar( opc );
+};
+
+const btnAgregarReg = function(){
+	idMod = null;
+	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Agregar registro'} );
+	
+	const body = jQuery( _m ).find( '.modal-body' );
+	const pie = [];
+	pie.push( '<div class="modal-footer">' );
+	pie.push( '	<button class="btn btn-secondary" data-bs-dismiss="modal" >Cerrar</button>' );
+	pie.push( '	<button class="btn btn-primary" onclick="btnGuardar();">Guardar</button>' );
+	pie.push( '</div>' );
+	body.after( pie.join('') );
+	
+	jQuery( _m ).modal('show');	
+};
+
+const lsLlenarCampos = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	
+	const paquetereqtipos_id = jQuery( '#paquetereqtipos_id_' + dt['id'] );
+	const requerido = jQuery( '#requerido_' + dt['id'] );
+	const descripcion = jQuery( '#descripcion_' + dt['id'] );
+	
+	const opt = _o.find(':selected');
+	const dtOpt = jQuery( opt ).data();
+	
+	paquetereqtipos_id.val( dtOpt['paquetereqtipos_id'] );
+	paquetereqtipos_id.trigger('change');
+	
+	if( dtOpt['requerido'] == 1 ){
+		requerido.prop( "checked", true );
+	}
+	descripcion.val( dtOpt['descripcion'] );
+	
+};
+
+let campos_i = 0;
+const btnAddCampos = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+
+	const btnsCtn = [];
+	btnsCtn.push('<div id="cntArrFields' + campos_i + '" class="row border rounded py-2 mb-1">');
+	
+    btnsCtn.push('	<div class="mb-3 col-md-4">');
+    btnsCtn.push('		<label class="form-label" for="ref_' + campos_i + '">Etiqueta del campo *</label>');    
+    btnsCtn.push('		<select data-id="' + campos_i + '" onchange="lsLlenarCampos( this );" class="form-select" id="ref_' + campos_i + '" name="ref_' + campos_i + '" required="required">');
+    btnsCtn.push('			<option selected="selected" disabled="disabled" value="" >Seleccione un campo</option>');
+<?php foreach( $l_reflista_id as $v ) : ?>
+    btnsCtn.push('			<option value="<?php echo $v['id'] ?>" data-label="<?php echo $v['label'] ?>" data-paquetereqtipos_id="<?php echo $v['paquetereqtipos_id'] ?>" data-descripcion="<?php echo $v['descripcion'] ?>" data-requerido="<?php echo $v['requerido'] ?>" ><?php echo $v['nombre'] ?></option>');
+<?php endforeach; ?>
+    btnsCtn.push('		</select>');
+    btnsCtn.push('	</div>');
+    
+    btnsCtn.push('	<div class="mb-3 col-md-2">');
+    btnsCtn.push('		<label class="form-label" for="paquetereqtipos_id_' + campos_i + '">Tipo de campo *</label>');
+    btnsCtn.push('		<select data-id="' + campos_i + '" class="form-select" id="paquetereqtipos_id_' + campos_i + '" name="paquetereqtipos_id_' + campos_i + '" required="required" onchange="renderTipoInput( this );">');
+<?php foreach( $l_paquetereqtipos_id as $v ) : ?>
+    btnsCtn.push('			<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>');
+<?php endforeach; ?>
+    btnsCtn.push('		</select>');
+    btnsCtn.push('	</div>');
+    
+    btnsCtn.push('	<div class="mb-3 col-md-1">');
+    btnsCtn.push('		<label class="form-label" for="requerido_' + campos_i + '">Obligatorio</label>');
+    btnsCtn.push('		<div class="form-check d-flex justify-content-center">');
+	btnsCtn.push('			<input class="form-check-input" type="checkbox" value="1" id="requerido_' + campos_i + '" name="requerido_' + campos_i + '" style="font-size: 20px;">');
+	btnsCtn.push('		</div>');
+    btnsCtn.push('	</div>');
+    
+    btnsCtn.push('	<div id="cntTipos_' + campos_i + '" class="mb-3 col-md-2" style="display: none;">');
+    btnsCtn.push('		<label class="form-label" for="acepta_' + campos_i + '">Tipos de documento</label>');
+    btnsCtn.push('		<input type="text" class="form-control" placeholder="*.xls,image/*,image/png" id="acepta_' + campos_i + '" name="acepta_' + campos_i + '">');
+    btnsCtn.push('	</div>');
+    
+    btnsCtn.push('	<div id="cntDesc_' + campos_i + '"  class="mb-3 col-md-4">');
+    btnsCtn.push('		<label class="form-label" for="descripcion_' + campos_i + '">Descripci&oacute;n</label>');
+    btnsCtn.push('		<input type="text" class="form-control" placeholder="" id="descripcion_' + campos_i + '" name="descripcion_' + campos_i + '">');
+    btnsCtn.push('	</div>');
+    
+    btnsCtn.push('	<div class="mb-3 col-md-1 d-flex justify-content-center align-items-center">');
+    btnsCtn.push('		<button data-target="#cntArrFields' + campos_i + '" onclick="btnDelCampos( this );" type="button" class="btn-close border radius p-2 mt-4"></button>');
+    btnsCtn.push('	</div>');
+    
+    btnsCtn.push('	<input type="hidden" id="id_' + campos_i + '" name="id_' + campos_i + '" value="">');
+    btnsCtn.push('</div>');
+
+	jQuery( dt['target'] ).append( btnsCtn.join('') );
+	
+	const rId = campos_i;
+	campos_i++;
+	
+	return rId;
+};
+
+const renderTipoInput = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	
+	const _oId = dt['id'];
+	const cntTipos = jQuery('#cntTipos_' + _oId);
+	const cntDesc = jQuery('#cntDesc_' + _oId);
+	
+	const sel = _o.find('option:selected');
+	
+	if( jQuery( sel ).text() == 'file' ){
+		cntTipos.show('fast');
+		cntDesc.attr('class','mb-3 col-md-2');
+	}
+	else{
+		cntTipos.hide();
+		cntDesc.attr('class','mb-3 col-md-4');
+	}
+	
+};
+
+const btnDelCampos = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	
+	if( confirm('\xBFDesea eliminar este campo?') ) {
+		jQuery( dt['target'] ).hide('fast', function(){
+    		jQuery( dt['target'] ).remove();
+    	});
+	}
+	
+};
+
+const btnGuardar = function(){
+	ut.validarFrm('frmvalcls', function ( r ) {
+		closeAllModal();
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        if( idMod !== null ){
+        	r['id'] = idMod;
+        }
+        
+        const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_RequerimientosHelperAdd ); ?>');
+        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+				reqs.recargarTabla();
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const btnModRegistro = function ( o ) {
+	const _o = jQuery( o );
+	const dt = _o.data();
+
+    idMod = dt['id'];
+
+	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Modificar registro'} );
+	
+	const body = jQuery( _m ).find( '.modal-body' );
+	const pie = [];
+	pie.push( '<div class="modal-footer">' );
+	pie.push( '	<button class="btn btn-secondary" data-bs-dismiss="modal" >Cerrar</button>' );
+	pie.push( '	<button class="btn btn-primary" onclick="btnGuardar();">Guardar</button>' );
+	pie.push( '</div>' );
+	body.after( pie.join('') );
+
+    var form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_RequerimientostplsitemsHelperGet ); ?>');
+    form_data.append('w_requerimientostpls_id', idMod );
+    form_data.append('ordenasc', 1 );
+
+    __TransportarData(
+			form_data,
+			function( oTmp ) {
+				const o = oTmp['items'];
+                for (const key in o) {
+                    if (Object.hasOwnProperty.call(o, key)) {
+                        const _el = o[key];
+                        const idEl = btnAddCampos( '<b data-target="#cntBtns"></b>' );
+                        jQuery('#name').val( _el['requerimientostpls_nombre'] );
+                        
+                        for (const kData in _el) {
+                            if (Object.hasOwnProperty.call(_el, kData)) {
+                                const _data = _el[kData];
+                                const element = jQuery('#' + kData + '_' + idEl);
+                                
+                                if( (""+element.attr("type")).toLowerCase() == "checkbox" ){
+                                	if( _data == 1 ){
+                                		element.prop( 'checked', true );
+                                	}
+                                }
+                                else{
+                                	element.val( _data );
+                                	if( _el['paquetereqtipos_id'] == 4 ){
+                                		element.trigger('change');
+                                	}
+                                }
+                            }
+                        }
+                        
+                    }
+                }
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+
+    jQuery( _m ).modal('show');
+};
+
+const Requerimientos = function( dC ){ // dC = data constructor
+	const _this = this;
+	const tablaCont = dC['tableContainer'];
+	let tbInter = null;
+	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
+	
+	_this.dibujarTb = function(){
+		const html = [];
+		
+		html.push('<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;"></table>');
+		
+		return html.join('');
+	};
+
+	_this.dibujarDataTable = function(){
+		const tb = _this.dibujarTb();
+		jQuery( tablaCont ).html( tb );
+		
+		tbInter = jQuery( '#' + tableId ).DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: './index.php',
+                data : function(d){
+                	d.ajax = '<?php echo md5( IndexCtrl::API_RequerimientostplsGetAjax ); ?>';
+                },
+                type: 'POST'
+            },
+            columns: [
+                { 'title' : 'Id', data: 'id' },
+                { 'title' : 'Nombre', data: 'nombre' },
+                { 'title' : 'Fecha', data: 'fecha' },
+                { 'title' : 'Creador', data: 'usuarios' },
+                { 'title' : 'Estado', data: 'requerimientostplsestados_id' },
+                {
+                    title: 'Acciones',
+                    data: null,
+                    orderable: false,
+                    width: '1%',
+                    render: function(data, type, row) {
+                      return `
+                        <button onclick="btnModRegistro(this);" data-id="${row.id}" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl${row.id}">
+                        	<i class="fe fe-edit fs-5"></i>
+                        	<div id="modTpl${row.id}" class="d-none">
+                        		<h6 class="mb-0 text-white">Editar</h6>
+                        	</div>
+                        </button>
+                      `;
+                    }
+                }
+            ],
+            responsive: false,
+            language: lengua_es,
+            processing: true
+        });
+		
+	};
+	
+    _this.recargarTabla = function () {
+        if ( tbInter ) {
+			tbInter.ajax.reload(null, false);
+        }
+    };
+};
+const dataConstruct = {
+	'tableContainer' : '#contTb'
+};
+const reqs = new Requerimientos ( dataConstruct );
+
+jQuery( document ).ready(function(){
+	reqs.dibujarDataTable();
+});
+
+</script>

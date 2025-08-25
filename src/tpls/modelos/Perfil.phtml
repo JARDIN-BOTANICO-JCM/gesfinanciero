@@ -1,0 +1,562 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+
+$modif = false;
+if ( $usu->getPerfil_id() == 1 || $usu->getPerfil_id() == 2 || $usu->getPerfil_id() == 3 ) {
+    $modif = true;
+}
+
+$genapi = false;
+if ( $usu->getPerfil_id() == 1 || $usu->getPerfil_id() == 2 ) {
+    $genapi = true;
+}
+
+
+$r = null;
+$data = null;
+try {
+	$r = OperacionesCtrl::usuarios_Obtener( array( 'id' => $usu->getId() ) );
+	if ( sizeof( $r ) > 0 ) {
+		$data = $r[0];
+	}
+} catch (\Throwable $th) {
+	throw new \Exception( $th->getMessage() );
+}
+
+$avatar = null;
+if ( strlen( trim($data['foto']) ) > 0) {
+    $avatar_path = dirname(dirname(dirname(dirname(__FILE__))));
+    $avatartmp = $avatar_path . DIRECTORY_SEPARATOR . \Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . 'avatar' . DIRECTORY_SEPARATOR . $data['foto'];
+
+    if ( file_exists( $avatartmp ) ) {
+        $avatar = $data['foto'];
+    }
+}
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                        <div class="d-flex">
+                            <!-- Aqui mas opciones -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                    
+                <!-- Content -->
+                <div class="row mt-0 mt-md-0" role="tabpanel">
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <!-- Side navbar -->
+                        <nav class="navbar navbar-expand-md navbar-light shadow-sm mb-4 mb-lg-0 sidenav">
+                            <!-- Menu -->
+                            <a class="d-xl-none d-lg-none d-md-none text-inherit fw-bold" href="#">Menu</a>
+                            <!-- Button -->
+                            <button class="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light" type="button" data-bs-toggle="collapse" data-bs-target="#sidenav" aria-controls="sidenav" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="fe fe-menu"></span>
+                            </button>
+                            <!-- Collapse navbar -->
+                            <div class="collapse navbar-collapse" id="sidenav">
+                                <div class="navbar-nav flex-column">
+                                    <span class="navbar-header">Configuraci&oacute;n</span>
+                                    <!-- List -->
+                                    <ul id="myList" role="tablist" class="list-unstyled ms-n2 mb-0 ">
+                                        <!-- Nav item -->
+                                        <li class="nav-item active" >
+                                            <a onclick="cambiarActivo(this);" class="nav-link list-group-item active" data-bs-toggle="list" href="#list-editar" role="tab"><i class="fe fe-settings nav-icon"></i>Editar Perfil</a>
+                                        </li>
+                                        <!-- Nav item -->
+                                        <li class="nav-item ">
+                                            <a onclick="cambiarActivo(this);" class="nav-link list-group-item" data-bs-toggle="list" href="#list-seguridad" role="tab"><i class="fe fe-user nav-icon"></i>Seguridad</a>
+                                        </li>
+                                        <?php if( $genapi ) : ?>
+                                        <!-- Nav item -->
+                                        <li class="nav-item ">
+                                            <a onclick="cambiarActivo(this);" class="nav-link list-group-item" data-bs-toggle="list" href="#list-apibox" role="tab"><i class="fas fa-key nav-icon"></i>Apibox</a>
+                                        </li>
+                                        <?php endif; ?>
+                                        <li class="nav-item ">
+                                        	<a class="nav-link list-group-item" href="/index.php?pageid=modelos/Comunicaciones.phtml" role="tab"><i class="fe fe-message-circle nav-icon"></i> Mensajes</a>
+                                        </li>
+                                    </ul>
+                                    <ul class="list-unstyled ms-n2 mb-0 mt-3 border-top">
+                                        <!-- Nav item -->
+                                        <li class="nav-item mt-3">
+                                            <a onclick="cerrarSesion();" href="#" class="nav-link" ><i class="fe fe-power nav-icon"></i> Cerrar sesi&oacute;n</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="col-lg-9 col-md-8 col-12">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="list-editar" role="tabpanel" >
+                                
+                                <!-- Card -->
+                                <div class="card">
+                                    <!-- Card header -->
+                                    <div class="card-header">
+                                        <h3 class="mb-0">Detalles del perfil</h3>
+                                        <p class="mb-0">
+                                            Modifica y actualiza la informaci&oacute;n de tu perfil.
+                                        </p>
+                                    </div>
+                                    <!-- Card body -->
+                                    <div class="card-body">
+
+                                        <div class="d-lg-flex align-items-center justify-content-between mt-5">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 position-relative d-flex justify-content-end align-items-end mt-n5">
+                                                    <?php if( !is_null( $avatar ) ) : ?>
+                                                    <img src="./repo/avatar/<?php echo $avatar; ?>" class="avatar-xl rounded-circle border border-4 border-white" alt="">
+                                                    <?php else: ?>
+                                                    <img src="./temas/img/logo_no_institu_v2.png" class="avatar-xl rounded-circle border border-4 border-white" alt="">
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div class="lh-1">
+                                                    <h2 class="mb-0">
+                                                        <?php echo $data['fullname']; ?>
+                                                    </h2>
+                                                    <p class="mb-0 d-block">@<?php echo $data['usuario']; ?></p>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <?php if ( $modif ) : ?>
+                                                <a href="#" class="btn btn-outline-white btn-sm">Update</a>
+                                                <a href="#" class="btn btn-outline-danger btn-sm">Delete</a>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-5">
+                                        <div>
+                                            <h4 class="mb-0">Personal Details</h4>
+                                            <p class="mb-4">
+                                                Formulario de modificaci&oacute;n de datos personales
+                                            </p>
+                                            <!-- Form -->
+                                            <form  id="frmval" class="row frmvalcls">
+                                                <!-- First name -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="nombres">Nombres</label>
+                                                    <?php if ( $modif ) : ?>
+                                                    <input class="form-control" value="<?php echo $data['nombres'] ?>" type="text" placeholder="Nombres" id="nombres" name="nombres">
+                                                    <?php else : ?>
+                                                    <label class="form-control text-muted"><?php echo $data['nombres'] ?></label>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <!-- Last name -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="apellidos">Apellidos</label>
+                                                    <?php if ( $modif ) : ?>
+                                                    <input class="form-control" value="<?php echo $data['apellidos'] ?>" type="text" placeholder="Apellidos" id="apellidos" name="apellidos">
+                                                    <?php else : ?>
+                                                    <label class="form-control text-muted"><?php echo $data['apellidos'] ?></label>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <!-- Phone -->
+                                                <?php if ( $usu->getPerfil_id() == 4) : ?>
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="tel">Phone</label>
+                                                    <?php if ( $modif ) : ?>
+                                                    <input class="form-control" value="<?php echo $data['tel'] ?>" type="text" placeholder="Tel&eacute;fono celular" id="tel" name="tel">
+                                                    <?php else : ?>
+                                                    <input type="text" id="tel" class="form-control" placeholder="Phone" required="">
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php endif; ?>
+                                                <!-- Birthday -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="birth">Fecha de nacimiento</label>
+                                                    <input class="form-control flatpickr flatpickr-input" value="<?php echo $data['nacimiento'] ?>" type="text" placeholder="Birth of Date" id="nacimiento" name="nacimiento" readonly="readonly">
+                                                </div>
+                                                <!-- Tipo documento -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label">Tipo de documento</label>
+                                                    <label class="form-control text-muted"><?php echo $data['tipodoc'] ?></label>
+                                                </div>
+                                                <!-- Documento -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label">Documento</label>
+                                                    <label class="form-control text-muted"><?php echo $data['documento'] ?></label>
+                                                </div>
+                                                <!-- Genero -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" >G&eacute;nero</label>
+                                                    <label class="form-control text-muted"><?php echo $data['genero'] ?></label>
+                                                </div>
+                                                <!-- Direccion -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="direccion" >Direcci&oacute;n</label>
+                                                    <?php if ( $modif ) : ?>
+                                                    <input class="form-control" value="<?php echo $data['direccion'] ?>" type="text" placeholder="direccion" id="direccion" name="direccion">
+                                                    <?php else : ?>
+                                                    <label class="form-control text-muted"><?php echo $data['direccion'] ?></label>
+                                                    <?php endif; ?>
+                                                </div>
+                                                <?php if ( $modif ) : ?>
+                                                <div class="col-12">
+                                                    <!-- Button -->
+                                                    <button class="btn btn-primary" type="submit" onclick="actualizar();">
+                                                        Actualizar perfil
+                                                    </button>
+                                                </div>
+                                                <?php endif; ?>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+        
+        					<?php if( $genapi ) : ?>
+                            <div class="tab-pane fade" id="list-apibox" role="tabpanel" >
+
+                                <div class="card">
+                                    <!-- Card header -->
+                                    <div class="card-header">
+                                        <h3 class="mb-0">Apibox</h3>
+                                        <p class="mb-0">
+                                            Generar llave para aplicaciones de terceros.
+                                        </p>
+                                    </div>
+                                    <!-- Card body -->
+                                    <div class="card-body">
+                                        <div class="row">
+                                        	<div class="mb-3 col-lg-12 col-md-12 col-12">
+                                        		<div class="form-floating">
+                                                    <textarea class="form-control" placeholder="Leave a comment here" id="txtApiTokenView" style="height: 100px"></textarea>
+                                                    <label for="txtApiTokenView">Api Token</label>
+                                                </div>
+                                        	</div>
+                                        </div>
+                                        <div class="row">
+                                        	<div class="mb-3 col-lg-12 col-md-12 col-12">
+                                    			<button onclick="apiValidaTkForm();" class="btn btn-primary">Generar Api Token <i class="fas fa-eye"></i></button>
+                                    		</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <form id="frmApiBoxChkTkvalId" class="frmApiBoxChkTkvalcls">
+                                <input id="apiboxvalidatk" name="apiboxvalidatk" type="hidden" value="<?php echo $data['mail']; ?>" />
+                            </form>
+                            <?php endif; ?>
+        
+                            <div class="tab-pane fade" id="list-seguridad" role="tabpanel" >
+
+                                <div class="card">
+                                    <!-- Card header -->
+                                    <div class="card-header">
+                                        <h3 class="mb-0">Seguridad</h3>
+                                        <p class="mb-0">
+                                            Modifica correo electr&oacute;nico y contrase&ntilde;a
+                                        </p>
+                                    </div>
+                                    <!-- Card body -->
+                                    <div class="card-body">
+                                        <h4 class="mb-0">Correo electr&oacute;nico</h4>
+                                        <p>
+                                            Su correo actual es
+                                            <span class="text-success"><?php echo $data['mail']; ?></span>
+                                        </p>
+                                        <form class="row frmUpMailvalcls">
+                                            <div class="mb-3 col-lg-6 col-md-12 col-12">
+                                                <label class="form-label" for="nwemail">Nuevo correo electr&oacute;nico</label>
+                                                <input id="nwemail" type="email" name="nwemail" class="form-control" placeholder="" required="">
+                                                <button type="submit" class="btn btn-primary mt-2" onclick="addNewMail();">
+                                                    Actualizar correo
+                                                </button>
+                                            </div>
+                                        </form>
+                                        <hr class="my-5">
+                                        <div>
+                                            <h4 class="mb-0">Cambio contrase&ntilde;a</h4>
+                                            <p>
+                                                Una vez se cambie la contrase&ntilde;a recibir&aacute; una confirmaci&oacute;n a su correo.
+                                            </p>
+                                            <!-- Form -->
+                                            <form id="frmValPass" class="row frmValPassCls">
+                                                <div class="col-lg-6 col-md-12 col-12">
+                                                        <!-- Current password -->
+                                                    <div class="mb-3">
+                                                        <label class="form-label" for="currentpassword">Clave actual</label>
+                                                        <input id="currentpassword" type="password" name="currentpassword" class="form-control" placeholder="" required="">
+                                                    </div>
+                                                        <!-- New password -->
+                                                    <div class="mb-3 password-field level0">
+                                                        <label class="form-label" for="newpassword">Nueva clave</label>
+                                                        <input id="newpassword" type="password" name="newpassword" class="form-control mb-2" placeholder="" required="">
+                                                        <div class="row align-items-center g-0">
+                                                            <div class="col-6">
+                                                                <span data-bs-toggle="tooltip" data-placement="right" title="" data-bs-original-title="Test it by typing a password in the field below. To reach full strength, use at least 6 characters, a capital letter and a digit, e.g. 'Test01'">
+                                                                    Nivel de seguridad
+                                                                    <i class="fe fe-help-circle ms-1"></i></span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                            <!-- Confirm new password -->
+                                                        <label class="form-label" for="confirmpassword">Confirmar nueva clave</label>
+                                                        <input id="confirmpassword" type="password" name="confirmpassword" class="form-control mb-2" placeholder="" required="">
+                                                    </div>
+                                                        <!-- Button -->
+                                                    <button onclick="actualizarpass();" class="btn btn-primary">
+                                                        Guardar clave
+                                                    </button>
+                                                    <div class="col-6"></div>
+                                                </div>
+                                                <div class="col-12 mt-4">
+                                                    <p class="mb-0">
+                                                        No recuerda su clave?
+                                                        <a href="#">Recuperela v&iacute;a correo electr&oacute;nico</a>
+                                                    </p>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+</div>
+
+<script type="application/javascript">
+
+<?php if( $genapi ) : ?>
+const nuevoApiToken = function(){
+	const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+    var form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_ApiboxGet ); ?>');
+    form_data.append('id', '<?php echo $usu->getId() ; ?>');
+
+	__TransportarData(
+		form_data,
+		function( o ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+            
+            jQuery("#txtApiTokenView").val( o );
+            
+			const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-success');
+            alerta.html( 'Transacci&oacute;n exitosa' );
+
+			jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		},
+		function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		}
+	);
+};
+const apiValidaTkForm = function(){
+	ut.validarFrm('frmApiBoxChkTkvalcls', function ( r ) {
+		const opc = { 
+			'frmid' : 'frmApiBoxChkTkvalcls',
+			'params' : [
+				{'email' : r['apiboxvalidatk'] }
+			]
+		};
+		validadorGlob.setConfig( opc );
+        validadorGlob.fn = function( o ){
+            nuevoApiToken( );
+        };
+        validadorGlob.vista();
+	});
+};
+<?php endif;?>
+
+const nuevoMail = function(){
+	ut.validarFrm('frmUpMailvalcls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_UsuariosMod ); ?>');
+        form_data.append('id', <?php echo $usu->getId(); ?> );
+        
+        form_data.append( 'mail' , jQuery('#nwemail').val() );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+                
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const addNewMail = function(){
+	ut.validarFrm('frmUpMailvalcls', function ( r ) {
+		const opc = { 
+			'frmid' : 'frmUpMailvalcls',
+			'params' : [
+				{'email' : r['nwemail'] }
+			]
+		};
+		validadorGlob.setConfig( opc );
+        validadorGlob.fn = function( o ){
+            nuevoMail();
+        };
+        validadorGlob.vista();
+	});
+};
+
+const actualizar = function(){
+	ut.validarFrm('frmvalcls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_UsuariosMod ); ?>');
+        form_data.append('id', <?php echo $usu->getId(); ?> );
+        
+		for (const k in r) {
+			if (Object.hasOwnProperty.call(r, k)) {
+				const _el = r[k];
+				form_data.append( k , _el);
+			}
+		}
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+                
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const actualizarpass = function(){
+	ut.validarFrm('frmValPassCls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Contrasena ); ?>');
+        
+		for (const k in r) {
+			if (Object.hasOwnProperty.call(r, k)) {
+				const _el = r[k];
+				form_data.append( k , _el);
+			}
+		}
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+                
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const cambiarActivo = function( o ){
+    var padre = jQuery( o ).parent().parent();
+    var _li = jQuery( o ).parent();
+    padre.find('.nav-item').attr('class', 'nav-item');
+    _li.addClass('active');
+};
+</script>

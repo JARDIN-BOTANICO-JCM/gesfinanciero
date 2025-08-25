@@ -1,0 +1,172 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$cfg = OperacionesCtrl::LeerConfigCorp();
+$_CFG_ALMACENAMIENTO_TAMANO = intval( isset( $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]) ? $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]["val"] : '5' );
+?>
+<style>
+    #chartContainer {
+        max-height: 500px;
+        display: none;
+    }
+    canvas {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 600px !important;
+    }
+</style>
+
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <h4 class="mb-3">Mi espacio actual</h4>
+                
+
+                    <div class="row">
+
+                        <div class="col-lg-6 col-md-6 col-12">
+                        	<div class="card">
+                        		<div class="card-body">
+                        			<div id="preloader"></div>
+                                	<div class="chartContainer">
+                                		<div id="storageChart" class="apex-charts d-flex justify-content-center"></div>
+                                	</div>
+                        		</div>
+                        	</div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="application/javascript">
+const verMiEstadoActual = function( ){
+	jQuery('#preloader').html( validadorGlob.ajaxspinner() );
+	
+	const form_data = new FormData();
+	form_data.append('ajax', "<?php echo md5( IndexCtrl::API_TamanoUsoGet ) ?>" );
+	
+	__TransportarData(
+		form_data,
+		function( dt ) {
+			const vlMB = convertToMB(dt['tamano']);
+
+            const totalStorage = (<?php echo $_CFG_ALMACENAMIENTO_TAMANO; ?> * 1024);
+            const usedStorage = Math.floor( vlMB );
+            const freeStorage = Math.floor( totalStorage - usedStorage );
+            
+            var options = {
+                series: [usedStorage, freeStorage],
+                chart: {
+                    type: 'donut',
+                    height: 400
+                },
+                labels: [`Usado (${usedStorage} MB)`, `Libre (${freeStorage} MB)`],
+                colors: ["#ff6384", "#36a2eb"],
+                legend: {
+                    position: 'bottom',
+                    fontSize: '14px',
+                    fontWeight: 600
+                },
+                title: {
+                    text: `Almacenamiento Total: ${totalStorage} MB`,
+                    align: 'center',
+                    style: {
+                        fontSize: '16px',
+                        fontWeight: 'bold'
+                    }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '40%'
+                        }
+                    }
+                }
+            };
+            
+            var chart = new ApexCharts(document.querySelector("#storageChart"), options);
+            chart.render();
+            
+            jQuery('#preloader').hide('fast');
+
+		},
+		function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            
+            if( ("" + err.responseText).length > 0 ){
+            	alerta.html( err.responseText );
+            }else{
+            	alerta.html( err );
+            }
+
+            jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		}
+	);
+
+};
+
+const convertToMB = function (size) {
+	const match = size.match(/^(\d+(\.\d+)?)\s*(MB|GB|KB)?$/i);
+
+    var value = parseFloat(match[1]);
+    var unit = match[3] ? match[3].toUpperCase() : "MB";
+
+    switch (unit) {
+        case "GB":
+            return value * 1024;
+        case "KB":
+            return value / 1024;
+        case "MB":
+        default:
+            return value;
+    }
+};
+
+jQuery( document ).ready(function(){
+	verMiEstadoActual();
+});
+</script>

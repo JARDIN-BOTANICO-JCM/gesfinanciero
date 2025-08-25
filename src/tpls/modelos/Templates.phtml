@@ -1,0 +1,739 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+define("PUNTOS", 0.352777778);
+
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+
+$ideditor = "editorTool";
+
+$d_tpls = null;
+try {
+    $d_tpls = OperacionesCtrl::editarPlantillas_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$htmltpl = "";
+if ( isset( $_POST['fl'] ) ){
+    $htmltpl = OperacionesCtrl::editarPlantillas_Documento( array( 'fl' => $_POST['fl'] ) );
+}
+
+$_pageformats = OperacionesCtrl::firmaspro_PageFormats_Obtener( array() );
+$_pageorientation = array('P' => 'Vertical', 'L' => 'Horizontal');
+
+$instDNombre = "";
+$inst = OperacionesCtrl::institucion_Obtener();
+$instD = array();
+if ( sizeof( $inst ) > 0 ) {
+    $instD = $inst[0];
+    
+    if ( isset( $instD['nombre'] ) ) {
+        $instDNombre = $instD['nombre'];
+    }
+}
+
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                        
+                        <div>
+                        	<button type="button" rol="button" class="btn btn-primary" onclick="mostrarFrmNewTpl();">Crear nueva plantilla</button>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+            
+                <div class="col-lg-12 col-md-12 col-12">
+                    <h4 class="mb-1">Plantillas</h4>
+
+                    <div class="row">
+
+                        <div class="col-lg-12 col-md-12 col-12">
+                            <div class="card mb-3">
+                                <!-- card header  -->
+                                <div class="card-header border-bottom-0 pb-1">
+                                    <label for="tplfile" class="form-label">
+                                        <h5>Lista de plantillas</h5>
+                                    </label>
+                                    <p>Seleccione la plantilla que desea editar</p>
+                                </div>
+
+                                <!-- table  -->
+                                <div class="card-body pt-0" >
+                                	<div class="mb-3">
+                                		
+                                        <select onchange="tplfile_change( this );" class="form-select" aria-label="Default select example" id="tplfile" >
+                                        	<option selected disabled value="">Seleccione una plantilla</option>
+                                            <?php foreach ( $d_tpls as $k ) : ?>
+                                            <?php 
+                                                $flprt = pathinfo( $k['fl'] );
+                                                $flprtLbl = pathinfo( $k['lbl'] );
+                                                
+                                                $tplVl = $flprt['filename'];
+                                                $tplId = $flprtLbl['filename'];
+                                                
+                                                $idsel = "";
+                                                if ( isset( $_POST['fl'] ) ) {
+                                                    if ( ( $_POST['fl'] . ".html" ) == $k['fl'] ) {
+                                                        $idsel = 'selected="selected"';
+                                                    }
+                                                }
+                                            ?>
+                                            <?php if ( strlen( trim( $tplId) ) > 0 )  : ?>
+                                            <option value="<?php echo $tplVl; ?>" <?php echo $idsel; ?> ><?php echo $tplId; ?></option>
+                                            <?php endif; ?>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        
+                                        <?php if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO  ) : ?>
+                                        <?php   if ( isset( $_POST['fl'] ) ) : ?>
+                                        <div class="d-grid gap-2 pt-3">
+                                            <button class="btn btn-danger" type="button" onclick="btnEliminar_onClick( this )" data-template="<?php echo $_POST['fl']; ?>">Eliminar esta plantilla</button>
+                                        </div>
+                                        <?php   endif; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php if ( isset( $_POST['fl'] ) ) : ?>
+                                    <div class="mb-3">
+                        				<div class="py-0" id="<?php echo $ideditor;?>" style="height: 300px; width: auto;"><?php echo $htmltpl; ?></div>
+                        				
+                        				<div class="d-grid gap-2 pt-3">
+                                            <button class="btn btn-primary" type="button" onclick="actualizarTemplate();">Guardar</button>
+                                            <?php if ( 
+                                                Utiles::ComienzaEn( $_POST['fl'], 'sig_' )
+                                                || Utiles::ComienzaEn( $_POST['fl'], 'loc_' )
+                                                || Utiles::ComienzaEn( $_POST['fl'], 'mix_' )
+                                                ) : ?>
+                                            <button data-file="<?php echo $_POST['fl']; ?>" class="btn btn-outline-secondary" type="button" onclick="mostrarConfig( this );">Configurar p&aacute;gina</button>
+                                            <?php endif; ?>
+                                        </div>
+                        				
+                        			</div>
+                        			<?php endif; ?>
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="frmNuevoTpl" class="frmClsNuevoTpl" style="display:none;" >
+    <form id="frmNwTp" class="frmNwTpCls">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Nueva plantilla</h4>
+                </div>
+                
+                <div class="row">
+
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label" for="tpl_nombre">Nombre de plantilla</label>
+                        <input type="text" class="form-control" placeholder="Nombre de la plantilla" id="tpl_nombre" name="tpl_nombre" required="required">
+                    </div>
+                    <div class="mb-3 col-md-6 col-12">
+                        <label class="form-label" for="tpl_tipo">Tipo de plantilla</label>
+                        <select class="form-select" id="tpl_tipo" name="tpl_tipo" required="required">
+                        	<?php foreach ( OperacionesCtrl::PLANTILLAS_TIPOS as $vTp ) : ?>
+                        	<option value="<?php echo $vTp['id'] ?>"><?php echo $vTp['nombre'] ?></option>
+                        	<?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+            <!-- buttons -->
+            <a href="#" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Cancel</a>
+            <button class="btn btn-primary" type="button" rol="button" onclick="actualizar();">Guardar</button>
+        </div>
+    </form>
+</div>
+
+<div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+    <form id="frmval" class="frmvalcls">
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Configuraci&oacute;n de p&aacute;gina</h4>
+                </div>
+                <div class="row">
+
+					<div class="mb-3 col-md-6">
+                        <label class="form-label" for="pdftitle">Nombre del documento</label>
+                        <input type="text" class="form-control" placeholder="Nombre del documento" id="pdftitle" name="pdftitle">
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="pdfkeywords">Palabras clave</label>
+                        <input type="text" class="form-control" placeholder="Palabras clave" id="pdfkeywords" name="pdfkeywords">
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="pageformat">Formato de la p&aacute;gina</label>
+                        <select id="pageformat" name="pageformat" class="form-select">
+                        	<?php foreach ($_pageformats as $kPf => $vPf) : ?>
+                        	<option value="<?php echo $kPf; ?>" data-x="<?php echo $vPf[0]; ?>" data-y="<?php echo $vPf[1]; ?>"><?php echo $kPf . ' (' .  round($vPf[0] * PUNTOS, 1) . ' x ' . round($vPf[1]* PUNTOS, 1) . ' mm)'; ?></option>
+                        	<?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="pageorientation">Orientaci&oacute;n de la p&aacute;gina</label>
+                        <select id="pageorientation" name="pageorientation" class="form-select">
+                        	<?php foreach ($_pageorientation as $kPf => $vPf) : ?>
+                        	<option value="<?php echo $kPf; ?>" ><?php echo $vPf; ?></option>
+                        	<?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <div class="form-check form-switch">
+                            <input checked="checked" class="form-check-input" type="checkbox" id="useheader" name="useheader" value="1" >
+                            <label class="form-check-label" for="useheader">Usar encabezado</label>
+						</div>
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <div class="form-check form-switch">
+                            <input checked="checked" class="form-check-input" type="checkbox" id="usefooter" name="usefooter" value="1" >
+                            <label class="form-check-label" for="usefooter">Usar pie de p&aacute;gina</label>
+						</div>
+                    </div>              
+
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h4 class="mb-1">Configuraci&oacute;n de encabezado</h4>
+                </div>
+                <div class="row">
+
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="lineatamanoheader">Tama&ntilde;o de la l&iacute;nea</label>
+                        <input step="any" type="number" class="form-control" placeholder="Tama&ntilde;o de la l&iacute;nea" id="lineatamanoheader" name="lineatamanoheader" value="0.5">
+                    </div>                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="lineaheadercolor">Color de la l&iacute;nea</label>
+                        <div class="form-control py-2" >
+                        	<input type="color" id="lineaheadercolor" name="lineaheadercolor" value="#000000">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="lineaheadertop">Posici&oacute; de la l&iacute;nea en Y</label>
+                        <input step="any" type="number" class="form-control" placeholder="Posici&oacute; de la l&iacute;nea en Y" id="lineaheadertop" name="lineaheadertop" value="23">
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="headerimgwidth">Ancho contenedor imagen</label>
+                        <input step="any" type="number" class="form-control" id="headerimgwidth" name="headerimgwidth" value="30">
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="imgalto">Alto de la imagen</label>
+                        <input step="any" type="number" class="form-control" id="imgalto" name="imgalto" value="50">
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="headerimg">Imagen</label>
+                        <div style="background-image: url(<?php echo rtrim( Utiles::getBaseUrl() , "/" ) . "/repo/recursos/logo_inst.jpg" ?>);height: 45px;background-position: center;background-repeat: no-repeat;background-size: contain; border: solid 1px #dfdfdf;">&nbsp;</div>
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <div class="form-check form-switch">
+                            <input checked="checked" class="form-check-input" type="checkbox" id="lineaheader" name="lineaheader" value="1" >
+                            <label class="form-check-label" for="lineaheader">Usar l&iacute;nea en el encabezado</label>
+						</div>
+                    </div>
+                    
+
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h4 class="mb-1">Configuraci&oacute;n pie de p&aacute;gina</h4>
+                </div>
+                <div class="row">
+
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="lineatamanofooter">Tama&ntilde;o de la l&iacute;nea</label>
+                        <input step="any" type="number" class="form-control" placeholder="Tama&ntilde;o de la l&iacute;nea" id="lineatamanofooter" name="lineatamanofooter" value="0.5">
+                    </div>                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="lineafootercolor">Color de la l&iacute;nea</label>
+                        <div class="form-control py-2" >
+                        	<input type="color" id="lineafootercolor" name="lineafootercolor" value="#000000">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="lineafootertop">Alto del pie de p&aacute;gina</label>
+                        <input step="any" type="number" class="form-control" placeholder="Posici&oacute; de la l&iacute;nea en Y" id="lineafootertop" name="lineafootertop" value="10">
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <div class="form-check form-switch">
+                            <input checked="checked" class="form-check-input" type="checkbox" id="lineafooter" name="lineafooter" value="1" >
+                            <label class="form-check-label" for="lineafooter">Usar l&iacute;nea en el pie de p&aacute;gina</label>
+						</div>
+                    </div>
+                    
+
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h4 class="mb-1">Configuraci&oacute;n de m&aacute;rgenes</h4>
+                </div>
+                <div class="row">
+
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="marginleft">Margen izquierda</label>
+                        <input type="number" class="form-control" id="marginleft" name="marginleft" value="15" />
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="margintop">Margen arriba</label>
+                        <input type="number" class="form-control" id="margintop" name="margintop" value="27" />
+                    </div>
+
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="marginright">Margen derecha</label>
+                        <input type="number" class="form-control" id="marginright" name="marginright" value="15" />
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="marginbottom">Margen abajo</label>
+                        <input type="number" class="form-control" id="marginbottom" name="marginbottom" value="25" />
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="headermargin">Margen Encabezado</label>
+                        <input type="number" class="form-control" id="headermargin" name="headermargin" value="5" />
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="footermargin">Margen Pie de p&aacute;gina</label>
+                        <input type="number" class="form-control" id="footermargin" name="footermargin" value="10" />
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-3">
+                    <h4 class="mb-1">Configuraci&oacute;n Firma</h4>
+                </div>
+                <div class="row">
+                	<div class="mb-3 col-12">
+                        <div class="form-check form-switch">
+                            <input checked="checked" class="form-check-input" type="checkbox" id="firmaneed" name="firmaneed" value="true" >
+                            <label class="form-check-label" for="firmaneed">Firmar este documento</label>
+						</div>
+                    </div>
+
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="firmaposx">Posici&oacute;n en X</label>
+                        <input type="number" class="form-control" id="firmaposx" name="firmaposx" value="0" />
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="firmaposy">Posici&oacute;n en Y</label>
+                        <input type="number" class="form-control" id="firmaposy" name="firmaposy" value="0" />
+                    </div>
+
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="firmadimw">Ancho del componente</label>
+                        <input type="number" class="form-control" id="firmadimw" name="firmadimw" value="500" />
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="firmadimh">Alto del componente</label>
+                        <input type="number" class="form-control" id="firmadimh" name="firmadimh" value="100" />
+                    </div>
+                    
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="firmapage">P&aacute;gina del componente</label>
+                        <input type="number" class="form-control" id="firmapage" name="firmapage" value="1" />
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+            <!-- buttons -->
+            <a href="#" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Cancel</a>
+            <button class="btn btn-secondary me-2" type="button" rol="button" onclick="firmaPrev_Helper();">Vista previa</button>
+            <button data-id="<?php echo OperacionesCtrl::CFG_PDF_PAGECONFIG; ?>" class="btn btn-primary" type="submit" onclick="pdfConfig_save( this );">Guardar</button>
+        </div>
+    </form>
+</div>
+
+<script src="temas/js/ckeditor_4_21_0_full_easyimage/ckeditor.js"></script>
+<script type="application/javascript">
+const tplfile_change = function( el ){
+    const opc = { 'id' : 'ajaxldr' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+    
+	const _el = jQuery( el );
+	const p = {
+		"fl" : _el.val()
+	};
+	ut.crearFormulario('index.php?pageid=modelos/Templates.phtml', p );
+};
+
+const modalFormularioNewTpl = function () {
+    const opc = {
+        'id' : 'frmNuevoTpl',
+        'title' : 'Nuevo archivo de plantilla',
+        'btnCerrarX' : true,
+        'scrolling' : true,
+        'center' : true,
+        'size' : 'modal-xl',
+        'level' : 'l2'
+    };
+    return mngModal.dibujar( opc );
+}
+const mostrarFrmNewTpl = function(){
+	const _m = modalFormularioNewTpl();
+	jQuery( _m ).modal('show');
+};
+const actualizar = function(){
+    ut.validarFrm('frmNwTpCls', function ( r ) {
+	    const data = ut.b64EncodeUnicode ( JSON.stringify( r ) ) ;
+	    
+    	const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_plantillasNew ); ?>');
+        form_data.append('data', data );
+    
+        __TransportarData(
+        	form_data,
+        	function( o ) {
+				const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Creaci&oacute;n plantilla','btnCerrarX' : true, 'level' : 'err', 'size' : '' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( "Se cre&oacute; la nueva plantilla exitosamente" );
+    
+                jQuery( objmdlErr ).modal('show');
+        	},
+        	function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+                jQuery( objmdlErr ).modal('show');
+        	}
+    	);
+    });
+};
+
+const actualizarTemplate = function(){
+    if( confirm('\xBFDesea guardar estos cambios?') ){
+        const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        const data = CKEDITOR.instances.<?php echo $ideditor; ?>.getData();
+    	
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_plantillasAdd ); ?>');
+        form_data.append('tpl', ut.b64EncodeUnicode ( data ) );
+        form_data.append('fl', jQuery('#tplfile').val() );
+    
+        __TransportarData(
+        	form_data,
+        	function( o ) {
+        	
+        		console.log( o );
+        	
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        	},
+        	function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+                jQuery( objmdlErr ).modal('show');
+                
+        		setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        	}
+    	);
+    }
+	
+};
+
+const modalFormulario = function () {
+    const opc = {
+        'id' : 'frmNuevoRegistro',
+        'title' : 'Ajustes del documento',
+        'btnCerrarX' : true,
+        'scrolling' : true,
+        'center' : true,
+        'size' : 'modal-xl',
+        'level' : 'l2'
+    };
+    return mngModal.dibujar( opc );
+}
+
+const mostrarConfig = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	
+	const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+	
+	const _m = modalFormulario();
+	
+	const form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5(IndexCtrl::API_FirmasAgregarConfigCorp_Get); ?>');
+    form_data.append('fileid', jQuery('#tplfile').val() );
+
+    __TransportarData(
+        form_data,
+        function( o ) {
+        	cargaCfgData( o );
+            setTimeout(function(){
+                jQuery( objmdl ).modal('hide'); 
+                jQuery( _m ).modal('show'); 
+            }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        },
+        function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        }
+    );
+	
+};
+
+const cargaCfgData = function( o ){
+	const _o = ut.b64DecodeUnicode( o ) ;
+	
+	if( ("" + jQuery.trim( _o )).length > 0 ){
+		const nwDt = JSON.parse( _o );
+	
+    	for (const key in nwDt ) {
+        	if (Object.hasOwnProperty.call( nwDt, key)) {
+            	let _el = nwDt[key];
+            	
+            	if( key == 'pdftitle' ){
+            		if( !( ("" + jQuery.trim( _el )).length > 0 ) ){
+            			let txtI = ( "" + jQuery( '#tplfile' ).val() );
+            			txtI = txtI.replace( "sig_", "");
+            			txtI = txtI.replace( /\_/ig, " ");
+            			txtI = txtI.replace( ".html", "");
+            			_el = txtI;
+            		}
+            	}
+            	if( key == 'headertitle' ){
+            		if( !( ("" + jQuery.trim( _el )).length > 0 ) ){
+            			_el = "<?php echo $instDNombre; ?>";
+            		}
+            	}
+            	
+            	const fld = jQuery('#' + key );
+            	if( fld.length ){
+            		const tn = fld.prop("tagName").toLowerCase();
+            		if( tn == 'input' || tn == 'select' ){
+            			if( ( "" + fld.attr('type') ).toLowerCase() == "checkbox" ){
+            				if( _el === true || _el != '' ){
+            					fld.prop('checked','checked');
+            				}
+            				else{
+            					fld.removeAttr('checked','checked');
+            				}
+            			}
+            			else{
+            				fld.val( _el );
+            			}
+            		}
+            	}
+        	}
+    	}
+	}
+	
+};
+        
+const firmaPrev_Helper = function(){
+	const dt = { "flid" : jQuery('#tplfile').val() + '.html' };
+	
+	const glosd = new SignDocs();
+	glosd.previa( dt );
+};
+
+const pdfConfig_save = function( o ){
+	ut.validarFrm('frmvalcls', function ( r ) {
+	
+		const okmk = confirm("\xBFDesea guardar esta configuraci\xF3n?");
+        if( okmk ){
+        
+    		const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+            r['fileid'] = jQuery('#tplfile').val();
+            
+            const _o = jQuery( o );
+            const id = _o.data('id');
+            const vl = ut.b64EncodeUnicode( JSON.stringify( r ) ) ;
+        
+            const form_data = new FormData();
+            form_data.append('id', id);
+            form_data.append('data', vl);
+            form_data.append('ufull', '<?php echo $usu->getNombres() . " " . $usu->getApellidos(); ?>');
+            form_data.append('ajax', '<?php echo md5(IndexCtrl::API_FirmasAgregarConfigCorp_Add); ?>');
+        
+            __TransportarData(
+                form_data,
+                function( o ) {
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+        }
+
+	});
+};
+
+const btnEliminar_onClick = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	const template = dt['template'];
+	
+	if (confirm("\xBFDesea eliminar el archivo '" + template + "'?")) {
+        var gs = jQuery.trim( ut.generateString(6) );
+        if( prompt( 'Escriba el siguiente texto (' + gs + ') para confirmar la eliminaci\xF3n del registro' ) == gs ){
+        	
+
+			const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+            const vl = ut.b64EncodeUnicode( JSON.stringify( dt ) ) ;
+        
+            const form_data = new FormData();
+            form_data.append('data', vl);
+            form_data.append('ajax', '<?php echo md5(IndexCtrl::API_plantillasDel); ?>');
+        
+            __TransportarData(
+                form_data,
+                function( o ) {
+                	if( o ){
+                		location.href = "./index.php?pageid=modelos/Templates.phtml";
+                	}
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+
+
+        }
+    }
+};
+
+window.CKEDITOR_VARIABLES_LIST = [];
+jQuery( document ).ready(function(){
+    <?php if ( isset( $_POST['fl'] ) ) : ?>
+    const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+            
+	fetch('/index.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'ajax=61b1bf34ed6cc6bfcd65c9f623d6327a'
+    })
+    .then(response => response.json())
+    .then(data => {
+        window.CKEDITOR_VARIABLES_LIST = data;
+        initSample( { 
+            'contEditor' : "<?php echo $ideditor; ?>",
+            height: '300px',
+            customConfig: 'configForTpls.js'
+    	} )();
+    	
+    	setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    });
+	<?php endif;?>
+});
+</script>
+
+
+

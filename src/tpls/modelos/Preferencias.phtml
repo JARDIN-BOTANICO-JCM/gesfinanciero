@@ -1,0 +1,152 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$cfg = OperacionesCtrl::LeerConfigCorp();
+
+$_CFG_ALMACENAMIENTO_TAMANO = intval( isset( $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]) ? $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]["val"] : '5' );
+
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+
+$filtroUsr = array(
+    'perfil_id' => array(
+        OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR,
+        OperacionesCtrl::USUARIOS_PERFIL_FINANCIERO,
+        OperacionesCtrl::USUARIOS_PERFIL_SUPERVISOR,
+        OperacionesCtrl::USUARIOS_PERFIL_SUPERVISORADM,
+        OperacionesCtrl::USUARIOS_PERFIL_RUTA
+        //,OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO
+    )
+);
+
+$d_usuarios = null;
+try {
+    $d_usuarios = OperacionesCtrl::usuarios_Obtener( $filtroUsr );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$d_tpls = array();
+try {
+    $d_tpls = OperacionesCtrl::editarPlantillas_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <h4 class="mb-1">Configuraciones de la plataforma</h4>
+                	
+                	<?php if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ) :?>
+                	<div class="row">
+                        <div class="col-12 mb-3" >
+                        
+                        	<div class="card">
+                                <div class="card-header border-bottom-0">
+                                    <label for="<?php echo OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ?>" class="form-label">
+                                        <h5>Tama&ntilde;o almacenamiento</h5>
+                                    </label>
+                                    <p class="m-0">Cu&aacute;nto espacio en disco se le asigna al cliente</p>
+                                </div>
+
+                                <!-- table  -->
+                                <div class="card-body pt-2" >
+                                    <div class="input-group ">
+                                    	<label for="<?php echo OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO; ?>" class="input-group-text">Tama&ntilde;o de almacenamiento (Gigasbytes)</label>
+                                        <input type="text" id="<?php echo OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO; ?>" value="<?php echo $_CFG_ALMACENAMIENTO_TAMANO; ?>" class="form-control" placeholder="Almacenamiento" aria-label="Almacenamiento" >
+                                        <button class="btn btn-outline-primary" type="button" onclick="btnFirmCfgFrm('#<?php echo OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO; ?>');">Guardar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        
+                        </div>
+                	</div>
+                	<?php endif; ?>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="application/javascript">
+const btnFirmCfgFrm = function( o ){
+    const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+    var _o = jQuery( o );
+    var id = _o.attr('id');
+    var vl = null;
+    if( (""+_o.attr('type')).toLowerCase() == "checkbox" ){
+    	vl = _o.is(':checked');
+    }
+    else{
+    	vl = _o.val();
+    }
+
+    const form_data = new FormData();
+    form_data.append('id', id);
+    form_data.append('vl', vl);
+    form_data.append('ufull', '<?php echo $usu->getNombres() . " " . $usu->getApellidos(); ?>');
+    form_data.append('ajax', '<?php echo md5(IndexCtrl::API_AgregarConfigCorp); ?>');
+
+    __TransportarData(
+        form_data,
+        function( o ) {
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        },
+        function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        }
+    );
+    
+};
+
+</script>

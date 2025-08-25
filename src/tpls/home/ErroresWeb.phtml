@@ -1,0 +1,33 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+OperacionesCtrl::authRequOff();
+?>
+<div id="db-wrapper" class="" style="background-color: #fefcfb; display: none;" >
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php Menubar::DibujarMenuHome(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeaderHome( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+            <?php print_r( $this->getMensaje() ); ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+jQuery( document ).ready(function(){
+	home.navLogin(function(){
+		jQuery('#db-wrapper').fadeIn('fast');
+	});
+});
+</script>

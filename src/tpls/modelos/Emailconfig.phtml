@@ -1,0 +1,357 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$cfg = OperacionesCtrl::LeerConfigCorp();
+
+$_CFG_SMTP_AUTHSMTP = filter_var( isset( $cfg[ OperacionesCtrl::CFG_SMTP_AUTHSMTP ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_AUTHSMTP ]["val"] : true , FILTER_VALIDATE_BOOLEAN);
+$_CFG_SMTP_HOST = isset( $cfg[ OperacionesCtrl::CFG_SMTP_HOST ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_HOST ]["val"] : "";
+$_CFG_SMTP_PORT = isset( $cfg[ OperacionesCtrl::CFG_SMTP_PORT ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_PORT ]["val"] : "";
+$_CFG_SMTP_USER = isset( $cfg[ OperacionesCtrl::CFG_SMTP_USER ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_USER ]["val"] : "";
+$_CFG_SMTP_PASS = isset( $cfg[ OperacionesCtrl::CFG_SMTP_PASS ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_PASS ]["val"] : "";
+$_CFG_SMTP_SECURE = isset( $cfg[ OperacionesCtrl::CFG_SMTP_SECURE ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_SECURE ]["val"] : "";
+$_CFG_SMTP_TFSERVICE = filter_var( isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICE ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICE ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
+$_CFG_SMTP_TFSERVICEURL = isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICEURL ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICEURL ]["val"] : "";
+$_CFG_SMTP_TFSAPITOKEN = isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSAPITOKEN ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSAPITOKEN ]["val"] : "";
+$_CFG_SMTP_TFSCLIID = isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSCLIID ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSCLIID ]["val"] : "";
+
+
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+
+$ver_contconfigsmtp = ( $_CFG_SMTP_TFSERVICE ? 'display: none;' : '' );
+$ver_contconfigtfservices = ( $_CFG_SMTP_TFSERVICE ? '' : 'display: none;' );
+
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <h4 class="mb-3">Servidor de correo</h4>
+                
+
+                    <div class="row">
+
+                        <div class="col-lg-6 col-md-6 col-12">
+                            <div class="card">
+                                <!-- card header  -->
+                                <div class="card-header border-bottom-0">
+                                    <label class="form-label">
+                                        <h5>Servidor SMTP</h5>
+                                    </label>
+                                    <p class="m-0">Esta configuraci&oacute;n permite enviar correos</p>
+                                    
+                                    <div class="d-flex mt-2 border-bottom">
+                                        <div class="flex-fill mb-3 me-3" >
+                                            <div class="form-check form-switch">
+                                                <input onchange="btnCfgTFServices(this);" class="form-check-input" type="checkbox" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICE; ?>" <?php echo ($_CFG_SMTP_TFSERVICE ? 'checked="checked"' : '' ) ?> >
+                                                <label class="form-check-label" for="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICE; ?>">Activar TF-Services para env&iacute;o de correos</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+
+                                <!-- table  -->
+                                <div id="contconfigsmtp" class="card-body pt-2" style="<?php echo $ver_contconfigsmtp; ?>" >
+                                
+                                    <div class="d-flex">
+                                        <div class="flex-fill mb-3 me-3" >
+                                            <label for="<?php echo OperacionesCtrl::CFG_SMTP_AUTHSMTP; ?>" class="form-label">
+                                                <h6>Se requiere autenticaci&oacute;n SMTP</h6>
+                                            </label>
+                                            <div class="form-check">
+                                            	<?php
+                                            	$AUTHSMTP = "checked";
+                                            	
+                                            	if( $_CFG_SMTP_AUTHSMTP != 1 ) {
+                                            	    $AUTHSMTP = "";
+                                            	}
+                                            	?>
+                                                <input class="form-check-input" type="checkbox" value="" id="<?php echo OperacionesCtrl::CFG_SMTP_AUTHSMTP; ?>" <?php echo $AUTHSMTP; ?> >
+                                                <label class="form-check-label" for="<?php echo OperacionesCtrl::CFG_SMTP_AUTHSMTP; ?>">
+                                                	Autenticar
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+
+                                        <div class="flex-fill mb-3 me-3" >
+                                        	<div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_HOST; ?>" placeholder="Host" value="<?php echo $_CFG_SMTP_HOST; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_HOST; ?>">Host</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-fill mb-3" >
+                                        	<div class="form-floating mb-3">
+                                                <input type="number" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_PORT; ?>" placeholder="Puerto" value="<?php echo $_CFG_SMTP_PORT; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_PORT; ?>">Puerto</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                        <div class="flex-fill mb-3 me-3" >
+                                            <div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_USER; ?>" placeholder="Usuario" value="<?php echo $_CFG_SMTP_USER; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_USER; ?>">Usuario</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-fill mb-3" >
+                                        	<div class="form-floating mb-3">
+                                                <input onchange="passMod = true;" type="password" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_PASS; ?>" placeholder="Clave" value="<?php echo $_CFG_SMTP_PASS; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_PASS; ?>">Contrase&ntilde;a</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                        <div class="flex-fill mb-3" >
+                                            <div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_SECURE; ?>" placeholder="M&eacute;todo de seguridad" value="<?php echo $_CFG_SMTP_SECURE; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_SECURE; ?>">M&eacute;todo de seguridad</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                        <div class="flex-fill mb-3 me-3" >
+                                            <div class="form-floating mb-3">
+                                                <button class="btn btn-primary" onclick="save_Handler();">Guardar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                
+                                
+                                <div id="contconfigtfservices" class="card-body pt-2" style="<?php echo $ver_contconfigtfservices; ?>" >
+                                
+                                    <div class="d-flex">
+                                    	<div class="flex-fill mb-3 me-3" >
+                                        	<div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICEURL; ?>" placeholder="Url de TF-Services" value="<?php echo $_CFG_SMTP_TFSERVICEURL; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICEURL; ?>">Url de TF-Services</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                    	<div class="flex-fill mb-3 me-3" >
+                                        	<div class="form-floating mb-3">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSCLIID; ?>" placeholder="Url de TF-Services" value="<?php echo $_CFG_SMTP_TFSCLIID; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_TFSCLIID; ?>">Cliente ID en TF-Services</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                    	<div class="flex-fill mb-3 me-3" >
+                                        	<div class="form-floating mb-3">
+                                                <input type="password" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSAPITOKEN; ?>" placeholder="Url de TF-Services" value="<?php echo $_CFG_SMTP_TFSAPITOKEN; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_TFSAPITOKEN; ?>">Token</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                        <div class="flex-fill mb-3 me-3" >
+                                            <div class="form-floating mb-3">
+                                                <button class="btn btn-primary" onclick="save_Handler();">Guardar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="application/javascript">
+var passMod = false;
+const save_Handler = function(){
+    const objs = [];
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_AUTHSMTP; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_HOST; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_PORT; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_USER; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_SECURE; ?>'});
+    if( passMod ){
+    	objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_PASS; ?>'});
+    }
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICEURL; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_TFSAPITOKEN; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_TFSCLIID; ?>'});
+    
+    const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+    
+    for( const oId in objs ){
+    	const o = objs[ oId ] ;
+    	const oEl = jQuery( o['id'] );
+    	
+    	if( ( "" + oEl.attr ( 'type' ) ).toLowerCase() == "checkbox" ){
+    		btnSaveCfgFrm( oEl );
+    	}
+    	else{
+        	//if( ( "" + jQuery.trim( oEl.val() ) ).length > 0 ){
+        		btnSaveCfgFrm( oEl );
+        	//}
+    	}
+    	
+    }
+    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    
+};
+var btnSaveCfgFrm = function( o ){
+
+    var _o = jQuery( o );
+    var id = _o.attr('id');
+    var vl = null;
+    if( (""+_o.attr('type')).toLowerCase() == "checkbox" ){
+    	vl = _o.is(':checked');
+    }
+    else if( ( "" + _o.attr('type')).toLowerCase() == "password" ){
+    	vl = ut.b64EncodeUnicode( _o.val() );
+    	passMod = false;
+    }
+    else{
+    	vl = _o.val();
+    }
+
+    var form_data = new FormData();
+    form_data.append('id', id);
+    form_data.append('vl', vl);
+    form_data.append('ufull', '<?php echo $usu->getNombres() . " " . $usu->getApellidos(); ?>');
+    form_data.append('ajax', '<?php echo md5(IndexCtrl::API_AgregarConfigCorp); ?>');
+
+    __TransportarData(
+        form_data,
+        function( o ) {
+            //fn( o );
+        },
+        function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+        }
+    );
+    
+    
+};
+
+const btnCfgTFServices = function( o ){
+	const fn = function( obj ){
+		const csmtp = jQuery("#contconfigsmtp");
+		const ctfse = jQuery("#contconfigtfservices");
+	
+    	const _o = jQuery( obj );
+    	const vl = _o.is(':checked');
+		if( vl ){
+			csmtp.hide();
+			ctfse.show();
+		}
+		else{
+			csmtp.show();
+			ctfse.hide();
+		}
+	};
+
+	btnFirmCfgFrm(o, fn);
+};
+
+const btnFirmCfgFrm = function( o, fn ){
+    const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+    var _o = jQuery( o );
+    var id = _o.attr('id');
+    var vl = null;
+    if( (""+_o.attr('type')).toLowerCase() == "checkbox" ){
+    	vl = _o.is(':checked');
+    }
+    else{
+    	vl = _o.val();
+    }
+
+    var form_data = new FormData();
+    form_data.append('id', id);
+    form_data.append('vl', vl);
+    form_data.append('ufull', '<?php echo $usu->getNombres() . " " . $usu->getApellidos(); ?>');
+    form_data.append('ajax', '<?php echo md5(IndexCtrl::API_AgregarConfigCorp); ?>');
+
+    __TransportarData(
+        form_data,
+        function( o ) {
+        	if( typeof( fn ) == "function"){
+        		fn( _o );
+        	}
+        	
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        },
+        function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        }
+    );
+    
+};
+</script>

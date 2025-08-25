@@ -1,0 +1,206 @@
+<?php 
+$_b = explode("/index.php/", Utiles::getBaseUrl() );
+$bA = trim($_b[0], "/");
+$titulo = "V&iacute;nculo expirado";
+$desc = "Este sitio debe ser renovado indicando el correo electr&oacute;nico en donde se debe recibir el nuevo v&iacute;nculo.";
+$img = $bA . "/temas/img/favicon_txt_130x32.png";
+$cod =  $raw['cod'];
+?>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta http-equiv="X-UA-Compatible" content="ie=edge">		
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta charset="utf-8">
+
+		
+		<title>Acappdemy - P&acute;ginas seguras</title>
+		<!-- CSS -->		
+		<!-- CSS only -->
+		<link rel="stylesheet" href="/temas/js/bootstrap-5.2.0-dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/temas/js/fontawesome-free-6.1.1-web/css/all.min.css" >
+		<link rel="stylesheet" href="/temas/js/flatpickr-4.6.13/flatpickr.min.css" >
+		<link rel="stylesheet" href="/temas/js/dragula/dist/dragula.min.css" >
+		<link rel="stylesheet" href="/temas/js/feather/feather.css">
+		<link rel="stylesheet" href="/temas/js/bootstrap-icons/font/bootstrap-icons.css" />
+		<link rel="stylesheet" href="/temas/js/bootstrap-select-1.14.0-beta2/dist/css/bootstrap-select.css">
+		<link rel="stylesheet" href="/temas/js/simplebar-5.3.8/dist/simplebar.min.css">
+		<link rel="stylesheet" href="/temas/js/DataTables/datatables.min.css" type="text/css"/>
+
+		
+		<link rel="shortcut icon" href="/temas/favicon/favicon_20x20.png" type="image/x-icon" />
+		<link rel="apple-touch-icon" href="/temas/favicon/favicon_180x180.png" sizes="180x180">
+        <link rel="icon" href="/temas/favicon/favicon_32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico" sizes="16x16" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico">
+		
+		<!-- Custom 
+		<link rel="stylesheet" href="/temas/css/theme.min.css">
+		-->
+		<!-- JS -->
+		<script type="text/javascript" src="/temas/js/jquery-3.6.0.min.js "></script>
+		<script type="text/javascript" src="/temas/js/utilidades.js?f=20190609150612"></script>
+		<script type="text/javascript">var ut = new Utilidades();</script>
+		<script type="text/javascript" src="/temas/js/Colecciones.js?f=202207271743"></script>
+
+
+        <style>
+            .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                user-select: none;
+            }
+    
+            @media (min-width : 768px) {
+                .bd-placeholder-img-lg {
+                    font-size: 3.5rem;
+                }
+            }
+    
+            .b-example-divider {
+                height: 3rem;
+                background-color: rgba(0, 0, 0, .1);
+                border: solid rgba(0, 0, 0, .15);
+                border-width: 1px 0;
+                box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+            }
+    
+            .b-example-vr {
+                flex-shrink: 0;
+                width: 1.5rem;
+                height: 100vh;
+            }
+    
+            .bi {
+                vertical-align: -.125em;
+                fill: currentColor;
+            }
+    
+            .nav-scroller {
+                position: relative;
+                z-index: 2;
+                height: 2.75rem;
+                overflow-y: hidden;
+            }
+    
+            .nav-scroller .nav {
+                display: flex;
+                flex-wrap: nowrap;
+                padding-bottom: 1rem;
+                margin-top: -1px;
+                overflow-x: auto;
+                text-align: center;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            .container {
+                max-width: 960px;
+            }
+        </style>
+
+	</head>
+
+	<body class="">
+		<nav class="navbar navbar-expand-lg navbar-dark bg-dark" style="-webkit-box-shadow: 0px 0px 2px 0px rgba(0,0,0,1); -moz-box-shadow: 0px 0px 2px 0px rgba(0,0,0,1); box-shadow: 0px 0px 2px 0px rgba(0,0,0,1)">
+			<div class="container">
+        		<a class="navbar-brand" href="./index.php">
+        			<img src="<?php echo $bA; ?>/temas/img/favicon_txt_130x32.png" style="height: 32px; margin: -7px 0px 0px 0px;">
+        		</a>
+            </div>
+        </nav>
+	
+    	<div class="container">
+    
+        	<div class="row">
+            	<div class="col pt-3">
+            		<div class="alert alert-danger">V&iacute;nculo expirado, para obtener una nueva url (link o hiperv&iacute;nculo) debe indicar su correo electr&oacute;nico.</div>
+                </div>
+			</div>
+			
+            <form id="frmmain" class="form-signin mb-4">
+            
+                <div class="form-label-group mb-3">
+                	<label for="email">Correo electr&oacute;nico</label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="Correo electr&oacute;nico" required="" autofocus="">
+                </div>
+            
+				<button onclick="Frm_onsubmit();" class="btn btn-lg btn-primary btn-block" type="submit"><i class="fas fa-sync"></i> Generar nuevo v&iacute;nculo</button>
+            </form>
+
+		</div>
+        
+		<div class="py-3 bg-light" style="">
+        	<footer class="pt-3 text-muted text-small container text-right">
+                <ul class="list-inline" style="margin: 0px;">
+                	<li class="list-inline-item"><a href="#">Privacy</a></li>
+                    <li class="list-inline-item"><a href="#">Terms</a></li>
+                    <li class="list-inline-item"><a href="#">Support</a></li>
+				</ul>
+				<p class="mb-1">&copy; 2019 Acappdemy</p>
+			</footer>
+		</div>
+
+		<div class="modal fade" id="grnModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true"><div class="modal-dialog"></div></div>
+
+    	<script type="text/javascript">
+    		var xjL = '<div class="d-flex align-items-center"><strong>Cargando...</strong><div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>';
+    		var grnModal = jQuery( '#grnModal' );
+    		var obtenerNuevo = function( d ){
+        		var _email = d['email'];
+        		var mDialog = grnModal.find('.modal-dialog');
+        		mDialog.attr('class', 'modal-dialog modal-dialog-centered modal-dialog-scrollable');
+        		
+    			var mDialogTxt = [];
+    			mDialogTxt.push( '<div class="modal-content"><div class="modal-body">' + xjL + '</div></div>' );
+                mDialog.html( mDialogTxt.join('') );
+                
+    			grnModal.modal('show');
+    			
+    		    var form_data = new FormData();
+    		    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_GenerarMagicPage ); ?>');
+    		    form_data.append('id', '<?php echo $cod ?>');
+    		    form_data.append('email', _email );
+    		    
+    		    var jqhxr = jQuery.ajax({
+    		        url: '<?php echo $bA; ?>/index.php',
+    		        dataType: 'json',
+    		        cache: false,
+    		        contentType: false,
+    		        processData: false,
+    		        data: form_data,
+    		        type: 'post'
+    			});
+    			jqhxr.done(function(data){
+    				if( typeof(data.ok) == "object" || typeof(data.ok) == "number" || typeof(data.ok) == "string" || typeof(data.ok) == "boolean" ){
+    					var obj = data.ok;
+    					console.log( obj );
+       	    			mDialogTxt = [];
+    	    			mDialogTxt.push( '<div class="modal-content"><div class="modal-body"><div class="alert alert-success"><i class="fas fa-check-circle"></i> El nuevo v&iacute;nculo ser&aacute; enviado a ' + _email + '</div></div><div class="modal-footer"><button class="btn btn-outline-danger" data-dismiss="modal">Cerrar</button></div></div>' );
+    	                mDialog.html( mDialogTxt.join('') );
+    				}
+    				if( typeof(data.err) == "object" || typeof(data.err) == "number" || typeof(data.err) == "string" || typeof(data.err) == "boolean" ){
+    					console.log(data.err);
+    					var prt = ("" + data.err).split(':');
+       	    			mDialogTxt = [];
+    	    			mDialogTxt.push( '<div class="modal-content"><div class="modal-body"><div class="alert alert-danger"><i class="fas fa-exclamation-triangle"></i> ' + prt[ prt.length - 1] + '</div></div><div class="modal-footer"><button class="btn btn-outline-danger" data-dismiss="modal">Cerrar</button></div></div>' );
+    	                mDialog.html( mDialogTxt.join('') );
+    				}
+    			});
+    			jqhxr.fail(function(err){
+    				console.log( err );
+    			});
+    		};
+    		
+    		var Frm_onsubmit = function(){
+    			ut.validarFrm( "form-signin", function( dt ){
+    				obtenerNuevo( dt );
+    			} );
+    		};
+    	</script>
+	</body>
+</html>

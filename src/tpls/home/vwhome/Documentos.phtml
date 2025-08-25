@@ -1,0 +1,655 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+OperacionesCtrl::authRequOff();
+
+$l_flujos_id = array();
+try {
+    $l_flujos_id = OperacionesCtrl::flujos_Obtener( array( 'w_flujosestados_id' => 2, 'ordenasc' => 1 ) );
+} catch (Exception $e) {
+    throw $e;
+}
+?>
+<div id="db-wrapper" class="" style="background-color: #fefcfb; display: none;" >
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenuHome(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeaderHome( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+        
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#" style="color: #cc5b08; "><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                        <div>
+                        	<button class="btn btn-primary " onclick="btnAgregarReg();">Crear solicitud</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+			<div class="card" id="contCardProcs">
+				<div class="card-body">
+					<h4 class="mb-0">Lista de procesos</h4>
+					<p class="mb-4">
+						Aqu&iacute; encuentra sus procesos y el estado de los mismos
+					</p>
+					
+					<div class="row" id="contTb">
+                    	<div class="col-3">
+                        	<div class="d-flex align-items-center">
+                              <strong>Loading...</strong>
+                              <div class="spinner-border spinner-border-sm ms-auto" role="status" aria-hidden="true"></div>
+                            </div>
+                    	</div>
+                    </div>
+					
+				</div>
+			</div>
+			            
+			<div class="card" id="contProce" style="display: none;">
+				<div id="cardDocs" class="card-body" style="display: none;" ></div>
+				<div id="cardProcs" class="card-body"></div>
+			</div>
+            
+        </div>
+    </div>
+</div>
+
+<div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+    <form id="frmval" class="frmvalcls">
+    	<div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Creaci&oacute;n de nueva solicitud</h4>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="flujos_id">Indique el tipo de solicitud que va a crear</label>
+                        <select class="form-select" id="flujos_id" name="flujos_id" required="required">
+                        	<option value="" disabled="disabled" selected="selected">Seleccione un tipo de solicitud</option>
+<?php foreach( $l_flujos_id as $v ) : ?>
+                        	<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+<?php endforeach; ?>
+                        </select>
+                        
+                    </div>
+                </div>
+                <div class="mb-3 col-md-12">
+                	<label class="form-label" for="mesaplica">Mes de afectaci&oacute;n</label>
+                    <div class="input-group me-3 ">
+                        <input id="mesaplica" name="mesaplica" value="<?php echo date("Y-m") . "-01"; ?>" class="form-control" type="text" >
+                        <span class="input-group-text text-muted" id="desde"><i class="fe fe-calendar"></i></span>
+                    </div>
+        		</div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+<script type="application/javascript">
+let idMod = null;
+let idFlId = null;
+const btnGuardar = function(){
+	home.navUser(function( uDt ){
+		ut.validarFrm('frmvalcls', function ( r ) {
+    		closeAllModal();
+    		
+    		const opc = { 'id' : 'ajaxldr' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+            const yo = JSON.parse( ut.b64DecodeUnicode(uDt) );
+            r['empleados_id_cif'] = yo['id'];
+            
+            if( idMod !== null ){
+            	r['id'] = idMod;
+            }
+            
+            const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesHomeHelperAdd ); ?>');
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+    
+    		__TransportarData(
+    			form_data,
+    			function( o ) {
+    				reqs.recargarTabla();
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			}
+    		);
+    	});
+	});
+};
+
+const modalFormulario = function ( d ) {
+    var opc = {
+            'id' : d['id'],
+            'title' : d['title'],
+            'btnCerrarX' : true,
+            'scrolling' : true,
+            'center' : true,
+            'size' : 'modal-xl',
+            'level' : 'l2'
+    };
+    return mngModal.dibujar( opc );
+};
+
+const btnAgregarReg = function(){
+	idMod = null;
+	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Nueva solicitud'} );
+	
+	const body = jQuery( _m ).find( '.modal-body' );
+	const pie = [];
+	pie.push( '<div class="modal-footer">' );
+	pie.push( '	<button class="btn btn-secondary" data-bs-dismiss="modal" >Cerrar</button>' );
+	pie.push( '	<button class="btn btn-primary" onclick="btnGuardar();">Guardar</button>' );
+	pie.push( '</div>' );
+	body.after( pie.join('') );
+	
+	jQuery("#mesaplica").flatpickr({
+		locale: flatpickr.l10ns.es,
+		dateFormat: "Y-m"
+	});
+	
+	jQuery( _m ).modal('show');	
+};
+
+const Requerimientos = function( dC ){ // dC = data constructor
+	const _this = this;
+	const tablaCont = dC['tableContainer'];
+	let tbInter = null;
+	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
+	
+	_this.dibujarTb = function(){
+		const html = [];
+		
+		html.push('<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;"></table>');
+		
+		return html.join('');
+	};
+	
+	_this.btnCloseModInfo = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const target = jQuery( dt['target'] );
+		const contCardProcs = jQuery('#contCardProcs');
+		
+		target.hide('fast');
+		contCardProcs.show('fast');
+
+		const cardDocs = jQuery('#cardDocs');
+		cardDocs.hide();
+		cardDocs.html ( '' );
+	};
+	
+	const btnModInfoHtml = function( d ){
+		const res = d['res'];
+		const data = d['data'];
+		
+		const items = res['items'][0];
+		const requs = res['requs'];
+		const resul = res['res'];
+		
+		const html = [];
+		html.push('<div class="d-flex justify-content-between">');
+		html.push('	<div>');
+		html.push('		<h4 class="mb-0">Solicitud ' + data['nombre'] + '</h4>');
+		html.push('			<p class="mb-4">');
+		html.push('			' + items['flujos_descripcion'] );
+		html.push('		</p>');
+		html.push('	</div>');
+		html.push('	<div>');
+		html.push('		<button class="btn-close" data-target="#contProce" onclick="reqs.btnCloseModInfo( this )" ></button>');
+		html.push('	</div>');
+		html.push('</div>');
+			
+		html.push('<div class="row" id="contTb">');
+		html.push('	<div class="col-12">');
+		html.push('		' + formRequsHtml( requs, resul ) );
+		html.push('	</div>');
+		html.push('</div>');
+
+    	return html.join('');
+	};
+	
+	const asignarValoresCampos = function( d ){
+		const src = d['src'];
+		const ref = d['ref'];
+		let val = "";
+		
+        for (const key in src) {
+    	    if (Object.hasOwnProperty.call( src, key ) ) {
+    	        const _el = src[key];
+    	        
+    	        if( _el['ref'] == ref ){
+    	        	val = _el['valor'];
+    	        }
+    	        
+	        }
+		}
+		
+		return val;
+	};
+	
+	const formRequsHtml = function( d, vals ){
+		const html = [];
+		
+        for (const key in d) {
+    	    if (Object.hasOwnProperty.call( d, key ) ) {
+    	        const _el = d[key];
+    	        
+    	        let requerido = false;
+    	        let requeridoEle = "";
+    	        if( _el['requerido'] == 1 ){
+    	        	requerido = true;
+    	        	requeridoEle = "*";
+    	        }
+    	        
+    	        const limpioName = ("" + _el['ref_nombre']).replace(/[\[\]]/ig,"");
+    	        const elName = limpioName + '_' +  _el['id'];
+    	        const elemCfg = { 'id' : elName, 'tipo' : _el['paquetereqtipos'], 'requerido' : requerido, 'acepta' : _el['acepta'] };
+    	        
+    	        html.push('<div class="mb-3 col-md-12" style="">');
+    	        if( _el['paquetereqtipos'] == 'formulario' ){
+    	        	const elCfgDt = _el['descripcion'];
+    	        	elemCfg['json'] = elCfgDt['json'];
+    	        	const elObj = home.entradasCampos( { 'd' : elemCfg, 'regId' : _el['id'] } );
+    	        	html.push('	<hr>' );
+    	        	html.push('	<span class="h3">' + elCfgDt['titulo'] + '</span><br>' );
+    	        	html.push('	<div class="text-muted mb-3">' + elCfgDt['descripcion'] + '</div>' );
+    	        	html.push('	' + elObj.prop('outerHTML') );
+    	        }
+    	        else{
+    	        	const jsondefv = JSON.parse( ut.b64DecodeUnicode( vals ) );
+    	        	
+    	        	const defval = asignarValoresCampos( { 'src' : jsondefv, 'ref' : _el['ref_nombre'] } );
+    	        	elemCfg['valor'] = defval;
+    	        	
+        	        html.push('	<label class="form-label" for="' + elName + '">' + _el['ref_label'] + ' ' + requeridoEle + '</label>');
+        	        html.push('	' +  home.entradasCampos( { 'd' : elemCfg } ) );
+        	        html.push('	<small class="text-muted" >' + _el['descripcion'] + '</small>');
+    	        }
+    	        html.push('</div >');
+			}
+		}
+		
+		const formu = [];
+		formu.push('<form id="frmval" class="frmvalcls">');
+		formu.push( html.join('') );
+		formu.push('	<div class="d-grid gap-2">');
+		formu.push('		<button data-formid="frmvalcls" onclick="reqs.guargaFormulario( this );" class="btn btn-primary" type="button" rol="button" >Generar documentos</button>');
+		formu.push('	</div >');
+		formu.push('</form >');
+		
+		return formu.join('');
+	};
+	
+	_this.guargaFormulario = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		home.navUser(function( uDt ){
+			jQuery('.d-none').find('[required]').removeAttr('required');
+			
+			ut.validarFrm( dt['formid'], function ( r ) {
+            	closeAllModal();
+            	
+            	r['paquetes_id'] = idMod;
+            	r['flujositems_id'] = idFlId;
+            	r['token'] = uDt;
+            	
+        		const opc = { 'id' : 'ajaxldr' };
+                const objmdl = mngModal.dibujar( opc );
+                jQuery( objmdl ).modal('show');
+                
+                const form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesrequHelperAdd ); ?>');
+                form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+                
+                jQuery( 'input[type=file]' ).each(function( i, ob ){
+                    const _oOb = jQuery( ob );
+                    form_data.append( _oOb.attr('id'), _oOb.prop('files')[0] );
+				});
+        
+        		__TransportarData(
+        			form_data,
+        			function( o ) {
+        				//console.log( o );
+        				
+        				documentosList( o['result'] );
+        				
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			},
+        			function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+        
+                        jQuery( objmdlErr ).modal('show');
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			}
+        		);
+    
+    		});
+			
+		});
+		
+	};
+	
+	_this.guardarProceso = function(){
+		obtenerRespuestas();
+	};
+
+	const formsDefVals = function( d ){
+		const jsondefv = d['data'];
+		for (const key in jsondefv) {
+    	    if (Object.hasOwnProperty.call( jsondefv, key ) ) {
+    	        const _el = jsondefv[ key ];
+    	        if( _el['paquetereqtipos_id'] == 6 ){
+    	        	const defvalforms = JSON.parse( _el['valor'] );
+    	        	
+    	        	for (const kField in defvalforms) {
+                	    if (Object.hasOwnProperty.call( defvalforms, kField ) ) {
+                	        const _elField = defvalforms[ kField ];
+                	        
+                	        const campoTmp = jQuery( '#' + _elField['field'] );
+                	        if( (""+campoTmp.attr('type')).toLowerCase() == 'checkbox' ){
+                	        	if( _elField['value'] == "on" ){
+                	        		//campoTmp.prop( 'checked', true );
+                	        		setTimeout( function(){ 
+                	        			campoTmp.trigger('click');
+                	        		}, 1500 );
+                	        	}
+            	        	}
+            	        	else if( (""+campoTmp.attr('type')).toLowerCase() == 'file' ){
+            	        		const tmpVal = _elField['value'];
+            	        		if( (""+tmpVal).length > 0 ){
+            	        			let nw = ut.CrearId();
+                            		requerido = "";
+                            		const pthi = ut.pathInfo( tmpVal );
+                            		const uHtml = [];
+                            		uHtml.push('<div>');
+                            		uHtml.push('	<a href="' + tmpVal + '" target="win' + nw + '" >' + pthi['basename'] + '</a>' );
+                            		uHtml.push('</div>');
+                            		url = uHtml.join('');
+                            		
+                	        		campoTmp.after( url );
+                	        		setTimeout(function(){ campoTmp.removeAttr('required'); }, 1500);
+            	        		}
+            	        	}
+            	        	else{
+            	        		campoTmp.val( _elField['value'] );
+            	        	}
+            	        }
+        	        }
+    	        }
+	        }
+        }
+	};
+	
+	const documentosList = function( dt ){
+		const cardDocs = jQuery('#cardDocs');
+		const docs = dt['docs'];
+		
+		cardDocs.hide();
+		cardDocs.html ( '' );
+		
+		const lista = [];
+		if( docs.length > 0 ){
+			for ( const key in docs ) {
+        	    if ( Object.hasOwnProperty.call( docs, key ) ) {
+        	        const _el = docs[ key ];
+        	        const bs = _el['bs'];
+        	        const url = _el['url'];
+        	        const fl = ut.pathInfo( bs );
+        	        
+        	        const fancy = ("" + fl['filename']).replace(/sig_/ig, "").replace(/_/ig," ");;
+        	        
+					lista.push('<div class="col"> ');
+					lista.push('	<div class="card h-100 text-center"> ');
+					lista.push('		<a href="' + url + '" target="vwnew">');
+					lista.push('		<i class="bi bi-file-earmark-pdf display-4 mt-3 text-danger"></i> ');
+					lista.push('		<div class="card-body"> ');
+					lista.push('			<h5 class="card-title">' + fancy + '</h5> ');
+					lista.push('		</div> ');
+					lista.push('		</a>');
+					
+					lista.push('		<div class="card-footer p-0"> ');
+					
+					lista.push('			<div class="btn-group w-100 d-flex"> ');
+					lista.push('				<a href="' + url + '" class="btn btn-primary flex-grow-1" target="vwnew"><i class="bi bi-pen me-1"></i>Firmar</a>');
+					lista.push('				<button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split flex-grow-0 px-2" style="width: 2rem;" data-bs-toggle="dropdown" aria-expanded="false"> ');
+					lista.push('					<span class="visually-hidden">Toggle Dropdown</span> ');
+					lista.push('				</button> ');
+					lista.push('				<ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start"> ');
+					lista.push('					<li><a class="dropdown-item" href="' + url + '" target="vwnew">Ver Archivo</a></li> ');
+					lista.push('				</ul> ');
+					lista.push('			</div > ');
+					
+					lista.push('		</div> ');
+					lista.push('	</div> ');
+					lista.push('</div> ');
+        	        
+				}
+			}
+			
+			const _html = [];
+    		_html.push('<div class="row row-cols-1 row-cols-md-3 g-4">');
+    		_html.push('	' + lista.join('') );
+    		_html.push('</div>');
+    		
+    		cardDocs.html ( _html.join('') );
+    		cardDocs.show('fast');
+		}
+		
+	};
+
+	_this.modInfo = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		idMod = dt['id'];
+		idFlId = dt['flujositems_id'];
+		idFlujo = dt['flujos_id'];
+		
+		const target = jQuery( dt['target'] );
+		
+		const contProce = jQuery('#contProce');
+		const card = contProce.find('#cardProcs');
+		
+		card.html('');
+    		
+    	closeAllModal();
+    	
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        home.navUser(function( uDt ){
+        	const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FlujositemsHelperGet ); ?>');
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+            form_data.append('u', uDt );
+            form_data.append('flujos_id', idFlujo);
+    
+    		__TransportarData(
+    			form_data,
+    			function( o ) {
+    				//console.log( o );
+    				target.hide('fast');
+    		
+            		contProce.show("fast", function(){
+            			card.html( btnModInfoHtml( { 'res': o, 'data' : dt } ) );
+            			
+            			const jsondefv = JSON.parse( ut.b64DecodeUnicode( o['res'] ) );
+            			formsDefVals( { 'data' : jsondefv } );
+            			
+            			documentosList( o );
+            			
+            		});
+            		
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			}
+    		);
+        });
+		
+	};
+	
+	const btnInfoHtml = function( dtInfo ){
+		const html = [];
+    	html.push('<button onclick="reqs.modInfo(this);" data-flujos_id="' + dtInfo.flujos_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
+        html.push('	<i class="fe fe-info fs-5"></i>');
+        html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
+        html.push('		<h6 class="mb-0 text-white">Editar</h6>');
+        html.push('	</div>');
+        html.push('</button>');
+        return html.join('');
+	};
+	
+	_this.dibujarDataTable = function( uDt ){
+		const tb = _this.dibujarTb();
+		jQuery( tablaCont ).html( tb );
+		
+		const yo = JSON.parse( ut.b64DecodeUnicode( uDt ) );
+		
+		tbInter = jQuery( '#' + tableId ).DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: './index.php',
+                data : function(d){
+                	d.ajax = '<?php echo md5( IndexCtrl::API_PaquetesHelperGetAjax ); ?>';
+                	d.columns[2]['search']['value'] = [ yo['id'] ];
+                },
+                type: 'POST'
+            },
+            columns: [
+                { 'title' : 'Id', data: 'id' },
+                { 'title' : 'Nombre', data: 'nombre' },
+                { 'title' : 'Empleado', data: 'empleados_id', visible: false },
+                {
+                	'title' : 'Mes',
+                	data: 'mesaplica',
+                	render: function(data, type, row) {
+                        if (!data) return '';
+                
+                        let fecha = new Date(data);
+                        let yyyy = fecha.getFullYear();
+                        let mm = fecha.getMonth() + 1;
+                        
+                        mm = mm < 10 ? '0' + mm : mm;
+                
+                        return yyyy + '-' + mm ;
+                    }
+                },
+                { 'title' : 'Creado', data: 'fecha' },
+                { 'title' : 'Proceso', data: 'flujositems_id' },
+                { 'title' : 'Usuario', data: 'usuariosmod' },
+                { 
+                	'title' : 'Revisado', 
+                	data: 'fechamodificado',
+                	render: function(data, type, row){
+                		if(!data) return '';
+                		if( data == '1900-01-01 00:00:00' ){
+                			return '';
+                		}
+                	} 
+            	},
+                { 'title' : 'Estado', data: 'paquetesestados_id' },
+                { 'title' : 'Plantilla', data: 'flujos_id' },
+                {
+                    title: 'Acciones',
+                    data: null,
+                    orderable: false,
+                    width: '1%',
+                    render: function(data, type, row) {
+                    	const btnInfo = btnInfoHtml( row );
+                    	
+                        return `
+                        <div class="d-flex justify-content-start">
+                            ${btnInfo}
+                        </div>
+                        `;
+                    }
+                }
+            ],
+            order: [[3, 'desc']],
+            responsive: false,
+            language: lengua_es,
+            processing: true
+        });
+		
+	};
+	
+    _this.recargarTabla = function () {
+        if ( tbInter ) {
+			tbInter.ajax.reload(null, false);
+        }
+    };
+};
+
+const chkArchivo = function( o ){
+	chkUploadFiles( o, <?php echo Utiles::getPostMaxSizeMB() ; ?>, function( fl ){
+		console.log( fl );
+	});
+};
+
+
+let reqs = null;
+const listaProcesos = function(){
+	home.navUser(function( uDt ){
+		const dataConstruct = {
+    	'tableContainer' : '#contTb'
+        };
+    	reqs = new Requerimientos ( dataConstruct );
+    	reqs.dibujarDataTable( uDt );
+	});
+};
+jQuery( document ).ready(function(){
+	home.navLogin(function(){
+		jQuery('#db-wrapper').fadeIn('fast', listaProcesos );
+	});
+});
+</script>

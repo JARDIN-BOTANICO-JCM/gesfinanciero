@@ -1,0 +1,473 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+?>
+<style>
+.procesando {
+    -webkit-filter: blur(4px); /* Safari 6.0 - 9.0, Chrome */
+    -moz-filter: blur(4px);    /* Firefox */
+    -o-filter: blur(4px);      /* Opera */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=4)"; /* IE 8-9 (muy limitado) */
+    filter: blur(4px);         /* Estándar */
+}
+
+</style>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+			<div class="row">
+				<div class="col-lg-12 col-md-12 col-12">
+					<div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+						<div class="mb-3 mb-lg-0">
+							<h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+									<li class="breadcrumb-item active" aria-current="page">
+										<?php echo $crum['l2']; ?>
+									</li>
+								</ol>
+							</nav>
+
+						</div>
+						
+						<div>
+							<button onclick="btnAgregarReg( this );" class="btn btn-primary">Agregar registro</button>
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-body">
+					<h4 class="mb-0">Administraci&oacute; de formularios</h4>
+					<p class="mb-4">
+						Admininstre formularios para recolectar informaci&oacute;n de los usuarios  
+					</p>
+					
+					<div class="row">
+						<div class="col-12" id="contTb"></div>
+					</div>
+					
+				</div>
+			</div>
+<?php 
+/*
+			<div class="card">
+				<div class="card-body">
+				
+					<button class="btn btn-info mt-3" onclick="renderEncuesta(formulario, jQuery('#encuesta-container'))">Mostrar Encuesta</button>
+                    <div id="encuesta-container" class="mt-4"></div>
+  					<button class="btn btn-dark mt-3" onclick="console.log(obtenerRespuestas())">Obtener Respuestas</button>
+  
+				</div>
+			</div>
+*/
+?>
+        </div>
+
+    </div>
+</div>
+
+<div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+    <form id="frmval" class="frmvalcls">
+    	<div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Formulario</h4>
+                </div>
+                <div class="row">
+                	<div class="mb-3 col-md-12">
+                        <label class="form-label" for="frm_nombre">T&iacute;tulo del formulario (Le aparece a los usuarios)</label>
+                        <input type="text" class="form-control" placeholder="Ejemplo: Declaraciones" id="frm_nombre" name="frm_nombre" required="required">
+                    </div>
+                    
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="frm_descripcion">Descripci&oacute;n del formulario (Le aparece a los usuarios)</label>
+                        <input type="text" class="form-control" placeholder="Ejemplo: Proceso de declaraci&oacute;n de renta" id="frm_descripcion" name="frm_descripcion" required="required">
+                    </div>
+                </div>
+        
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Orden de preguntas</h4>
+                </div>
+                <div class="row">
+                
+                	<div id="form-container"></div>
+                	<div class="mb-3 col-12 d-grid gap-2 mt-1">
+                		<button class="btn btn-primary" type="button" rol="button" onclick="addField(jQuery('#form-container'))">Agregar campo</button>
+                	</div>
+                	
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="application/javascript">
+var fieldIdCounter = 0;
+var formulario = [];
+
+function addField(container, data) {
+    var id = 'field-' + fieldIdCounter;
+    var field = jQuery('<div class="card p-3 mb-3 dragActivo" data-id="' + id + '"></div>');
+    
+    var row = jQuery('<div class="row align-items-end gx-2"></div>');
+    
+    var labelInput = jQuery('<input type="text" class="form-control" placeholder="Etiqueta" required="required" >').val(data && data.label || '');
+    var labelCol = jQuery('<div class="col mb-2"></div>').append(labelInput);
+    
+    var placeholderInput = jQuery('<input type="text" class="form-control placeholder-input" placeholder="Placeholder">').val(data && data.placeholder || '');
+    var placeholderCol = jQuery('<div class="col mb-2 placeholder-col"></div>').append(placeholderInput);
+    
+    var typeSelect = jQuery('<select class="form-select" required="required" >' +
+    <?php foreach ( OperacionesCtrl::FORMULARIOS_FIELD_TYPES as $kField => $vField ) : ?>
+    '<option value="<?php echo $kField; ?>"><?php echo $vField; ?></option>' +
+    <?php endforeach; ?>
+    '</select>').val(data && data.type || 'text');
+    var typeCol = jQuery('<div class="col mb-2"></div>').append(typeSelect);
+    
+    var requiredCheck = jQuery('<div class="form-check">' +
+    '<input class="form-check-input" type="checkbox">' +
+    '<label class="form-check-label">Obligatorio</label>' +
+    '</div>');
+    requiredCheck.find('input').prop('checked', data && data.required || false);
+    var requiredCol = jQuery('<div class="col mb-2"></div>').append(requiredCheck);
+    
+    var deleteBtn = jQuery('<button type="button" rol="button" class="btn btn-danger btn-sm">Eliminar</button>');
+    var deleteCol = jQuery('<div class="col-auto mb-2 text-end"></div>').append(deleteBtn);
+    deleteBtn.on('click', function () {
+    	field.remove();
+    });
+    
+    row.append(labelCol, placeholderCol, typeCol, requiredCol, deleteCol);
+    //field.append('<span class="text-muted">field_' + fieldIdCounter + '</span>');
+    field.append(row);
+    
+    // Extras
+    var extraContainer = jQuery('<div class="mt-2 mb-2"></div>');
+    field.append(extraContainer);
+    
+    function togglePlaceholder() {
+        var type = typeSelect.val();
+        if (type === 'text' || type === 'datetime') {
+    		placeholderCol.show();
+        } else {
+            placeholderCol.hide();
+            placeholderInput.val('');
+        }
+    }
+    
+    typeSelect.on('change', function () {
+        updateFieldType(jQuery(this), extraContainer, null);
+        togglePlaceholder();
+    });
+    
+    updateFieldType(typeSelect, extraContainer, data);
+    togglePlaceholder();
+    
+    container.append(field);
+    
+    agregarAgarre( { 'contenedor' : 'form-container', 'hijos' : 'dragActivo' } );
+    
+    fieldIdCounter++;
+}
+
+function updateFieldType(selectEl, container, data) {
+    container.empty();
+    var type = selectEl.val();
+    
+    if (type === 'select') {
+        var optInput = jQuery('<textarea class="form-control mb-2" placeholder="Opciones (una por línea)"></textarea>');
+        if (data && data.options) {
+			optInput.val(data.options.join('\n'));
+        }
+        container.append(optInput);
+    }
+    
+    if (type === 'checkbox') {
+        var childContainer = jQuery('<div class="ms-3 mt-2 border-start ps-2"></div>');
+        container.append(
+    		jQuery('<button type="button" rol="button" class="btn btn-outline-secondary btn-sm mb-2">Agregar hijo</button>').on('click', function () {
+    			addField(childContainer);
+    		}),
+			childContainer
+        );
+        
+        if (data && data.children) {
+            for (var i = 0; i < data.children.length; i++) {
+            	addField(childContainer, data.children[i]);
+            }
+        }
+    }
+    
+    // datetime ya no tiene campo flatpickr
+}
+
+function serializeForm(container) {
+  var result = [];
+  container.children('.card').each(function () {
+    var $card = jQuery(this);
+    var row = $card.find('.row');
+
+    var field = {
+      label: row.find('input[placeholder="Etiqueta"]').val(),
+      placeholder: row.find('input.placeholder-input').val(),
+      type: row.find('select').val(),
+      required: row.find('input[type="checkbox"]').prop('checked')
+    };
+
+    var extra = $card.find('> .mt-2');
+    if (field.type === 'select') {
+      field.options = extra.find('textarea').val().split('\n').filter(Boolean);
+    } else if (field.type === 'checkbox') {
+      var childContainer = extra.find('> .ms-3');
+      field.children = serializeForm(childContainer);
+    }
+
+    result.push(field);
+  });
+  return result;
+}
+
+function guardarJson() {
+  formulario = serializeForm(jQuery('#form-container'));
+  console.log("Formulario guardado:", formulario);
+}
+
+function loadFromJson(json, container) {
+  container.empty();
+  for (var i = 0; i < json.length; i++) {
+    addField(container, json[i]);
+  }
+}
+</script>
+
+<script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+<script type="application/javascript">
+let idMod = null;
+const modalFormulario = function ( d ) {
+    var opc = {
+            'id' : d['id'],
+            'title' : d['title'],
+            'btnCerrarX' : true,
+            'scrolling' : true,
+            'center' : true,
+            'size' : 'modal-fullscreen',
+            'level' : 'l2'
+    };
+    return mngModal.dibujar( opc );
+};
+
+const btnAgregarReg = function(){
+	idMod = null;
+	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Agregar registro'} );
+	
+	const body = jQuery( _m ).find( '.modal-body' );
+	const pie = [];
+	pie.push( '<div class="modal-footer">' );
+	pie.push( '	<button class="btn btn-secondary" data-bs-dismiss="modal" >Cerrar</button>' );
+	pie.push( '	<button class="btn btn-primary" onclick="btnGuardar();">Guardar</button>' );
+	pie.push( '</div>' );
+	body.after( pie.join('') );
+	
+	jQuery( _m ).modal('show');	
+};
+
+const btnGuardar = function(){
+	ut.validarFrm('frmvalcls', function ( r ) {
+		closeAllModal();
+		
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        const rDt = {
+        	'titulo' : jQuery.trim( jQuery('#frm_nombre').val() ),
+        	'descripcion' : jQuery.trim( jQuery('#frm_descripcion').val() ),
+        	'json' : serializeForm( jQuery('#form-container') )
+    	};
+    	
+        if( idMod !== null ){
+        	rDt['id'] = idMod;
+        }
+        
+        const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FormulariosHelperAdd ); ?>');
+        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( rDt ) ) );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+				reqs.recargarTabla();
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const btnModRegistro = function ( o ) {
+	fieldIdCounter = 0;
+	const _o = jQuery( o );
+	const dt = _o.data();
+
+    idMod = dt['id'];
+
+	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Modificar registro'} );
+	
+	const body = jQuery( _m ).find( '.modal-body' );
+	const pie = [];
+	pie.push( '<div class="modal-footer">' );
+	pie.push( '	<button class="btn btn-secondary" data-bs-dismiss="modal" >Cerrar</button>' );
+	pie.push( '	<button class="btn btn-primary" onclick="btnGuardar();">Guardar</button>' );
+	pie.push( '</div>' );
+	body.after( pie.join('') );
+
+    const form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FormulariosGet ); ?>');
+    form_data.append('id', idMod );
+
+    __TransportarData(
+		form_data,
+		function( oDt ) {
+		
+			for (const key in oDt ) {
+    			if (Object.hasOwnProperty.call( oDt, key ) ) {
+    				const _el = oDt[ key ];
+    				
+    				jQuery('#frm_nombre').val( _el['titulo'] );
+    				jQuery('#frm_descripcion').val( _el['descripcion'] );
+    				
+    				formulario = JSON.parse( _el['json'] );
+            		loadFromJson( formulario, jQuery('#form-container') );
+				}
+			}
+		
+		},
+		function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		}
+	);
+
+    jQuery( _m ).modal('show');
+};
+
+const Requerimientos = function( dC ){ // dC = data constructor
+	const _this = this;
+	const tablaCont = dC['tableContainer'];
+	let tbInter = null;
+	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
+	
+	_this.dibujarTb = function(){
+		const html = [];
+		
+		html.push('<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;"></table>');
+		
+		return html.join('');
+	};
+	
+	const btnModifyHtml = function( id ){
+		const html = [];
+    	html.push('<button onclick="btnModRegistro(this);" data-id="' + id + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + id + '">');
+        html.push('	<i class="fe fe-edit fs-5"></i>');
+        html.push('	<div id="modTpl' + id + '" class="d-none">');
+        html.push('		<h6 class="mb-0 text-white">Editar</h6>');
+        html.push('	</div>');
+        html.push('</button>');
+        return html.join('');
+	};
+	
+	_this.dibujarDataTable = function(){
+		const tb = _this.dibujarTb();
+		jQuery( tablaCont ).html( tb );
+		
+		tbInter = jQuery( '#' + tableId ).DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: './index.php',
+                data : function(d){
+                	d.ajax = '<?php echo md5( IndexCtrl::API_FormulariosGetAjax ); ?>';
+                },
+                type: 'POST'
+            },
+            columns: [
+                { 'title' : 'Id', data: 'id' },
+                { 'title' : 'Formulario', data: 'nombre' },
+                { 'title' : 'T&iacute;tulo', data: 'titulo' },
+                { 'title' : 'Creador', data: 'usuarios' },
+                { 'title' : 'Creado', data: 'fecha' },
+                { 'title' : 'Estado', data: 'formulariosestados_id' },
+                {
+                    title: 'Acciones',
+                    data: null,
+                    orderable: false,
+                    width: '1%',
+                    render: function(data, type, row) {
+                    	const btnMod = btnModifyHtml( row.id );
+                    	
+                        return `
+                        <div class="d-flex justify-content-start">
+                            ${btnMod}
+                        </div>
+                        `;
+                    }
+                }
+            ],
+            order: [[1, 'desc']],
+            responsive: false,
+            language: lengua_es,
+            processing: true
+        });
+		
+	};
+	
+    _this.recargarTabla = function () {
+        if ( tbInter ) {
+			tbInter.ajax.reload(null, false);
+        }
+    };
+};
+const dataConstruct = {
+	'tableContainer' : '#contTb'
+};
+const reqs = new Requerimientos ( dataConstruct );
+
+jQuery( document ).ready(function(){
+	reqs.dibujarDataTable();
+});
+
+</script>

@@ -1,0 +1,1274 @@
+<?php
+$cfg = OperacionesCtrl::LeerConfigCorp();
+
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+$loginas = false;
+
+if ( isset( $_SESSION["usu"] ) ) {
+    if( $usu->getPerfil_id() == 1 || $usu->getPerfil_id() == 2 ){
+        $loginas = true;
+    }
+}
+
+$tmpanyoGbl = OperacionesCtrl::anyolectivo_Obtener();
+$GBL_anyolectivo_id = $tmpanyoGbl[0]['id'];
+
+$g_jsn = IndexCtrl::JS_Name_get();
+?>
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+	<symbol id="gbl-check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+    	<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+	</symbol>
+	<symbol id="gbl-info-fill" fill="currentColor" viewBox="0 0 16 16">
+    	<path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+	</symbol>
+	<symbol id="gbl-exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+    	<path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+	</symbol>
+</svg>
+
+<?php if( !is_null( $usu ) ) : ?>
+    <!-- Codigo INI -->
+    <div id="frmGlbCodConf" class="mdlCont" style="display:none;" >
+        <form id="frmGlbCodValConf" class="frmGlbCodValConfCss">
+            <div class="row mb-4">
+                <div id="frmGlbCodValConfOpcs" class="mb-3 col-md-12" >
+                    <div class="d-grid gap-2">
+                    <button onclick="validadorGlob.getCode();" class="btn btn-success">Solicitar c&oacute;digo</button>
+                    <button onclick="validadorGlob.setCode();" class="btn btn-success">Ingresar c&oacute;digo</button>
+                    </div>
+                </div>
+                <div id="frmGlbCodValConfGetCode" class="mb-3 col-md-12" style="display: none;">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="validadorGlob.get();">Solicitar c&oacute;digo <i class="fa-solid fa-envelope"></i></button>
+                    </div>
+                    <label class="form-label mt-3">
+                        <small>
+                            *El c&oacute;digo se enviar&aacute; a <?php echo $usu->getMail(); ?>,
+                            revise en su bandeja de entrada o en SPAM.
+                        </small>
+                    </label>
+                    <div class="d-grid gap-2">
+                        <button onclick="validadorGlob.goBack();" class="btn btn-link"><i class="fa-solid fa-angle-left"></i> Volver</button>
+                    </div>
+                </div>
+                <div id="frmGlbCodValConfSetCode" class="mb-3 col-md-12" style="display: none;">
+                    <label class="form-label" for="gblcodigo">C&oacute;digo de confirmaci&oacute;n</label>
+                    <input type="text" class="form-control" placeholder="C&oacute;digo" id="gblcodigo" name="codigo" >
+                    <div class="d-grid gap-2">
+                        <button onclick="validadorGlob.goBack();" class="btn btn-link"><i class="fa-solid fa-angle-left"></i> Volver</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <!-- buttons -->
+                <a href="#" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Cancelar</a>
+                <button class="btn btn-primary" type="submit" onclick="validadorGlob.exec();">Verificar</button>
+            </div>
+        </form>
+    </div>
+    <!-- Codigo FIN -->
+<?php endif; ?>
+
+<?php 
+$glb_usr_reg = "";
+if ( isset( $_SESSION['usu'] ) ) {
+    $glb_usr_reg = $_SESSION['usu']->getUsuario();
+}
+?>
+	<div class="modal fade" id="tiempoFuera" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="tiempoFueraLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body">
+                	<div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">Alerta</h4>
+                        <p>Por inactividad la sesi&oacute;n se cerr&oacute; y podr&iacute;a perder la informaci&oacute;n que no ha guardado.</p>
+                	</div>
+                	
+                	<div class="row">
+                		<div class="col-12">
+                			
+                			<form id="glb_frmLAjaxInin" class="glb_frmClsLAjaxInin" method="post" action="./index.php">
+                                <!-- Username -->
+                                <div class="mb-3">
+                                    <label for="glb_lgn_usuario" class="form-label">Usuario o correo electr&oacute;nico</label>
+                                    <label class="form-control"><?php echo $glb_usr_reg; ?></label>
+                                    <input type="hidden" id="glb_lgn_usuario" name="glb_lgn_usuario" value="<?php echo $glb_usr_reg; ?>" >
+                                </div>
+                                <div class="mb-3">
+                                    <label for="glb_lgn_clave" class="form-label">Contrase&ntilde;a</label>
+                                    <input type="password" id="glb_lgn_clave" class="form-control" name="glb_lgn_clave" placeholder="***********" required="required">
+                                </div>
+                            </form>
+                			
+                		</div>
+                	</div>
+                	
+                </div>
+                <div class="modal-footer">
+                	<button id="glb_btnAjaxIniData" type="button" rol="button" class="btn btn-primary" data-dismiss="modal" data-target="glb_frmClsLAjaxInin" onclick="safeOperation( this );">Iniciar sesi&oacute;n</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="global_std_msj" style="display: none;">
+		<div class="card mb-3">
+			<div class="card-img-top"></div>
+			<div class="card-body">
+				<div class="d-flex justify-content-between">
+					<h5 class="card-title me-3"></h5>
+					<div class="txt-adjun"></div>
+				</div>
+				<p class="card-text txt-main"></p>
+				<p class="card-text">
+					<small class="text-muted">Last updated 3 mins ago</small>
+				</p>				
+			</div>
+		</div>
+    
+    </div>
+
+    <div id="mdlError" class="mdlCont" style="display: none;">
+        <div class="alert"></div>
+    </div>
+
+    <div class="modal fade" id="stcMdl_l1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <div class="modal fade" id="stcMdl_l2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <div class="modal fade" id="stcMdl_err" data-bs-backdrop="static" data-bs-keyboard="true" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <div id="ajaxldr" class="mdlCont" style="display: none;">
+        <div class="d-flex align-items-center ">
+            <strong>Cargando...</strong>
+            <div class="spinner-border ms-auto spinner-border-sm" role="status" aria-hidden="true"></div>
+        </div>
+    </div>
+    
+    <script type="application/javascript" >
+    const initSample = function( ckeCfg ) {
+    
+    	var wysiwygareaAvailable = isWysiwygareaAvailable(),
+    		isBBCodeBuiltIn = !!CKEDITOR.plugins.get( 'bbcode' );
+    
+    	return function() {
+    	
+    	    if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) CKEDITOR.tools.enableHtml5Elements( document );
+        
+            CKEDITOR.config.height = 150;
+            CKEDITOR.config.width = 'auto';
+    	
+    		var editorElement = CKEDITOR.document.getById( ckeCfg.contEditor );
+    
+    		if ( wysiwygareaAvailable ) {
+    			CKEDITOR.replace( ckeCfg.contEditor, ckeCfg );
+    		} else {
+    			editorElement.setAttribute( 'contenteditable', 'true' );
+    			CKEDITOR.inline( ckeCfg.contEditor );
+    		}
+    	};
+    
+    	function isWysiwygareaAvailable() {
+    		if ( CKEDITOR.revision == ( '%RE' + 'V%' ) ) { return true; }
+    		return !!CKEDITOR.plugins.get( 'wysiwygarea' );
+    	}
+    };
+    </script>
+
+    <script type="text/javascript">
+    const chkUploadFiles = function(o, mb, fn){
+    	const errPreSrv = [];
+    	jQuery.each( jQuery( o )[0].files, function(i, file) {
+    		const fileMb = file['size'] / (1024 * 1024);
+    		if ( fileMb > mb ) {
+    			errPreSrv.push( '"<strong>' + file['name'] + '</strong>" debe ser menor o m\xE1ximo de ' + mb + 'MB de peso' );
+    		}
+    		else{
+        		if (file) {
+                	fn( file );
+                }
+    		}
+    	});
+    	
+    	if( errPreSrv.length > 0 ){
+        	const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+    	
+        	const lsErr = [];
+            lsErr.push( "<p>Hemos encontrado algunos errores:</p>" );
+            lsErr.push( "<ul>" );
+            lsErr.push( "	<li>" + errPreSrv.join('</li><li>') + "</li>" );
+            lsErr.push( "</ul>" );
+            alerta.html( lsErr.join('')  );
+        
+            jQuery( objmdlErr ).modal('show');
+    	}
+    };
+    </script>
+    
+    <script type="application/javascript">
+    const nuevoPass = function( o ){
+    	nwPass(o, '<?php echo md5( IndexCtrl::API_UsuariosClaveAsignadaAdmin ); ?>' );
+    };
+    const nuevoAluPass = function( o ){
+    	nwPass(o, '<?php echo md5( IndexCtrl::API_EmpleadosClaveAsignadaAdmin); ?>' );
+    }
+	const nwPass = function( o, api ){
+		const _o = jQuery( o );
+    	if ( confirm( "\xBFDesea generar una nueva clave y enviarla por correo?" ) ){
+    		
+    		const _id = _o.data('id');
+    	
+    		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+			var form_data = new FormData();
+            form_data.append('ajax', api);
+            form_data.append('id', _id );
+    
+            __TransportarData(
+                form_data,
+                function( o ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Solicitud enviada','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-success');
+                    alerta.html( 'El c&oacute;digo fue enviado correctamente.' );
+                    
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+
+    	}
+	};
+     
+    const nuevoPassManual = function( o ){
+    	passManual( o , '<?php echo md5( IndexCtrl::API_UsuariosClaveAsignadaAdminManual ); ?>' );
+    };
+    const nuevoAluPassManual = function( o ){
+    	passManual( o , '<?php echo md5( IndexCtrl::API_EmpleadosClaveAsignadaAdminManual ); ?>' );
+    };
+    const passManual = function( o, api ){
+    	const _o = jQuery( o );
+    	const val1 = confirm("\xBFDesea cambiar la clave de este usuario?");
+    	
+    	if ( val1 ){
+    		const nwtxt = prompt('Ingrese nueva clave');
+    		
+    		if( nwtxt != null){
+    			if( ("" + nwtxt).length > 0 ){
+    				
+                	const _id = _o.data('id');
+                	const _notificar = _o.data('notificar');
+        	
+            		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+                    const objmdl = mngModal.dibujar( opc );
+                    jQuery( objmdl ).modal('show');
+                    
+        			var form_data = new FormData();
+                    form_data.append('ajax', api );
+                    form_data.append('id', _id );
+                    form_data.append('notificar', _notificar );
+                    form_data.append('setclave', jQuery.trim( nwtxt ) );
+            
+                    __TransportarData(
+                        form_data,
+                        function( o ) {
+                            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Clave asignada','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                            const alerta = jQuery(objmdlErr + ' div.alert');
+                            alerta.attr('class','alert alert-success');
+                            alerta.html( 'El c&oacute;digo fue enviado correctamente.' );
+                            
+                            jQuery( objmdlErr ).modal('show');
+                            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                        },
+                        function ( err ) {
+                            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                            const alerta = jQuery(objmdlErr + ' div.alert');
+                            alerta.attr('class','alert alert-danger');
+                            alerta.html( err.responseText );
+            
+                            jQuery( objmdlErr ).modal('show');
+                            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                        }
+                    );
+    
+    			}
+    			else{
+    				alert('Clave inv\xE1lida');
+    			}
+    		}
+    	}
+    };
+    
+    </script>
+
+    <script type="application/javascript">
+    const cerrarSesion = function(){
+        if( confirm('\xBFDesea cerrar su sesi\xF3n?') ){
+            location.href = './index.php?logout=true';
+        }
+    };
+    </script>
+
+    <script type="text/javascript">
+    const str_pad_left = function(string,pad,length) {
+        return (new Array(length+1).join(pad)+string).slice(-length);
+    };
+    const calcSalario = function( o ){
+    	const _o = jQuery( o );
+    	const dt = _o.data();
+    	const target = dt['target'];
+    	const vl = ut.intToPesos( parseFloat( _o.val() ) , 2,",","." );
+    	jQuery( target ).html( "($" + vl + ")" );
+    	
+    };
+    </script>
+    
+    <script type="application/javascript">
+    var aAsPostf = function(e, o){
+        e.stopPropagation();
+        e.preventDefault();
+        
+        var v = jQuery( o );
+        var _o = v.attr("href");
+        
+        var urlO = ut.UrlEncodingToObject( _o );
+        ut.crearFormulario( urlO["url"], urlO["params"] );
+    };
+
+    const mkL = function( d ){
+    	const el = jQuery( d );
+    	const hashid = el.data('hashid');
+    	const params = [];
+    	params.push( { 'hashid' : hashid } );
+    	ictrl.navMrkLeido(
+        	function( r ){
+        		el.hide('fast', function(){
+        			el.remove();
+        		});
+        	}, 
+    		JSON.stringify( params )
+    	);
+    };
+
+    jQuery(document).ready(function(){
+        <?php if ( Seguridad::isLogin() ) : ?>
+        <?php   if( OperacionesCtrl::$AUTO_LOG_OUT ) : ?>
+    	setInterval(checkSession, 300000);
+    	<?php else : ?>
+    	// alo = off
+    	<?php  endif; ?>
+    	<?php endif; ?>
+    
+        jQuery(".aAsPost").on("click", function(e){
+            aAsPostf( e, this );
+        });
+    });
+    </script>
+
+    <script type="application/javascript">
+    const ValidadorGlob = function(){
+        var _this = this;
+
+		let frmId = 'frmUpMailvalcls';
+		let params = [];
+		
+		_this.setConfig = function( opc ){
+    		if( typeof( opc ) == 'object' ){
+    			if (Object.hasOwnProperty.call( opc, 'frmid')) {
+    				frmId = opc['frmid'];
+    			}
+    			if (Object.hasOwnProperty.call( opc, 'params')) {
+    				params = opc['params'];
+    			}
+    		}
+		};
+
+        _this.goBack = function(){
+            ut.validarFrm( frmId , function ( r ) {
+                jQuery('#frmGlbCodValConfOpcs').show('fast');
+                jQuery('#frmGlbCodValConfGetCode').hide('fast');
+                jQuery('#frmGlbCodValConfSetCode').hide('fast');
+            });
+        };
+
+        _this.getCode = function(){
+            ut.validarFrm( frmId , function ( r ) {
+                jQuery('#frmGlbCodValConfOpcs').hide('fast',function(){
+                    jQuery('#frmGlbCodValConfSetCode').hide('fast');
+                    jQuery('#frmGlbCodValConfGetCode').show('fast');
+                });
+            });
+        };
+
+        _this.setCode = function(){
+            ut.validarFrm( frmId , function ( r ) {
+                jQuery('#frmGlbCodValConfOpcs').hide('fast',function(){
+                    jQuery('#frmGlbCodValConfSetCode').show('fast');
+                    jQuery('#frmGlbCodValConfGetCode').hide('fast');
+                });
+            });
+        };
+
+        _this.fn = null;
+        _this.vista = function(){
+            var opc = {
+            'id' : 'frmGlbCodConf',
+            'title' : 'M&oacute;dulo de confirmaci&oacute;n',
+            'btnCerrarX' : true,
+            'scrolling' : true,
+            'center' : true,
+            'size' : 'modal-sm',
+            'level' : 'l2'
+            };
+            const _mfc = mngModal.dibujar( opc );
+            jQuery(_mfc).modal('show');
+        };
+        _this.exec = function(){
+            ut.validarFrm( frmId , function ( r ) {
+                
+                const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+                const objmdl = mngModal.dibujar( opc );
+                jQuery( objmdl ).modal('show');
+
+                var form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_CodigoactivaGet ); ?>');
+                form_data.append('codActiva', jQuery('#gblcodigo').val() );
+                <?php if( !is_null( $usu ) ) : ?>
+                form_data.append('key', '<?php echo md5( $usu->getId() ); ?>');
+                <?php endif; ?>
+
+                __TransportarData(
+                    form_data,
+                    function( o ) {
+                        _this.fn( o );
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    },
+                    function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+
+                        jQuery( objmdlErr ).modal('show');
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    }
+                );
+            
+            });
+        };
+        _this.get = function(){
+            ut.validarFrm(frmId, function ( r ) {
+                
+                const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+                const objmdl = mngModal.dibujar( opc );
+                jQuery( objmdl ).modal('show');
+
+                var form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_CodigoactivaAdd ); ?>');
+                <?php if( !is_null( $usu ) ) : ?>
+                form_data.append('id', '<?php echo $usu->getId() ; ?>');
+                <?php endif; ?>
+                
+                if( params.length > 0 ){
+                    for (const key in params) {
+                        if (Object.hasOwnProperty.call(params, key)) {
+                            const _el = params[key];
+                            
+                            for (const kDt in _el) {
+                                if (Object.hasOwnProperty.call(_el, kDt)) {
+                                    const _regs = _el[kDt];
+                                    form_data.append( kDt, jQuery.trim( _regs ));
+                                }
+                            }
+                        }
+                    }
+                }
+
+                __TransportarData(
+                    form_data,
+                    function( o ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Solicitud enviada','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-success');
+                        <?php if( !is_null( $usu ) ) : ?>
+                        alerta.html( 'Se ha enviado un c&oacute;digo a <?php echo $usu->getMail() ; ?>' );
+                        <?php endif; ?>
+
+                        jQuery( objmdlErr ).modal('show');
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    },
+                    function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+
+                        jQuery( objmdlErr ).modal('show');
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    }
+                );
+            
+            });
+        };
+        
+        _this.ajaxspinner = function( cfg ){
+        	let _txt = "Cargando... ";
+        	let _cls = "spinner-border-sm ms-2";
+        	let _alineacion = "align-items-center";
+        	
+        	if( typeof( cfg ) == "object" ){
+        		if ( Object.hasOwnProperty.call( cfg, 'label' ) ) {
+        			_txt = cfg[ 'label' ] ;
+            	}
+            	if ( Object.hasOwnProperty.call( cfg, 'spinnerClass' ) ) {
+            		_cls = cfg[ 'spinnerClass' ];
+            	}
+            	if ( Object.hasOwnProperty.call( cfg, 'align' ) ) {
+            		_alineacion = cfg[ 'align' ];
+            	}
+        	}
+        	
+        	const cargando = '<div class="d-flex ' + _alineacion + '"><strong>' + _txt + '</strong><div class="spinner-border ' + _cls + '" role="status" aria-hidden="true"></div></div>';
+        	
+        	return cargando;
+        };
+        
+        let livs_id_sto = null;
+        _this.livesearch = function( o ){
+        	const glb_name = "GBLLIVESEARCHCONT";
+        	
+        	if( o === 'clean' ){
+        		jQuery( "#" + glb_name ).hide('fast', function(){
+					jQuery( "#" + glb_name ).remove();
+				});
+        	}
+        	else{
+        	
+            	const _o = jQuery( o );
+            	const dt = _o.data();
+            	
+            	jQuery( dt['target'] ).val( '' );
+            	
+            	const lbl = _this.ajaxspinner({'label':'Consultando...'});
+            	
+            	if( jQuery( "#" + glb_name ).length ){
+            		const glb_el = jQuery( "#" + glb_name );
+            		const frmD = glb_el.data();
+            		const from = frmD['from'];
+            		
+            		const html = [];
+            		
+            		html.push('		<li class="list-group-item shadow-lg" aria-current="true">' + lbl + '</li>' );
+            		jQuery( "#" + glb_name ).html( html.join('') );
+            		
+            	}else{
+            		const html = [];
+            		
+    	        	html.push('	<div class="list-group shadow-lg" data-from="' + _o.attr('id') + '" id="'+ glb_name + '" style="position: absolute; z-index: 9999; max-width: ' + _o.outerWidth() + 'px; min-width: ' + _o.outerWidth() + 'px;" >');
+    	        	html.push('		<li class="list-group-item" aria-current="true">' + lbl + '</li>' );
+    	        	html.push('	</div>');
+    	        	_o.after( html.join('') );
+            	}
+            	
+            	if( livs_id_sto == null){
+            	
+                	livs_id_sto = setTimeout(function(){
+                		const form_data = new FormData();
+                		form_data.append('ajax', dt['ajaxid'] );
+                		form_data.append('searchtext', ( "" + _o.val() ).replace(/[^a-zA-Z0-9\ ]/ig,'_') );
+                		form_data.append('limite', dt['limit'] );
+                		
+                		let campos = {
+            				'id' : 'id',
+            				'nombre' : 'nombre'
+        				};
+                		
+                		__TransportarData(
+                			form_data,
+                			function( dtR ) {
+                			
+                    			if ( Object.hasOwnProperty.call( dt, 'campos' ) ) {
+                    				
+                    				let nwJson = [];
+                    				const jsDt = JSON.parse( "{" + ("" + dt['campos']).replace(/\'/ig,'"') + "}" );
+                    				for ( const kDt in jsDt ) {
+                                        if ( Object.hasOwnProperty.call( jsDt, kDt ) ) {
+                                            const _elDt = jsDt[ kDt ];
+                                            
+                                            nwJson.push( '"' + kDt + '":"' + _elDt + '"' );
+                                        }
+                                    }
+                                    
+                                    campos = JSON.parse( "{" + nwJson.join(',') + "}" );
+                    			}
+                			
+                				if( jQuery( "#" + glb_name ).length ){
+                        			const htmlCont = [];
+                        			htmlCont.push('		<div class="list-group-item list-group-item-primary d-flex justify-content-between" aria-current="true">' );
+                        			htmlCont.push('			<h5 class="m-0">Resultados:</h5>' );
+                        			htmlCont.push('			<button type="button" class="btn-close"></button>' );
+                        			htmlCont.push('		</div>' );
+                        			
+                        			for ( const key in dtR ) {
+                                        if ( Object.hasOwnProperty.call( dtR, key ) ) {
+                                            const _el = dtR[key];
+                                            
+                                            let strlabel = _el[ campos['nombre'] ];
+                                            let dtValue = _el[ campos['nombre'] ];
+                                            
+                                            if ( Object.hasOwnProperty.call( _el, 'departamento' ) ) {
+                                            	strlabel = _el[ campos['nombre'] ] + ' - <small class="text-muted">' + _el['departamento'] + '</small>';
+                                            }
+                                            
+                                            if( Object.hasOwnProperty.call( campos, 'label' ) ) {
+                                            	const jsonFor = [];
+                                            	for ( const cpK in campos ) {
+                                                    if ( Object.hasOwnProperty.call( campos, cpK ) ) {
+                                                        const _elCp = campos[ cpK ];
+                                                        
+                                                        jsonFor.push( '"' + cpK + '":" ' + _el[ _elCp ] + ' "');
+                                                    }
+                                                }
+                                                const flLleno = JSON.parse( "{" + jsonFor.join( ',' ) + "}" );
+                                            	strlabel = jQuery.trim( ut.replacelabel( campos['label'], flLleno ) );
+                                            	dtValue = jQuery.trim( ut.replacelabel( campos['valor'], flLleno ) );;
+                                            }
+                                            
+                                            htmlCont.push('		<div data-id="' + _el[ campos[ 'id' ] ] + '" data-value="' + dtValue + '" class="list-group-item list-group-item-action" >' + strlabel + '</div>' );
+                                        }
+                                    }
+                        			
+                        			jQuery( "#" + glb_name ).html( htmlCont.join('') );
+                        			jQuery( "#" + glb_name ).find( '.btn-close' ).off('click');
+                        			jQuery( "#" + glb_name ).find( '.btn-close' ).on('click', function(){
+                        				jQuery( "#" + glb_name ).hide('fast', function(){
+                        					jQuery( "#" + glb_name ).remove();
+                        				});
+                        			});
+                        			
+                        			const itemsO = jQuery( "#" + glb_name ).find( '.list-group-item' );
+                        			itemsO.off('click');
+                        			itemsO.on('click', function(){
+                        				const liOb = jQuery( this );
+                        				const liDt = liOb.data();
+                        				
+                        				let dejartxt = false;
+                        				if ( Object.hasOwnProperty.call( dt, 'dejartxt' ) ) {
+                        					dejartxt = dt['dejartxt'];
+                        				}
+                        				
+                        				if( liDt['id'] > 0 ){
+                        					jQuery( dt['target'] ).val( liDt['id'] );
+                            				_o.val( liDt['value'] );
+                        				}
+                        				else{
+                        					if( !dejartxt ){
+                                				jQuery( dt['target'] ).val( liDt['id'] );
+                            					_o.val( liDt['value'] );
+                        					}
+                        					else{
+                        						jQuery( dt['target'] ).val( '' );
+                        					}
+                        				}
+                        				
+                        				jQuery( "#" + glb_name ).hide('fast', function(){
+                        					jQuery( "#" + glb_name ).remove();
+                        				});
+                        			});
+                    			}
+                    			
+                    			clearTimeout( livs_id_sto );
+                    			livs_id_sto = null;
+                			},
+                			function ( err ) {
+	                			clearTimeout( livs_id_sto );
+                    			livs_id_sto = null;
+                			
+                                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                                const alerta = jQuery(objmdlErr + ' div.alert');
+                                alerta.attr('class','alert alert-danger');
+                                
+                                const rTxt = JSON.parse( err.responseText );
+                                alerta.html( rTxt.err );
+                
+                                jQuery( objmdlErr ).modal('show');
+                			}
+                	    );
+                	}, 1000);
+                		
+            	}
+        	
+        	}
+
+        }
+        
+    };
+    const validadorGlob = new ValidadorGlob();
+    </script>
+
+	<script src="/temas/js/MemoriaManager.js?f=<?php echo date('YmdHis');?>"></script>
+    <script type="application/javascript">
+    const IndiceCtrl = function(){
+    	const _this = this;
+    	const mmanager = new MemoriaManager();
+    	let pref = '';
+    	let nuevacarga = 0;
+    	
+    	if( arguments.length > 0 ){
+            const cfg = arguments[0];
+            if ( Object.hasOwnProperty.call( cfg, 'pref' ) ) {
+            	const _dt = cfg[ 'pref' ];
+            	pref = dt;
+        	}
+        }
+    	
+    	const mem_Normal = function( d ){
+			let _d = ut.b64DecodeUnicode( d );
+			if( ("" + _d).length > 0 ){
+				return JSON.parse( _d );
+			}
+			
+			return false;
+		};
+		
+		_this.mem_Agregar = function( el ){
+			const dt = mmanager.agregar ( el );
+        	if( dt === true ){
+        		const r = mmanager.obtenerTodo();
+        		const lg = ut.b64EncodeUnicode( JSON.stringify( r ) );
+				ut.SetDatosLocal( '<?php echo $g_jsn; ?>' + pref , lg );
+        	}
+        	
+        	return dt;
+		};
+		
+		_this.mem_Obtener = function(){
+			const memtotal = mmanager.obtenerTodo().length;
+			if( memtotal > 0 ){
+				return mmanager.obtenerTodo();
+			} 
+			else{
+				const dt = ut.GetDatosLocal( "<?php echo $g_jsn; ?>" + pref  );
+            	if( dt != null ){
+                	let def = mem_Normal( dt );
+                	mmanager.cargar( def );
+                	
+                	return mmanager.obtenerTodo();
+            	}
+			}
+        	
+        	return false;
+		};
+		
+		_this.mem_Eliminar = function( el ) {
+			const dt = ut.GetDatosLocal( "<?php echo $g_jsn; ?>" + pref  );
+        	if( dt != null ){
+            	let def = mem_Normal( dt );
+            	mmanager.cargar( def );
+            	
+            	const rDel = mmanager.eliminarPorId( el );
+            	if( rDel ){
+            		const r = mmanager.obtenerTodo();
+            		const lg = ut.b64EncodeUnicode( JSON.stringify( r ) );
+            		ut.SetDatosLocal( '<?php echo $g_jsn; ?>' + pref , lg );
+            		
+            		return true;
+            	}
+        	}
+        	
+        	return false;
+		};
+    	
+    	const generalNav = function( hash, params, fn ){
+    		
+    		const form_data = new FormData();
+    		form_data.append('ajax', hash );
+    		
+    	    if( params != null ){
+    	    	form_data.append('params', params );
+    	    }
+    		
+    		__TransportarData(
+    			form_data,
+    			function( r ) {
+    				if( typeof( fn ) == "function" ){
+    					fn( r );
+    				}
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    
+                    const rTxt = JSON.parse( err.responseText );
+                    alerta.html( rTxt.err );
+    
+                    jQuery( objmdlErr ).modal('show');
+    			}
+    	    );
+    	}
+    	
+    	<?php if ( $loginas ) : ?>
+    	_this.loginAs = function( o ){
+    		const _o = jQuery( o );
+    		const dt = JSON.stringify( _o.data( ) );
+    		generalNav('<?php echo md5( IndexCtrl::API_Home_LoginAs ); ?>', dt, function( dtR ){
+    			ut.crearFormulario( "home.php", {'las' : dtR }, 'post', 'las_page' );
+    		});
+    	};
+    	<?php endif; ?>
+    	
+    	_this.safeOp = function( pr, fn ){
+    		generalNav('<?php echo md5( IndexCtrl::API_LoginSystemAjax ); ?>', pr, fn );
+    	};
+    	
+    	_this.imprimirCapa = function(divId, title) {
+            let mywindow = window.open('', 'PRINT', 'height=650,width=900,top=100,left=150');
+            
+            mywindow.document.write(`<html><head><title>${title}</title>`);
+            mywindow.document.write('</head><body >');
+            mywindow.document.write(document.getElementById(divId).innerHTML);
+            mywindow.document.write('</body></html>');
+            
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+            
+            mywindow.print();
+            mywindow.close();
+            
+            return true;
+        };
+        
+ 		_this.imprimirCapaPorArchivo = function(divId, title) {
+            const doc = new jsPDF();
+    		doc.fromHTML('<html><head><title>'  + title + '</title></head><body>' + document.getElementById( divId ).innerHTML + '</body></html>');
+     		doc.save( title + '.pdf' );
+        };
+        
+        <?php if( !is_null( $usu ) ) : ?>
+        _this.setConfigData = function ( r, cfgId ){
+    		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+    		
+    		const jsDt = ut.b64EncodeUnicode( JSON.stringify ( r ) );
+    		
+            const form_data = new FormData();
+            form_data.append('id', cfgId );
+            form_data.append('vl', jsDt );
+            form_data.append('ufull', '<?php echo $usu->getNombres() . " " . $usu->getApellidos(); ?>');
+            form_data.append('ajax', '<?php echo md5(IndexCtrl::API_AgregarConfigCorp); ?>');
+    
+    		__TransportarData(
+    			form_data,
+    			function( o ) {
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			}
+    		);
+    	};
+    	<?php endif ;?>
+    	
+    };
+    const ictrl = new IndiceCtrl();
+    </script>
+    
+    <script type="application/javascript">
+    if (!String.prototype.startsWith) {
+        String.prototype.startsWith = function(searchString, position){
+          position = position || 0;
+          return this.substr(position, searchString.length) === searchString;
+      };
+    }
+    </script>
+    
+    <script type="application/javascript">
+    const glbConteoDeLetras = function( o ){
+    	const _o = jQuery( o );
+    	const dt = _o.data();
+    	const max = _o.attr('maxlength');
+    	const target = dt['target'];
+    	
+    	const dif = max - ( "" + _o.val() ).length;
+    	
+    	let texto = [];
+    	texto.push( dif + '/' + max );
+    	
+    	jQuery( target ).html( texto.join('') );
+    };
+    </script>
+    
+    <script type="application/javascript">
+    const OrdenarCls = function(){
+    	const _this = this;
+    	
+    	let tempOrden = [];
+    	
+    	let actualizar = function( api ){
+    	
+			const form_data = new FormData();
+            form_data.append('ajax', api );
+            form_data.append('data' , ut.b64EncodeUnicode( JSON.stringify( tempOrden ) ) );
+    
+            __TransportarData(
+                form_data,
+                function( o ) {
+                	console.log( o );
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+                }
+            );
+    	
+    	};
+    	
+        _this.reOrden = function( o ){
+        	const _o = jQuery( o ); 
+        	const pr = _o.parent();
+        	const prDt = pr.data();
+        	const ul = pr.find('li');
+        	
+        	tempOrden = [];
+        	ul.each(function(i,ob){
+        		const _ob = jQuery( ob );
+        		const dt = _ob.data();
+        		tempOrden.push( {'id' : dt['id'], 'nombre' : dt['nombre'] } );
+        	});
+        	
+        	actualizar( prDt['api'] );
+        };
+        _this.cargarOrdenLista = function( fuente ){
+        	const html = [];
+        	for (const key in fuente ) {
+                if (Object.hasOwnProperty.call( fuente , key ) ) {
+                    const el = fuente [key];
+                    tempOrden.push( {'id' : el['id'], 'nombre' : el['nombre'] } );
+                }
+            }
+        };
+        _this.listarOrdenVirtual = function(obj, id, nombre){
+        	const html = [];
+        	for (const key in tempOrden ) {
+                if (Object.hasOwnProperty.call( tempOrden , key ) ) {
+                    const el = tempOrden [key];
+                    html.push( '<li data-id="' + el[ id ] + '" data-nombre="' + el[ nombre ] + '" class="list-group-item" style="background-color: #f6f6f6;">' + el[ nombre ] + '</li>');
+                }
+            }
+            jQuery( obj ).html( html.join('') );
+        };
+    };
+    const ordCls = new OrdenarCls();
+    </script>
+    
+    <script type="application/javascript">
+    const SignDocs = function(){
+    	const _this = this;
+    	
+    	_this.generar = function( o ){
+    		let apidef = "<?php echo md5( IndexCtrl::API_FirmasGet ); ?>";
+    	
+			const form_data = new FormData();
+            form_data.append('ajax', apidef );
+            form_data.append('data' , ut.b64EncodeUnicode( JSON.stringify( o ) ) );
+    
+            __TransportarData(
+                form_data,
+                function( ob ) {
+                	const fn = o['fn'];
+                	fn( { 'url' : ob['url'], 'ob' : o } );
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+                }
+            );
+    	
+    	};
+    	
+    	
+    	_this.previa = function( o ){
+    	
+			const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FirmasPreviaGet ); ?>' );
+            form_data.append('data' , ut.b64EncodeUnicode( JSON.stringify( o ) ) );
+    
+            __TransportarData(
+                form_data,
+                function( ob ) {
+                	window.open( ob['url'], "acappDoc");
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+                }
+            );
+    	
+    	};
+    	
+    	_this.pdfLabel = function ( d ){
+    		const opc = [
+    			{ 'id': 0 , 'ico' : '<i class="fas fa-star"></i>' , 'lbl' : 'Documento sin revisar' },
+    			{ 'id': 1 , 'ico' : '<i class="fas fa-eye"></i>' , 'lbl' : 'Documento revisado' },
+    			{ 'id': 2 , 'ico' : '<i class="fas fa-file-signature"></i>' , 'lbl' : 'Documento firmado' },
+    			{ 'id': 3 , 'ico' : '<i class="far fa-times-circle"></i>' , 'lbl' : 'Documento anulado' }
+    		];
+    		
+    		for (const key in opc ) {
+            	if ( Object.hasOwnProperty.call( opc, key ) ) {
+                	const _el = opc[ key ];
+                	
+                	if( _el['id'] == d ){
+                		return _el;
+                	}
+                	
+            	}
+        	}
+        	
+        	return false;
+    	};
+    	
+    	_this.pdfEstadoGet = function( d ){
+        	const pdfid = d['pdfid'];
+        	const docs = d['docs'];
+        	let texto = "Sin revisar";
+        	let eid = 0;
+        	
+        	for (const key in docs ) {
+            	if (Object.hasOwnProperty.call( docs, key)) {
+                	const _el = docs[ key ];
+                	
+                	if( _el['pdfid'] == pdfid ){
+                		if( _el['firmasestados_id'] > eid ){
+                    		texto = _el['firmasestados'];
+                    		eid = _el['firmasestados_id'];
+                    	}
+                	}
+                	
+            	}
+        	}
+        	
+        	const res = { 'id': eid, 'lbl' : texto };
+        	return res;
+        };
+    };
+    
+    const safeOperation = function( o ){
+    	const _o = jQuery( o );
+    	const dt = _o.data();
+    	ut.validarFrm( dt['target'], function ( r ) {
+			const ud = {'u': r['glb_lgn_usuario'], 'c': r['glb_lgn_clave'] };
+			const bJs = ut.b64EncodeUnicode( JSON.stringify( ud ) );
+			
+    		ictrl.safeOp( bJs , function( res ){
+    			
+    			if ( res === true ) {
+    				jQuery("#tiempoFuera").modal("hide");
+    			}
+    			
+        	});
+    	});
+    };
+    
+    const checkSession = function () {
+        fetch('index.php?ajaxl=<?php echo md5(IndexCtrl::API_SESSION_ACTIVA) ?>')
+            .then(response => response.json())
+            .then(data => {
+                if ( !data.active ) {
+                    jQuery("#tiempoFuera").modal("show");
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    };
+    
+    const htmlQuickLogin = function( o ){
+    	const _o = jQuery( o['obj'] );
+    	const dt = _o.data();
+		const html = [];
+		let fn = "";
+		let modal = "";
+		
+		if ( Object.hasOwnProperty.call( o, 'modal' ) ) {
+			modal = 'data-modal="' + o['modal'] + '"';
+		}
+		
+		const dataArr = [];
+        for (const idD in dt ) {
+        	if ( Object.hasOwnProperty.call( dt, idD ) ) {
+        		const _el = dt[ idD ];
+        		
+        		if( idD == 'targetfunc' ){
+        			fn = 'onclick="' + _el + '( this )" ';
+        		}
+        		else{
+        			dataArr.push( 'data-' + idD + '="' + _el + '"' );
+        		}
+    		}
+		}
+	
+    	html.push('	<form id="frmLQuickLogin" class="frmLQuickLoginCls" method="post" action="./index.php"> ');
+    	html.push('		<div class="row"> ');
+    	html.push('			<div class="col-6 mb-3"> ');
+    	html.push('				<label for="qlgn_usuario" class="form-label">Usuario</label> ');
+    	html.push('				<label class="form-control"><?php echo $glb_usr_reg; ?></label> ');
+    	html.push('				<input type="hidden" id="qlgn_usuario" name="qlgn_usuario" value="<?php echo $glb_usr_reg; ?>" > ');
+        html.push('			</div> ');
+        html.push('			<div class="col-6 mb-3"> ');
+        html.push('				<label for="qlgn_clave" class="form-label">Contrase&ntilde;a</label> ');
+        html.push('				<input type="password" id="qlgn_clave" name="qlgn_clave" class="form-control" placeholder="***********" required="required"> ');
+        html.push('			</div> ');
+        html.push('			<div class="d-grid gap-2 mb-3"> ');
+        html.push('				<button ' + dataArr.join('') + ' ' + fn + ' ' + modal + ' class="btn btn-primary" rol="button" type="button" >Enviar</button> ');
+        html.push('			</div> ');
+        html.push('		</div> ');
+        html.push('		<input type="hidden" id="qlgn_sesion" name="qlgn_sesion" value="false" > ');
+        html.push('	</form> ');
+        
+        return html.join('');
+    };
+    
+    document.getElementById("glb_frmLAjaxInin").addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            
+            safeOperation( '#glb_btnAjaxIniData' );
+        }
+    });
+        
+    
+    </script>
+
+    <script type="application/javascript">
+    const evaluarCarnet_Click = function( o ){
+    	const _o = jQuery( o );
+    	const dt = _o.data();
+    	
+    	const nm = dt['nombre'];
+    	const dc = dt['documento'];
+    	const td = dt['tipodoc_id'];
+    	const fl = td + '_' + dc + '.png';
+    	const al = <?php echo $GBL_anyolectivo_id ?>;
+    	
+    	const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : nm,'btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-lg' } );
+        const alerta = jQuery(objmdlErr + ' div.alert');
+        const cuerpo = alerta.parent();
+        alerta.remove();
+        
+        const htmlC = [];
+        htmlC.push( '<div id="card-vprevia" class="card" style="">' );
+    	htmlC.push( '	<div class="card-body text-center">' );
+    	htmlC.push( '		<img id="imgpreview" src="repo/carnets/' + al + '/' + fl + '" class="card-img-top" alt="" style="width: 100%; max-width: 600px;">' );
+    	htmlC.push( '	</div>' );
+    	htmlC.push( '</div>' );
+    	
+    	cuerpo.html( htmlC.join('') );
+    	jQuery( objmdlErr ).modal('show');
+    };
+    </script>
+    
+<script type="application/javascript">
+const closeAllModal = function(){
+    jQuery('.modal.show').each(function() {
+        const modal = bootstrap.Modal.getInstance(this);
+        if (modal) modal.hide();
+    });
+};
+</script>
+<script type="application/javascript">
+const agregarAgarre = function( d ){
+	if (window.drake && window.drake.destroy) {
+		window.drake.destroy();
+    }
+    
+    window.drake = dragula([document.getElementById( d['contenedor'] )], {
+        moves: function (el, source, handle, sibling) {
+            if (['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(handle.tagName)) {
+    			return false;
+            }
+            return el.classList.contains( d['hijos'] ) || handle.classList.contains( d['hijos'] );
+        }
+    });
+    
+    window.drake.on('drop', function (el, target, source, sibling) {
+        if (Object.hasOwnProperty.call( d, 'fn' )) {
+        	if( typeof(d['fn']) == 'function' ){
+        		fn = d['fn'];
+        		setTimeout(function(){ fn(); } , 100);
+        	}
+        }
+    });
+};
+</script>
+
+<!-- JavaScript Bundle with Popper -->
+<script src="/temas/js/bootstrap-5.2.0-dist/js/bootstrap.bundle.min.js" ></script>
+<script src="/temas/js/flatpickr-4.6.13/flatpickr.min.js" ></script>
+<script src="/temas/js/inputmask-5.0.7/jquery.inputmask.min.js" ></script>
+<script src="/temas/js/dragula/dist/dragula.min.js" ></script>
+<script src="/temas/js/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/temas/js/tippy.js/dist/tippy-bundle.umd.min.js"></script>
+<script src="/temas/js/apexcharts/apexcharts/dist/apexcharts.min.js"></script>
+<script src="/temas/js/bootstrap-select-1.14.0-beta2/dist/js/bootstrap-select.js" ></script>
+<script src="/temas/js/simplebar-5.3.8/dist/simplebar.min.js"></script>
+
+<script src="/temas/js/ManagerModal.js?f=202207271743" ></script>
+
+<script src="/temas/js/theme.min.js"></script>
+<script src="/temas/js/temamins.js"></script>
+
+<?php /*
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-JRB5ECK82E"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-JRB5ECK82E');
+</script>
+*/
+?>

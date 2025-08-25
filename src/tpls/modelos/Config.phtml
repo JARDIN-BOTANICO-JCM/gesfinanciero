@@ -1,0 +1,264 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$r = null;
+$data = null;
+try {
+	$r = OperacionesCtrl::institucion_Obtener();
+	if ( sizeof( $r ) > 0 ) {
+		$data = $r[0];
+	}
+} catch (\Throwable $th) {
+	throw new \Exception( $th->getMessage() );
+}
+
+$extPo = array('jpg','jpeg','png', 'apng');
+$logoinst_path = dirname(dirname(dirname(dirname(__FILE__))));
+$logoinsttmp = $logoinst_path . DIRECTORY_SEPARATOR . 'temas' . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'logo_inst';
+
+$logoinst = './temas/img/logo_no_institu_v2.png';
+foreach( $extPo as $_i ){
+	$fullfl = $logoinsttmp . "." . $_i;
+	if ( file_exists( $fullfl ) ) {
+		$logoinst = './temas/img/logo_inst.' . $_i;
+	}
+}
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+			<div class="row">
+				<div class="col-lg-12 col-md-12 col-12">
+					<div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+						<div class="mb-3 mb-lg-0">
+							<h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+									<li class="breadcrumb-item active" aria-current="page">
+										<?php echo $crum['l2']; ?>
+									</li>
+								</ol>
+							</nav>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<!-- Card header -->
+				<div class="card-header">
+					<h3 class="mb-0">Perfil de la instituci&oacute;n</h3>
+					<p class="mb-0">
+						Configure informaci&oacute;n relevante de su instituci&oacute;n para crear documentaci&oacute;n u otros usos.
+					</p>
+				</div>
+				<!-- Card body -->
+				<div class="card-body">
+
+					<div class="d-lg-flex align-items-center justify-content-between">
+						<div class="d-flex align-items-center mb-4 mb-lg-0">
+							<img src="<?php echo $logoinst ?>" id="img-uploaded" class="avatar-xl rounded-circle" alt="">
+							<div class="ms-3">
+								<h4 class="mb-0">Logo institucional</h4>
+								<p class="mb-0">
+									Seleccione una imagen no mayor a 800px en formato PNG o JPG.
+								</p>
+							</div>
+						</div>
+						<div>
+							<input type="file" id="logoinst" onchange="logoinst_change(this);" style="display: none;">
+							<button class="btn btn-outline-white btn-sm" onclick="logoinst_click();">Actualiza</button>
+							<button class="btn btn-outline-danger btn-sm">Eliminar</button>
+						</div>
+					</div>
+					<hr class="my-5">
+					<div>
+						<h4 class="mb-0">Detalle</h4>
+						<p class="mb-4">
+							Edita datos del colegio o instituto
+						</p>
+						<form id="frmval" class="row frmvalcls ">
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="nombre">Nombre</label>
+								<input type="text" id="nombre" name="nombre" class="form-control" placeholder="Mi colegio o instituto" required="" value="<?php echo isset( $data['nombre'] ) ? $data['nombre'] : ''; ?>">
+							</div>
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="direccion">Direcci&oacute;n</label>
+								<input type="text" id="direccion" name="direccion" class="form-control" placeholder="Direcci&oacute;n" required="" value="<?php echo isset( $data['direccion'] ) ? $data['direccion'] : ''; ?>">
+							</div>
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="telefono">Tel&eacute;fono</label>
+								<input type="phone" id="telefono" name="telefono" class="form-control" placeholder="Tel&eacute;fono" required="" value="<?php echo isset( $data['telefono'] ) ? $data['telefono'] : ''; ?>">
+							</div>
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="dane">DANE</label>
+								<input type="text" id="dane" name="dane" class="form-control" placeholder="DANE" required="" value="<?php echo isset( $data['dane'] ) ? $data['dane'] : ''; ?>">
+							</div>
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="licencia">Licencia</label>
+								<input type="text" id="licencia" name="licencia" class="form-control" placeholder="Licencia" value="<?php echo isset( $data['licencia'] ) ? $data['licencia'] : ''; ?>">
+							</div>
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="nit">Nit</label>
+								<input type="text" id="nit" name="nit" class="form-control" placeholder="NIT" required="" value="<?php echo isset( $data['nit'] ) ? $data['nit'] : ''; ?>">
+							</div>
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="resolucion">Resoluci&oacute;n</label>
+								<input type="text" id="resolucion" name="resolucion" class="form-control" placeholder="Resoluci&oacute;n" required="" value="<?php echo isset( $data['resolucion'] ) ? $data['resolucion'] : ''; ?>">
+							</div>
+							<?php /*
+							<div class="mb-3 col-12 col-md-6">
+								<label for="paises" class="form-label">Pa&iacute;s</label>
+								<select id="paises" name="paises" class="selectpicker" data-width="100%" onchange="llenarDepts(jQuery('#paises').val(),'');">
+									<option value="">Seleccione pa&iacute;s</option>
+								</select>
+							</div>
+							
+							<div class="mb-3 col-12 col-md-6">
+								<label for="departamentos" class="form-label">Departamentos</label>
+								<select id="departamentos" name="departamentos" class="selectpicker" data-width="100%" onchange="llenarLugares(jQuery('#departamentos').val(),'');">
+									<option value="">Seleccione departamento</option>
+								</select>
+							</div>
+							*/ ?>
+							<input type="hidden" id="paises" name="paises" />
+							<input type="hidden" id="departamentos" name="departamentos" />
+							<div class="mb-3 col-12 col-md-6">
+								<label class="form-label" for="lugares_id_livesearch">Ciudad<sup>*</sup></label>
+                                <input type="text" autocomplete="off" id="lugares_id_livesearch" class="form-control" required="required" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#lugares_id" data-limit="5" />
+								<input type="hidden" id="lugares_id" name="lugares_id" />
+							</div>
+							<div class="mb-3 col-12 col-md-6">
+								<label for="director" class="form-label">Nombre del director</label>
+								<select id="director" name="director" class="selectpicker" data-width="100%">
+									<option value="">Seleccione director</option>
+								</select>
+								
+							</div>
+							<div class="col-12">
+								<button class="btn btn-primary" type="submit" onclick="actualizar();">
+									Actualizar datos
+								</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="application/javascript">
+const logoinst_change = function( ipfl ) {
+	const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+	var _ipfl = jQuery( ipfl ).prop('files')[0];
+	var flparts = ("" + _ipfl['name']).split('.');
+	var flext = flparts[ flparts.length - 1];
+
+	if ( flext == 'jpg' || flext == 'jpeg' || flext == 'png' || flext == 'apng' ) {
+		var form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_InstitucionLogo) ; ?>' );
+		form_data.append('file', _ipfl );
+        __TransportarData(
+            form_data,
+            function( o ) {
+				//logo_inst
+                //document.getElementById('img-uploaded').src = URL.createObjectURL(_ipfl);
+				document.getElementById('img-uploaded').src = './temas/img/' + o;
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                _alumnos_id.html('<option>Sin alumnos</option>');
+
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            }
+        );
+
+	}
+	else {
+		alert('El formato ' + flext + ' no es aceptado o compatible');
+	}
+};
+
+const logoinst_click = function(){
+	jQuery('#logoinst').trigger('click');
+};
+
+jQuery( document ).ready(function(){
+	var adlCfg = {
+		'elId' : '#director',
+		'formdata' : {'ajax' : '<?php echo md5( IndexCtrl::API_ObtenerTutores ); ?>'},
+		'defItem' : '<?php echo isset( $data['usuarios_id'] ) ? $data['usuarios_id'] : ''; ?>',
+		'campos':'nombres;_;apellidos',
+		'fn' : function(d){}
+	};
+	__AgregarDatosLista( adlCfg );
+
+});
+
+const actualizar = function(){
+	ut.validarFrm('frmvalcls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+		var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_InstitucionAdd ); ?>');
+		for (const k in r) {
+			if (Object.hasOwnProperty.call(r, k)) {
+				const _el = r[k];
+				form_data.append( k , _el);
+			}
+		}
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err' } );
+
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+</script>

@@ -1,0 +1,2053 @@
+<?php
+OperacionesCtrl::$AUTO_LOG_OUT = false;
+
+$cfg = OperacionesCtrl::LeerConfigCorp();
+$_CFG_MATRICULA_PAGEID = isset( $cfg[ OperacionesCtrl::CFG_MATRICULA_PAGEID ]) ? $cfg[ OperacionesCtrl::CFG_MATRICULA_PAGEID ]["val"] : "000000";
+$_CFG_MATRICULA_ANEXLS = isset( $cfg[ OperacionesCtrl::CFG_MATRICULA_ANEXLS ]) ? $cfg[ OperacionesCtrl::CFG_MATRICULA_ANEXLS ]["val"] : "[]";
+$_CFG_MATRICULA_DOC4SIG = isset( $cfg[ OperacionesCtrl::CFG_MATRICULA_DOC4SIG ]) ? $cfg[ OperacionesCtrl::CFG_MATRICULA_DOC4SIG ]["val"] : "[]";
+
+$codId = false;
+$cod = null;
+if ( isset( $d[ 0 ] ) ) {
+    $cod = $d[ 0 ];
+    if ( $d[ 0 ] == $_CFG_MATRICULA_PAGEID ){
+        $codId = true;
+    }
+}
+
+$logoinst = self::obtener_LogoCompany();
+
+$d_tipodoc = null;
+try {
+    $d_tipodoc = OperacionesCtrl::tipodoc_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_deptos = null;
+try {
+    $d_deptos = OperacionesCtrl::departamentos_Obtener ( array('paises_id' => 1) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_lugares = null;
+try {
+    $d_lugares = OperacionesCtrl::lugares_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_paises = null;
+try {
+    $d_paises = OperacionesCtrl::paises_Obtener( array('id' => 1) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_generos = null;
+try {
+    $d_generos = OperacionesCtrl::generos_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_cargos = null;
+try {
+    $d_cargos = OperacionesCtrl::cargos_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_titulos = null;
+try {
+    $d_titulos = OperacionesCtrl::titulos_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_estados = null;
+try {
+    $d_estados = OperacionesCtrl::estado_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$d_cursos = null;
+try {
+    $d_cursos_mem = array();
+    $d_cursos_tmp = OperacionesCtrl::cursos_Obtener( array() );
+    foreach ( $d_cursos_tmp as $v ) {
+        $nm_prt = explode(" ", $v['nombre']);
+        $nwId = strtolower( $nm_prt[0] );
+        if ( !isset( $d_cursos_mem[ $nwId ] ) ) {
+            $d_cursos[] = array( 'id' => $v['id'], 'nombre' => trim( $nwId ) );
+            $d_cursos_mem[ $nwId ] = '';
+        }
+    }
+    
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$d_cjornada = null;
+try {
+    $d_cjornada = OperacionesCtrl::contjornada_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$d_tipoacudiente = null;
+try {
+    $d_tipoacudiente = OperacionesCtrl::tipoacudiente_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$d_grados = null;
+try {
+    $d_grados = OperacionesCtrl::grados_Obtener( array( 'orden_asc' => '3', 'w_visible' => '1' ) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+
+$clase_files = "clsanexos";
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta http-equiv="X-UA-Compatible" content="ie=edge">		
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta charset="utf-8">
+
+		
+		<title>Acappdemy - Matr&iacute;cula</title>
+		<!-- CSS -->		
+		<!-- CSS only -->
+		<link rel="stylesheet" href="/temas/js/bootstrap-5.2.0-dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/temas/js/fontawesome-free-6.1.1-web/css/all.min.css" >
+		<link rel="stylesheet" href="/temas/js/flatpickr-4.6.13/flatpickr.min.css" >
+		<link rel="stylesheet" href="/temas/js/dragula/dist/dragula.min.css" >
+		<link rel="stylesheet" href="/temas/js/feather/feather.css">
+		<link rel="stylesheet" href="/temas/js/bootstrap-icons/font/bootstrap-icons.css" />
+		<link rel="stylesheet" href="/temas/js/bootstrap-select-1.14.0-beta2/dist/css/bootstrap-select.css">
+		<link rel="stylesheet" href="/temas/js/simplebar-5.3.8/dist/simplebar.min.css">
+		<link rel="stylesheet" href="/temas/js/DataTables/datatables.min.css" type="text/css"/>
+
+		
+		<link rel="shortcut icon" href="/temas/favicon/favicon_20x20.png" type="image/x-icon" />
+		<link rel="apple-touch-icon" href="/temas/favicon/favicon_180x180.png" sizes="180x180">
+        <link rel="icon" href="/temas/favicon/favicon_32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico" sizes="16x16" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico">
+		
+		<!-- Custom 
+		<link rel="stylesheet" href="/temas/css/theme.min.css">
+		-->
+		<!-- JS -->
+		<script type="text/javascript" src="/temas/js/jquery-3.6.0.min.js "></script>
+		<script type="text/javascript" src="/temas/js/utilidades.js?f=20190609150612"></script>
+		<script type="text/javascript">var ut = new Utilidades();</script>
+		<script type="text/javascript" src="/temas/js/Colecciones.js?f=202207271743"></script>
+
+
+        <style>
+            .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                user-select: none;
+            }
+    
+            @media (min-width : 768px) {
+                .bd-placeholder-img-lg {
+                    font-size: 3.5rem;
+                }
+            }
+    
+            .b-example-divider {
+                height: 3rem;
+                background-color: rgba(0, 0, 0, .1);
+                border: solid rgba(0, 0, 0, .15);
+                border-width: 1px 0;
+                box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+            }
+    
+            .b-example-vr {
+                flex-shrink: 0;
+                width: 1.5rem;
+                height: 100vh;
+            }
+    
+            .bi {
+                vertical-align: -.125em;
+                fill: currentColor;
+            }
+    
+            .nav-scroller {
+                position: relative;
+                z-index: 2;
+                height: 2.75rem;
+                overflow-y: hidden;
+            }
+    
+            .nav-scroller .nav {
+                display: flex;
+                flex-wrap: nowrap;
+                padding-bottom: 1rem;
+                margin-top: -1px;
+                overflow-x: auto;
+                text-align: center;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            .container {
+                max-width: 960px;
+            }
+        </style>
+
+	</head>
+
+    <body class="bg-light">
+    
+        <div class="container">
+            <main>
+            
+            	<?php if ( $codId ) : ?>
+            
+                <div class="py-5 text-center">
+                    <img class="d-block mx-auto mb-4 img-thumbnail shadow-sm" src="<?php echo $logoinst; ?>" alt="" height="128"  style="height: 128px;background: #fff;" >
+                    <h2>Formulario de matr&iacute;cula</h2>
+                    <!-- <p class="lead"></p> -->
+                </div>
+    
+                <div class="row g-5" >
+                
+                	<div class="col-12" id="cntAlertFin" style="display: none;">
+                        <div class="alert alert-success d-flex align-items-center" role="alert">
+                        	<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#gbl-check-circle-fill"/></svg>
+                        	<div>
+                        		<h4>&iexcl;Bien hecho!</h4>
+                            	Proceso finalizado correctamente
+                        	</div>
+                        </div>
+                        
+                    </div>
+ 
+                    <div class="col-md-5 col-lg-4 order-md-last contFormRegs">
+                        <h4 class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-primary">Resumen del proceso</span>
+                            <!-- <span class="badge bg-primary rounded-pill">0</span> -->
+                        </h4>
+                        <div class="list-group mb-3">
+                            <button class="list-group-item list-group-item-action lh-sm d-flex justify-content-start list-group-item-info " onclick="tabEff( this );" data-idtab="#tab-curso">
+                                <div class="me-2">
+                                	<h6 class="my-0">
+                                    	<i class="fa-solid fa-graduation-cap"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Curso</h6>
+                                    <small class="text-muted">Curso al que desea matricular el estudiante</small>
+                                </div>
+                                <!-- <span class="text-muted">$12</span> -->
+                            </button>
+                            
+                            <button class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-identify">
+                                <div class="me-2">
+                            		<h6 class="my-0">
+                                    	<i class="fas fa-id-card-alt"></i>
+                                    </h6>
+                            	</div>
+                            	<div>
+                                    <h6 class="my-0">Identificaci&oacute;n</h6>
+                                    <small class="text-muted">Identificaci&oacute;n del estudiante</small>
+                                </div>
+                            </button>
+                            
+                            <button id="btnEstuItem" class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-student">
+                                <div class="me-2">
+                                    <h6 class="my-0">
+                                    	<i class="fa-solid fa-user-graduate"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Estudiante</h6>
+                                    <small class="text-muted">Informaci&oacute;n principal del estudiante</small>
+                                </div>
+                            </button>
+                            
+                            <button class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-location">
+                                <div class="me-2">
+                                    <h6 class="my-0">
+                                    	<i class="fas fa-map-marker"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Localizaci&oacute;n</h6>
+                                    <small class="text-muted">Informaci&oacute;n de localizaci&oacute;n del alumno</small>
+                                </div>
+                            </button>
+
+                            <button class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-madre">
+                                <div class="me-2">
+                                    <h6 class="my-0">
+                                    	<i class="fas fa-female"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Datos Mam&aacute;</h6>
+                                    <small class="text-muted">Informaci&oacute;n de la madre</small>
+                                </div>
+                            </button>
+                            
+                            <button class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-padre">
+                                <div class="me-2">
+                                    <h6 class="my-0">
+                                    	<i class="fas fa-male"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Datos Pap&aacute;</h6>
+                                    <small class="text-muted">Informaci&oacute;n del padre</small>
+                                </div>
+                            </button>
+                            
+                            <button class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-hermanos">
+                                <div class="me-2">
+                                    <h6 class="my-0">
+                                    	<i class="fas fa-people-arrows"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Datos Hermanos</h6>
+                                    <small class="text-muted">Relacionar los hermanos del alumno</small>
+                                </div>
+                            </button>
+                            
+                            <button class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-historialedu">
+                                <div class="me-2">
+                                    <h6 class="my-0">
+                                    	<i class="fas fa-history"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Historial acad&eacute;mico</h6>
+                                    <small class="text-muted">Relacionar el hist&oacute;co acad&eacute; del alumno</small>
+                                </div>
+                            </button>
+                            
+                            <button id="btnContactItem" class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-contact">
+                                <div class="me-2">
+                                    <h6 class="my-0">
+                                    	<i class="fas fa-users"></i>
+                                    </h6>
+                                </div>
+                                <div>
+                                    <h6 class="my-0">Acudiente</h6>
+                                    <small class="text-muted">Informaci&oacute;n del acudiente</small>
+                                </div>
+                            </button>
+
+                        </div>
+                    </div>
+                    <div id="frmval" class="col-md-7 col-lg-8 frmvalcls contFormRegs">
+                    
+                    	<div class="tab-pane active" id="tab-curso" >
+                    		<form id="frmval_1" class="frmvalcls_1">
+                        		<h4 class="mb-3 pb-3 border-bottom"><i class="fa-solid fa-graduation-cap"></i> Curso</h4>
+                        		
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="mb-3 col-md-12">
+                                                <label class="form-label" for="cursos_id"><h5 class="mb-0">Curso<sup>*</sup></h5></label>
+                                                <select onchange="solicitarAnexos( this );" class="form-select frmdata" id="cursos_id" name="cursos_id" required="" >
+                                                	<option selected disabled value="">Seleccione un curso</option>
+                                                    <?php foreach ( $d_cursos as $k ) : ?>
+                                                    <option value="<?php echo $k['id'] ?>"><?php echo $k['nombre'] ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <input type="hidden" id="contjornada_id" name="contjornada_id" value="1">
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                        		
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrder( this );" data-fin="false">Continuar</button>
+                                    </div>
+                                </div>
+                    		</form>
+                    	</div>
+
+						<div class="tab-pane" style="display: none;" id="tab-identify">
+                    		<form id="frmval_2" class="frmvalcls_2">
+                    		
+    							<h4 class="mb-3 pb-3 border-bottom">
+    								<i class="fas fa-id-card-alt"></i> Identificaci&oacute;n
+    							</h4>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Identificaci&oacute;n del <strong class="text-danger">estudiante</strong></h4>
+                                        </div>
+                                        <div class="row">
+                        
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="tipodoc_id">Tipo de documento<sup>*</sup></label>
+                                                <select class="form-select" aria-label="Default select example" id="tipodoc_id" name="tipodoc_id" required="">
+                                                    <?php foreach( $d_tipodoc as $v ) : ?>
+                                                    <?php   if( $v['id'] == 4 || 
+                                                        $v['id'] == 5 ||
+                                                        $v['id'] == 9 ||
+                                                        $v['id'] == 13 ||
+                                                        $v['id'] == 14 ||
+                                                        $v['id'] == 15 ) : ?>
+                                                    <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                                                    <?php   endif; ?>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="documento">N&uacute;mero de documento<sup>*</sup></label>
+                                                <input onkeyup="addEstCode();" onblur="addEstCode();" type="text" class="form-control" placeholder="N&uacute;mero de documento" id="documento" name="documento" required="">
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="lugarescedula_id_livesearch">Lugar de expedici&oacute;n<sup>*</sup></label>
+                                                <input type="text" autocomplete="off" id="lugarescedula_id_livesearch" class="form-control" required="required" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#lugarescedula_id" data-limit="5" />
+                								<input type="hidden" id="lugarescedula_id" name="lugarescedula_id" />
+                                            </div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="revExists( this );" data-fin="false">Continuar</button>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="nuevousr" name="nuevousr" value="1" />
+                                <input type="hidden" id="nhid" name="nhid" value="0" />
+							</form>
+                    	</div>
+                    	
+						<div class="tab-pane" style="display: none;" id="tab-anexos">
+                    		<form id="frmval_3" class="frmvalcls_3">
+                    		
+    							<h4 class="mb-3 pb-3 border-bottom">
+    								<i class="fa-solid fa-paperclip"></i> Documentos anexos
+    							</h4>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Documentos requeridos</h4>
+                                        </div>
+                                        <div class="row">
+                        
+                                            <div class="mb-3 col-md-12" id="fld_anexos"></div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrder( this );" data-fin="false">Continuar</button>
+                                    </div>
+                                </div>
+                                
+							</form>
+                    	</div>
+
+                    	<div class="tab-pane" style="display: none;" id="tab-student">
+                    		<form id="frmval_4" class="frmvalcls_4">
+                    		
+    							<h4 class="mb-3 pb-3 border-bottom"><i class="fa-solid fa-user-graduate"></i> Estudiante</h4>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h4 class="mb-4">Informaci&oacute;n principal del <strong class="text-danger">estudiante</strong></h4>
+                        
+                                        <div class="row">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="nombres">Nombres del estudiante<sup>*</sup></label>
+                                                <input onkeyup="addEstUsr();" onblur="addEstUsr();" type="text" class="form-control" placeholder="Nombres " id="nombres" name="nombres" required="">
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="apellidos">Apellidos del estudiante<sup>*</sup></label>
+                                                <input onkeyup="addEstUsr();" onblur="addEstUsr();" type="text" class="form-control" placeholder="Apellidos" id="apellidos" name="apellidos" required="">
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="tel">N&uacute;mero de celular</label>
+                                                <input type="text" class="form-control" placeholder="N&uacute;mero de celular" id="tel" name="tel" >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="nacimiento">Fecha de nacimiento</label>
+                                                <div class="input-group me-3  ">
+                                                    <input id="nacimiento" name="nacimiento" class="form-control" type="text" placeholder="Fecha de nacimiento" aria-describedby="nacimiento_lbl" readonly="readonly">
+                                                    <span class="input-group-text text-muted" id="nacimiento_lbl"><i class="fe fe-calendar"></i></span>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="generos_id">G&eacute;nero</label>
+                                                <select class="form-select" aria-label="Default select example" id="generos_id" name="generos_id" >
+                                                    <?php foreach( $d_generos as $v ) : ?>
+                                                    <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="lugares_id_livesearch">Lugar de nacimiento<sup>*</sup></label>
+                                                <input type="text" autocomplete="off" id="lugares_id_livesearch" class="form-control" required="required" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#lugares_id" data-limit="15" />
+                								<input type="hidden" id="lugares_id" name="lugares_id" />
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="gruposanguineo">Grupo sangu&iacute;neo</label>
+                                                <input type="text" class="form-control" placeholder="Ejemplo: O+" id="gruposanguineo" name="gruposanguineo" >
+                                            </div>
+                                            
+                                            <div class="mb-3 col-md">
+                                                <label class="form-label" for="eps">EPS<sup>*</sup></label>
+                                                
+                                                <select name="eps" class="form-control" id="eps" aria-label="Default select example" required="">
+                                                	<option selected disabled value="">Selecciona una EPS</option>
+													<?php foreach ( OperacionesCtrl::$GBL_EPS_LIST as $oVl ) : ?>
+													<option value="<?php echo $oVl['vl']; ?>" <?php echo $oVl['sel']; ?>><?php echo $oVl['lbl']; ?></option>
+													<?php endforeach; ?>
+                                                </select>
+                                                
+                                            </div>
+                                            <?php
+                                            /*
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="ars">ARS</label>
+												<select class="form-control" id="ars" name="ars" aria-label="Default select example" required="">
+													<option selected disabled value="">Selecciona una ARS</option>
+													<?php foreach ( OperacionesCtrl::$GBL_ARL_LIST as $oVl ) : ?>
+													<option value="<?php echo $oVl['vl']; ?>" <?php echo $oVl['sel']; ?>><?php echo $oVl['lbl']; ?></option>
+													<?php endforeach; ?>
+												</select
+                                            </div>
+                                            */
+                                            ?>
+                                            <input type="hidden" id="codigo" name="codigo" >
+                                            <input type="hidden" id="usuario" name="usuario" >
+                                            <input type="hidden" id="mail" name="mail" >
+                                            <input type="hidden" id="ars" name="ars" value="Sin ARS" >
+                                            
+                                            <?php 
+                                            /* los dejo por si algun dia lo mostramos
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="codigo">C&oacute;digo del estudiante</label>
+                                                <input type="text" class="form-control" placeholder="C&oacute;digo del estudiante" id="codigo" name="codigo" required="">
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="usuario">Usuario</label>
+                                                <input type="text" class="form-control" placeholder="Usuario" id="usuario" name="usuario" required="">
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="email">Email</label>
+                                                <input type="email" class="form-control" placeholder="Correo electr&oacute;nico" id="mail" name="mail" >
+                                            </div>
+                                            */
+                                            ?>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                
+                                <hr class="my-4">
+                                
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrder( this );" data-fin="false">Continuar</button>
+                                    </div>
+                                </div>
+                                
+							</form>
+                    	</div>
+
+                    	<div class="tab-pane" style="display: none;" id="tab-location" >
+                    		<form id="frmval_5" class="frmvalcls_5">
+                        		<h4 class="mb-3 pb-3 border-bottom"><i class="fas fa-map-marker"></i> Localizaci&oacute;n</h4>
+                        		
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Localizaci&oacute;n del <strong class="text-danger">estudiante</strong></h4>
+                                        </div>
+                                        <div class="row">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="direccion">Direcci&oacute;n</label>
+                                                <input type="text" class="form-control" placeholder="Direcci&oacute;n" id="direccion" name="direccion" >
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="barrio">Barrio</label>
+                                                <input type="text" class="form-control" placeholder="Barrio" id="barrio" name="barrio" >
+                                            </div>
+                                            <div class="mb-3 col-md-12">
+                                                <label class="form-label" for="loc_lugares_id_livesearch">Ciudad<sup>*</sup></label>
+                                                <input type="text" autocomplete="off" id="loc_lugares_id_livesearch" class="form-control" required="required" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#loc_lugares_id" data-limit="5" />
+                								<input type="hidden" id="loc_lugares_id" name="loc_lugares_id" />
+                                            </div>
+                                        </div>
+                        				<input type="hidden" id="loc_paises_id" name="loc_paises_id" value="1" />
+                        				<input type="hidden" id="loc_departamento_id" name="loc_departamento_id" value="1" />
+                                    </div>
+                                </div>
+                        		
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrder( this );" data-fin="false">Continuar</button>
+                                    </div>
+                                </div>
+                    		</form>
+                    	</div>
+                    	
+                    	<div class="tab-pane" style="display: none;" id="tab-madre" >
+                    		<form id="frmval_6" class="frmvalcls_6">
+                        		<h4 class="mb-3 pb-3 border-bottom"><i class="fas fa-female"></i> Datos Mam&aacute;</h4>
+                        		
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Informaci&oacute;n de la <strong class="text-danger">mam&aacute;</strong></h4>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="mb-3 col-md">
+                                            	<div class="form-check form-check-inline">
+													<input data-target="#cont_camposmadre" class="form-check-input contact_madreCls" type="radio" name="contact_madre" id="contact_madre_si" value="1" onclick="llenarDatosSiNo( this );" checked>
+													<label class="form-check-label" for="contact_madre_si">Llenar datos</label>
+												</div>
+                                                <div class="form-check form-check-inline">
+                                                    <input data-target="#cont_camposmadre" class="form-check-input" type="radio" name="contact_madre" id="contact_madre_no" value="0" onclick="llenarDatosSiNo( this );"s>
+                                                	<label class="form-check-label contact_madreCls" for="contact_madre_no">No llenar datos</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row" id="cont_camposmadre">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_madre_tipodoc_id">Tipo documento<sup>*</sup></label>
+                                                <select class="form-select campovariable" aria-label="Tipo documento" id="contact_madre_tipodoc_id" name="contact_madre_tipodoc_id"  onchange="" required >
+                                                    <?php foreach( $d_tipodoc as $v ) : ?>
+                                                    <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_madre_documento">N&uacute;mero documento<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="N&uacute;mero de documento" id="contact_madre_documento" name="contact_madre_documento" required >
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_madre_nombres">Nombres<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="Nombres" id="contact_madre_nombres" name="contact_madre_nombres" required >
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_madre_apellidos">Apellidos<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="Apellidos" id="contact_madre_apellidos" name="contact_madre_apellidos" required >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_madre_tipoacudiente_id">Parentesco</label>
+                                                <label class="form-control" >Madre</label>
+                                                <input type="hidden" name="contact_madre_tipoacudiente_id" value="2" >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_madre_mail">Correo electr&oacute;nico<sup>*</sup></label>
+                                                <input type="email" onblur="correoUnico_helper();" onkeyup="correoUnico_helper();" onpaste="correoUnico_helper();" class="form-control campovariable" placeholder="Correo electr&oacute;nico" id="contact_madre_mail" name="contact_madre_mail" required >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_madre_tel">Tel&eacute;fono celular<sup>*</sup></label>
+                                                <input type="tel" class="form-control campovariable" placeholder="Tel&eacute;fono celular" id="contact_madre_tel" name="contact_madre_tel" required >
+                                            </div>
+                                            <div class="mb-3 col-md">
+                                                <label class="form-label" for="contact_madre_direccion">Direcci&oacute;n</label>
+                                                <input type="text" class="form-control campovariable" placeholder="Direcci&oacute;n" id="contact_madre_direccion" name="contact_madre_direccion" >
+                                            </div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                        		
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrderRevMail( this );" data-fin="false" >Continuar</button>
+                                    </div>
+                                </div>
+                        		
+                    		</form>
+                    	</div>
+
+                    	<div class="tab-pane" style="display: none;" id="tab-padre" >
+                    		<form id="frmval_7" class="frmvalcls_7">
+                        		<h4 class="mb-3 pb-3 border-bottom"><i class="fas fa-male"></i> Datos Pap&aacute;</h4>
+                        		
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Informaci&oacute;n del <strong class="text-danger">pap&aacute;</strong></h4>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="mb-3 col-md">
+                                            	<div class="form-check form-check-inline">
+													<input data-target="#cont_campospadre" class="form-check-input contact_padreCls" type="radio" name="contact_padre" id="contact_padre_si" value="1" onclick="llenarDatosSiNo( this );" checked>
+													<label class="form-check-label" for="contact_padre_si">Llenar datos</label>
+												</div>
+                                                <div class="form-check form-check-inline">
+                                                    <input data-target="#cont_campospadre" class="form-check-input contact_padreCls" type="radio" name="contact_padre" id="contact_padre_no" value="0" onclick="llenarDatosSiNo( this );"s>
+                                                	<label class="form-check-label" for="contact_padre_no">No llenar datos</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row" id="cont_campospadre">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_padre_tipodoc_id">Tipo documento<sup>*</sup></label>
+                                                <select class="form-select campovariable" aria-label="Tipo documento" id="contact_padre_tipodoc_id" name="contact_padre_tipodoc_id"  onchange="" required >
+                                                    <?php foreach( $d_tipodoc as $v ) : ?>
+                                                    <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_padre_documento">N&uacute;mero documento<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="N&uacute;mero de documento" id="contact_padre_documento" name="contact_padre_documento" required >
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_padre_nombres">Nombres<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="Nombres" id="contact_padre_nombres" name="contact_padre_nombres" required >
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_padre_apellidos">Apellidos<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="Apellidos" id="contact_padre_apellidos" name="contact_padre_apellidos" required >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" >Parentesco</label>
+                                                <label class="form-control" >Padre</label>
+                                                <input type="hidden" name="contact_padre_tipoacudiente_id" value="1" >
+                                                
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_padre_mail">Correo electr&oacute;nico<sup>*</sup></label>
+                                                <input type="email" onblur="correoUnico_helper();" onkeyup="correoUnico_helper();" onpaste="correoUnico_helper();" class="form-control campovariable" placeholder="Correo electr&oacute;nico" id="contact_padre_mail" name="contact_padre_mail" required >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_padre_tel">Tel&eacute;fono celular<sup>*</sup></label>
+                                                <input type="tel" class="form-control campovariable" placeholder="Tel&eacute;fono celular" id="contact_padre_tel" name="contact_padre_tel" required >
+                                            </div>
+                                            <div class="mb-3 col-md">
+                                                <label class="form-label" for="contact_padre_direccion">Direcci&oacute;n</label>
+                                                <input type="text" class="form-control campovariable" placeholder="Direcci&oacute;n" id="contact_padre_direccion" name="contact_padre_direccion" >
+                                            </div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                        		
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrderRevMail( this );" data-fin="false" >Continuar</button>
+                                    </div>
+                                </div>
+                        		
+                    		</form>
+                    	</div>
+                    	
+                    	<div class="tab-pane" style="display: none;" id="tab-hermanos" >
+                    		<form id="frmval_8" class="frmvalcls_8">
+                        		<h4 class="mb-3 pb-3 border-bottom"><i class="fas fa-people-arrows"></i> Datos Hermanos</h4>
+                        		
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Informaci&oacute;n de los hermanos del <strong class="text-danger">Estudiante</strong></h4>
+                                        </div>
+                                        
+                                        <div class="row" >
+                                        	<div class="col-12">
+                                                <div id="bro_contBtnAdd" class="d-grid gap-2">
+                                                    <button class="btn btn-secondary" type="button" data-target="#bro_contBtnAdd" onclick="bro.agregarGUI( this );">Agregar hermano</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                        		
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrder( this );" data-fin="false" >Continuar</button>
+                                    </div>
+                                </div>
+                        		
+                    		</form>
+                    	</div>
+                    	
+                    	<div class="tab-pane" style="display: none;" id="tab-historialedu" >
+                    		<form id="frmval_9" class="frmvalcls_9">
+                        		<h4 class="mb-3 pb-3 border-bottom"><i class="fas fa-history"></i> Datos Hist&oacute;ricos</h4>
+                        		
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Hist&oacute;rico de datos educativos del <strong class="text-danger">Estudiante</strong></h4>
+                                        </div>
+                                        
+                                        <div class="row" id="const_camposhistorialedu">
+                                            <div class="mb-3 col-12">
+                                            
+                                            	<table class="table table-sm table-bordered table-striped table-hover" style="font-size: 0.85em;" width="100%">
+                                                	<thead>
+                                                		<tr>
+                                                			<th>Grado</th>
+                                                			<th>A&ntilde;o</th>
+                                                			<th>Instituci&oacute;n</th>
+                                                			<th>Calendario</th>
+                                                			<th>Ciudad</th>
+                                                		</tr>
+                                                	</thead>
+                                                	<tbody>
+                                                		<?php foreach ( $d_grados as $kGrado ) : ?>
+                                                		<tr>
+                                                			<td>
+                                                				<?php echo $kGrado['nombre']; ?>
+                                                				<input type="hidden" id="histoedu_id_<?php echo $kGrado['id']; ?>" name="histoedu_id_<?php echo $kGrado['id']; ?>" value="<?php echo $kGrado['id']; ?>" />
+                                                				<input type="hidden" id="histoedu_nombre_<?php echo $kGrado['id']; ?>" name="histoedu_nombre_<?php echo $kGrado['id']; ?>" value="<?php echo $kGrado['nombre']; ?>" />
+                                            				</td>
+                                                			<td>
+                                                				<select class="form-select form-select-sm" style="width: 100px;" id="histoedu_ano_<?php echo $kGrado['id']; ?>" name="histoedu_ano_<?php echo $kGrado['id']; ?>">
+                                                                    <option value="" selected>&nbsp;</option>
+                                                                    <?php for( $i_anyo = ( intval( date('Y') ) - 20); $i_anyo <= intval( date('Y') ); $i_anyo++ ): ?>
+                                                                    <option value="<?php echo $i_anyo; ?>"><?php echo $i_anyo; ?></option>
+                                                                    <?php endfor; ?>
+                                                                </select>
+                                                			</td>
+                                                			<td>
+                                                				<input maxlength="255" type="text" class="form-control form-control-sm" placeholder="Instituci&oacute;n" id="histoedu_inst_<?php echo $kGrado['id']; ?>" name="histoedu_inst_<?php echo $kGrado['id']; ?>">
+                                                			</td>
+                                                			<td>
+                                                				<select class="form-select form-select-sm" style="width: 90px;" id="histoedu_calen_<?php echo $kGrado['id']; ?>" name="histoedu_calen_<?php echo $kGrado['id']; ?>">
+                                                                    <option value="" selected>&nbsp;</option>
+                                                                    <option value="a">A</option>
+                                                                    <option value="b">B</option>
+                                                                </select>
+                                                			</td>
+                                                			<td>
+                                                                <input type="text" autocomplete="off" id="histoedu_lug_<?php echo $kGrado['id']; ?>_livesearch" class="form-control form-control-sm" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#histoedu_lug_<?php echo $kGrado['id']; ?>" data-limit="5" />
+                                								<input type="hidden" id="histoedu_lug_<?php echo $kGrado['id']; ?>" name="histoedu_lug_<?php echo $kGrado['id']; ?>" />
+                                                			</td>
+                                                		</tr>
+                                                		<?php endforeach; ?>
+                                                	</tbody>
+                                                </table>
+                                            
+                                            </div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                        		
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrder( this );" data-fin="false" >Continuar</button>
+                                    </div>
+                                </div>
+                        		
+                    		</form>
+                    	</div>
+                    	
+                    	<div class="tab-pane" style="display: none;" id="tab-contact" >
+                    		<form id="frmval_10" class="frmvalcls_10">
+                        		<h4 class="mb-3 pb-3 border-bottom"><i class="fas fa-users"></i> Acudiente</h4>
+                        		
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="mb-4">
+                                            <h4 class="mb-1">Informaci&oacute;n del <strong class="text-danger">acudiente</strong></h4>
+                                        </div>
+                                        <div class="row">
+                                            <div class="mb-3 col-md">
+                                            	<label class="form-label" for="contact_datosacudiente">&iquest;Qui&eacute;n es el acudiente?</label>
+                                                <select data-paraacu="true" data-target="#cont_camposacudiente" class="form-select" id="contact_datosacudiente" name="contact_datosacudiente"  onchange="quienAcudiente( this );" ></select>
+                                            </div>
+                                        </div>
+                                        <div class="row" id="cont_camposacudiente" style="display: none;">
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_tipodoc_id">Tipo documento<sup>*</sup></label>
+                                                <select class="form-select campovariable" aria-label="Tipo documento" id="contact_tipodoc_id" name="contact_tipodoc_id"  onchange="" required >
+                                                    <?php foreach( $d_tipodoc as $v ) : ?>
+                                                    <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_documento">N&uacute;mero documento<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="N&uacute;mero de documento" id="contact_documento" name="contact_documento" required >
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_nombres">Nombres<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="Nombres" id="contact_nombres" name="contact_nombres" required >
+                                            </div>
+                                            <div class="mb-3 col-md-6">
+                                                <label class="form-label" for="contact_apellidos">Apellidos<sup>*</sup></label>
+                                                <input type="text" class="form-control campovariable" placeholder="Apellidos" id="contact_apellidos" name="contact_apellidos" required >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_tipoacudiente_id">Parentesco</label>
+                                                <select class="form-select campovariable" aria-label="Pa&iacute;s" id="contact_tipoacudiente_id" name="contact_tipoacudiente_id" onchange="" >
+                                                    <?php foreach( $d_tipoacudiente as $v ) : ?>
+                                                    <?php   if( $v['id'] != 1 && $v['id'] != 2 ) : ?>
+                                                    <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                                                    <?php   endif; ?>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_mail">Correo electr&oacute;nico<sup>*</sup></label>
+                                                <input type="email" onblur="correoUnico_helper();" onkeyup="correoUnico_helper();" onpaste="correoUnico_helper();" class="form-control campovariable" placeholder="Correo electr&oacute;nico" id="contact_mail" name="contact_mail" required >
+                                            </div>
+                                            <div class="mb-3 col-md-4">
+                                                <label class="form-label" for="contact_tel">Tel&eacute;fono celular<sup>*</sup></label>
+                                                <input type="tel" class="form-control campovariable" placeholder="Tel&eacute;fono celular" id="contact_tel" name="contact_tel" required >
+                                            </div>
+                                            <div class="mb-3 col-md">
+                                                <label class="form-label" for="contact_direccion">Direcci&oacute;n</label>
+                                                <input type="text" class="form-control campovariable" placeholder="Direcci&oacute;n" id="contact_direccion" name="contact_direccion" >
+                                            </div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                        		
+                        		<div class="row g-3">
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="deOrderRevMail( this );" data-fin="true" data-ifnext="#btnDocsFirma">Continuar</button>
+                                    </div>
+                                </div>
+                        		
+                    		</form>
+                    	</div>
+                    	
+                    	<div class="tab-pane" style="display: none;" id="tab-docsig">
+                    		<form id="frmval_11" class="frmvalcls_11">
+                    		
+    							<h4 class="mb-3 pb-3 border-bottom">
+    								<i class="fas fa-signature"></i> Firma de documentos
+    							</h4>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <div class="row">
+                        
+                                            <div class="mb-3 col-md-12" id="fld_docsig"></div>
+                                        </div>
+                        
+                                    </div>
+                                </div>
+                                
+                                <hr class="my-4">
+                                
+                        		<div class="row g-3" id="btnChkCode" >
+                                    <div class="col-sm-12">
+                                    	<button class="w-100 btn btn-primary btn-lg" type="button" onclick="chkCode( this );" data-fin="true">Confirmar c&oacute;digo</button>
+                                    </div>
+                                </div>
+                                
+							</form>
+                    	</div>
+
+                    </div>
+                </div>
+
+            
+                <?php else : ?>
+                
+                <div class="py-5 text-center">
+                    <img class="d-block mx-auto mb-4" src="<?php echo $logoinst; ?>" alt="" height="128">
+                    <h2>Formulario de matr&iacute;cula</h2>
+                </div>
+                
+                <div class="row g-5">
+                	<div id="frmval" class="col-md-12 col-lg-12 frmvalcls">
+                    	<div class="alert alert-danger d-flex align-items-center" role="alert">
+                          <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#gbl-exclamation-triangle-fill"/></svg>
+                          <div>
+                            El c&oacute;digo <?php echo $cod; ?> es incorrecto.
+                          </div>
+                        </div>
+                        <p>Confirme directamente con la instituci&oacute;n la url y c&oacute;digo correcto.</p>
+                	</div>
+                </div>
+                
+                <?php endif; ?>
+            </main>
+    
+            <footer class="my-5 pt-5 text-muted text-center text-small">
+                <p class="mb-1">&copy; 2022 Acappdemy</p>
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="#">Privacy</a></li>
+                    <li class="list-inline-item"><a href="#">Terms</a></li>
+                    <li class="list-inline-item"><a href="#">Support</a></li>
+                </ul>
+            </footer>
+        </div>
+        
+            
+        <div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+            <form id="frmvalFirma" class="frmvalFirmacls">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row" id="contPrevDoc"></div>
+                    </div>
+            	</div>
+        	</form>
+        </div>
+        
+        <script type="application/javascript">
+    	const activo = "list-group-item-info"; 
+    	
+    	let bro = null;
+    	
+    	const Hermanos = function ( d ){
+    		const _this = this;
+    		let idinc = 0;
+    		const inst = d['instancia'];
+    		
+    		_this.agregarGUI = function( o ){
+    			const _o = jQuery( o );
+    			const dt = _o.data();
+    			const target = dt['target'];
+    			
+    			let _nombres = "";
+    			let _edad = "";
+    			
+    			if( Object.hasOwnProperty.call( dt , 'nombres' ) ){
+    				_nombres = dt['nombres'];
+    			}
+    			if( Object.hasOwnProperty.call( dt , 'edad' ) ){
+    				_edad = dt['edad'];
+    			}
+    			
+    			const idCol = "hrms_" + inst + "_" + idinc;
+    			
+    			const html = [];
+    			html.push( '<div id="' + idCol + '" class="col-12 border-bottom mb-3 capahermanos"> ');
+    			html.push( '	<div class="row"> ');
+    			html.push( '		<div class="mb-3 col-md-7"> ');
+                html.push( '			<label class="form-label" for="hermanos_nombres_' + idinc + '">Nombre completo<sup>*</sup></label> ');
+                html.push( '			<input type="text" class="form-control campovariable" placeholder="Nombre completo" id="hermanos_nombres_' + idinc + '" name="hermanos_nombres_' + idinc + '" value="' + _nombres + '" required > ');
+            	html.push( '		</div> ');
+            	html.push( '		<div class="mb-3 col-md-4"> ');
+                html.push( '			<label class="form-label" for="hermanos_edad_' + idinc + '">Edad<sup>*</sup></label> ');
+                html.push( '			<input type="text" class="form-control campovariable" placeholder="Edad" id="hermanos_edad_' + idinc + '" name="hermanos_edad_' + idinc + '" value="' + _edad + '" required > ');
+            	html.push( '		</div> ');
+            	html.push( '		<div class="mb-3 col-md-1 justify-content-center align-items-end"> ');
+            	html.push( '			<div> ');
+                html.push( '				<button data-target="#' + idCol + '" rol="button" type="button" class="btn btn-outline-danger py-0 px-1" onclick="' + inst + '.eliminarGUI( this );" ><i class="far fa-trash-alt"></i></button> ');
+                html.push( '			</div> ');
+            	html.push( '		</div> ');
+            	html.push( '	</div> ');
+            	html.push( '</div> ');
+            	
+            	jQuery( target ).before( html.join('') );
+            	idinc++;
+    		};
+    		_this.eliminarGUI = function( o ){
+    		
+    			if( confirm('Desea eliminar este registro?') ){
+    				const _o = jQuery( o );
+        			const dt = _o.data();
+        			const target = dt['target'];
+        			
+        			jQuery( target ).hide('fast', function(){
+        				jQuery( target ).remove();
+        			}) ;
+    			}
+    			
+    		};
+    	};
+    	
+    	let gbl_correosunicos = true;
+    	const correoUnico = function(){
+    		const madre_mail = jQuery('#contact_madre_mail');
+    		const padre_mail = jQuery('#contact_padre_mail'); 
+    		const contact_mail = jQuery('#contact_mail');
+    		
+    		let correosunicos = true;
+    		if( ("" + jQuery.trim( madre_mail.val() ) ).length > 0 && ("" + jQuery.trim( padre_mail.val() ) ).length > 0 ){
+        		if( (""+ jQuery.trim(madre_mail.val())).toLowerCase() == ("" + jQuery.trim(padre_mail.val())).toLowerCase() ){
+        			alert('El correo del padre y de la madre deben ser diferentes');
+        			correosunicos = false;
+        		}
+    		}
+    		
+    		if( ("" + jQuery.trim( padre_mail.val() ) ).length > 0 && ("" + jQuery.trim( contact_mail.val() ) ).length > 0 ){
+        		if( ("" + jQuery.trim(padre_mail.val())).toLowerCase() == ("" + jQuery.trim(contact_mail.val()) ).toLowerCase() ){
+        			alert('El correo del padre y el acudiente deben ser diferentes');
+        			correosunicos = false;
+        		}
+    		}
+    		
+    		if( ("" + jQuery.trim( madre_mail.val() ) ).length > 0 && ("" + jQuery.trim( contact_mail.val() ) ).length > 0 ){
+        		if( ("" + jQuery.trim(madre_mail.val())).toLowerCase() == ("" + jQuery.trim(contact_mail.val())).toLowerCase() ){
+        			alert('El correo de la madre y el acudiente deben ser diferentes');
+        			correosunicos = false;
+        		}
+    		}
+    		
+    		return correosunicos;
+    	};
+    	
+    	const correoUnico_helper = function(){
+    		gbl_correosunicos = correoUnico();
+    	};
+    	
+    	const deOrderRevMail = function( o ){
+    		if( gbl_correosunicos ){
+    			deOrder( o );
+    		}
+    		else{
+    			alert('Confirme que los correo de madre, padre y acudiente sean diferentes');
+    		}
+    	};
+    	
+    	const llenarDatosSiNo = function( o ){
+    		const _o = jQuery( o );
+    		const dt = _o.data();
+    		const p = jQuery( dt['target'] );
+    		const campos = p.find('.campovariable');
+    		
+    		const elVal = _o.val();
+    		let valor = _o.val();
+    		if ( Object.hasOwnProperty.call( dt , 'paraacu' ) ) {
+    			if( dt['paraacu'] ){
+    				if( elVal == 1 || elVal == 2 ){
+    					valor = 0;
+    				}
+    				if( elVal == 0 ){
+    					valor = 1;
+    				}
+    			}
+    		}
+    		
+    		if( valor == "1" ){
+    			const sup = p.find('sup');
+    			sup.show();
+    			const lbl = sup.parent();
+    			
+    			lbl.each(function( i , oLbl ){
+    				const _oLbl = jQuery( oLbl );
+    				
+    				const _for = _oLbl.attr('for');
+        			const _obReq = jQuery( "#" + _for );
+        			_obReq.attr('required', 'required');
+    			});
+    			
+    			campos.each(function(i,oCam){
+    				const _cam = jQuery( oCam );
+    				_cam.removeAttr( 'disabled' );
+    			});
+    			
+    		}
+    		if( valor == "0" ){
+    			const sup = p.find('sup');
+    			sup.hide();
+    			const lbl = sup.parent();
+    			
+    			lbl.each(function( i , oLbl ){
+    				const _oLbl = jQuery( oLbl );
+    				
+    				const _for = _oLbl.attr('for');
+        			const _obReq = jQuery( "#" + _for );
+        			_obReq.removeAttr( 'required' );
+    			});
+    			
+    			campos.each(function(i,oCam){
+    				const _cam = jQuery( oCam );
+    				_cam.attr( 'disabled', 'disabled' );
+    			});
+    		}
+    	};
+    	
+    	const agregarListaPadres = function(){
+    		const contactm = jQuery('.contact_madreCls:checked');
+    		const contactp = jQuery('.contact_padreCls:checked');
+
+    		const contact_datosacudiente = jQuery( '#contact_datosacudiente' );
+    		
+    		const html = [];
+    		html.push('<option value="" disabled="disabled" selected="selected" >Selecione una opci&oacute;n</option>');
+    		html.push('<option value="0" >Es otra persona diferente al pap&aacute; o mam&aacute;</option>');
+    		if( contactp.val() == "1" ){
+    			html.push('<option value="1">El acudiente es el Pap&aacute;</option>');
+    		}
+    		if( contactm.val() == "1" ){
+    			html.push('<option value="2">El acudiente es la Mam&aacute;</option>');
+    		}
+    		contact_datosacudiente.html( html.join('') );
+    		
+    		jQuery('#cont_camposacudiente').hide();
+    		
+    	};
+    	
+    	const quienAcudiente = function( o ){
+    		const _o = jQuery( o );
+    		const dt = _o.data();
+    		const oDt = jQuery( dt['target'] );
+    		
+    		if( _o.val() == 0 ){
+    			oDt.show();
+    			llenarDatosSiNo( o );
+    		}
+    		else {
+    			oDt.hide();
+    			llenarDatosSiNo( o );
+    		}
+    	};
+    	
+        const deOrder = function( o ){
+        	const _o = jQuery( o );
+        	const dt = _o.data();
+        	const fin = dt['fin'];
+        	const ifnext = dt['ifnext'];
+        	
+        	const nObj = jQuery( ifnext );
+        	
+        	const cls = _o.parent().parent().parent();
+        	ut.validarFrm( cls.attr('class') , function( d ){
+        		
+        		if( fin === true ){
+        			actualizar( nObj );
+        		}
+        		else{
+        			jQuery('.list-group .' + activo).next().trigger('click');
+        			agregarListaPadres();
+        		}
+        		
+        	});
+        	
+        };
+        const tabEff = function( o ){
+        	const _o = jQuery( o );
+        	if( !_o.hasClass( activo ) ){
+        		const dt = _o.data();
+            	const tb = dt['idtab'];
+            	jQuery( '.tab-pane' ).hide();
+            	jQuery( tb ).show('fast');
+            	
+            	jQuery( _o ).removeClass('disabled');
+            	jQuery( '.list-group-item' ).removeClass( activo );
+            	
+            	_o.addClass( activo );
+            	
+            	jQuery('.zaque-selectpck').selectpicker('render');
+        	}
+        };
+        
+        const recolectar = function( frm, fn ){
+        	var o = jQuery( frm );
+      		jsonObj = [];
+      		jQuery("#" + o.attr('id') + " input, #" + o.attr('id') + " select").each(function() {
+    			var nombre = jQuery(this).attr("name");
+    			var valor = ("" + jQuery(this).val()).replace(/\\/ig, "/");
+    			
+    			if(jQuery.trim( valor ).length > 0){
+        			jsonObj.push('"' + nombre + '" : "' + valor + '"');
+    			}
+      		});
+      		var tmpJson = JSON.parse("{" + jsonObj.join(',') + "}");
+      		
+      		fn( tmpJson );
+        };
+        const actualizar = function( nOb ){
+            var fld = [];
+            
+        	recolectar('.frmvalcls', function ( r ) {
+        		const opc = { 'id' : 'ajaxldr' };
+                const objmdl = mngModal.dibujar( opc );
+                jQuery( objmdl ).modal('show');
+        
+        		var form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EstudiantesHelperOffAuthAdd ); ?>');
+                
+        		for (const k in r) {
+        			if (Object.hasOwnProperty.call(r, k)) {
+        				const _el = r[k];
+        				form_data.append( k , _el);
+        			}
+        		}
+        		
+        		//const frmDArr = [];
+        		jQuery(".<?php echo $clase_files; ?>").each(function( i, obj ){
+        			const _obj = jQuery( obj );
+        			var _ipfl = jQuery( obj ).prop('files')[0];
+        			form_data.append( 'a' + _obj.attr('name'), _ipfl );
+        		});
+        		
+        		//if( frmDArr.length > 0 ){
+        		//	form_data.append( "anexos" , frmDArr);
+        		//}
+        
+        		__TransportarData(
+        			form_data,
+        			function( o ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err' } );
+                        
+                        const htmlAlr = [];
+                        htmlAlr.push('<div class="mb-3" >Transacci&oacute;n exitosa</div>');
+                        htmlAlr.push('<div class="d-grid gap-2">');
+						htmlAlr.push('	<button class="btn btn-primary" type="button" data-bs-dismiss="modal" >Firmar documentos</button>');
+						htmlAlr.push('</div>');
+                        
+        				const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-success');
+                        alerta.html( htmlAlr.join('') );
+                        
+                        const nObj = jQuery( nOb );
+                        if( nObj.length ){
+                        	configFirmas();
+                        }
+                        else{
+                        	jQuery('.contFormRegs').hide();
+                        	jQuery('#cntAlertFin').show('fast');
+                        }
+        
+        				jQuery( objmdlErr ).modal('show');
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			},
+        			function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+
+                        const errjson = JSON.parse( err.responseText );
+                        var txtW = errjson.err;
+                        console.log(errjson);
+                        if( ("" + txtW).toLowerCase().startsWith('duplicate') ){
+                        	var nwerr = ("" + txtW).toLowerCase().replace('duplicate entry','');
+                        	nwerr = ("" + nwerr).replace('for key',';');
+                        	nwerr = ("" + nwerr).replace(/'/ig,'');
+                        	strprs = nwerr.split(';');
+                        	
+                        	if( jQuery.trim(strprs[1]) == 'estudiantes.numdoc' ){
+                        		txtW = 'La identificaci&oacute;n ' + jQuery.trim( strprs[0] ) + ' ya existe.';
+                        	}
+                        	
+                        	alerta.html( txtW );
+                        }else{
+                        	alerta.html( errjson.err );
+                        }
+
+        
+                        jQuery( objmdlErr ).modal('show');
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			}
+        		);
+        	});
+        };
+        
+        
+        const idItemSel = "btnAnexosItem";
+        const tplAnexosItem = function(){
+        	const _btnHtml = [];
+            _btnHtml.push( '<button id="' + idItemSel + '" class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-anexos" style="display: none;"> ');
+            _btnHtml.push( '    <div class="me-2"> ');
+            _btnHtml.push( '        <h6 class="my-0"> ');
+            _btnHtml.push( '        	<i class="fa-solid fa-paperclip"></i> ');
+            _btnHtml.push( '        </h6> ');
+            _btnHtml.push( '    </div> ');
+            _btnHtml.push( '    <div> ');
+            _btnHtml.push( '        <h6 class="my-0">Documentos anexos </h6> ');
+            _btnHtml.push( '        <small class="text-muted">Adjunte documentos como certificados, carnets, etc.</small> ');
+            _btnHtml.push( '    </div> ');
+            _btnHtml.push( '</button> ');
+            
+            return _btnHtml.join('');
+        };
+        
+        const idDocItemSel = "btnDocsFirma";
+        const tplDocSigItem = function(){
+        	const _btnHtml = [];
+            _btnHtml.push( '<button id="' + idDocItemSel + '" class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-docsig" style="display: none;" > ');
+            _btnHtml.push( '    <div class="me-2"> ');
+            _btnHtml.push( '        <h6 class="my-0"> ');
+            _btnHtml.push( '        	<i class="fas fa-signature"></i> ');
+            _btnHtml.push( '        </h6> ');
+            _btnHtml.push( '    </div> ');
+            _btnHtml.push( '    <div> ');
+            _btnHtml.push( '        <h6 class="my-0">Firma documentos</h6> ');
+            _btnHtml.push( '        <small class="text-muted">Lea los documentos y si est&aacute; de acuerdo f&iacute;rmelos</small> ');
+            _btnHtml.push( '    </div> ');
+            _btnHtml.push( '</button> ');
+            
+            return _btnHtml.join('');
+        };
+        
+        const tplFrmAnexos = function( dt ){
+        	const _vl = dt[ 'vl' ];
+			const _tplfrm = [];
+			
+			var ast = "";
+			var req = "";
+			let ant = 'class="mb-3"';
+			if( _vl[ 'estado' ] == 1 ){
+				req = 'required="required" ';
+				ast = "<strong>*</strong>";
+			}
+			if( _vl[ 'antiguos' ] == 1 ){
+				ant = 'class="mb-3 clsAnt"';
+			}
+			
+			const idfrm = '<?php echo OperacionesCtrl::USUARIOS_FORM_ANEXO_ID; ?>' + dt['id'];
+			_tplfrm.push('<div ' + ant + '>');
+			_tplfrm.push('	<label for="' + idfrm + '" class="form-label">' + _vl['label'] + '' + ast + '</label>');
+			_tplfrm.push('	<input class="form-control <?php echo $clase_files; ?>" type="file" id="' + idfrm + '" ' + req + ' name="' + idfrm + '" >');
+			_tplfrm.push('</div>');
+			
+			return _tplfrm.join('');
+        };
+        
+        const solicitarAnexos = function( o ){
+        	const _o = jQuery( o );
+        	const _item = jQuery( '#' + idItemSel );
+        	const _fld_anexos = jQuery('#fld_anexos');
+        	
+        	if( _item.length > 0 ){
+        		_item.hide('fast', function(){
+        			_item.remove();
+        		});
+        	}
+        	
+        	_fld_anexos.html('');
+        	const _curs = cursos.obtenerPorId( _o.val() );
+        	
+        	if (Object.hasOwnProperty.call(_curs, 'vl')) {
+        		var _dtc = _curs['vl'];
+        		if ( _dtc.length > 0 ){
+        		
+        			const _campos = [];
+        		
+        			for( const id in _dtc ){
+        				const _el = _dtc[ id ] ;
+        				_campos.push( tplFrmAnexos( _el ) );
+        			}
+        			
+        			_fld_anexos.html( _campos.join('') );
+        		
+        			jQuery('#btnEstuItem').after( tplAnexosItem() );
+        			setTimeout(function(){
+        				jQuery( '#' + idItemSel ).show('fast');
+        			}, 100);
+        		}
+        	}
+        	
+        	// ======================================================
+        	
+        	//tab-docsig
+        	const _itemDpc = jQuery( '#' + idDocItemSel );
+        	const _fld_docsig = jQuery( '#fld_docsig' );
+        	if( _itemDpc.length > 0 ){
+        		_itemDpc.hide('fast', function(){
+        			_itemDpc.remove();
+        		});
+        	}
+        	
+        	_fld_docsig.html('');
+        	const _dsig = docsig.obtenerPorId( _o.val() );
+        	
+        	if (Object.hasOwnProperty.call(_dsig, 'vl')) {
+        		const _dtDS = _dsig['vl'];
+        		if ( _dtDS.length > 0 ){
+        			jQuery('#btnContactItem').after( tplDocSigItem() );
+        			setTimeout(function(){
+        				jQuery( '#' + idDocItemSel ).show('fast');
+        			}, 100);
+        		}
+        	}
+        };
+        
+        let tplFrmTokenHtml = "";
+        const tplFrmToken = function( d ){
+        	const _camposDS = [];
+        	
+        	_camposDS.push( '<h5 style="text-align: center;" class="mb-4">C&oacute;digo de confirmaci&oacute;n</h5> ' );	
+			_camposDS.push( '<div class="form-floating mb-3"> ' );
+			_camposDS.push( '	<input required="required" type="text" class="form-control" id="ca_cod" name="ca_cod" placeholder="El c&oacute;digo en su correo"> ' );
+			_camposDS.push( '	<label for="ca_cod">C&oacute;digo</label> ' );
+			_camposDS.push( '</div> ' );
+			_camposDS.push( '<small class="text-muted">Revise su bandeja de entrada (o spam) e ingrese el c&oacute;digo que le fue enviado a <strong>' + d['mail'] + '</strong></small> ' );
+			
+			_camposDS.push( '<button class="btn btn-link btn-sm" type="button" onclick="configFirmas( {\'nextcapa\' : false} );" >Enviar c&oacute;digo nuevamente si no lleg&oacute;</button> ' );
+			
+			_camposDS.push( '<input type="hidden" value="' + d['hashacuid'] + '" class="form-control" id="ca_idu" name="ca_idu" > ' );
+			
+			tplFrmTokenHtml = _camposDS.join('') ;
+			
+			return tplFrmTokenHtml;
+        };
+        
+        let dtRegF = null;
+        let dtRegD = null;
+        const configFirmas = function( d ){
+        	let prin = true;
+        	
+        	if( typeof( d ) != "undefined" ){
+            	if ( Object.hasOwnProperty.call( d, 'nextcapa')) {
+            		prin = d[ 'nextcapa' ];
+            	}
+        	}
+        
+        	const _fld_docsig = jQuery( '#fld_docsig' );
+        	if( prin ){
+            	jQuery('.list-group .' + activo).next().trigger('click');
+            	jQuery('button.list-group-item').each(function(i,o){
+            		const _o = jQuery( o );
+            		if( !_o.hasClass('list-group-item-info') ){
+            			_o.addClass( 'disabled' );
+            		}
+            	});
+            	
+            	_fld_docsig.html( validadorGlob.ajaxspinner( { 'label' : 'Enviando c&oacute;digo a su correo' } ) );
+        	}
+        	
+        	const contact_datosacudiente = jQuery('#contact_datosacudiente');
+        	let tipodoc_id = '';
+        	let documento = '';
+        	let estudiante = jQuery('#documento').val();
+        	if( contact_datosacudiente.val() == 1 ){
+        		tipodoc_id = parseInt( jQuery('#contact_padre_tipodoc_id').val() );
+        		documento = jQuery.trim( jQuery('#contact_padre_documento').val() );
+        	}
+        	else if( contact_datosacudiente.val() == 2 ){
+	        	tipodoc_id = parseInt( jQuery('#contact_madre_tipodoc_id').val() );
+        		documento = jQuery.trim( jQuery('#contact_madre_documento').val() );
+        	}
+        	else{
+        		tipodoc_id = parseInt( jQuery('#contact_tipodoc_id').val() );
+        		documento = jQuery.trim( jQuery('#contact_documento').val() );
+        	}
+        	
+        	const data = {
+        		"tipodoc_id" : tipodoc_id,
+        		"documento" : documento,
+        		"estudiante" : estudiante
+    		};
+        	
+        	const form_data = new FormData();
+        	form_data.append('ajax', '<?php echo md5( IndexCtrl::API_CodigoactivaJson64Add ); ?>');
+        	form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( data ) ) );
+        
+            __TransportarData(
+                form_data,
+                function( nwDt ) {
+                
+                	if( nwDt === false ){
+                		_fld_docsig.html( 'Error enviando c&oacute;digo' );
+                	}
+                	else{
+                		const res = nwDt['res'] ;
+                    	if( res == 'sent!' ){
+                    		dtRegF = nwDt['dt'];
+                    		dtRegD = nwDt['docs'];
+                    		_fld_docsig.html ( tplFrmToken( dtRegF ) );
+                    	}
+                    	else{
+                    		_fld_docsig.html( res );
+                    	}
+                	}
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    const jsE = JSON.parse( err.responseText );
+                    
+                    let errorMsj = jsE['err'];
+                    if( ("" + jsE['err']).substr( 0, "Duplicate".length ) ){
+                    	errorMsj = "Ya terminaste el proceso de matr&iacute;cula exitosamente.";
+                    }
+                    
+                    alerta.html( errorMsj );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    //setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+        };
+        
+        const BTN_DATA_ROL_REV = "revisar";
+        const BTN_DATA_ROL_FIR = "firmar";
+        const chkCode = function(){
+        	ut.validarFrm( 'frmvalcls_11' , function ( r ) {
+                const form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_CodigoactivaGet ); ?>');
+                form_data.append('codActiva', jQuery('#ca_cod').val() );
+                form_data.append('key', jQuery('#ca_idu').val() );
+                
+                const _fld_docsig = jQuery( '#fld_docsig' );
+                
+                _fld_docsig.html( validadorGlob.ajaxspinner( { 'label' : 'Confirmando el c&oacute;digo' } ) );
+                
+                __TransportarData(
+                    form_data,
+                    function( o ) {
+                    
+                    	const okO = o['ok'];
+                    	if( okO ){
+                    		const _dsig = docsig.obtenerPorId( jQuery('#cursos_id').val() );
+                        	const _dtDS = _dsig['vl'];
+
+                            const _camposDS = [];
+            		
+                			_camposDS.push( '<div class="list-group"> ' );
+                			for( const id in _dtDS ){
+                				const _el = _dtDS[ id ] ;
+                				
+                				const nmF = _el['data'];
+                				let defN = (""+nmF).replace("sig_","");
+                				defN = defN.replace(/\_/ig, ' ');
+                				defN = defN.replace(".phtml", '');
+                				
+                				const pdfDt = glosd.pdfEstadoGet( { 'pdfid' : nmF, 'docs' : dtRegD } );
+                				const lblSty = glosd.pdfLabel( pdfDt['id'] );
+                				
+                				let firmable = 'data-firmado="true"';
+                				if( pdfDt['id'] == 0 || pdfDt['id'] == 1 ){
+                					firmable = "";
+                				}
+                				
+                				docEstadoMng ( { 'id' : nmF, 'e' : pdfDt['id'] } ) ;
+                				
+                				_camposDS.push( '	<button onclick="firmaGen_Helper( this );" ' + firmable + ' data-proc="<?php echo md5( OperacionesCtrl::FIRMAS_PROC_REV ); ?>" data-flid="' + nmF + '" data-estid="' + dtRegF['estudiantes_id'] + '" data-acuid="' + dtRegF['acudientes_id'] + '" data-rol="' + BTN_DATA_ROL_REV + '" rol="button" type="button" class="list-group-item list-group-item-action" >' );
+                				_camposDS.push( '		<div class="d-flex w-100 justify-content-between"> ' );
+                				_camposDS.push( '			<div class="d-flex justify-content-start"> ' );
+                				_camposDS.push( '				<div class="me-3 pt-1">' );
+                				_camposDS.push( '					<i class="fas fa-file fs-5 text-danger"></i>' );
+                				_camposDS.push( '				</div>' );
+                				
+                				_camposDS.push( '				<div class="">' );
+                				_camposDS.push( '					<h5 class="mb-0">' + defN + '</h5>' );
+                				_camposDS.push( '					<small class="lblCls">' + lblSty['lbl'] + '</small>' );
+                				_camposDS.push( '				</div >' );
+                				_camposDS.push( '			</div >' );
+                				_camposDS.push( '			<div class="icoCls"> ' );
+                				_camposDS.push( '				' + lblSty['ico'] );
+                				_camposDS.push( '			</div >' );
+                				_camposDS.push( '		</div >' );
+                				
+                				_camposDS.push( '	</button >' );
+                			}
+                			_camposDS.push( '</div> ' );
+                			
+                			jQuery('#btnChkCode').hide('fast');
+                			
+                			setTimeout(function(){ _fld_docsig.html( _camposDS.join('') ); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    	}
+                    	else{
+                    		setTimeout(function(){ _fld_docsig.html( tplFrmTokenHtml ); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    	}
+                        
+                    },
+                    function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        
+                        const errjs = JSON.parse( err.responseText );
+                        
+                        alerta.html( errjs['err'] );
+                        
+                		_fld_docsig.html ( tplFrmToken( dtRegF ) );
+
+                        jQuery( objmdlErr ).modal('show');
+                        //setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    }
+                );
+            
+            });
+        };
+        
+        const docEstadoMng = function( d ){      
+        	const nmF = d['id'];
+        	const dDt = lgDoc.obtenerPorId( nmF );
+
+			if( dDt === false ){
+				lgDoc.agregar( nmF , { 'e' : d['e'] } );
+				return d['e'];
+			}
+			else{
+				const vl = dDt['vl'];
+				
+				if( d['e'] > vl['e'] ){
+					if( lgDoc.eliminarPorId( nmF ) ){
+						lgDoc.agregar( nmF , { 'e' : d['e'] } );
+						
+						return d['e'];
+					}
+				}
+				else{
+					return d['e'];
+				}
+			}
+
+        };
+        
+        const addEstUsr = function(){
+        	const iddoc = ( "" + jQuery('#documento').val() );
+        	const nom = ( "" + jQuery('#nombres').val() ).toLocaleLowerCase();
+        	const ape = ( "" + jQuery('#apellidos').val() ).toLocaleLowerCase();
+        	
+        	//const preape = 
+        	
+        	const def = [];
+        	def.push ( nom.substr(0,1) );
+        	def.push ( ape.replace(/\ /ig, '').substr(0,10) );
+        	def.push ( iddoc );
+        	def.push ( '@<?php echo trim(Config::DOMINIO_DEF); ?>' );
+        	
+        	jQuery('#mail').val( def.join('') );
+        	
+        };
+        
+        const addEstCode = function(){
+        	const tmpCod = ("" + jQuery('#documento').val() ).replace(/\D+/ig,'');
+        	jQuery('#documento').val( tmpCod );
+        	jQuery('#codigo').val( tmpCod );
+        	jQuery('#usuario').val( jQuery('#documento').val() );
+        };
+        
+        const cursos = new Colecciones();
+        const docsig = new Colecciones();
+        const lgDoc = new Colecciones();
+        const anexInfo = <?php echo $_CFG_MATRICULA_ANEXLS; ?>;
+        const lsDocSig = <?php echo $_CFG_MATRICULA_DOC4SIG; ?>;
+        
+        const gUsrData = function( dt ){
+        	const lbl_cont = 'contact_';
+        	for (const key in dt ) {
+            	if (Object.hasOwnProperty.call( dt, key)) {
+                	const _el = dt[ key ];
+                	let oZaque = jQuery('#' + key );
+                	
+                	if( oZaque.length ){
+                	
+                		if( Object.hasOwnProperty.call( dt, 'contact_tipoacudiente_id' ) ){
+                    		let tipoac = "";
+                    		const cta_id = dt['contact_tipoacudiente_id'];
+                    		
+                    		if ( cta_id == 1 ){
+                    			tipoac = "contact_padre_";
+                    		}
+                    		else if ( cta_id == 2 ){
+                    			tipoac = "contact_madre_";
+                    		}
+                    		else if ( cta_id == 3 || cta_id == 4 || cta_id == 5 || cta_id == 6 ){
+                    			tipoac = "contact_";
+                    			jQuery("#contact_datosacudiente option[value=0]").prop('selected','selected');
+                    			jQuery("#contact_datosacudiente").trigger('change');
+                    		}
+                    		
+                    		if( key.substr( 0, lbl_cont.length ) == lbl_cont ){
+                    			const newkey = ( "" + jQuery.trim( key ) ).replace( lbl_cont , tipoac );
+                    			oZaque = jQuery('#' + newkey );
+                    		}
+                    	}
+                    	
+                    	if( oZaque.hasClass('zaque-selectpck') ){
+                    		//oZaque.selectpicker('val', 'Mustard');
+                    	}
+                    	//else{
+                    	
+                    	if( key == "lugares_id" ){
+                    		const oZaque_ls = jQuery( '#' + key + '_livesearch' );
+                    		setTimeout( function(){
+                    			oZaque_ls.val( dt['lugares'] );
+                    		} , 1000 );
+                    		jQuery('#lugares_id').val( dt['lugares_id'] );
+                    	}
+                    	else if( key == "loc_lugares_id" ){
+                    		const oZaque_ls = jQuery('#' + key + "_livesearch");
+                    		setTimeout( function(){
+                    			oZaque_ls.val( dt['loc_lugares'] );
+                    		} , 1000 );
+                    		jQuery('#loc_lugares_id').val( dt['loc_lugares_id'] );
+                    	}
+                    	else if( key != "lugarescedula_id" ){
+                    		oZaque.val( _el );
+                    	}
+                    		
+                    	//}
+                	
+                	}
+                	
+            	}
+        	}
+        };
+        
+        const gHermanosData = function( dt ){
+        	for (const key in dt ) {
+            	if (Object.hasOwnProperty.call( dt, key)) {
+                	const _el = dt[ key ];
+                	
+                	setTimeout(
+                		function(){
+                			bro.agregarGUI('<button style="" data-target="#bro_contBtnAdd" data-nombres="' + _el['nombre'] + '" data-edad="' + _el['edad'] + '" ></button>');
+                		}
+                	, 500);
+                	
+            	}
+        	}
+        };
+        
+        const gHistorialData = function( dt ){
+        	document.getElementById('frmval_9').reset();
+        	for (const key in dt ) {
+            	if (Object.hasOwnProperty.call( dt, key)) {
+                	const _el = dt[ key ];
+                	
+                	const grado_id = _el['grado_id'];
+
+                	jQuery('#histoedu_ano_' + grado_id).val( _el['anyo'] );
+                	jQuery('#histoedu_inst_' + grado_id).val( _el['inst'] );
+                	jQuery('#histoedu_calen_' + grado_id).val( _el['calendario'] );
+                	jQuery('#histoedu_lug_' + grado_id + '_livesearch').val( _el['lugares'] );
+                	jQuery('#histoedu_lug_' + grado_id + '').val( _el['lugares_id'] );
+                	
+                	
+            	}
+        	}
+        };
+        
+        const limpiarNed = function(){
+            jQuery("#nuevousr").val('1');
+            jQuery("#nhid").val('0');
+            jQuery("#nombres").val('');
+            jQuery("#apellidos").val('');
+            jQuery("#tel").val('');
+            jQuery("#nacimiento").val('');
+            jQuery("#generos_id").val( jQuery("#generos_id option:first").val() );
+            jQuery("#lugares_id").val( jQuery("#lugares_id").val() );
+            jQuery("#gruposanguineo").val('');
+            jQuery("#eps").val( jQuery("#eps option:first").val() );
+            jQuery("#ars").val( jQuery("#ars option:first").val() );
+            jQuery("#mail").val('');
+            jQuery("#direccion").val('');
+            jQuery("#barrio").val('');
+            jQuery("#loc_paises_id").val( jQuery("#loc_paises_id option:first").val() );
+            jQuery("#loc_departamento_id").val( jQuery("#loc_departamento_id option:first").val() );
+            jQuery("#loc_lugares_id").val( jQuery("#loc_lugares_id option:first").val() );
+            jQuery("#contact_tipodoc_id").val( jQuery("#contact_tipodoc_id option:first").val() );
+            jQuery("#contact_documento").val('');
+            jQuery("#contact_nombres").val('');
+            jQuery("#contact_apellidos").val('');
+            jQuery("#contact_tipoacudiente_id").val( jQuery("#contact_tipoacudiente_id option:first").val() );
+            jQuery("#contact_mail").val('');
+            jQuery("#contact_tel").val('');
+            jQuery("#contact_direccion").val('');
+        };
+        
+        const anexosAnt = function(){
+        	const clsAnt = jQuery(".clsAnt");
+        	
+        	clsAnt.remove();
+        };
+        
+        const revExists = function( o ){
+        	const _o = jQuery( o );
+        	const cls = _o.parent().parent().parent();
+        	
+        	solicitarAnexos( jQuery( '#cursos_id' ) );
+        	
+        	ut.validarFrm( cls.attr('class') , function( d ){
+        		
+        		const mtdV = ut.b64EncodeUnicode( jQuery.trim( jQuery('#tipodoc_id').val() ) + '_' + jQuery.trim( jQuery('#documento').val() ) ) ;
+        		
+        		const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+                const objmdl = mngModal.dibujar( opc );
+                jQuery( objmdl ).modal('show');
+            	
+            	const form_data = new FormData();
+            	form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EstudiantesHomeHelperGet ); ?>');
+            	form_data.append('matriculadata', mtdV );
+            
+                __TransportarData(
+                    form_data,
+                    function( nwDt ) {
+                    	if( Object.keys( nwDt ).length > 0 ){
+                    	
+                        	for (const key in nwDt ) {
+                            	if (Object.hasOwnProperty.call( nwDt, key)) {
+                            		if( key == 'her' ){
+                            			const _el = nwDt[key];
+                            			jQuery('.capahermanos').remove();
+                            			gHermanosData( _el );
+                            		}
+                            		else if( key == 'hedu' ){
+                            			const _el = nwDt[key];
+                            			gHistorialData( _el );
+                            		}
+                            		else{
+                                    	const _el = nwDt[key];
+                                    	jQuery('#nuevousr').val( _el['idhash'] );
+                                    	jQuery('#nhid').val( _el['id'] );
+                                    	
+                                    	gUsrData( _el );
+                                    	anexosAnt();
+                                	}
+                                	
+                            	}
+                        	}
+                    	}
+                    	else{
+                    		limpiarNed();
+                    	}
+            			deOrder( o );
+            			
+            			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    },
+                    function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+            
+                        jQuery( objmdlErr ).modal('show');
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    }
+                );
+
+        	});
+        };
+        
+        const modalFormulario = function () {
+            const opc = {
+                'id' : 'frmNuevoRegistro',
+                'title' : 'Revisi&oacute;n de documento',
+                'btnCerrarX' : true,
+                'scrolling' : true,
+                'center' : true,
+                'size' : 'modal-xl',
+                'level' : 'l2'
+            };
+            return mngModal.dibujar( opc );
+        }
+        
+        const firmaViewer_Helper = function( o ){
+        	const dt = o['ob'];
+        	
+        	const _m = modalFormulario();
+        	
+        	const btnDt = btnHelper.data();
+        	
+        	const ifrm = [];
+        	ifrm.push('<div class="mb-3 col-md-12" >');
+        	ifrm.push('	<iframe width="100%" height="400" src="' + o['url'] + '" frameborder="0" allowfullscreen></iframe>');
+        	ifrm.push('</div >');
+        	
+        	const arUrl = ut.pathInfo( o['url'] );
+        	const pstFl = ( "" + arUrl[ 'filename' ] ).split('_');
+        	
+        	if ( pstFl[ pstFl.length - 1 ] !== "fir" ) {
+        		const btnFirmarTmp = [];
+            	//btnFirmarTmp.push('<div class="mb-3 col-md-12" >');
+            	btnFirmarTmp.push('	<button type="button" rol="button" data-proc="<?php echo md5( OperacionesCtrl::FIRMAS_PROC_FIR ); ?>" data-acuid="' + dt['acuid'] + '" data-estid="' + dt['estid'] + '" data-flid="' + dt['flid'] + '" onclick="firmaGen_Helper( this );" data-rol="' + BTN_DATA_ROL_FIR + '" class="btn btn-primary">Firmar</button>');
+            	//btnFirmarTmp.push('</div >');
+            	
+            	const lbl = btnHelper.find('.lblCls');
+            	const ico = btnHelper.find('.icoCls');
+            	
+            	const idEst = docEstadoMng( {'id' : dt['flid'], 'e' : 1 } );
+            	let pdfl = glosd.pdfLabel( idEst );
+            	
+            	lbl.html( pdfl['lbl'] );
+            	ico.html( pdfl['ico'] );
+            	
+            	const modalCont = jQuery( _m ).find('.modal-content');
+            	const modalFooter = modalCont.find('.modal-footer');
+            	
+            	if( modalFooter.length > 0 ){
+            		modalFooter.html( btnFirmarTmp.join('') );
+            	}
+            	else{
+            		modalCont.append('<div class="modal-footer">' + btnFirmarTmp.join('') + '</div>');
+            	}
+            	
+        	}
+        	
+        	jQuery('#contPrevDoc').html( ifrm.join('') );
+        	
+        	jQuery( _m ).modal('show'); 
+        	
+        };
+        const firmaCertify_Helper = function( o ){
+        	const dt = o['ob'];
+        	
+        	const _m = modalFormulario();
+        	
+        	const ifrm = [];
+        	ifrm.push('<div class="mb-3 col-md-12" >');
+        	ifrm.push('	<iframe width="100%" height="400" src="' + o['url'] + '" frameborder="0" allowfullscreen></iframe>');
+        	ifrm.push('</div >');
+        	jQuery('#contPrevDoc').html( ifrm.join('') );
+        	
+        	const lbl = btnHelper.find('.lblCls');
+        	const ico = btnHelper.find('.icoCls');
+        	
+        	const idEst = docEstadoMng( {'id' : dt['flid'], 'e' : 2 } );
+        	
+        	let pdfl = glosd.pdfLabel( idEst );
+        	
+        	lbl.html( pdfl['lbl'] );
+        	ico.html( pdfl['ico'] );
+        };
+        
+        let btnHelper = null;
+        const firmaGen_Helper = function( o ){
+        	const _o = jQuery( o );
+        	
+        	const dt = _o.data();
+        	
+        	if( dt['rol'] == BTN_DATA_ROL_REV ){
+        		btnHelper = _o;
+        	}
+        	
+        	dt['fn'] = firmaViewer_Helper;
+        	
+        	if( dt['proc'] == "<?php echo md5( OperacionesCtrl::FIRMAS_PROC_FIR ); ?>" ){
+        		dt['fn'] = firmaCertify_Helper;
+        	}
+        	
+        	glosd.generar( dt );
+        };
+        
+        let glosd = null;
+        
+        
+        
+        jQuery( document ).ready(function(){
+        
+        	jQuery('#nacimiento').flatpickr({});
+            
+            cursos.iniciar( anexInfo );
+            docsig.iniciar( lsDocSig );
+        
+        	bro = new Hermanos( { 'instancia' : 'bro' } );
+        
+        	jQuery('.zaque-selectpck').selectpicker();
+        	
+        	glosd = new SignDocs();
+        });
+        </script>
+
+

@@ -1,0 +1,773 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+
+$d_tipodoc = null;
+try {
+    $d_tipodoc = OperacionesCtrl::tipodoc_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+/*
+$d_deptos = null;
+try {
+    $d_deptos = OperacionesCtrl::departamentos_Obtener ( array('paises_id' => 1) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_lugares = null;
+try {
+    $d_lugares = OperacionesCtrl::lugares_Obtener( array('departamento_id' => 3) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_paises = null;
+try {
+    $d_paises = OperacionesCtrl::paises_Obtener( array('id' => 1) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+*/
+$d_generos = null;
+try {
+    $d_generos = OperacionesCtrl::generos_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_cargos = null;
+try {
+    $d_cargos = OperacionesCtrl::cargos_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+$d_titulos = null;
+try {
+    $d_titulos = OperacionesCtrl::titulos_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+/*
+$d_estados = null;
+try {
+    $d_estados = OperacionesCtrl::estado_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+*/
+$d_perfil_id = null;
+try {
+    $d_perfil_id = OperacionesCtrl::perfil_Obtener( array( 'desdeadmin' => true, 'perfil_id' => $usu->getPerfil_id() ) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$columnas = array(
+    'id' => array('lbl' => 'Id', 'visible' => 'true'),
+    'tipodoc_id' => array('lbl' => 'tipodoc_id', 'visible' => 'false'),
+    'documento' => array('lbl' => 'Documento', 'visible' => 'true'),
+    'lugarescedula_id' => array('lbl' => 'lugarescedula_id', 'visible' => 'false'),
+    'nombres' => array('lbl' => 'Nombres', 'visible' => 'true'),
+    'apellidos' => array('lbl' => 'Apellidos', 'visible' => 'true'),
+    'mail' => array('lbl' => 'Correo', 'visible' => 'true'),
+    'nacimiento' => array('lbl' => 'Nacimiento', 'visible' => 'false'),
+    'generos_id' => array('lbl' => 'Genero', 'visible' => 'true'),
+    'lugares_id' => array('lbl' => 'lugares_id', 'visible' => 'false'),
+    'gruposanguineo' => array('lbl' => 'Grupo sangu&iacute;neo', 'visible' => 'false'),
+    'codigo' => array('lbl' => 'C&oacute;digo', 'visible' => 'true'),
+    'usuario' => array('lbl' => 'Usuario', 'visible' => 'true'),
+    'direccion' => array('lbl' => 'direccion', 'visible' => 'false'),
+    'barrio' => array('lbl' => 'barrio', 'visible' => 'false'),
+    'loc_lugares_id' => array('lbl' => 'loc_lugares_id', 'visible' => 'false'),
+    'cargos_id' => array('lbl' => 'cargos_id', 'visible' => 'false'),
+    'titulos_id' => array('lbl' => 'titulos_id', 'visible' => 'false'),
+    'creado' => array('lbl' => 'Fecha', 'visible' => 'true'),
+    'perfil_id' => array('lbl' => 'perfil_id', 'visible' => 'true'),
+    'estado_id' => array('lbl' => 'estado_id', 'visible' => 'false')
+);
+
+$editperf = false;
+if( $usu->getPerfil_id() == 1 ){
+    $editperf = true;
+}
+elseif ( $usu->getPerfil_id() == 2 ){
+    $editperf = true;
+}
+
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                        <div>
+                        	<?php //if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO ) : ?>
+                            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stcMdl_l2" onclick="btnAddRegistro();">Agregar registro</a>
+                            <?php //endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="card">
+                        <!-- card header  -->
+                        <div class="card-header border-bottom-0">
+                            <h4 class="mb-1">Listado completo</h4>
+                        </div>
+                        <!-- table  -->
+                        <div class="card-body pt-2">
+                            
+                            <table id="tbInter" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%; font-size: 0.85em;">
+                                <thead>
+                                    <tr>
+                                        <?php foreach ($columnas as $k) : ?>
+                                        <th><?php echo $k['lbl'] ?></th>
+                                        <?php endforeach; ?>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                            
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+    <form id="frmval" class="frmvalcls">
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Identificaci&oacute;n</h4>
+                </div>
+                <div class="row">
+
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label" for="tipodoc_id">Tipo de documento</label>
+                        <select class="form-select" aria-label="Default select example" id="tipodoc_id" name="tipodoc_id" required="required">
+                            <?php foreach( $d_tipodoc as $v ) : ?>
+                            <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label" for="documento">N&uacute;mero de documento</label>
+                        <input type="text" class="form-control" placeholder="N&uacute;mero de documento" id="documento" name="documento" required="required">
+                    </div>
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label" for="lugarescedula_id_livesearch">Lugar de expedici&oacute;n</label>
+                        <input type="text" autocomplete="off" id="lugarescedula_id_livesearch" class="form-control" required="required" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#lugarescedula_id" data-limit="5" />
+						<input type="hidden" id="lugarescedula_id" name="lugarescedula_id" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="mb-4">Informaci&oacute;n principal</h4>
+
+                <div class="row">
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="nombres">Nombres</label>
+                        <input type="text" class="form-control" placeholder="Nombres " id="nombres" name="nombres" required="required">
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="apellidos">Apellidos</label>
+                        <input type="text" class="form-control" placeholder="Apellidos" id="apellidos" name="apellidos" required="required">
+                    </div>
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label" for="email">Email</label>
+                        <input type="email" class="form-control" placeholder="Correo electr&oacute;nico" id="mail" name="mail" >
+                    </div>
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label" for="tel">N&uacute;mero de celular</label>
+                        <input type="text" class="form-control" placeholder="N&uacute;mero de celular" id="tel" name="tel" >
+                    </div>
+                    <div class="mb-3 col-md-4">
+                        <label class="form-label" for="nacimiento">Fecha de nacimiento</label>
+                        <div class="input-group me-3  ">
+                            <input id="nacimiento" name="nacimiento" class="form-control" type="text" placeholder="Fecha de nacimiento" aria-describedby="nacimiento_lbl" readonly="readonly">
+                            <span class="input-group-text text-muted" id="nacimiento_lbl"><i class="fe fe-calendar"></i></span>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="generos_id">G&eacute;nero</label>
+                        <select class="form-select" aria-label="Default select example" id="generos_id" name="generos_id" >
+                            <?php foreach( $d_generos as $v ) : ?>
+                            <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="lugares_id_livesearch">Lugar de nacimiento</label>
+                        <input type="text" autocomplete="off" id="lugares_id_livesearch" class="form-control" required="required" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#lugares_id" data-limit="5" />
+						<input type="hidden" id="lugares_id" name="lugares_id" />
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="gruposanguineo">Grupo sangu&iacute;neo</label>
+                        <input type="text" class="form-control" placeholder="Ejemplo: O+" id="gruposanguineo" name="gruposanguineo" >
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="codigo">C&oacute;digo del usuario</label>
+                        <input type="text" class="form-control" placeholder="Normalmente se usa el n&uacute;mero de c&eacute;dula" id="codigo" name="codigo" required="required">
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="usuario">Usuario</label>
+                        <input type="text" class="form-control" placeholder="Usuario" id="usuario" name="usuario" required="required">
+                    </div>
+
+                    <div class="col-md-3 col-12 mb-4" id="capafoto">
+                        <div>
+                            <!-- logo -->
+                            <label class="form-label" for="foto">Foto</label><br/>
+                            <div class="icon-shape icon-xxl border rounded position-relative">
+                                <span class="position-absolute" id="prefoto"> <i class="bi bi-image fs-3  text-muted"></i></span>
+                                <input id="foto" class="form-control border-0 opacity-0" type="file" onchange="__actualizarImg( this, jQuery('#prefoto'), <?php echo OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ?>, idMod, '<?php echo md5( IndexCtrl::API_UpFotoPerfiles ); ?>' );">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Localizaci&oacute;n</h4>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="direccion">Direcci&oacute;n</label>
+                        <input type="text" class="form-control" placeholder="Direcci&oacute;n" id="direccion" name="direccion" >
+                    </div>
+                    <div class="mb-3 col-md-6">
+                        <label class="form-label" for="barrio">Barrio</label>
+                        <input type="text" class="form-control" placeholder="Barrio" id="barrio" name="barrio" >
+                    </div>
+                    
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="loc_lugares_id_livesearch">Ciudad</label>
+                        <input type="text" autocomplete="off" id="loc_lugares_id_livesearch" class="form-control" required="required" onkeyup="validadorGlob.livesearch( this );" onfocus="validadorGlob.livesearch( 'clean' );" data-ajaxid="<?php echo md5(IndexCtrl::API_ObtenerLugares) ?>" data-target="#loc_lugares_id" data-limit="5" />
+						<input type="hidden" id="loc_lugares_id" name="loc_lugares_id" />
+						
+						<input type="hidden" id="loc_paises_id" name="loc_paises_id" value="1" />
+						<input type="hidden" id="loc_departamento_id" name="loc_departamento_id" value="1" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Formaci&oacute;n</h4>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="cargos_id">Cargo (opcional)</label>
+                        <select class="form-select" aria-label="cargos" id="cargos_id" name="cargos_id" >
+                            <?php foreach( $d_cargos as $v ) : ?>
+                            <?php
+                            $txt = '';
+                            if ( $v['id'] == 1) {
+                                $txt = "selected";
+                            }
+                            ?>
+                            <option value="<?php echo $v['id'] ?>" <?php echo $txt ?>><?php echo $v['nombre'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="titulos_id">T&iacute;tulo (opcional)</label>
+                        <select class="form-select" aria-label="titulos" id="titulos_id" name="titulos_id" >
+                            <?php foreach( $d_titulos as $v ) : ?>
+                            <?php
+                            $txt = '';
+                            if ( $v['id'] == 1) {
+                                $txt = "selected";
+                            }
+                            ?>
+                            <option value="<?php echo $v['id'] ?>" <?php echo $txt ?>><?php echo $v['nombre'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+		<?php if ( $editperf ) : ?>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Perfil</h4>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="perfil_id">Perfil</label>
+                        <select class="form-select" aria-label="Perfil" id="perfil_id" name="perfil_id" >
+                            <?php foreach( $d_perfil_id as $v ) : ?>
+                            <?php
+                            $txt = '';
+                            if ( $v['id'] == 1) {
+                                $txt = "selected";
+                            }
+                            ?>
+                            <option value="<?php echo $v['id'] ?>" <?php echo $txt ?>><?php echo $v['nombre'] ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Informaci&oacute;n contractual</h4>
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="oficio">Oficio que desempeñar&aacute; el empleado</label>
+                        <textarea class="form-control" placeholder="Oficio" id="oficio" name="oficio" ></textarea>
+                    </div>
+					<div class="mb-3 col-md-6">
+                        <label class="form-label" for="salariomes">Salario mensual <span id="lblsalario">($0,00)</span></label>
+                    	<input type="number" data-target="#lblsalario" onkeyup="calcSalario( this );" step="any" class="form-control" placeholder="Salario mensual" id="salariomes" name="salariomes" >
+                    </div>
+					<div class="mb-3 col-md-6">
+                        <label class="form-label" for="contratoini">Fecha de inicio del contrato</label>
+                        <div>
+                        	<input type="text" class="form-control" placeholder="Inicio contrato" id="contratoini" name="contratoini" >
+                        </div>
+                    </div>
+					<div class="mb-3 col-md-6">
+                        <label class="form-label" for="contratofin">Fecha de inicio de finalizaci&oacute;n</label>
+                        <div>
+                        	<input type="text" class="form-control" placeholder="Fin contrato" id="contratofin" name="contratofin" >
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <?php endif; ?>
+        
+        <div class="d-flex justify-content-end">
+            <!-- buttons -->
+            <a href="#" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Cancel</a>
+            <button class="btn btn-primary" type="submit" onclick="actualizar();">Guardar</button>
+        </div>
+    </form>
+</div>
+
+<script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+
+<script type="text/javascript">
+var idMod = null;
+var ls_generos = <?php echo json_encode( $d_generos ); ?>;
+var ls_cols = <?php echo json_encode( $columnas ) ?>;
+const ls_perfil_id = <?php echo json_encode( $d_perfil_id );?>
+
+var tbInter = null;
+jQuery(document).ready( function () {
+    tbInter = jQuery('#tbInter').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: './index.php',
+            data : function(d){
+            	d.ajax = '<?php echo md5( IndexCtrl::API_UsuariosGetAjax ); ?>';
+            	
+            	<?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO) : ?>
+            	d.columns[20]['search']['value'] = 1;
+            	d.columns[19]['search']['value'] = [1, 2, 6, 7, 8, 9];
+            	<?php elseif ( $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR) : ?>
+            	d.columns[20]['search']['value'] = 1;
+            	d.columns[19]['search']['value'] = [2, 6, 7, 8, 9];
+            	<?php else :?>
+            	d.columns[0]['search']['value'] = [<?php echo $usu->getId()?>];
+            	<?php endif; ?>
+            	
+            },
+            type: 'POST',
+            <?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO) : ?>
+            /*
+            dataSrc : function( json ){
+                let data = json.data;
+                let filter = data.filter(function(value, index, arr){
+                    return (value['perfil_id'] === '1' || value['perfil_id'] === '2');
+                });
+                return filter;
+                
+            }
+            */
+            <?php endif; ?>
+        },
+        columns: [
+            <?php foreach ($columnas as $k => $v) : ?>
+            { data: '<?php echo $k ?>' },
+            <?php endforeach; ?>
+            { data: null }
+        ],
+		dom: 'Bfrtip',
+		buttons: _allBtnTb,
+        responsive: true,
+        language: lengua_es,
+        'createdRow': function( row, data, dataIndex ) {
+            jQuery(row).attr('id', 'r' + data['id']);
+        },
+        columnDefs: [
+            <?php $idTarget = 0; ?>
+            <?php foreach ($columnas as $k => $v) : ?>
+            {
+                'targets': <?php echo $idTarget ; ?>,
+                'createdCell':  function (td, cellData, rowData, row, col) {
+                    jQuery(td).attr('id', 'td_<?php echo $k; ?>_' + rowData['id']);
+                    jQuery(td).attr('data-campo', '<?php echo $k; ?>');
+                    jQuery(td).attr('data-valor', cellData);
+                }
+                ,visible: <?php echo $v['visible']; ?>
+                <?php if ( $idTarget == 8 ) : ?>
+                ,render: function (data, type, row) {
+                    var html = [];
+                    
+                    for (const key in ls_generos) {
+                        if (Object.hasOwnProperty.call(ls_generos, key)) {
+                            const _el = ls_generos[key];
+                            if ( data == _el['id'] ) {
+                                html.push( _el['nombre'] );
+                            }
+                        }
+                    }
+
+                    return html.join('');
+                }
+                <?php endif; ?>
+                <?php if ( $idTarget == 19 ) : ?>
+                ,render: function (data, type, row) {
+                    var html = [];
+                    
+                    for (const key in ls_perfil_id) {
+                        if (Object.hasOwnProperty.call(ls_perfil_id, key)) {
+                            const _el = ls_perfil_id[key];
+                            if ( data == _el['id'] ) {
+                                html.push('<span class="badge bg-primary">' + _el['nombre'] +'</span>' );
+                            }
+                        }
+                    }
+
+                    return html.join('');
+                }
+                <?php endif; ?>
+            },
+            <?php $idTarget++; ?>
+            <?php endforeach; ?>
+            {
+                render: function (data, type, row) {
+                    var html = [];
+                    html.push('<button onclick="btnModRegistro(this);" data-id="' + data['id'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip" data-template="one' + data['id'] + '">');
+                    html.push(' <i class="fe fe-edit fs-5"></i> ');
+                    html.push(' <div id="one' + data['id'] + '" class="d-none"> ');
+                    html.push('     <h6 class="mb-0 text-white">Editar</h6> ');
+                    html.push(' </div> ');
+                    html.push('</button> ');
+                    
+                    <?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO ) : ?>
+                    html.push('<a href="index.php?as=' + data['id'] + '&ajax=<?php echo md5( IndexCtrl::API_IniciarLoginAsOtro ) ?>" onclick="aAsPostf(event,this);" class="btn m-0 px-1 py-0 text-muted text-primary-hover ms-3" data-template="two' + data['id'] + '"> ');
+                    html.push('	<i class="fas fa-user-secret"></i> ');
+                    html.push(' <div id="two' + data['id'] + '" class="d-none"> ');
+                    html.push('     <h6 class="mb-0 text-white">Iniciar sesi&oacute;n</h6> ');
+                    html.push(' </div> ');
+                    html.push('</a> ');
+                    <?php endif; ?>
+                    
+                    <?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR ) : ?>
+                    html.push('<button onclick="eliminar(this);" data-id="' + data['id'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover ms-3 texttooltip" data-template="two' + data['id'] + '"> ');
+                    html.push(' <i class="fe fe-trash-2 fs-5"></i> ');
+                    html.push(' <div id="two' + data['id'] + '" class="d-none"> ');
+                    html.push('     <h6 class="mb-0 text-white">Eliminar</h6> ');
+                    html.push(' </div> ');
+                    html.push('</button> ');
+                    
+                    html.push('<span class="dropdown dropstart ms-2"> ');
+                    html.push('	<a class="btn-icon btn btn-ghost btn-sm rounded-circle" href="#" role="button" id="extraOpc' + data['id'] + '" data-bs-toggle="dropdown"  data-bs-offset="-20,20" aria-expanded="false" > ');
+                    html.push('		<i class="fe fe-more-vertical"></i> ');
+                    html.push('	</a> ');
+                    html.push('	<span class="dropdown-menu" aria-labelledby="extraOpc' + data['id'] + '"> ');
+                    html.push('		<span class="dropdown-header">Extra</span> ');
+                    
+                    html.push('		<button class="dropdown-item" onclick="nuevoPass(this);" data-id="' + data['id'] + '" data-notificar="1"><i class="fas fa-key dropdown-item-icon"></i> Env&iacute;ar nueva clave</button> ');
+                    html.push('		<button class="dropdown-item" onclick="nuevoPassManual( this );" data-id="' + data['id'] + '" data-notificar="1"><i class="fa-solid fa-lock dropdown-item-icon"></i> Asignar nueva clave</button> ');
+                    html.push('		<button class="dropdown-item" onclick="nuevoPassManual( this );" data-id="' + data['id'] + '" data-notificar="0"><i class="fas fa-user-shield dropdown-item-icon"></i> Asignar nueva clave y no notificar</button> ');
+                    html.push('	</span> ');
+                    html.push('</span> ');
+                    <?php endif; ?>
+
+                    return html.join('');
+                },
+                'targets': <?php echo $idTarget ; ?>
+            }
+        ]
+    });
+
+});
+
+const llenarLugares = function ( departamento_id, def ) {
+	var adlCfg = {
+		'elId' : '#loc_lugares_id',
+		'formdata' : {'ajax' : '<?php echo md5( IndexCtrl::API_ObtenerLugares ); ?>', 'departamento_id' : departamento_id },
+		'defItem' : def,
+		'fn' : function(d){}
+	};
+	__AgregarDatosLista( adlCfg );
+};
+
+var btnAddRegistro = function ( ) {
+    idMod = null;
+    modalFormulario();
+
+    jQuery('#capafoto').remove();
+
+    const nacimiento_time = jQuery('#nacimiento').flatpickr({
+        static: true
+    });
+    
+    <?php if ( $editperf ) : ?>
+    jQuery('#contratoini,#contratofin').flatpickr({
+        static: true
+    });
+    <?php endif; ?>
+};
+
+var modalFormulario = function () {
+    var opc = {
+            'id' : 'frmNuevoRegistro',
+            'title' : 'Agregar registro',
+            'btnCerrarX' : true,
+            'scrolling' : true,
+            'center' : true,
+            'size' : 'modal-xl',
+            'level' : 'l2'
+    };
+    return mngModal.dibujar( opc );
+}
+
+var btnModRegistro = function ( o ) {
+    var _o = jQuery( o );
+    idMod = _o.attr('data-id');
+
+    var _m = modalFormulario();
+
+    const nacimiento_time = jQuery('#nacimiento').flatpickr({
+        static: true
+    });
+    
+    <?php if ( $editperf ) : ?>
+    jQuery('#contratoini,#contratofin').flatpickr({
+        static: true
+    });
+    <?php endif; ?>
+
+    var form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_UsuariosGet ); ?>');
+    form_data.append('id', idMod );
+
+    __TransportarData(
+			form_data,
+			function( o ) {
+                console.log('o: ');
+                console.log( o );
+                for (const key in o) {
+                    if (Object.hasOwnProperty.call(o, key)) {
+                        const _el = o[key];
+                        for (const key in _el) {
+                            if (Object.hasOwnProperty.call(_el, key)) {
+                                const _elDiv = _el[key];
+
+                                if( key == 'loc_lugares_id' ){
+                                    setTimeout(function(){
+                                        jQuery('#' + key).val( _elDiv );
+                                        jQuery('#' + key + '_livesearch').val( _el['loc_lugares'] );
+                                    }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                                }
+                                else if( key == 'lugares_id' ){
+                                	setTimeout(function(){
+                                    	jQuery('#' + key).val( _elDiv );
+                                    	jQuery('#' + key + '_livesearch').val( _el['lugares'] );
+                                	}, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                                }
+                                else if( key == 'lugarescedula_id' ){
+                                	setTimeout(function(){
+                                    	jQuery('#' + key).val( _elDiv );
+                                    	jQuery('#' + key + '_livesearch').val( _el['lugarescedula'] );
+                                	}, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                                }
+                                else if ( key == 'foto' ) {
+                                    if( ("" + _elDiv).length > 0 ){
+                                        jQuery('#prefoto').html( '<img src="./repo/avatar/' + _elDiv + '" style="height: 55px; " />' );
+                                    }
+                                }
+                                else if( key == 'salariomes' ){
+                                	setTimeout(function(){
+                                    	jQuery('#' + key).val( parseInt( _elDiv ) );
+                                    	calcSalario( '#' + key );
+                                	}, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                                }
+                                else{
+                                    jQuery('#' + key).val( _elDiv );
+                                }
+                            }
+                        }
+                    }
+                }
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+
+    jQuery( _m ).modal('show');
+};
+
+const actualizar = function(){
+    var fld = [];
+    
+	ut.validarFrm('frmvalcls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+		var form_data = new FormData();
+        if ( idMod === null ) {
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_AdminHelperAdd ); ?>');
+        }else{
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_UsuariosMod ); ?>');
+            form_data.append('id', idMod );
+        }
+        
+		for (const k in r) {
+			if (Object.hasOwnProperty.call(r, k)) {
+				const _el = r[k];
+				form_data.append( k , _el);
+			}
+		}
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err' } );
+
+                if ( idMod === null ) {
+                    tbInter.clear().draw();
+                }else{
+                    tbInter.clear().draw();
+                }
+                
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const eliminar = function( o ){
+    if (confirm('Desea eliminar?')) {
+        var _o = jQuery( o );
+        const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_UsuariosRm ); ?>');
+        form_data.append('id' , _o.attr('data-id') );
+
+        __TransportarData(
+            form_data,
+            function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err' } );
+
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+                
+                tbInter.row( _o.parent().parent() ).remove().draw();
+
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            }
+        );    
+    }
+};
+</script>

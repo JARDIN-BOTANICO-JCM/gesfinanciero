@@ -1,0 +1,14 @@
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Configuración de IDEs
+.buildpath
+.project
+.settings/
+
+# Otras carpetas temporales
+node_modules/
+vendor/
+dist/
+
