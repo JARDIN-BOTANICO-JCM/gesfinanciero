@@ -12,3 +12,10 @@ node_modules/
 vendor/
 dist/
 
+# Ignorar carpetas completas
+repo/anexos/
+repo/avatar/
+repo/proc/
+repo/com/
+repo/recursos/
+repo/usuarios/
