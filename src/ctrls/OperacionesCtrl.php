@@ -8520,6 +8520,198 @@ EOD;
 	// reflista FIN
 	
 	// empleadosdetallescontrato INI
+	public static function empleadosdetallescontrato_Agregar($d) {
+		date_default_timezone_set('America/Bogota');
+
+		$o = new Empleadosdetallescontrato();
+		if (isset( $d['tipodoc_id'] ) ) {
+			$o->setTipodoc_id( $d['tipodoc_id'] );
+		}
+		if (isset( $d['documento'] ) ) {
+			$o->setDocumento( $d['documento'] );
+		}
+		if (isset( $d['empleados_id'] ) ) {
+			$o->setEmpleados_id( $d['empleados_id'] );
+		}
+		if (isset($d['contrato'])){
+			$o->setContrato( $d['contrato'] );
+		}
+		if (isset($d['meses'])) {
+			$o->setMeses($d['meses']);
+		}
+		if (isset($d['dias'])) {
+			$o->setDias($d['dias']);
+		}
+		if (isset( $d['fecha'] ) ) {
+	        $o->setFecha( $d['fecha'] );
+	    }
+		if (isset( $d['usuario'] ) ) {
+			$o->setUsuario( $d['usuario'] );
+		}
+		if (isset( $d['fechamodifica'] ) ) {
+	        $o->setFechamodifica( $d['fechamodifica'] );
+	    }
+		if (isset( $d['anyolectivo_id'] ) ) {
+			$o->setAnyolectivo_id( $d['anyolectivo_id'] );
+		}
+		if (isset( $d['fileactaini'] ) ) {
+			$o->setFileactaini( $d['fileactaini'] );
+		}
+		if (isset( $d['fileactainivalorgestor'] ) ) {
+			$o->setFileactainivalorgestor( $d['fileactainivalorgestor'] );
+		}
+
+		$id = $o->saveData();
+		if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+			http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+			throw new \Exception($o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+		}
+
+		if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	       http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'formularios_Agregar: Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	}
+
+	public static function empleadosdetallescontrato_Modificar($d) {
+		date_default_timezone_set('America/Bogota');
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() );
+	    }
+
+		$tb = "empleadosdetallescontrato ";
+		$aSt = array(); 
+
+		if ( isset( $d['tipodoc_id'] ) ) {
+			$aSt['tipodoc_id'] = $d['tipodoc_id'] ;
+		}
+		if ( isset( $d['documento'] ) ) {
+			$aSt['documento'] = $d['documento'] ;
+		}
+		if ( isset( $d['empleados_id'] ) ) {
+			$aSt['empleados_id'] = $d['empleados_id'] ;
+		}
+		if ( isset( $d['contrato'] ) ) {
+			$aSt['contrato'] = $d['contrato'] ;
+		}
+		if ( isset( $d['meses'] ) ) {
+			$aSt['meses'] = $d['meses'] ;
+		}
+		if ( isset( $d['dias'] ) ) {
+			$aSt['dias'] = $d['dias'] ;
+		}
+		if ( isset( $d['fecha'] ) ) {
+			$aSt['fecha'] = $d['fecha'] ;
+		}
+		if ( isset( $d['usuario'] ) ) {
+			$aSt['usuario'] = $d['usuario'] ;
+		}
+		if ( isset( $d['fechamodifica'] ) ) {
+			$aSt['fechamodifica'] = $d['fechamodifica'] ;
+		}
+		if ( isset( $d['anyolectivo_id'] ) ) {
+			$aSt['anyolectivo_id'] = $d['anyolectivo_id'] ;
+		}
+		if ( isset( $d['fileactaini'] ) ) {
+			$aSt['fileactaini'] = $d['fileactaini'] ;
+		}
+		if ( isset( $d['fileactainivalorgestor'] ) ) {
+			$aSt['fileactainivalorgestor'] = $d['fileactainivalorgestor'] ;
+		}
+
+		 $pr = [];
+	    $wh  = '';
+	    if ( isset( $d['id'] ) ) {
+	        $wh  = 'id = ?';
+	        $pr[]  = $d['id'];
+	    }
+
+		 if ( $wh == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'formularios_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+
+		$xt = $wh;
+	    $cu = null;
+
+		 try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception( 'formularios_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    
+	    return $cu;
+	}
+
+	public static function empleadosdetallescontrato_Obtener($d) {
+		$r = new Singleton();
+		$r::$lnk->query( self::SQL_BIG_SELECTS );
+
+		$vr  = "empdetcont.`id`, empdetcont.`tipodoc_id`, empdetcont.`documento`, empdetcont.`empleados_id`, empdetcont.`contrato`, ";
+		$vr .= "empdetcont.`meses`, empdetcont.`dias`, empdetcont.`fecha`, empdetcont.`usuario`, empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, ";
+		$vr .= "empdetcont.`fileactaini`, empdetcont.`fileactainivalorgestor`, ";
+
+		$tb  = '`empleadosdetallescontrato` as empdetcont ';
+
+		$jn  = 'LEFT JOIN empleados as emple on emple.id = empdetcont.empleados_id ';
+		$jn  .= "LEFT JOIN tipodoc as tipod on tipod.id = empdetcont.tipodoc_id ";
+		$pr = [];
+		$wh = [];
+
+		if (isset($d['id'])) {
+			$wh[] = "empdetcont.`id` = ?";
+			$pr[] = $d['id'];
+    	}
+		if (isset($d['empleados_id'])) {
+			$wh[] = "empdetcont.`empleados_id` = ?";
+			$pr[] = $d['empleados_id'];
+		}
+		if (isset($d['documento'])) {
+			$wh[] = "empdetcont.`documento` = ?";
+			$pr[] = $d['documento'];
+		}
+
+		$defWh = "";
+		if (count($wh) > 0) {
+			$defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+		}
+
+		$orden = "ORDER BY empDetCont.`id` DESC";
+		if (isset($d['ordendesc'])) {
+			$orden = "ORDER BY " . $d['ordendesc'] . " DESC";
+		}
+		if (isset($d['ordenasc'])) {
+			$orden = "ORDER BY " . $d['ordenasc'] . " ASC";
+		}
+
+		$limite = "";
+		if (isset($d['limite'])) {
+			$limite = "LIMIT " . intval($d['limite']);
+		}
+
+		$xt = $jn . $defWh . $orden . $limite;
+
+		$sql = "SELECT " . $vr . " FROM " . $tb . " " . $xt;
+
+		$r = [];
+		try {
+			$r = Singleton::_safeRawQuery($sql, $pr);
+		} catch (Exception $e) {
+			http_response_code(IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+			throw new \Exception('empleadosdetallescontrato_Obtener: ' . $e->getMessage(), IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+		}
+
+		return $r;
+	}
+
+
 	// TODO: @Valeria Agregar las funciones de agregar (formularios_Agregar), obtener (formularios_Obtener), modificar (formularios_Modificar)
 	// empleadosdetallescontrato FIN
 	
@@ -9145,8 +9337,6 @@ EOD;
 	        'msj' => $msj,
 	    );
 	    return $msjr;
-	}
-	
-	
+	}	
 }
 ?>
