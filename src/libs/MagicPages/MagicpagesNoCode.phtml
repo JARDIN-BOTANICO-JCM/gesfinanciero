@@ -1,0 +1,148 @@
+<?php 
+$logoinst = OperacionesCtrl::obtener_LogoCompany();
+?>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta http-equiv="X-UA-Compatible" content="ie=edge">		
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta charset="utf-8">
+
+		
+		<title>Acappdemy - P&acute;ginas seguras</title>
+		<!-- CSS -->		
+		<!-- CSS only -->
+		<link rel="stylesheet" href="/temas/js/bootstrap-5.2.0-dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/temas/js/fontawesome-free-6.1.1-web/css/all.min.css" >
+		<link rel="stylesheet" href="/temas/js/flatpickr-4.6.13/flatpickr.min.css" >
+		<link rel="stylesheet" href="/temas/js/dragula/dist/dragula.min.css" >
+		<link rel="stylesheet" href="/temas/js/feather/feather.css">
+		<link rel="stylesheet" href="/temas/js/bootstrap-icons/font/bootstrap-icons.css" />
+		<link rel="stylesheet" href="/temas/js/bootstrap-select-1.14.0-beta2/dist/css/bootstrap-select.css">
+		<link rel="stylesheet" href="/temas/js/simplebar-5.3.8/dist/simplebar.min.css">
+		<link rel="stylesheet" href="/temas/js/DataTables/datatables.min.css" type="text/css"/>
+
+		
+		<link rel="shortcut icon" href="/temas/favicon/favicon_20x20.png" type="image/x-icon" />
+		<link rel="apple-touch-icon" href="/temas/favicon/favicon_180x180.png" sizes="180x180">
+        <link rel="icon" href="/temas/favicon/favicon_32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico" sizes="16x16" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico">
+		
+		<!-- Custom 
+		<link rel="stylesheet" href="/temas/css/theme.min.css">
+		-->
+		<!-- JS -->
+		<script type="text/javascript" src="/temas/js/jquery-3.6.0.min.js "></script>
+		<script type="text/javascript" src="/temas/js/utilidades.js?f=20190609150612"></script>
+		<script type="text/javascript">var ut = new Utilidades();</script>
+		<script type="text/javascript" src="/temas/js/Colecciones.js?f=202207271743"></script>
+
+
+        <style>
+            .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                user-select: none;
+            }
+    
+            @media (min-width : 768px) {
+                .bd-placeholder-img-lg {
+                    font-size: 3.5rem;
+                }
+            }
+    
+            .b-example-divider {
+                height: 3rem;
+                background-color: rgba(0, 0, 0, .1);
+                border: solid rgba(0, 0, 0, .15);
+                border-width: 1px 0;
+                box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+            }
+    
+            .b-example-vr {
+                flex-shrink: 0;
+                width: 1.5rem;
+                height: 100vh;
+            }
+    
+            .bi {
+                vertical-align: -.125em;
+                fill: currentColor;
+            }
+    
+            .nav-scroller {
+                position: relative;
+                z-index: 2;
+                height: 2.75rem;
+                overflow-y: hidden;
+            }
+    
+            .nav-scroller .nav {
+                display: flex;
+                flex-wrap: nowrap;
+                padding-bottom: 1rem;
+                margin-top: -1px;
+                overflow-x: auto;
+                text-align: center;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            .container {
+                max-width: 960px;
+            }
+        </style>
+
+	</head>
+    <body class="bg-light">
+    
+        <div class="container">
+            <main>
+            
+            	<div class="py-5 text-center">
+                    <img class="d-block mx-auto mb-4" src="<?php echo $logoinst; ?>" alt="" height="128" style="object-fit: cover;">
+                    <h2>P&aacute;ginas temporales</h2>
+                </div>
+                
+                <div class="row g-5">
+                	<div id="frmval" class="col-md-12 col-lg-12 frmvalcls">
+                    	<div class="alert alert-danger d-flex align-items-center" role="alert">
+                          <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#gbl-exclamation-triangle-fill"/></svg>
+                          <div>
+                            El c&oacute;digo es obligatorio.
+                          </div>
+                        </div>
+                        <p>Verifique la informaci&oacute;n del documento o el link.</p>
+                	</div>
+                </div>
+            </main>
+    
+            <footer class="my-5 pt-5 text-muted text-center text-small">
+                <p class="mb-1">&copy; 2022 Acappdemy</p>
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="#">Privacy</a></li>
+                    <li class="list-inline-item"><a href="#">Terms</a></li>
+                    <li class="list-inline-item"><a href="#">Support</a></li>
+                </ul>
+            </footer>
+        </div>
+        
+            
+        <div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+            <form id="frmvalFirma" class="frmvalFirmacls">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row" id="contPrevDoc"></div>
+                    </div>
+            	</div>
+        	</form>
+        </div>
+        
+
+<script type="application/javascript">
+</script>

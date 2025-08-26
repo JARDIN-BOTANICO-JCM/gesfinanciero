@@ -1,0 +1,679 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$l_flujosroles_id = array();
+try {
+    $l_flujosroles_id = OperacionesCtrl::flujosroles_Obtener( array( 'ordenasc' => 1 ) );
+} catch (Exception $e) {
+    throw $e;
+}
+
+$l_requerimientostpls_id = array();
+try {
+    $l_requerimientostpls_id = OperacionesCtrl::requerimientostpls_Obtener( array( 'ordenasc' => 1 ) );
+} catch (Exception $e) {
+    throw $e;
+}
+
+$l_usuarios_id = array();
+try {
+    $l_usuarios_id = OperacionesCtrl::usuarios_Obtener( array( 'ordenasc' => 1 ) );
+} catch (Exception $e) {
+    throw $e;
+}
+
+$l_flujosestados_id = array();
+try {
+    $l_flujosestados_id = OperacionesCtrl::flujosestados_Obtener( array( 'ordenasc' => 1 ) );
+} catch (Exception $e) {
+    throw $e;
+}
+
+$d_tpls = null;
+try {
+    $d_tpls = OperacionesCtrl::editarPlantillas_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+?>
+<style>
+.procesando {
+    -webkit-filter: blur(4px); /* Safari 6.0 - 9.0, Chrome */
+    -moz-filter: blur(4px);    /* Firefox */
+    -o-filter: blur(4px);      /* Opera */
+    -ms-filter: "progid:DXImageTransform.Microsoft.Blur(PixelRadius=4)"; /* IE 8-9 (muy limitado) */
+    filter: blur(4px);         /* Estándar */
+}
+
+</style>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+			<div class="row">
+				<div class="col-lg-12 col-md-12 col-12">
+					<div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+						<div class="mb-3 mb-lg-0">
+							<h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+									<li class="breadcrumb-item active" aria-current="page">
+										<?php echo $crum['l2']; ?>
+									</li>
+								</ol>
+							</nav>
+
+						</div>
+						
+						<div>
+							<button onclick="btnAgregarReg( this );" class="btn btn-primary">Agregar registro</button>
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-body">
+					<h4 class="mb-0">Flujos de trabajo</h4>
+					<p class="mb-4">
+						Cree los flujos de trabajo necesarios para hacer seguimiento de sus operaciones
+					</p>
+					
+					<div class="row">
+						<div class="col-12" id="contTb"></div>
+					</div>
+					
+				</div>
+			</div>
+
+        </div>
+
+    </div>
+</div>
+
+<div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+    <form id="frmval" class="frmvalcls">
+    	<div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Informaci&oacute;n del flujo</h4>
+                </div>
+                <div class="row">
+                	<div class="mb-3 col-md-12">
+                        <label class="form-label" for="flu_nombre">Nombre del flujo (Le aparece a los usuarios)</label>
+                        <input type="text" class="form-control" placeholder="Ejemplo: Cuentas de cobro" id="flu_nombre" name="flu_nombre" required="required">
+                    </div>
+                    
+                    <div class="mb-3 col-md-12">
+                        <label class="form-label" for="flu_descripcion">Descripci&oacute;n del flujo (Le aparece a los usuarios)</label>
+                        <input type="text" class="form-control" placeholder="Ejemplo: Proceso de cobro" id="flu_descripcion" name="flu_descripcion" required="required">
+                    </div>
+                </div>
+        
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4 class="mb-1">Orden flujo</h4>
+                </div>
+                <div class="row">
+                	<div id="cntBtns" class="col-12"></div>
+                	<div class="mb-3 col-12 d-grid gap-2 mt-1">
+                		<button data-target="#cntBtns" class="btn btn-primary" type="button" rol="button" onclick="btnAddCampos( this );">Agregar campo</button>
+                	</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="mb-4">
+                    <span class="mb-1 h4">Archivos para generar</span>
+                </div>
+                <div class="row">
+                	<div id="cntTpls" class="col-12">
+                	
+                	<?php foreach ( $d_tpls as $k ) : ?>
+                    <?php 
+                        $flprt = pathinfo( $k['fl'] );
+                        $flprtLbl = pathinfo( $k['lbl'] );
+                        
+                        $tplVl = $flprt['filename'];
+                        $flname = str_replace(
+                            ['sig_', '_'],
+                            ['', ' '],
+                            $flprtLbl['filename']
+                        );
+                        
+                    ?>
+                    <?php if ( Utiles::ComienzaEn($tplVl, 'sig_') )  : ?>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="tpls_<?php echo $tplVl; ?>" name="tpls_<?php echo $tplVl; ?>" value="<?php echo $tplVl; ?>">
+                        <label class="form-check-label" for="tpls_<?php echo $tplVl; ?>"><?php echo $flname; ?></label>
+                    </div>
+                    
+                    <?php endif; ?>
+                    <?php endforeach; ?>
+                	
+                	</div>
+                </div>
+            </div>
+        </div>
+        
+    </form>
+</div>
+
+<script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+<script type="application/javascript">
+let idMod = null;
+const d_flujosestados = <?php echo json_encode( $l_flujosestados_id ); ?> ;
+const modalFormulario = function ( d ) {
+    var opc = {
+            'id' : d['id'],
+            'title' : d['title'],
+            'btnCerrarX' : true,
+            'scrolling' : true,
+            'center' : true,
+            'size' : 'modal-fullscreen',
+            'level' : 'l2'
+    };
+    return mngModal.dibujar( opc );
+};
+
+const btnAgregarReg = function(){
+	idMod = null;
+	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Agregar registro'} );
+	
+	const body = jQuery( _m ).find( '.modal-body' );
+	const pie = [];
+	pie.push( '<div class="modal-footer">' );
+	pie.push( '	<button class="btn btn-secondary" data-bs-dismiss="modal" >Cerrar</button>' );
+	pie.push( '	<button class="btn btn-primary" onclick="btnGuardar();">Guardar</button>' );
+	pie.push( '</div>' );
+	body.after( pie.join('') );
+	
+	jQuery( _m ).modal('show');	
+};
+
+const mostrarExternos = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	
+	if( _o.is(':checked') ){
+		jQuery('#usuarios_id_' + dt['id']).val( 0 );
+		jQuery('.usrinterno' + dt['id'] ).hide();
+		jQuery('.usrexterno' + dt['id']).show();
+	}
+	else{
+		jQuery('.usrinterno' + dt['id']).show();
+		jQuery('.usrexterno' + dt['id']).hide();
+	}
+};
+
+const llenarDatos = function( o ){
+	const _o = jQuery( o );
+	const _sel = _o.find('option:selected') ;
+	const dt = jQuery( _sel ).data();
+	const id = dt['id'];
+	
+	if( _sel.val() == 0 ){
+		jQuery('#chkEsExterno' + id).trigger('click');
+		jQuery('#nombre_' + id).val('');
+    	jQuery('#correo_' + id).val('');
+    	jQuery('#tel_' + id).val('');
+	}
+	else{
+		jQuery('#nombre_' + id).val(dt['nombres']);
+    	jQuery('#correo_' + id).val(dt['email']);
+    	jQuery('#tel_' + id).val(dt['tel']);
+	}
+};
+
+let campos_i = 0;
+const btnAddCampos = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+
+	const btnsCtn = [];
+	btnsCtn.push('<div id="cntArrFields' + campos_i + '" class="row border rounded py-2 mb-1 dragActivo bg-white" >');
+	
+	btnsCtn.push('	<div class="mb-3 col-md-1 d-flex justify-content-center align-items-center" >');
+	
+	btnsCtn.push('		<div class="form-check mt-4">');
+	btnsCtn.push('			<input id="chkEsExterno' + campos_i + '" class="form-check-input" data-id="' + campos_i + '" onclick="mostrarExternos( this );" type="checkbox" value="" id="esexterno' + campos_i + '">');
+	btnsCtn.push('		</div>');
+	btnsCtn.push('	</div>');
+	
+    btnsCtn.push('	<div class="mb-3 col-md-6 usrinterno' + campos_i + '" >');
+    btnsCtn.push('		<label class="form-label" for="usuarios_id_' + campos_i + '">Usuario *</label>');
+    btnsCtn.push('		<select onchange="llenarDatos( this );" class="form-select" id="usuarios_id_' + campos_i + '" name="usuarios_id_' + campos_i + '" >');
+	btnsCtn.push('			<option value="" selected="selected" disabled="disabled" >Seleccione un usuario</option>');
+<?php foreach( $l_usuarios_id as $v ) : ?>
+    btnsCtn.push('			<option value="<?php echo $v['id'] ?>" data-id="' + campos_i + '" data-nombres="<?php echo trim( $v['nombres'] . ' ' . $v['apellidos']) ?>" data-email="<?php echo trim( $v['mail']) ?>" data-tel="<?php echo trim( $v['tel']) ?>"><?php echo trim( $v['nombres'] . ' ' . $v['apellidos']) ?></option>');
+<?php endforeach; ?>
+	btnsCtn.push('			<option data-id="' + campos_i + '" value="0">Usuario externo</option>');
+    btnsCtn.push('		</select>');
+    btnsCtn.push('	</div>');
+    
+    btnsCtn.push('	<div class="mb-3 col-md-2 usrexterno' + campos_i + '" style="display: none;">');
+    btnsCtn.push('		<label class="form-label" for="nombre_' + campos_i + '">Etiqueta del campo *</label>');
+    btnsCtn.push('		<input type="text" class="form-control" placeholder="Ejemplo: Pepito P&eacute;rez" id="nombre_' + campos_i + '" name="nombre_' + campos_i + '" required="required">');
+    btnsCtn.push('	</div>');
+    btnsCtn.push('	<div class="mb-3 col-md-2 usrexterno' + campos_i + '" style="display: none;">');
+    btnsCtn.push('		<label class="form-label" for="correo_' + campos_i + '">E-mail *</label>');
+    btnsCtn.push('		<input type="email" class="form-control" placeholder="Ejemplo: pepitoperez@correo.com" id="correo_' + campos_i + '" name="correo_' + campos_i + '" required="required">');
+    btnsCtn.push('	</div>');
+    btnsCtn.push('	<div class="mb-3 col-md-2">');
+    btnsCtn.push('		<label class="form-label" for="flujosroles_id_' + campos_i + '">Rol *</label>');
+    btnsCtn.push('		<select class="form-select" id="flujosroles_id_' + campos_i + '" name="flujosroles_id_' + campos_i + '" required="required">');
+<?php foreach( $l_flujosroles_id as $v ) : ?>
+    btnsCtn.push('			<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>');
+<?php endforeach; ?>
+    btnsCtn.push('		</select>');
+    btnsCtn.push('	</div>');
+    btnsCtn.push('	<div class="mb-3 col-md-2">');
+    btnsCtn.push('		<label class="form-label" for="requerimientos_' + campos_i + '">Requerimientos</label>');
+    btnsCtn.push('		<select class="form-select" id="requerimientos_' + campos_i + '" name="requerimientos_' + campos_i + '" >');
+    btnsCtn.push('			<option value="">Sin requerir</option>');
+<?php foreach( $l_requerimientostpls_id as $v ) : ?>
+    btnsCtn.push('			<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>');
+<?php endforeach; ?>
+    btnsCtn.push('		</select>');
+    btnsCtn.push('	</div>');    
+    btnsCtn.push('	<div class="mb-3 col-md-2 usrexterno' + campos_i + '" style="display: none;">');
+    btnsCtn.push('		<label class="form-label" for="tel_' + campos_i + '">Tel&eacute;fono</label>');
+    btnsCtn.push('		<input type="tel" class="form-control" placeholder="Ejemplo: 3110000001" id="tel_' + campos_i + '" name="tel_' + campos_i + '">');
+    btnsCtn.push('	</div>');
+    btnsCtn.push('	<div class="mb-3 col-md-1 d-flex justify-content-center align-items-center">');
+    btnsCtn.push('		<button data-target="#cntArrFields' + campos_i + '" data-id="' + campos_i + '" onclick="btnDelCampos( this );" type="button" class="btn-close border radius p-2 mt-4"></button>');
+    btnsCtn.push('	</div>');
+    btnsCtn.push('	<input type="hidden" id="id_' + campos_i + '" name="id_' + campos_i + '" value="">');
+    btnsCtn.push('	<input type="hidden" id="orden_' + campos_i + '" name="orden_' + campos_i + '" value="" class="idOrden" >');
+    btnsCtn.push('</div>');
+
+	jQuery( dt['target'] ).append( btnsCtn.join('') );
+	
+	const rId = campos_i;
+	campos_i++;
+	
+	agregarAgarre( { 'contenedor' : 'cntBtns', 'hijos' : 'dragActivo', 'fn' : nuevoOrden } );
+	
+	return rId;
+};
+
+const nuevoOrden = function(){
+	let i = 0 ;
+	jQuery('.idOrden').each(function(i, o){
+		jQuery( o ).val( i );
+		i++;
+	});
+};
+
+const btnDelCampos = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	let delDb = false;
+	
+	if( confirm('\xBFDesea eliminar este campo?') ) {
+		const itemId = dt['id'];
+		const dbId = jQuery("#id_" + itemId).val();
+	
+		let eliminar = true;
+		if( dbId > 0 ){
+			eliminar = false;
+			
+			if( confirm('Eliminando este campo, se eliminar\xE1n tambi\xE9n los documentos.\n\xBFDesea continuar?') ){
+				const gs = jQuery.trim( ut.generateString(6) );
+            	if( prompt( 'Escriba el siguiente texto (' + gs + ') para confirmar la eliminaci\xF3n de los registros' ) == gs ){
+            		eliminar = true;
+            		delDb = true;
+            	}
+			}
+			
+		}
+	
+		if( eliminar ){
+			if( delDb ){
+				const target = jQuery( dt['target'] );
+				target.addClass('procesando');
+        
+				const form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FlujositemsHelperDel ); ?>');
+                form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( { 'id' : dbId } ) ) );
+        
+        		__TransportarData(
+        			form_data,
+        			function( o ) {
+        				//console.log( o );
+        				jQuery( dt['target'] ).hide('fast', function(){
+                    		jQuery( dt['target'] ).remove();
+                    		target.removeClass('procesando');
+                    	});
+        			},
+        			function ( err ) {
+        				target.removeClass('procesando');
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+        
+                        jQuery( objmdlErr ).modal('show');
+        			}
+        		);
+			}
+			else{
+				jQuery( dt['target'] ).hide('fast', function(){
+            		jQuery( dt['target'] ).remove();
+            	});
+			}
+		}
+	}
+	
+};
+
+const btnGuardar = function(){
+	ut.validarFrm('frmvalcls', function ( r ) {
+		closeAllModal();
+		
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        if( idMod !== null ){
+        	r['id'] = idMod;
+        }
+        
+        const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FlujosHelperAdd ); ?>');
+        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+				reqs.recargarTabla();
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const btnModRegistro = function ( o ) {
+	const _o = jQuery( o );
+	const dt = _o.data();
+
+    idMod = dt['id'];
+
+	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Modificar registro'} );
+	
+	const body = jQuery( _m ).find( '.modal-body' );
+	const pie = [];
+	pie.push( '<div class="modal-footer">' );
+	pie.push( '	<button class="btn btn-secondary" data-bs-dismiss="modal" >Cerrar</button>' );
+	pie.push( '	<button class="btn btn-primary" onclick="btnGuardar();">Guardar</button>' );
+	pie.push( '</div>' );
+	body.after( pie.join('') );
+
+    const form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FlujositemsPrincipalHelperGet ); ?>');
+    form_data.append('w_flujos_id', idMod );
+    form_data.append('ordenasc', 6 );
+
+    __TransportarData(
+		form_data,
+		function( oDt ) {
+			const o = oDt['data'];
+			const dcs = oDt['documentos'];
+			
+            for (const key in o) {
+                if (Object.hasOwnProperty.call(o, key)) {
+                    const _el = o[key];
+                    const idEl = btnAddCampos( '<b data-target="#cntBtns"></b>' );
+                    jQuery('#flu_nombre').val( _el['flujos_nombre'] );
+                    jQuery('#flu_descripcion').val( _el['flujos_descripcion'] );
+                    
+                    
+                    for (const kData in _el) {
+                        if (Object.hasOwnProperty.call(_el, kData)) {
+                            const _data = _el[kData];
+                            
+                            if( kData == 'usuarios_id'){
+                            	if( _data > 0 ){
+                            		jQuery('#chkEsExterno' + idEl).prop( 'checked', false );
+                            	}
+                            	else{
+                            		jQuery('#chkEsExterno' + idEl).trigger( 'click' );
+                            	}
+                            }
+                            
+                            jQuery('#' + kData + '_' + idEl).val( _data );
+                        }
+                    }
+                    
+                }
+            }
+            
+            for (const key in dcs) {
+                	if ( Object.hasOwnProperty.call( dcs, key ) ) {
+                		const _el = dcs[key];
+
+                		if( _el['activo'] == 1 ){
+                			jQuery("#" + _el['vl'] ).prop('checked', true);
+                		}
+                	}
+                }
+		},
+		function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		}
+	);
+
+    jQuery( _m ).modal('show');
+};
+
+const modRegistro = function( api, o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+
+	const opc = { 'id' : 'ajaxldr' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+    
+    const form_data = new FormData();
+    form_data.append('ajax', api );
+    form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+
+	__TransportarData(
+		form_data,
+		function( o ) {
+			reqs.recargarTabla();
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		},
+		function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		}
+	);
+};
+
+const btnPauseRegistro = function( o ){
+	modRegistro( '<?php echo md5( IndexCtrl::API_FlujosHelperEstadoMod ); ?>', o );
+};
+
+const btnPlayRegistro = function( o ){
+	modRegistro( '<?php echo md5( IndexCtrl::API_FlujosHelperEstadoMod ); ?>', o );
+};
+
+const Requerimientos = function( dC ){ // dC = data constructor
+	const _this = this;
+	const tablaCont = dC['tableContainer'];
+	let tbInter = null;
+	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
+	
+	_this.dibujarTb = function(){
+		const html = [];
+		
+		html.push('<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;"></table>');
+		
+		return html.join('');
+	};
+	
+	const btnModifyHtml = function( id ){
+		const html = [];
+    	html.push('<button onclick="btnModRegistro(this);" data-id="' + id + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + id + '">');
+        html.push('	<i class="fe fe-edit fs-5"></i>');
+        html.push('	<div id="modTpl' + id + '" class="d-none">');
+        html.push('		<h6 class="mb-0 text-white">Editar</h6>');
+        html.push('	</div>');
+        html.push('</button>');
+        return html.join('');
+	};
+	
+	const btnPlayHtml = function( id ){
+		const html = [];
+    	html.push('<button onclick="btnPauseRegistro(this);" data-id="' + id + '" data-value="<?php echo md5(OperacionesCtrl::FLUJOS_ESTADO_CORRIENDO) ?>" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="btnPlayTpl' + id + '">');
+        html.push('	<i class="fas fa-play fs-5"></i>');
+        html.push('	<div id="btnPlayTpl' + id + '" class="d-none">');
+        html.push('		<h6 class="mb-0 text-white">Iniciar</h6>');
+        html.push('	</div>');
+        html.push('</button>');
+        
+        return html.join('');
+	};
+	
+	const btnPauseHtml = function( id ){
+		const html = [];
+    	html.push('<button onclick="btnPlayRegistro(this);" data-id="' + id + '" data-value="<?php echo md5(OperacionesCtrl::FLUJOS_ESTADO_DETENIDO) ?>" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="btnPlayTpl' + id + '">');
+        html.push('	<i class="fas fa-pause fs-5"></i>');
+        html.push('	<div id="btnPlayTpl' + id + '" class="d-none">');
+        html.push('		<h6 class="mb-0 text-white">Iniciar</h6>');
+        html.push('	</div>');
+        html.push('</button>');
+        
+        return html.join('');
+	};
+	
+	_this.dibujarDataTable = function(){
+		const tb = _this.dibujarTb();
+		jQuery( tablaCont ).html( tb );
+		
+		tbInter = jQuery( '#' + tableId ).DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: './index.php',
+                data : function(d){
+                	d.ajax = '<?php echo md5( IndexCtrl::API_FlujosGetAjax ); ?>';
+                },
+                type: 'POST'
+            },
+            columns: [
+                { 'title' : 'Id', data: 'id' },
+                { 'title' : 'Nombre', data: 'nombre' },
+                { 'title' : 'Descripcion', data: 'descripcion' },
+                { 'title' : 'version', data: 'version' },
+                { 
+                	'title' : 'Estado', data: 'flujosestados_id',
+                	render: function(data, type, row) {
+                		let pildora = "";
+                		
+                		let clsTp = "";
+    					if ( data == 2 ){
+    						clsTp = "bg-success";
+    					}
+    					else if( data == 1 ){
+    						clsTp = "bg-secondary";
+    					}
+                		
+                		for (const key in d_flujosestados ) {
+                			if (Object.hasOwnProperty.call( d_flujosestados, key ) ) {
+                				const _el = d_flujosestados[ key ];
+                				if( _el['id'] == data ){
+									pildora = '<span class="badge ' + clsTp + '">' + _el['nombre'] + '</span>';                					
+                				}
+                			}
+            			}
+                		return pildora;
+                	} 
+            	},
+                { 'title' : 'Creador', data: 'usuarios' },
+                { 'title' : 'Creado', data: 'fecha' },
+                {
+                    title: 'Acciones',
+                    data: null,
+                    orderable: false,
+                    width: '1%',
+                    render: function(data, type, row) {
+                    	const btnMod = btnModifyHtml( row.id );
+                    	let btnPlay = btnPlayHtml( row.id );
+                    	if( row.flujosestados_id == 2 ){
+                    		btnPlay = btnPauseHtml( row.id );
+                    	}
+                    	
+                        return `
+                        <div class="d-flex justify-content-start">
+                            ${btnMod}
+                            ${btnPlay}
+                        </div>
+                        `;
+                    }
+                }
+            ],
+            order: [[6, 'desc']],
+            responsive: false,
+            language: lengua_es,
+            processing: true
+        });
+		
+	};
+	
+    _this.recargarTabla = function () {
+        if ( tbInter ) {
+			tbInter.ajax.reload(null, false);
+        }
+    };
+};
+const dataConstruct = {
+	'tableContainer' : '#contTb'
+};
+const reqs = new Requerimientos ( dataConstruct );
+
+jQuery( document ).ready(function(){
+	reqs.dibujarDataTable();
+});
+
+</script>

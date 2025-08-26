@@ -1,0 +1,209 @@
+<p><strong>INFORME DE PAGO - PERSONA NATURAL - JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</strong></p>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td><span style="font-size:11px">1.- Clase y Datos de Compromiso (Datos del Contratista)</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Contrato</span></strong></th>
+			<td style="text-align:left; width:25%"><span style="font-size:11px">JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Proceso SECOP</span></strong></th>
+			<td style="text-align:left; width:25%">&nbsp;</td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Contratista</span></strong></th>
+			<td><span style="font-size:11px">{$empl_nombres}</span></td>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Documento de identidad</span></strong></th>
+			<td><span style="font-size:11px">{$empl_documento}</span></td>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Tipo Doc.&nbsp;</span></strong></th>
+			<td><span style="font-size:11px">{$empl_tipodoc}</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha inicial del contrato</span></strong></th>
+			<td><span style="font-size:11px">[fecha valor={$bogdata_fecha_de_entrada} esexcel=true]</span></td>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha final del contrato</span></strong></th>
+			<td><span style="font-size:11px">[fechacontratocompleto fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} esexcel=true]</span></td>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Correo electr&oacute;nico</span></strong></th>
+			<td><span style="font-size:11px">{$empl_mail}</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Objeto del contrato</span></strong></th>
+		</tr>
+		<tr>
+			<td style="text-align:left"><span style="font-size:11px">{$bogdata_objeto}</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="text-align:left"><span style="font-size:11px">2.- Informaci&oacute;n del contrato</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Periodo objeto del informe</span></strong></th>
+			<td style="width:16%"><span style="font-size:11px">[fechaxls&nbsp;mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} formato=Y-m-d] hasta [fecha&nbsp;valor={$mesaplica} formato=Y-m-t]</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Fecha inicial informe</span></strong></th>
+			<td style="width:16%"><span style="font-size:11px">[fecha valor={$bogdata_fecha_de_entrada} esexcel=true]</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Fecha final &nbsp;informe</span></strong></th>
+			<td style="width:20%"><span style="font-size:11px">[fecha valor={$bogdata_fecha_de_entrada} esexcel=true formato=Y-m-t]</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Valor inicial del contrato</span></strong></th>
+			<td style="width:16%"><span style="font-size:11px">$ [moneda valor={$bogdata_valor_crp}]</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Valor adicional</span></strong></th>
+			<td style="width:16%"><span style="font-size:11px">0</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Valor total del contrato</span></strong></th>
+			<td style="width:20%"><span style="font-size:11px">$ [moneda valor={$bogdata_valor_crp}]</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Plazo inicial del contrato</span></strong></th>
+			<td style="width:12%">&nbsp;</td>
+			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Plazo adicional</span></strong></th>
+			<td style="width:12%"><span style="font-size:11px">0</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Valor mensual del contrato</span></strong></th>
+			<td style="width:12%"><span style="font-size:11px">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false descuentos=false]</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Valor a pagar</span></strong></th>
+			<td style="width:16%"><span style="font-size:11px">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false]</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="text-align:left"><span style="font-size:11px">2.1 - Adicionales del contrato</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha inicia</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha termina</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">D&iacute;as</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">N&uacute;mero CRP</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Valor adici&oacute;n</span></strong></th>
+		</tr>
+		<tr>
+			<th style="text-align:left">&nbsp;&nbsp;</th>
+			<th style="text-align:left">&nbsp;</th>
+			<th style="text-align:left">&nbsp;</th>
+			<th style="text-align:left">&nbsp;</th>
+			<th style="text-align:left">&nbsp;</th>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="text-align:left"><span style="font-size:11px">3 - Aportes seguridad social</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">IBC Per&iacute;odo de Cotizaci&oacute;n</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Clase Riesgo ARL</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Valor Pago Aportes de Pensi&oacute;n</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Valor Pago Aportes de Salud</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Valor Pago Aportes ARL</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Total Pagado Seguridad Social</span></strong></th>
+		</tr>
+		<tr>
+			<td style="text-align:left">[fecha valor={$mesaplica} formato=m]</td>
+			<td style="text-align:left">&nbsp;</td>
+			<td style="text-align:left">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false pension=true descuentos=false]</td>
+			<td style="text-align:left">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false salud=true descuentos=false]</td>
+			<td style="text-align:left">0</td>
+			<td style="text-align:left">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false totalaportes=true descuentos=false]</td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="text-align:left"><span style="font-size:11px">4 - Informaci&oacute;n de Novedades del Contrato</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Fecha Inicia Novedad</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Fecha Termina Novedad</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left; width:25%">D&iacute;as</th>
+			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Novedad</span></strong></th>
+		</tr>
+		<tr>
+			<td style="text-align:left">&nbsp;</td>
+			<td style="text-align:left">&nbsp;</td>
+			<td style="text-align:left">&nbsp;</td>
+			<td style="text-align:left">&nbsp;</td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="text-align:left"><span style="font-size:11px">4.1 - Informaci&oacute;n de Embargos o Cesiones de Derecho</span></td>
+		</tr>
+	</tbody>
+</table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha Inicia Embargo / Cesi&oacute;n de Derechos</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha Termina Embargo / Cesi&oacute;n de Derechos</span></strong></th>
+			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Descripci&oacute;n</span></strong></th>
+		</tr>
+	</tbody>
+</table>
+
+<p>[flujofinanciero&nbsp;crp={$bogdata_nmero_de_crp} fondos={$bogdata_fondos} fondosdesc={$bogdata_descripcion_del_fondo} rubro={$bogdata_rubro}&nbsp;rubrodesc={$bogdata_descripcin_del_rubro}&nbsp;tiporegistro=PRESUPUESTAL mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final}&nbsp; valortotal={$bogdata_valor_crp} ]</p>
+
+<p>[obligaciones empleado={$empl_id} mesaplica={$mesaplica} ]</p>

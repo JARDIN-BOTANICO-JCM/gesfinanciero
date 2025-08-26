@@ -1,0 +1,394 @@
+<?php
+OperacionesCtrl::$AUTO_LOG_OUT = false;
+
+$cfg = OperacionesCtrl::LeerConfigCorp();
+$_CFG_PDF_PAGECONFIG = isset( $cfg[ OperacionesCtrl::CFG_PDF_PAGECONFIG ]) ? $cfg[ OperacionesCtrl::CFG_PDF_PAGECONFIG ]["val"] : base64_encode( '[]' );
+
+$docinfo = array();
+$dtFirst = array();
+
+$codId = false;
+if ( sizeof( $data ) > 0 ) {
+    $codId = true;
+    
+    $dtFirst = $data[0];
+    
+    if ( $docente ) {
+        $dtFirst['estudiantes'] = $dtFirst["usuarios"];
+        $dtFirst['est_tipodoc'] = '';
+        $dtFirst['est_documento'] = $dtFirst["documento"];
+    }
+    
+    $frmpg = json_decode( base64_decode( $_CFG_PDF_PAGECONFIG ) , true );
+    $piDoc = pathinfo( $dtFirst[ 'pdfid' ] );
+    $docinfo = json_decode( base64_decode( $frmpg[ $piDoc['filename'] ] ) , true );
+}
+
+$logoinst = OperacionesCtrl::obtener_LogoCompany();
+$instDt = OperacionesCtrl::institucion_Obtener();
+$inst = $instDt[0];
+?>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta http-equiv="X-UA-Compatible" content="ie=edge">		
+        <meta name="description" content="">
+        <meta name="author" content="">
+        <meta charset="utf-8">
+
+		
+		<title>Acappdemy - Matr&iacute;cula</title>
+		<!-- CSS -->		
+		<!-- CSS only -->
+		<link rel="stylesheet" href="/temas/js/bootstrap-5.2.0-dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="/temas/js/fontawesome-free-6.1.1-web/css/all.min.css" >
+		<link rel="stylesheet" href="/temas/js/flatpickr-4.6.13/flatpickr.min.css" >
+		<link rel="stylesheet" href="/temas/js/dragula/dist/dragula.min.css" >
+		<link rel="stylesheet" href="/temas/js/feather/feather.css">
+		<link rel="stylesheet" href="/temas/js/bootstrap-icons/font/bootstrap-icons.css" />
+		<link rel="stylesheet" href="/temas/js/bootstrap-select-1.14.0-beta2/dist/css/bootstrap-select.css">
+		<link rel="stylesheet" href="/temas/js/simplebar-5.3.8/dist/simplebar.min.css">
+		<link rel="stylesheet" href="/temas/js/DataTables/datatables.min.css" type="text/css"/>
+
+		
+		<link rel="shortcut icon" href="/temas/favicon/favicon_20x20.png" type="image/x-icon" />
+		<link rel="apple-touch-icon" href="/temas/favicon/favicon_180x180.png" sizes="180x180">
+        <link rel="icon" href="/temas/favicon/favicon_32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico" sizes="16x16" type="image/png">
+        <link rel="icon" href="/temas/favicon/favicon.ico">
+		
+		<!-- Custom 
+		<link rel="stylesheet" href="/temas/css/theme.min.css">
+		-->
+		<!-- JS -->
+		<script type="text/javascript" src="/temas/js/jquery-3.6.0.min.js "></script>
+		<script type="text/javascript" src="/temas/js/utilidades.js?f=20190609150612"></script>
+		<script type="text/javascript">var ut = new Utilidades();</script>
+		<script type="text/javascript" src="/temas/js/Colecciones.js?f=202207271743"></script>
+
+
+        <style>
+            .bd-placeholder-img {
+                font-size: 1.125rem;
+                text-anchor: middle;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                user-select: none;
+            }
+    
+            @media (min-width : 768px) {
+                .bd-placeholder-img-lg {
+                    font-size: 3.5rem;
+                }
+            }
+    
+            .b-example-divider {
+                height: 3rem;
+                background-color: rgba(0, 0, 0, .1);
+                border: solid rgba(0, 0, 0, .15);
+                border-width: 1px 0;
+                box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+            }
+    
+            .b-example-vr {
+                flex-shrink: 0;
+                width: 1.5rem;
+                height: 100vh;
+            }
+    
+            .bi {
+                vertical-align: -.125em;
+                fill: currentColor;
+            }
+    
+            .nav-scroller {
+                position: relative;
+                z-index: 2;
+                height: 2.75rem;
+                overflow-y: hidden;
+            }
+    
+            .nav-scroller .nav {
+                display: flex;
+                flex-wrap: nowrap;
+                padding-bottom: 1rem;
+                margin-top: -1px;
+                overflow-x: auto;
+                text-align: center;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+            }
+            .container {
+                max-width: 960px;
+            }
+        </style>
+
+	</head>
+
+    <body class="bg-light">
+    
+        <div class="container">
+            <main>
+            
+            	<?php if ( $codId ) : ?>
+            	
+            	<div class="row pt-3">
+            		<div class="col-12 d-flex justify-content-center align-items-center">
+            			<div class="me-3">
+                			<img src="<?php echo $logoinst;?>" class="" style="height: 150px; object-fit: cover;" />
+            			</div>
+            			<div>
+            				<h5><?php echo $inst['nombre']?></h5>
+            				<span><?php echo $inst['direccion'] ?></span>
+            				<br>
+            				<span>Tel: <?php echo $inst['telefono'] ?></span>
+            			</div>
+                	</div>
+            	</div>
+            	
+				<div class="row ">
+				
+    				<div class="col-12 col-md-7 mb-3">
+    				
+                        <div class="card mb-3">
+                            <!-- card body -->
+                            <div class="card-body d-flex justify-content-between p-2">
+    							<button id="prev" class="btn btn-sm btn-secondary"><i class="fas fa-chevron-left"></i></button>
+                                <span>
+                                	<span id="page_num"></span> / <span id="page_count"></span>
+                            	</span>
+                                <button id="next" class="btn btn-sm btn-secondary"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+        
+                        <div class="card mb-3">
+                        	<div class="card-body">
+                        		<div class="d-flex justify-content-center">
+                        			<canvas id="the-canvas" style="border: 1px solid black; direction: ltr;"></canvas>
+                        		</div>
+                        	</div>
+                        </div>
+    				
+                	</div>
+				
+                    <div class="col-12 col-md-5 mb-3 order-md-last order-first">
+                        <!-- card -->
+                        <div class="card">
+                            <!-- card body -->
+                            <div class="card-body">
+                                <div class="mb-6 border-bottom mb-3 pb-3 d-flex justify-content-start">
+                                    <!-- heading -->
+                                    <div class="h1 me-3">
+                                    	<i class="fas fa-award"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="mb-0">Verificaci&oacute;n de documento</h2>
+                                        <p class="mb-0">El documento <strong>"<?php echo $docinfo['pdftitle']; ?>"</strong> v&aacute;lido y firmado electr&oacute;nicamente, a continuaci&oacute;n los detalles del firmado.</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <!-- row -->
+                                    <div class="row  ">
+                                        <!-- col -->
+                                        <div class="col-12 ">
+                                            <div class="alert alert-success">
+                                                <span>El proceso de firmado inicia el <?php echo $dtFirst['fecha'] . ""; ?>, involucrando a <?php echo $dtFirst['estudiantes']?> identificado con <?php echo $dtFirst['est_tipodoc']?> n&uacute;mero <?php echo $dtFirst['est_documento']?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                	<?php $urldocfirmado = ""; ?>
+                                    <?php foreach ( $data as $vDt ) : ?>
+                                    <?php 
+                                    $docData = "";
+                                    if ( $docente ) {
+                                        $vDt['acudientes'] = $vDt['usuarios'];
+                                        $docData = "&docente=" . md5( OperacionesCtrl::FIRMAS_CERT_MODO_DOCENTE );
+                                    }
+                                    ?>
+                                    <!-- row -->
+                                    <div class="row justify-content-between ">
+                                        <!-- col -->
+                                        <div class="col-12 ">
+                                            <div class="d-md-flex">
+                                                <div class="mt-2">
+                                                    <h5 class="mb-1"><?php echo $vDt['firmasestados']; ?> por <strong><?php echo $vDt['acudientes']; ?></strong></h5>
+                                                    <span><?php echo $vDt['tipodoc'] . ' No. ' . $vDt['documento']; ?></span>
+                                                    <br>
+                                                    <a href="mailto:<?php echo $vDt['mail']?>"><?php echo $vDt['mail']?></a>
+                                                    <br >
+                                                    <span>P&aacute;ginas del documento: <?php echo $vDt['paginas'] ?></span>
+                                                    <br>
+                                                    <small class="text-muted">ID: <?php echo '0x' . $vDt['pdfhash']; ?></small>
+                                                    <br>
+                                                    <small class="text-muted"><?php echo $vDt['ip'] ?></small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- price -->
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-end mt-2">
+                                                <h5><?php echo $vDt['fechahora']?></h5>
+                                            </div>
+                                        </div>
+                                        <?php 
+                                        $url_msk_dt = explode( "/", $vDt['pdfurl'] );
+                                        $idMsk = $url_msk_dt[ sizeof( $url_msk_dt ) - 2 ];
+                                        $dcMsk = $url_msk_dt[ sizeof( $url_msk_dt ) - 1 ];
+                                        
+                                        if( $vDt['firmasestados_id'] == 2 ){
+                                            $urldocfirmado = "/index.php?ajaxl=" . md5(IndexCtrl::API_LNK_DESCARGAR_PDF) . "&id=" . md5( $idMsk ) . "&doc=" . $dcMsk . "" . $docData;
+                                        }
+                                        ?>
+                                    </div>
+                                    <hr>
+                                    <?php endforeach; ?>
+                                    
+                                    <div class="mb-3 pt-3">
+                                        <!-- text -->
+                                        <div class="d-flex align-items-start">
+                                            <div>
+												<h4 class="mb-0">C&oacute;digo de verificaci&oacute;n</h4>
+												<small class="text-muted">0x<?php echo $cod; ?></small>
+											</div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php else : ?>
+                
+                <div class="py-5 text-center">
+                    <img class="d-block mx-auto mb-4" src="<?php echo $logoinst; ?>" alt="" height="128" style="object-fit: cover;">
+                    <h2>Formulario de matr&iacute;cula</h2>
+                </div>
+                
+                <div class="row g-5">
+                	<div id="frmval" class="col-md-12 col-lg-12 frmvalcls">
+                    	<div class="alert alert-danger d-flex align-items-center" role="alert">
+                          <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#gbl-exclamation-triangle-fill"/></svg>
+                          <div>
+                            El c&oacute;digo "<?php echo $cod; ?>" es incorrecto.
+                          </div>
+                        </div>
+                        <p>Verifique la informaci&oacute;n del documento.</p>
+                	</div>
+                </div>
+                
+                <?php endif; ?>
+            </main>
+    
+            <footer class="my-5 pt-5 text-muted text-center text-small">
+                <p class="mb-1">&copy; 2022 Acappdemy</p>
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="#">Privacy</a></li>
+                    <li class="list-inline-item"><a href="#">Terms</a></li>
+                    <li class="list-inline-item"><a href="#">Support</a></li>
+                </ul>
+            </footer>
+        </div>
+        
+            
+        <div id="frmNuevoRegistro" class="mdlCont" style="display:none;" >
+            <form id="frmvalFirma" class="frmvalFirmacls">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row" id="contPrevDoc"></div>
+                    </div>
+            	</div>
+        	</form>
+        </div>
+        
+<script type="application/javascript" src="/temas/js/pdfjs-3.11.174-dist/build/pdf.js"></script>
+<script type="application/javascript">
+const url = '<?php echo $urldocfirmado ; ?>';
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/temas/js/pdfjs-3.11.174-dist/build/pdf.worker.js';
+
+var pdfDoc = null,
+	pageNum = 1,
+    pageRendering = false,
+    pageNumPending = null,
+    scale = 0.8,
+    canvas = document.getElementById('the-canvas'),
+    ctx = canvas.getContext('2d');
+
+function renderPage(num) {
+	pageRendering = true;
+	
+	pdfDoc.getPage(num).then(function(page) {
+	
+    	var viewport = page.getViewport({ scale: scale, });
+    
+    	var outputScale = window.devicePixelRatio || 1;
+    
+    	canvas.width = Math.floor(viewport.width * outputScale);
+    	canvas.height = Math.floor(viewport.height * outputScale);
+    	canvas.style.width = Math.floor(viewport.width) + "px";
+    	canvas.style.height =  Math.floor(viewport.height) + "px";
+    
+    	var transform = outputScale !== 1
+        ? [outputScale, 0, 0, outputScale, 0, 0]
+        : null;
+    
+    	var renderContext = {
+            canvasContext: ctx,
+            transform: transform,
+            viewport: viewport,
+    	};
+    	var renderTask = page.render(renderContext);
+    
+        renderTask.promise.then(function () {
+        	pageRendering = false;
+    		if (pageNumPending !== null) {
+                renderPage(pageNumPending);
+                pageNumPending = null;
+    		}
+    		
+    		jQuery('#the-canvas').prop('style','border: 1px solid black; direction: ltr; width : 100%');
+    	});
+    });
+
+	document.getElementById('page_num').textContent = num;
+}
+
+function queueRenderPage(num) {
+    if (pageRendering) {
+		pageNumPending = num;
+	} else {
+		renderPage(num);
+    }
+}
+
+function onPrevPage() {
+	if (pageNum <= 1) {
+		return;
+	}
+	pageNum--;
+	queueRenderPage(pageNum);
+}
+document.getElementById('prev').addEventListener('click', onPrevPage);
+
+function onNextPage() {
+	if (pageNum >= pdfDoc.numPages) {
+		return;
+	}
+	pageNum++;
+	queueRenderPage(pageNum);
+}
+document.getElementById('next').addEventListener('click', onNextPage);
+
+var loadingTask = pdfjsLib.getDocument(url);
+loadingTask.promise.then(function(pdfDoc_) {
+	pdfDoc = pdfDoc_;
+	document.getElementById('page_count').textContent = pdfDoc.numPages;
+
+	renderPage(pageNum);
+});
+</script>
+
+

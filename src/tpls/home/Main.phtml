@@ -1,0 +1,89 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+OperacionesCtrl::authRequOff();
+
+$inst = \OperacionesCtrl::institucion_Obtener();
+$instDt = array(
+    'nombre' => 'Sin definir'
+);
+if ( isset( $inst[0] ) ) {
+    $instDt = $inst[0];
+}
+?>
+<div id="db-wrapper" class="" style="background-color: #fefcfb; display: none;" >
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php Menubar::DibujarMenuHome(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeaderHome( ); ?>
+            
+        <!-- Container fluid -->
+        <section class="container-fluid p-4">
+        
+			<div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-3 mb-3 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold">&iexcl;<?php echo $instDt['nombre'] ; ?>, te da la bienvenida!</h1>
+                        </div>
+                        <div class="d-flex">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+        	<div id="contAgenda" class="row" style="display: none;" ></div>
+        	
+        	<div class="row" >
+        		<div class="col-12">
+					<h3>Novedades</h3>
+					<p>Encuentra aqu&iacute; informaci&oacute;n relevante sobre actividades, noticias, tareas, rendimiento y todas las actividades relacionadas con tus dependientes</p>
+				</div>
+        	</div>
+        	
+			<div class="row" id="notisecs">
+				
+				<div class="col-12" >
+    				<div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+    					Cargando ...
+          			</div>
+      			</div>
+                
+            </div>
+            
+        </section>
+        
+    </div>
+</div>
+
+<script type="text/javascript">
+const checkIfImageExists = function (url, callback) {
+	const img = new Image();
+	img.src = url;
+
+	if (img.complete) {
+		callback(true);
+	} else {
+		img.onload = () => {
+			callback(true);
+		};
+      
+		img.onerror = () => {
+			callback(false);
+		};
+	}
+};
+
+
+jQuery( document ).ready(function(){
+	home.navLogin(function(){
+	});
+});
+</script>
+

@@ -1,0 +1,164 @@
+<?php
+$usuario = "";
+if ( isset( $_POST['usuario'] ) ) {
+    $usuario = $_POST['usuario'];
+}
+
+OperacionesCtrl::registrarVisita_Agregar( array() );
+
+$logoinst = OperacionesCtrl::obtener_LogoCompany();
+?>
+<div class="container d-flex flex-column">
+    <div class="row align-items-center justify-content-center g-0 min-vh-100">
+
+        <div id="cplogin" class="col-lg-5 col-md-8 py-8 py-xl-0">
+            <!-- Card -->
+            <div class="card shadow ">
+                <!-- Card body -->
+                <div class="card-body p-6">
+                    <div class="">
+                        <p style="text-align: center;" class="m-0">
+                        	
+                            <a href="../index.php"><img src="<?php echo $logoinst; ?>" height="92" class="mb-4" alt=""  style="-webkit-border-radius: 45px; -moz-border-radius: 45px; border-radius: 45px;"></a>
+                        </p>
+                        <h2 class="mb-1 fw-bold">Inicio de sesi&oacute;n administrativo</h2>
+                    </div>
+                    <!-- Form -->
+                    <form method="post" action="./index.php">
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="usuario" class="form-label">Usuario o correo electr&oacute;nico</label>
+                            <input type="text" id="usuario" class="form-control" name="usuario" placeholder="Usuario" required="" value="<?php echo $usuario ; ?>" >
+                        </div>
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Contrase&ntilde;a</label>
+                            <input type="password" id="password" class="form-control" name="clave" placeholder="***********" required="">
+                        </div>
+                        <!-- Checkbox -->
+                        <div class="d-lg-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberme">
+                                <label class="form-check-label " for="rememberme">Recordarme</label>
+                            </div>
+                            <div>
+                                <button type="button" class="btn btn-link p-0" onclick="accionesShowHide('#cprecov', '#cplogin');">Olvid&eacute; mi contrase&ntilde;a</button>
+                            </div>
+                        </div>
+                        <div>
+                            <!-- Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary ">Iniciar</button>
+                            </div>
+                        </div>
+                        <hr class="mt-4">
+                        <div class="m-0 text-center">
+                            <a href="../index.php"><img src="./temas/img/Acappdemy_r_text_logo.svg" height="64" class="mb-0" alt=""></a>
+                        </div>
+                        <input type="hidden" name="pageid" value="">
+                        <input type="hidden" name="cmd" value="Autenticar" />
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+		<div id="cprecov" class="col-lg-5 col-md-8 py-8 py-xl-0" style="display: none;">
+			<!-- Card -->
+			<div class="card shadow">
+				<!-- Card body -->
+				<div class="card-body p-6">
+					<div class="mb-4">
+						<a href="../index.html"><img src="../assets/images/brand/logo/logo-icon.svg" class="mb-4" alt=""></a>
+						<h1 class="mb-1 fw-bold">Recuperaci&oacute;n de clave</h1>
+						<p>Ingrese los campos requeridos.</p>
+					</div>
+					<!-- Form -->
+					<form id="frmRecu" class="frmRecuCls" >
+							<!-- Email -->
+						<div class="mb-3">
+							<label for="email" class="form-label">Correo electr&oacute;nico</label>
+							<input type="email" id="email" class="form-control" name="email" placeholder="Ingresa tu correo electr&oacute;nico" required="required" >
+						</div>
+							<!-- Button -->
+						<div class="mb-3 d-grid">
+							<button type="button" class="btn btn-primary" data-targetid="#email" onclick="recuperarClave( this );" >
+								Recuperar contrase&ntilde;a
+							</button>
+						</div>
+						<span>Volver a <button type="button" class="btn btn-link p-0" onclick="accionesShowHide('#cplogin', '#cprecov');">Login</button></span>
+					</form>
+				</div>
+			</div>
+		</div>
+        
+    </div>
+</div>
+
+<script type="text/javascript">
+const accionesShowHide = function( s, h ){
+	jQuery( h ).hide( 'fast' , function(){
+		jQuery( s ).show( 'fast', function(){} );
+	});
+};
+
+const recuperarClave = function( o ){
+	const _o = jQuery( o );
+	const _dt = _o.data();
+	
+	const idrec = jQuery( _dt['targetid'] );
+
+	ut.validarFrm('frmRecuCls', function ( r ) {
+		const form_data = new FormData();
+    	form_data.append('ajax', "<?php echo md5( IndexCtrl::API_RecuperarSisClave ) ?>" );
+    	form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) )  );
+    	
+    	__TransportarData(
+    		form_data,
+    		function( dt ) {
+    			console.log( dt );
+    		},
+    		function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                if( ("" + err.responseText).length > 0 ){
+                	alerta.html( err.responseText );
+                }else{
+                	alerta.html( err );
+                }
+    
+                jQuery( objmdlErr ).modal('show');
+    			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    		}
+    	);
+	});
+};
+
+jQuery(document).ready(function() {
+    <?php 
+    $txt = $this->getMensaje();
+    ?>
+    <?php if( strlen( trim( $txt ) ) > 0 ) : ?>
+    var myModal = new bootstrap.Modal(document.getElementById("stcMdl_l1"), {});
+    
+    var modalDialog = jQuery('#stcMdl_l1').find('.modal-dialog');
+    var html = [];
+    html.push( '<div class="modal-content">');
+    html.push( '    <div class="modal-header">');
+    html.push( '        <h5 class="modal-title">Error inicio de sesi&oacute;n</h5>');
+    html.push( '        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>');
+    html.push( '    </div>');
+    html.push( '    <div class="modal-body">');
+    html.push( '        <?php echo $txt; ?>');
+    html.push( '    </div>');
+    html.push( '    <div class="modal-footer">');
+    html.push( '        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>');
+    html.push( '    </div>');
+    html.push( '</div> ');
+    modalDialog.html( html.join('') );
+    myModal.show();
+    <?php endif; ?>
+
+});
+</script>

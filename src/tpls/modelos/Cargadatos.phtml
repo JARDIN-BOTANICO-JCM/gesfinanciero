@@ -1,0 +1,164 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$l_anyolectivo = array();
+try {
+    $l_anyolectivo = OperacionesCtrl::anyolectivo_Obtener();
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$l_cargadatos = array();
+try {
+    $l_cargadatos = OperacionesCtrl::cargadatos_Obtener( array( 'ordenasc' => 1 ) );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+			<div class="row">
+				<div class="col-lg-12 col-md-12 col-12">
+					<div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+						<div class="mb-3 mb-lg-0">
+							<h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+									<li class="breadcrumb-item active" aria-current="page">
+										<?php echo $crum['l2']; ?>
+									</li>
+								</ol>
+							</nav>
+
+						</div>
+
+					</div>
+				</div>
+			</div>
+
+			<div class="card">
+				<div class="card-body">
+					<h4 class="mb-0">Centro de control</h4>
+					<p class="mb-4">
+						Aqu&iacute; puede subir los archivos necesarios para que los usuarios puedan generar sus documentos autom&aacute;ticamente
+					</p>
+					<form id="frmval" class="row frmvalcls ">
+						<div class="col-12 mb-3">
+							<label for="cargadatos_anyo_0" class="h2">A&ntilde;o para cargar</label>
+							<select class="form-select" id="cargadatos_anyo_0" name="cargadatos_anyo_0" required="required" >
+                            	<option selected disabled value="">Seleccione a&ntilde;o para cargar</option>
+                            	<?php foreach ( $l_anyolectivo as $kAnyo ) : ?>
+                            	<option value="<?php echo $kAnyo['id']; ?>"><?php echo $kAnyo['nombre']; ?></option>
+                            	<?php endforeach; ?>
+                        	</select>
+						</div>
+						
+						<div class="col-12 mb-3">
+							<label for="cargadatos_src_0" class="h2">Fuente de datos</label>
+							<select class="form-select" id="cargadatos_src_0" name="cargadatos_src_0" required="required" onchange="archivosHelper( this );" >
+                            	<option selected disabled value="">Seleccione tipo de datos</option>
+                            	<?php foreach ( $l_cargadatos as $kCdata ) : ?>
+                            	<option value="<?php echo $kCdata['id']; ?>" data-nombre="<?php echo $kCdata['nombre']; ?>" data-multiple="<?php echo $kCdata['multiple']; ?>" data-tiposaceptados="<?php echo $kCdata['tiposaceptados']; ?>"><?php echo $kCdata['label']; ?></option>
+                            	<?php endforeach; ?>
+                        	</select>
+						</div>
+						
+                        <div class="mb-3 col-12" >
+                        	<label for="cargadatos_fls_0" class="h2">Archivos</label>
+                        	<input onchange="chkArchivo( this );" data-proposito="" data-id="0" class="form-control evaluacionresflsClsData" type="file" id="cargadatos_fls_0" name="cargadatos_fls_0" accept=".xlsx,.pdf" required="required"> 
+                        </div>
+						
+						<div class="col-12">
+							<button class="btn btn-primary" type="submit" onclick="actualizar();">
+								Cargar archivos
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="application/javascript">
+const archivosHelper = function( o ){
+	const _o = jQuery( o );
+	const sel = _o.find( 'option:selected' );
+	const dt = jQuery( sel ).data();
+	const cargadatos_fls = jQuery('#cargadatos_fls_0');
+	
+	document.getElementById('cargadatos_fls_0').value = '';
+	
+	if( dt['multiple'] == 1 ){
+		cargadatos_fls.prop('multiple', true);
+	}
+	cargadatos_fls.prop( 'accept',  dt['tiposaceptados'] );
+};
+
+const chkArchivo = function( o ){
+	chkUploadFiles( o, <?php echo Utiles::getPostMaxSizeMB() ; ?>, function( fl ){
+		console.log( fl );
+	});
+};
+
+const actualizar = function(){
+	ut.validarFrm('frmvalcls', function ( r ) {
+        const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Cargadatos_Upload ); ?>');
+        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+        
+        jQuery( '.evaluacionresflsClsData' ).each(function( i, ob ){
+			const _ob = jQuery( ob );
+			const _obDt = _ob.data();
+			const dtFItem = _obDt['id'];
+			form_data.append('fuentes_' + dtFItem, _ob.prop('files')[0] );
+		});
+
+        __TransportarData(
+            form_data,
+            function( o ) {
+            	const result = o.result;
+            	
+            	const objmdl2 = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Carga de datos','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdl2 + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Carga correcta' );
+
+                jQuery( objmdl2 ).modal('show');
+
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            }
+        );
+
+	});
+};
+</script>

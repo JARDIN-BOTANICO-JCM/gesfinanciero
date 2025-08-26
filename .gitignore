@@ -1,0 +1,21 @@
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Configuración de IDEs
+.buildpath
+.project
+.settings/
+
+# Otras carpetas temporales
+node_modules/
+vendor/
+dist/
+
+# Ignorar carpetas completas
+repo/anexos/
+repo/avatar/
+repo/proc/
+repo/com/
+repo/recursos/
+repo/usuarios/

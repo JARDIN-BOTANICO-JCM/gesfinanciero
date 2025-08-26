@@ -1,0 +1,503 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+$d_cursos = null;
+try {
+    $d_cursos = OperacionesCtrl::cursos_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$d_tpls = null;
+try {
+    $d_tpls = OperacionesCtrl::editarPlantillas_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+?>
+<div id="db-wrapper" class="">
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenu(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeader( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#"><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-12 mb-3">
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-label" for="cursos_id"><h5 class="mb-0">Curso</h5></label>
+                            <select class="form-select frmdata" id="cursos_id" required="" onchange="obtener();">
+                                <option selected="">Selecciona un curso</option>    
+                                <?php foreach ( $d_cursos as $k ) : ?>
+                                <option value="<?php echo $k['id'] ?>"><?php echo $k['nombre'] ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="form-label" for="alumnos_id"><h5 class="mt-3 mb-0">Alumnos</h5></label>
+                            <select class="form-select" size="2" id="alumnos_id" style="height: 400px;" multiple="multiple">
+                                <option value="" disabled="disabled">Sin alumnos</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-lg-9 col-md-9 col-12 mb-3">
+                    
+                    <div class="row mb-3">
+                    
+                    	<div class="col-12">
+                    		<label class="form-label" for="tplfile">
+                    			<h5 class="mb-0">Documento</h5>
+                    		</label>
+                    	</div>
+                        <div class="col-12" id="listaBoletines">
+
+							<div class="d-flex ">
+                                <div class="flex-grow-1 me-3">
+                                	<select onchange="" class="form-select" id="tplfile" >
+                                    	<option selected disabled value="">Seleccione una plantilla</option>
+                                        <?php foreach ( $d_tpls as $k ) : ?>
+                                        <?php 
+                                            $flprt = pathinfo( $k['fl'] );
+                                            $flprtLbl = pathinfo( $k['lbl'] );
+                                            
+                                            $tplVl = $flprt['filename'];
+                                            $tplId = $flprtLbl['filename'];
+                                            
+                                            $idsel = "";
+                                            if ( isset( $_POST['fl'] ) ) {
+                                                if ( ( $_POST['fl'] . ".phtml" ) == $k['fl'] ) {
+                                                    $idsel = 'selected="selected"';
+                                                }
+                                            }
+                                        ?>
+                                        <?php if ( strlen( trim( $tplId) ) > 0 )  : ?>
+                                        <?php   if ( substr( strtolower( $tplId ), 0, strlen("mix_") ) == "mix_"  ) : ?>
+                                        <?php 
+                                        $nmTpl = str_replace("Mix_", "", $tplId) ;
+                                        $nmTpl = str_replace("_", " ", $nmTpl) ;
+                                        ?>
+                                        <option value="<?php echo $tplVl; ?>" <?php echo $idsel; ?> ><?php echo $nmTpl; ?></option>
+                                        <?php   endif; ?>
+                                        <?php endif; ?>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                    	<div class="col-12">
+                    		<label class="form-label" for="">
+                    			<h5 class="mb-0">Opciones</h5>
+                    		</label>
+                    	</div>
+                    	
+                    	<div class="col-12 mb-3">
+
+                    		<div class="btn-toolbar" role="toolbar" >
+                                <div class="btn-group btn-group-sm me-2" role="group" aria-label="">
+                            		<button type="button" class="btn btn-secondary" onclick="btnGenerar_onClick();" data-bs-toggle="tooltip" data-bs-placement="top" title="Generar documentos">
+                        				<i class="fas fa-play"></i>
+                            		</button>
+                                </div>
+                                <div class="btn-group btn-group-sm me-2" role="group" aria-label="">
+                            		<button type="button" class="btn btn-secondary" onclick="btnObtenerGenerados_onClick();" data-bs-toggle="tooltip" data-bs-placement="top" title="Ver documentos">
+                            			<i class="fas fa-folder-open"></i>
+                            		</button>
+                                </div>
+                                
+                                <div class="btn-group btn-group-sm me-2" role="group" aria-label="">
+                            		<button type="button" class="btn btn-secondary" onclick="btnSelTodo_onClick();" data-bs-toggle="tooltip" data-bs-placement="top" title="Seleccionar todo">
+                            			<i class="far fa-check-square"></i>
+                            		</button>
+                            		<button type="button" class="btn btn-secondary" onclick="btnNoSelTodo_onClick();" data-bs-toggle="tooltip" data-bs-placement="top" title="Quitar selecci&oacute;n">
+                            			<i class="far fa-minus-square"></i>
+                            		</button>
+                            		
+									<div class="btn-group btn-group-sm me-2" role="group">
+                                        <button id=btnEnviarDropmenu type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" data-bs-toggle="tooltip" data-bs-placement="top" title="Enviar selecci&oacute;n">
+                                          <i class="far fa-paper-plane"></i>
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="btnEnviarDropmenu">
+                                            <li><button class="dropdown-item" onclick="btnEnviarTodoPrincipal_onClick();" >Enviar al acudiente principal</button></li>
+                                            <li><button class="dropdown-item" onclick="btnEnviarTodoAcudientesAll_onClick();" >Enviar todos los acudientes</button></li>
+                                        </ul>
+									</div>
+                            		
+                                </div>
+                                <?php /*
+                                <div class="btn-group btn-group-sm me-2" role="group" aria-label="">
+                            		<button type="button" class="btn btn-secondary" onclick="" data-bs-toggle="tooltip" data-bs-placement="top" title="Descargar todo">
+                            			<i class="far fa-file-archive"></i>
+                            		</button>
+                                </div>
+                                */?>
+							</div>
+                    		
+                    	</div>
+                    	
+                    	<div class="col-12 mb-3">
+                    		<hr>
+                    	</div>
+                    	
+                    	<div class="col-12 mb-3">
+                    		<table id="tbInter" class="table table-sm table-bordered table-striped table-hover responsive" style="width:100%">
+                    			<thead>
+                        			<tr>
+                        				<th>&nbsp;</th>
+                        				<th>Hash</th>
+                        				<th>Estudiantes</th>
+                        				<th width="50">Documento</th>
+                        				<th>Curso</th>
+                        				<th>Archivo</th>
+                        				<th>Fecha</th>
+                        				<th>Creador</th>
+                        				<th>Tipo doccumento</th>
+                        			</tr>
+                        		</thead>
+                    			<tbody>
+                    			</tbody>
+                    		</table >
+                    	</div>
+                    	
+                    </div>
+                    
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+<script type="application/javascript">
+let tbInter = null;
+
+const obtener = function( ){
+    const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+    var _txt = [];
+
+    var _cursos_id = jQuery.trim( jQuery('#cursos_id').val() );
+    var _alumnos_id = jQuery("#alumnos_id");
+    _alumnos_id.html('');
+
+    var form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_MatriculasGet ); ?>');
+    form_data.append('cursos_id' , _cursos_id );
+
+    if( _cursos_id > 0 ){
+        __TransportarData(
+            form_data,
+            function( o ) {
+                if( o.length > 0 ){
+                    for (const key in o) {
+                        var cuerpo = [];
+                        if (Object.hasOwnProperty.call(o, key)) {
+                            const _el = o[key]; 
+                            _alumnos_id.append('<option value="' + _el['estudiantes_id'] + '">' + _el['estudiantes'] + '</option>');
+                        }
+                    }
+                }
+                
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                _alumnos_id.html('<option>Sin alumnos</option>');
+
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            }
+        );
+    }
+    else{
+        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    }
+};
+
+
+const btnGenerar_onClick = function( o ){
+	const alumnos_id = jQuery("#alumnos_id");
+	const tplfile = jQuery("#tplfile");
+	
+	let okForm = false;
+	if( alumnos_id.val().length > 0  && ( "" + tplfile.find(':selected').val() ).length > 0 ){
+		alumnos_id.removeClass('is-invalid');
+		tplfile.removeClass('is-invalid');
+		okForm = true;
+	}
+	else{
+		if( alumnos_id.val().length > 0 ){
+			alumnos_id.removeClass('is-invalid');
+		}
+		else{
+			alumnos_id.addClass('is-invalid');
+		}
+		if( ( "" + tplfile.find(':selected').val() ).length > 0 ){
+			tplfile.removeClass('is-invalid');
+		}
+		else{
+			tplfile.addClass('is-invalid');
+		}
+	}
+	
+	if( okForm ){
+	
+		const dt = {
+    		"ids" : alumnos_id.val(),
+    		"flid" : tplfile.val() + '.phtml' 
+    	};
+    	
+    	const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        const vl = ut.b64EncodeUnicode( JSON.stringify( dt ) ) ;
+    
+        const form_data = new FormData();
+        form_data.append('data', vl);
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_plantillasMixAdd ); ?>');
+    
+        __TransportarData(
+            form_data,
+            function( o ) {
+            	generadosTpl( o );
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                const jsEr = JSON.parse(err.responseText);
+                const erTxt = jsEr['err'];
+                
+                alerta.html( erTxt );
+    
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            }
+        );
+	
+	}
+
+};
+
+const generadosTpl = function( o ){
+	const jsb64 = ut.b64DecodeUnicode( o );
+	const js = JSON.parse( jsb64 );
+	
+	tbInter.clear().draw();
+    for ( const key in js ) {
+        if ( Object.hasOwnProperty.call(js, key) ) {
+            const _el = js[ key ];
+            
+            for ( const kDoc in _el ) {
+                if ( Object.hasOwnProperty.call(_el, kDoc) ) {
+                    const _doc = _el[ kDoc ];
+                    
+                    const lnk = '<?php echo md5( IndexCtrl::API_LNK_DESCARGAR_CERTIFICADOS); ?>&id=' + _doc.documentomd5 + '&doc=' + _doc.archivo + '.pdf&anyo=' + _doc.anyo;
+      
+      				const chkSw = [];              
+                    chkSw.push('<div class="form-check form-switch"> ');
+                    chkSw.push('	<input class="form-check-input btnsel" type="checkbox" id="f' + _doc.hash + '"> ');
+                    chkSw.push('</div> ');
+                    
+                    tbInter.row.add([
+                    	'' + chkSw.join(''),
+                        _doc.hash,
+                        _doc.estudiantes,
+                        _doc.documento,
+                        _doc.cursos,
+                        '<a href="./index.php?ajaxl=' + lnk + '" target="baja_data" class="btn btn-sm btn-link p-0 text-dark">' + _doc.archivo + '</a>',
+                        _doc.fecha,
+                        _doc.creador,
+                        _doc.tipodoc_id
+                    ]).draw( false );
+                }
+            }
+            
+        }
+    }
+    
+    tbInter.off('click');
+    tbInter.on('click', 'tbody tr input.btnsel', function (e) {
+        e.currentTarget.parentNode.parentNode.parentNode.classList.toggle('selected');
+    });
+	
+};
+
+const btnObtenerGenerados_onClick = function( o ){
+
+	const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+    const form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_plantillasMixGet ); ?>');
+
+    __TransportarData(
+        form_data,
+        function( o ) {
+        	generadosTpl( o );
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        },
+        function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            
+            const jsEr = JSON.parse(err.responseText);
+            const erTxt = jsEr['err'];
+            
+            alerta.html( erTxt );
+
+            jQuery( objmdlErr ).modal('show');
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        }
+    );
+};
+
+const btnSelTodo_onClick = function(){
+    const allRows = tbInter.rows({ search: 'applied' }).nodes();
+    jQuery( allRows ).addClass('selected');
+    
+    tbInter.rows({ search: 'applied' }).nodes().to$().find('input[type="checkbox"]').prop('checked', true);
+};
+
+const btnNoSelTodo_onClick = function(){
+    const allRows = tbInter.rows().nodes();
+    jQuery(allRows).removeClass('selected');
+    
+    tbInter.rows().nodes().to$().find('input[type="checkbox"]').prop('checked', false);
+};
+
+const btnEnviarTodoPrincipal_onClick = function(){
+	btnEnviarTodo_onClick( false );
+};
+
+const btnEnviarTodoAcudientesAll_onClick = function(){
+	btnEnviarTodo_onClick( true );
+};
+
+const btnEnviarTodo_onClick = function( oDt ){
+	let allRows = tbInter.rows('.selected').data();
+	
+    let dataToSend = allRows.map(row => {
+        return {
+            hash: row[1],
+            estudiantes: row[2],
+            documento: row[3],
+            cursos: row[4],
+            url: row[5],
+            fecha: row[6],
+            creador: row[7],
+            tipodoc_id: row[8]
+        };
+    }).toArray();
+	
+	let jsonData = JSON.stringify(dataToSend);
+	let jsdtB64 = ut.b64EncodeUnicode( jsonData);
+	
+	let opcDt = oDt || false;
+	
+	const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+    const form_data = new FormData();
+    form_data.append( 'ajax' , '<?php echo md5( IndexCtrl::API_plantillasMixSend ); ?>');
+    form_data.append( 'data' , jsdtB64 );
+    form_data.append( 'atodos' , opcDt );
+
+    __TransportarData(
+        form_data,
+        function( o ) {
+        	console.log( o );
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        },
+        function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            
+            const jsEr = JSON.parse(err.responseText);
+            const erTxt = jsEr['err'];
+            
+            alerta.html( erTxt );
+
+            jQuery( objmdlErr ).modal('show');
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        }
+    );
+	
+};
+
+const tabla = function(){
+    tbInter = jQuery('#tbInter').DataTable({
+		buttons: _allBtnTb,
+		responsive: true,
+        language: lengua_es,
+        columnDefs: [
+            { "visible": false, "targets": 1 },
+            { "visible": false, "targets": 8 }
+        ],
+        order: [[6, 'desc']],
+        createdRow: function(row, data, dataIndex) {
+            jQuery(row).attr('id', data[0]);
+        }
+    });
+};
+
+jQuery(document).ready( function () {
+    tabla();
+});
+
+
+</script>

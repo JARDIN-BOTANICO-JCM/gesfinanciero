@@ -1,0 +1,447 @@
+<?php
+use src\sistema\Menubar\Menubar;
+use src\sistema\Headerbar\Headerbar;
+
+OperacionesCtrl::authRequOff();
+
+$d_tipodoc = null;
+try {
+    $d_tipodoc = OperacionesCtrl::tipodoc_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+?>
+<div id="db-wrapper" class="" style="background-color: #fefcfb; display: none;" >
+    <!-- navbar vertical -->
+    <!-- Sidebar -->
+    <?php $crum = Menubar::DibujarMenuHome(); ?>
+
+    <!-- Page Content -->
+    <div id="page-content">
+
+        <!-- Page Header -->
+        <?php Headerbar::DibujarHeaderHome( ); ?>
+            
+        <!-- Container fluid -->
+        <div class="container-fluid p-4">
+        
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-12">
+                    <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
+                        <div class="mb-3 mb-lg-0">
+                            <h1 class="mb-0 h2 fw-bold"><?php echo $crum['l2']; ?></h1>
+
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="#" style="color: #cc5b08; "><?php echo $crum['l1']; ?></a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        <?php echo $crum['l2']; ?>
+                                    </li>
+                                </ol>
+                            </nav>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="container">
+                    
+                <!-- Content -->
+                <div class="row mt-0 mt-md-0" role="tabpanel">
+                    <div class="col-lg-3 col-md-4 col-12">
+                        <!-- Side navbar -->
+                        <nav class="navbar navbar-expand-md navbar-light shadow-sm mb-4 mb-lg-0 sidenav">
+                            <!-- Menu -->
+                            <a class="d-xl-none d-lg-none d-md-none text-inherit fw-bold" href="#">Menu</a>
+                            <!-- Button -->
+                            <button class="navbar-toggler d-md-none icon-shape icon-sm rounded bg-primary text-light" type="button" data-bs-toggle="collapse" data-bs-target="#sidenav" aria-controls="sidenav" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="fe fe-menu"></span>
+                            </button>
+                            <!-- Collapse navbar -->
+                            <div class="collapse navbar-collapse" id="sidenav">
+                                <div class="navbar-nav flex-column">
+                                    <span class="navbar-header">Configuraci&oacute;n</span>
+                                    <!-- List -->
+                                    <ul id="myList" role="tablist" class="list-unstyled ms-n2 mb-0 ">
+                                        <!-- Nav item -->
+                                        <li class="nav-item active" >
+                                            <a onclick="cambiarActivo(this);" class="nav-link list-group-item active" data-bs-toggle="list" href="#list-editar" role="tab"><i class="fe fe-settings nav-icon"></i>Editar Perfil</a>
+                                        </li>
+                                        <!-- Nav item -->
+                                        <li class="nav-item ">
+                                            <a onclick="cambiarActivo(this);" class="nav-link list-group-item" data-bs-toggle="list" href="#list-seguridad" role="tab"><i class="fe fe-user nav-icon"></i>Seguridad</a>
+                                        </li>
+                                    </ul>
+                                    <ul class="list-unstyled ms-n2 mb-0 mt-3 border-top">
+                                        <!-- Nav item -->
+                                        <li class="nav-item mt-3">
+                                            <a onclick="cerrarSesion();" href="#" class="nav-link" ><i class="fe fe-power nav-icon"></i> Cerrar sesi&oacute;n</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="col-lg-9 col-md-8 col-12">
+                        <div class="tab-content">
+                            <div class="tab-pane fade show active" id="list-editar" role="tabpanel" >
+                                
+                                <!-- Card -->
+                                <div class="card">
+                                    <!-- Card header -->
+                                    <div class="card-header">
+                                        <h3 class="mb-0">Detalles del perfil</h3>
+                                        <p class="mb-0">
+                                            Modifica y actualiza la informaci&oacute;n de tu perfil.
+                                        </p>
+                                    </div>
+                                    <!-- Card body -->
+                                    <div class="card-body">
+
+                                        <div class="d-lg-flex align-items-center justify-content-between mt-1">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-2 position-relative d-flex justify-content-end align-items-end mt-n0">
+	                                                <img id="foto" src="./temas/img/logo_no_institu_v2.png" class="avatar-xl rounded-circle border border-4 border-white" alt="">
+                                                </div>
+                                                <div class="lh-1">
+                                                    <h2 class="mb-0 perf_fullname" >
+                                                    	<div class="d-flex align-items-center">
+															<strong>Cargando...</strong>
+															<div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+														</div>
+													</h2>
+                                                    <p class="mb-0 d-block perf_email">@USUARIO</p>
+                                                </div>
+                                            </div>
+                                            
+                                            <div>
+                                            	<?php /*
+                                            	<a href="#" class="btn btn-outline-white btn-sm">Actualizar Foto</a>
+                                                <a href="#" class="btn btn-outline-danger btn-sm">Eliminar</a>
+                                                */?>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-5">
+                                        <div>
+                                            <h4 class="mb-0">Datos Personales</h4>
+                                            <p class="mb-4">
+                                                Formulario de modificaci&oacute;n de datos personales
+                                            </p>
+                                            <!-- Form -->
+                                            <form  id="frmval" class="row frmvalcls">
+                                                <!-- Nombres -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="nombres">Nombres</label>
+                                                    <input class="form-control" value="" type="text" placeholder="Nombres" id="nombres" name="nombres">
+                                                </div>
+                                                <!-- Apellidos -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="apellidos">Apellidos</label>
+                                                    <input class="form-control" value="" type="text" placeholder="Apellidos" id="apellidos" name="apellidos">
+                                                </div>
+                                                <!-- Tipo documento -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label">Tipo de documento</label>
+                                                    <select class="form-select" aria-label="Tipo de documento" id="tipodoc_id" name="tipodoc_id" required="">
+                                                        <?php foreach( $d_tipodoc as $v ) : ?>
+                                                        <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <!-- Documento -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="documentos">Documento</label>
+                                                    <input class="form-control" value="" type="text" placeholder="Documento" id="documento" name="documento">
+                                                </div>
+                                                <!-- Direccion -->
+                                                <div class="mb-3 col-12 col-md-6">
+                                                    <label class="form-label" for="direccion" >Direcci&oacute;n</label>
+                                                    <input class="form-control" value="" type="text" placeholder="direccion" id="direccion" name="direccion">
+                                                </div>
+                                                
+                                                <div class="col-12">
+                                                    <!-- Button -->
+                                                    <button class="btn btn-primary" type="submit" onclick="actualizar();">
+                                                        Actualizar perfil
+                                                    </button>
+                                                </div>
+                                                
+                                                <input type="hidden" id="perf_nwid" name="id" class="myid" value="">
+                                                
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </div>
+        
+                            <div class="tab-pane fade" id="list-seguridad" role="tabpanel" >
+
+                                <div class="card">
+                                    <!-- Card header -->
+                                    <div class="card-header">
+                                        <h3 class="mb-0">Seguridad</h3>
+                                        <p class="mb-0">
+                                            Modifica correo electr&oacute;nico y contrase&ntilde;a
+                                        </p>
+                                    </div>
+                                    <!-- Card body -->
+                                    <div class="card-body">
+                                        <h4 class="mb-0">Correo electr&oacute;nico</h4>
+                                        <p>
+                                            Su correo actual es
+                                            <span class="text-success perf_email">$MAIL</span>
+                                        </p>
+                                        <form id="frmUpMailval" class="row frmUpMailvalcls">
+                                            <div class="mb-3 col-lg-6 col-md-12 col-12">
+                                                <label class="form-label" for="nwemail">Nuevo correo electr&oacute;nico</label>
+                                                <input id="nwemail" type="email" name="nwemail" class="form-control" placeholder="" required="">
+                                                <button type="submit" class="btn btn-primary mt-2" onclick="addNewMail();">
+                                                    Actualizar correo
+                                                </button>
+                                            </div>
+                                            <input type="hidden" id="mail_oldemail" name="email" class="oldemail" value="" />
+                                            <input type="hidden" id="mail_nwemailid" name="id" class="myid" value="">
+                                            <input type="hidden" id="nwemailhome" name="nwemailhome" value="true" />
+                                            <input type="hidden" id="nwemailkey" name="key" class="mykey" value="" />
+                                        </form>
+                                        <hr class="my-5">
+                                        <div>
+                                            <h4 class="mb-0">Cambio contrase&ntilde;a</h4>
+                                            <p>
+                                                Una vez se cambie la contrase&ntilde;a recibir&aacute; una confirmaci&oacute;n a su correo.
+                                            </p>
+                                            <!-- Form -->
+                                            <form id="frmValPass" class="row frmValPassCls">
+                                                <div class="col-lg-6 col-md-12 col-12">
+                                                        <!-- Current password -->
+                                                    <div class="mb-3">
+                                                        <label class="form-label" for="currentpassword">Clave actual</label>
+                                                        <input id="currentpassword" type="password" name="currentpassword" class="form-control" placeholder="" required="">
+                                                    </div>
+                                                        <!-- New password -->
+                                                    <div class="mb-3 password-field level0">
+                                                        <label class="form-label" for="newpassword">Nueva clave</label>
+                                                        <input id="newpassword" type="password" name="newpassword" class="form-control mb-2" placeholder="" required="">
+                                                        <div class="row align-items-center g-0">
+                                                            <div class="col-6">
+                                                                <span data-bs-toggle="tooltip" data-placement="right" title="" data-bs-original-title="Test it by typing a password in the field below. To reach full strength, use at least 6 characters, a capital letter and a digit, e.g. 'Test01'">
+																	Nivel de seguridad
+                                                                    <i class="fe fe-help-circle ms-1"></i>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                            <!-- Confirm new password -->
+                                                        <label class="form-label" for="confirmpassword">Confirmar nueva clave</label>
+                                                        <input id="confirmpassword" type="password" name="confirmpassword" class="form-control mb-2" placeholder="" required="">
+                                                    </div>
+                                                        <!-- Button -->
+                                                    <button onclick="actualizarpass();" class="btn btn-primary">
+                                                        Guardar clave
+                                                    </button>
+                                                    <div class="col-6"></div>
+                                                </div>
+                                                <div class="col-12 mt-4">
+                                                    <p class="mb-0">
+                                                        No recuerda su clave?
+                                                        <a href="#">Recuperela v&iacute;a correo electr&oacute;nico</a>
+                                                    </p>
+                                                </div>
+                                                <input type="hidden" id="nwpassid" name="id" class="myid" value="" />
+                                                <input type="hidden" id="nwpassky" name="key" class="mykey" value="" />
+                                                <input type="hidden" id="nwpasstp" name="tipo" class="mytipo" value="" />
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+var modid = null;
+var cProf = null;
+
+const actualizarpass = function(){
+	ut.validarFrm('frmValPassCls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_ContrasenaHome ); ?>');
+        form_data.append('key', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+                
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const fillPerf = function(){
+	const rDt = cProf;
+	for (const k in rDt ) {
+        if (Object.hasOwnProperty.call(rDt, k)) {
+        	const _el = rDt[ k ];
+        	
+        	modid = _el['idhash'];
+        	
+    		const fullnm = _el['nombres'] + " " + _el['apellidos'];
+    		jQuery('.perf_fullname').html( fullnm );
+    		jQuery('.perf_email').html( _el['mail'] );
+    		
+    		jQuery('#nombres').val( _el['nombres'] );
+    		jQuery('#apellidos').val( _el['apellidos'] );
+    		jQuery('#documento').val( _el['documento'] );
+    		jQuery('#direccion').val( _el['direccion'] );
+    		jQuery('#tipoacudiente_id').val( _el['tipoacudiente_id'] );
+    		
+    		if( ("" + jQuery.trim( _el['foto'] ) ).length > 0 ){
+    			const fotop = jQuery('#foto').parent();
+    			jQuery( fotop ).html('<img id="foto" src="repo/avatar/' + jQuery.trim( _el['foto'] ) + '" class="avatar-xl rounded-circle border border-4 border-white" alt="">');
+    		}
+    		
+    		// nwemail
+    		jQuery(".myid").val( _el['id'] );
+    		jQuery(".oldemail").val( _el['mail'] );
+    		jQuery(".mykey").val( _el['idhash'] );
+    		jQuery(".mytipo").val( pDt['tipo'] );
+    	}
+	}
+};
+
+const miperfil = function(){
+	home.navMiPerfil(function( rDt ){
+		cProf = rDt;
+    	fillPerf();
+	});
+};
+
+const actualizar = function(){
+	ut.validarFrm('frmvalcls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EmpleadosMod ); ?>');
+        form_data.append('key', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+                
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const nuevoMail = function(){
+	ut.validarFrm('frmUpMailvalcls', function ( r ) {
+		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+
+        var form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EmpleadosMod ); ?>');
+        form_data.append('idhash', modid );
+        
+        form_data.append( 'mail' , jQuery('#nwemail').val() );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+                
+				const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( 'Transacci&oacute;n exitosa' );
+
+				jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const addNewMail = function(){
+	ut.validarFrm('frmUpMailvalcls', function ( r ) {
+        validadorGlob.fn = function( o ){
+            nuevoMail();
+        };
+        validadorGlob.vista();
+        fillPerf();
+	});
+};
+
+const cambiarActivo = function( o ){
+    var padre = jQuery( o ).parent().parent();
+    var _li = jQuery( o ).parent();
+    padre.find('.nav-item').attr('class', 'nav-item');
+    _li.addClass('active');
+};
+
+var pDt = "";
+jQuery( document ).ready(function(){
+	pDt = JSON.parse( ut.b64DecodeUnicode( home.writePerfil() ) );
+	home.navLogin(function(){
+		jQuery('#db-wrapper').fadeIn('fast', miperfil);
+	});
+});
+</script>

@@ -1,0 +1,1238 @@
+<?php 
+$cfg = OperacionesCtrl::LeerConfigCorp();
+
+$g_jsn = HomeCtrl::JS_Name_get();
+
+$tmpanyoGbl = OperacionesCtrl::anyolectivo_Obtener();
+$GBL_anyolectivo_id = $tmpanyoGbl[0]['id'];
+
+$logoutForce = 0;
+if (isset( $_REQUEST['logout'] ) ) {
+    if( strlen( trim( $_REQUEST['logout'] ) ) > 0 ) {
+        $logoutForce = filter_var( $_REQUEST['logout'] , FILTER_VALIDATE_BOOLEAN );
+    }
+    else {
+        $logoutForce = 1;
+    }
+}
+
+?>
+    <!-- Codigo INI -->
+    <div id="frmGlbCodConf" class="mdlCont" style="display:none;" >
+        <form id="frmGlbCodValConf" class="frmGlbCodValConfCss">
+            <div class="row mb-4">
+                <div id="frmGlbCodValConfOpcs" class="mb-3 col-md-12" >
+                    <div class="d-grid gap-2">
+                    <button onclick="validadorGlob.getCode();" class="btn btn-success">Solicitar c&oacute;digo</button>
+                    <button onclick="validadorGlob.setCode();" class="btn btn-success">Ingresar c&oacute;digo</button>
+                    </div>
+                </div>
+                <div id="frmGlbCodValConfGetCode" class="mb-3 col-md-12" style="display: none;">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-success" onclick="validadorGlob.get();">Solicitar c&oacute;digo <i class="fa-solid fa-envelope"></i></button>
+                    </div>
+                    <label class="form-label mt-3">
+                        <small>
+                            *El c&oacute;digo se enviar&aacute; a <span class="perf_email">$EMAIL_PENDIENTE</span>,
+                            revise en su bandeja de entrada o en SPAM.
+                        </small>
+                    </label>
+                    <div class="d-grid gap-2">
+                        <button onclick="validadorGlob.goBack();" class="btn btn-link"><i class="fa-solid fa-angle-left"></i> Volver</button>
+                    </div>
+                </div>
+                <div id="frmGlbCodValConfSetCode" class="mb-3 col-md-12" style="display: none;">
+                    <label class="form-label" for="gblcodigo">C&oacute;digo de confirmaci&oacute;n</label>
+                    <input type="text" class="form-control" placeholder="C&oacute;digo" id="gblcodigo" name="codigo" >
+                    <div class="d-grid gap-2">
+                        <button onclick="validadorGlob.goBack();" class="btn btn-link"><i class="fa-solid fa-angle-left"></i> Volver</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-end">
+                <!-- buttons -->
+                <a href="#" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Cancelar</a>
+                <button class="btn btn-primary" type="submit" onclick="validadorGlob.exec();">Verificar</button>
+            </div>
+        </form>
+    </div>
+    <!-- Codigo FIN -->
+    
+    
+
+    <div id="mdlError" class="mdlCont" style="display: none;">
+        <div class="alert"></div>
+    </div>
+
+    <div class="modal fade" id="stcMdl_l1" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <div class="modal fade" id="stcMdl_l2" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <div class="modal fade" id="stcMdl_err" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog"></div>
+    </div>
+
+    <div id="ajaxldr" class="mdlCont" style="display: none;">
+        <div class="d-flex align-items-center ">
+            <strong>Cargando...</strong>
+            <div class="spinner-border ms-auto spinner-border-sm" role="status" aria-hidden="true"></div>
+        </div>
+    </div>
+    
+    <div id="global_std_msj" style="display: none;">
+        
+		<div class="card mb-3">
+			<div class="card-img-top"></div>
+			<div class="card-body" style="overflow: auto;">
+				<div class="d-flex justify-content-between">
+					<h5 class="card-title me-3"></h5>
+					<div class="txt-adjun"></div>
+				</div>
+				<p class="card-text txt-main"></p>
+				<p class="card-text">
+					<small class="text-muted">Last updated 3 mins ago</small>
+				</p>
+			</div>
+		</div>
+    
+    </div>
+    
+    
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    	<symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+        	<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+    	</symbol>
+    	<symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+        	<path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+    	</symbol>
+    	<symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+        	<path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+    	</symbol>
+    </svg>
+    
+    <script type="application/javascript">
+    const cerrarSesion = function(){
+        if( confirm('\xBFDesea cerrar su sesi\xF3n?') ){
+            location.href = './index.php?logout=true';
+        }
+    };
+    </script>
+    <script type="application/javascript">
+    const closeAllModal = function(){
+        jQuery('.modal.show').each(function() {
+            const modal = bootstrap.Modal.getInstance(this);
+            if (modal) modal.hide();
+        });
+    };
+    </script>
+    
+    <script type="application/javascript">
+    var aAsPostf = function(e, o){
+        e.stopPropagation();
+        e.preventDefault();
+        
+        var v = jQuery( o );
+        var _o = v.attr("href");
+        
+        var urlO = ut.UrlEncodingToObject( _o );
+        ut.crearFormulario( urlO["url"], urlO["params"] );
+    };
+
+    jQuery(document).ready(function(){
+        jQuery(".aAsPost").on("click", function(e){
+            aAsPostf( e, this );
+        });
+        
+        home.writePerfil();
+    });
+    </script>
+
+    <script type="application/javascript">
+    const ValidadorGlob = function(){
+        var _this = this;
+
+        _this.goBack = function(){
+            ut.validarFrm('frmUpMailvalcls', function ( r ) {
+                jQuery('#frmGlbCodValConfOpcs').show('fast');
+                jQuery('#frmGlbCodValConfGetCode').hide('fast');
+                jQuery('#frmGlbCodValConfSetCode').hide('fast');
+            });
+        };
+
+        _this.getCode = function(){
+            ut.validarFrm('frmUpMailvalcls', function ( r ) {
+                jQuery('#frmGlbCodValConfOpcs').hide('fast',function(){
+                    jQuery('#frmGlbCodValConfSetCode').hide('fast');
+                    jQuery('#frmGlbCodValConfGetCode').show('fast');
+                });
+            });
+        };
+
+        _this.setCode = function(){
+            ut.validarFrm('frmUpMailvalcls', function ( r ) {
+                jQuery('#frmGlbCodValConfOpcs').hide('fast',function(){
+                    jQuery('#frmGlbCodValConfSetCode').show('fast');
+                    jQuery('#frmGlbCodValConfGetCode').hide('fast');
+                });
+            });
+        };
+
+        _this.fn = null;
+        _this.vista = function(){
+            var opc = {
+            'id' : 'frmGlbCodConf',
+            'title' : 'M&oacute;dulo de confirmaci&oacute;n',
+            'btnCerrarX' : true,
+            'scrolling' : true,
+            'center' : true,
+            'size' : 'modal-sm',
+            'level' : 'l2'
+            };
+            const _mfc = mngModal.dibujar( opc );
+            jQuery(_mfc).modal('show');
+        };
+        _this.exec = function(){
+            ut.validarFrm('frmUpMailvalcls', function ( r ) {
+                
+                const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+                const objmdl = mngModal.dibujar( opc );
+                jQuery( objmdl ).modal('show');
+
+                var form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_CodigoactivaGet ); ?>');
+                form_data.append('codActiva', jQuery('#gblcodigo').val() );
+                
+                for (const k in r ) {
+            		if (Object.hasOwnProperty.call(r, k)) {
+            			const _el = r[ k ];
+            			form_data.append( k, _el );
+        			}
+            	}
+
+                __TransportarData(
+                    form_data,
+                    function( o ) {
+                        _this.fn( o );
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    },
+                    function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+
+                        jQuery( objmdlErr ).modal('show');
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    }
+                );
+            
+            });
+        };
+        _this.get = function(){
+            ut.validarFrm('frmUpMailvalcls', function ( r ) {
+                
+                const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+                const objmdl = mngModal.dibujar( opc );
+                jQuery( objmdl ).modal('show');
+
+                var form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_CodigoactivaAdd ); ?>');
+                
+                for (const k in r ) {
+            		if (Object.hasOwnProperty.call(r, k)) {
+            			const _el = r[ k ];
+            			
+            			form_data.append( k, _el );
+        			}
+            	}
+
+                __TransportarData(
+                    form_data,
+                    function( o ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Solicitud enviada','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-success');
+                        
+                        alerta.html( 'Se ha enviado un c&oacute;digo a ' + jQuery('.oldemail').val() );
+                        
+                        _this.goBack();
+                        _this.setCode();
+
+                        jQuery( objmdlErr ).modal('show');
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    },
+                    function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+
+                        jQuery( objmdlErr ).modal('show');
+                        setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                    }
+                );
+
+            });
+        };
+    };
+    const validadorGlob = new ValidadorGlob();
+    </script>
+
+    <script type="application/javascript">
+    if (!String.prototype.startsWith) {
+        String.prototype.startsWith = function(searchString, position){
+          position = position || 0;
+          return this.substr(position, searchString.length) === searchString;
+      };
+    }
+    </script>
+
+<!-- JavaScript Bundle with Popper -->
+<script src="/temas/js/bootstrap-5.2.0-dist/js/bootstrap.bundle.min.js" ></script>
+<script src="/temas/js/flatpickr-4.6.13/flatpickr.min.js" ></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/l10n/es.js"></script>
+<script src="/temas/js/inputmask-5.0.7/jquery.inputmask.min.js" ></script>
+<script src="/temas/js/dragula/dist/dragula.min.js" ></script>
+<script src="/temas/js/@popperjs/core/dist/umd/popper.min.js"></script>
+<script src="/temas/js/tippy.js/dist/tippy-bundle.umd.min.js"></script>
+<script src="/temas/js/apexcharts/apexcharts/dist/apexcharts.min.js"></script>
+<script src="/temas/js/bootstrap-select-1.14.0-beta2/dist/js/bootstrap-select.js" ></script>
+<script src="/temas/js/simplebar-5.3.8/dist/simplebar.min.js"></script>
+
+<script src="/temas/js/ManagerModal.js?f=<?php echo date('YmdHis');?>" ></script>
+
+<script src="/temas/js/theme.min.js"></script>
+<script src="/temas/js/temamins.js"></script>
+<script src="/temas/js/MemoriaManager.js?f=<?php echo date('YmdHis');?>"></script>
+
+
+<script type="application/javascript">
+let regIdHijo = 0;
+
+function renderEncuesta(json, regId) {
+	regIdHijo = 0;
+    var form = jQuery('<div class="p-3 border rounded bg-light"></div>');
+    renderFields(json, form, regId);
+    return form;
+}
+
+function renderFields(fields, parent, regId) {
+  for (var i = 0; i < fields.length; i++) {
+    var field = fields[i];
+    var formGroup = jQuery('<div class="mb-3"></div>');
+    var nameAttr = 'field_' + i + '_' + regId; // Math.floor(Math.random() * 100000);
+
+    if (field.type === 'checkbox') {
+      var label = jQuery('<label class="form-label"></label>')
+        .text(field.label + (field.required ? ' *' : ''))
+        .attr('for', nameAttr);
+
+      var checkbox = jQuery('<input type="checkbox" class="form-check-input mt-1 ms-2">')
+        .attr('id', nameAttr)
+        .attr('name', nameAttr);
+
+      if (field.required) {
+		checkbox.prop('required', true);
+		checkbox.attr('data-required', true);
+      }
+
+      const ocultoName = 'ocul' + nameAttr;
+      const oculto = jQuery('<input type="hidden" value="' + field.label + '">')
+        .attr('id', ocultoName)
+        .attr('name', ocultoName);
+
+      formGroup.append(label, oculto, checkbox);
+
+      // Crear contenedor de hijos (oculto por defecto)
+      if (field.children && field.children.length > 0) {
+        var childGroup = jQuery('<div class="ms-4 mt-2 border-start ps-3 d-none"></div>');
+        renderFields(field.children, childGroup, (regId + '_' + regIdHijo ) );
+        regIdHijo++;
+        
+        formGroup.append(childGroup);
+
+        // Asignar evento usando IIFE para evitar cierre incorrecto del nameAttr
+        (function (checkboxId) {
+          setTimeout(function () {
+            jQuery('#' + checkboxId).on('change', function () {
+              var container = jQuery(this).closest('.mb-3').find('> .ms-4');
+              if (jQuery(this).is(':checked')) {
+                container.removeClass('d-none');
+                container.find('[data-required]').attr('required', true);
+              } else {
+                container.addClass('d-none');
+                jQuery('.d-none').find('[required]').removeAttr('required');
+              }
+            });
+          }, 0);
+        })(nameAttr);
+
+        // Si viene marcado en JSON, activarlo y mostrar hijos
+        if (field.checked) {
+          checkbox.prop('checked', true);
+          setTimeout(function () {
+            checkbox.trigger('change');
+          }, 0);
+        }
+      }
+    }
+
+    else {
+      var label = jQuery('<label class="form-label"></label>')
+        .attr('for', nameAttr)
+        .text(field.label + (field.required ? ' *' : ''));
+      
+      const ocultoName = 'ocul' + nameAttr;
+      const oculto = jQuery('<input type="hidden" value="' + field.label + '">')
+        .attr('id', ocultoName)
+        .attr('name', ocultoName);
+        
+      formGroup.append(label, oculto);
+      
+
+      var input;
+
+      if (field.type === 'text') {
+        input = jQuery('<input type="text" class="form-control">')
+          .attr('id', nameAttr)
+          .attr('name', nameAttr)
+          .attr('placeholder', field.placeholder || '');
+      }
+
+      else if (field.type === 'datetime') {
+        input = jQuery('<input type="text" class="form-control datetime-input">')
+          .attr('id', nameAttr)
+          .attr('name', nameAttr)
+          .attr('placeholder', field.placeholder || '');
+
+        // Inicia flatpickr solo con fecha (sin hora)
+        setTimeout(function () {
+          flatpickr('.datetime-input', {
+            dateFormat: "Y-m-d",
+            enableTime: false
+          });
+        }, 0);
+      }
+
+      else if (field.type === 'file') {
+        input = jQuery('<input type="file" class="form-control">')
+          .attr('id', nameAttr)
+          .attr('name', nameAttr);
+      }
+
+      else if (field.type === 'select') {
+        input = jQuery('<select class="form-select"></select>')
+          .attr('id', nameAttr)
+          .attr('name', nameAttr);
+		input.append('<option selected="selected" disabled="disabled" value="">Escoja una opci&oacute;n</option>');
+		
+        if (field.options && Array.isArray(field.options)) {
+          for (var j = 0; j < field.options.length; j++) {
+            input.append('<option value="' + field.options[j] + '">' + field.options[j] + '</option>');
+          }
+        }
+      }
+
+      if (input) {
+        if (field.required){
+			input.prop('required', true);
+			input.attr('data-required', true);
+        }
+        formGroup.append(input);
+      }
+    }
+
+    parent.append(formGroup);
+  }
+  
+}
+
+function obtenerRespuestas() {
+  var result = [];
+  var form = jQuery('#formulario-respuestas');
+
+  function leerCampos(fields, parentElement) {
+    var respuestas = [];
+
+    for (var i = 0; i < fields.length; i++) {
+      var field = fields[i];
+      var fieldName = field.label;
+
+      var response = {
+        label: fieldName,
+        type: field.type,
+        respuesta: null
+      };
+
+      if (field.type === 'checkbox') {
+        var checkboxInput = parentElement.find('label:contains("' + field.label + '") + input[type="checkbox"]').first();
+        var isChecked = checkboxInput.is(':checked');
+        response.respuesta = isChecked;
+
+        // Solo incluir hijos si el checkbox está marcado
+        if (isChecked && field.children && field.children.length > 0) {
+          var childrenContainer = checkboxInput.closest('.mb-3').find('> .ms-4');
+          response.children = leerCampos(field.children, childrenContainer);
+        }
+      }
+
+      else if (field.type === 'file') {
+        var inputFile = parentElement.find('label:contains("' + field.label + '")').next('input[type="file"]').get(0);
+        if (inputFile && inputFile.files.length > 0) {
+          response.respuesta = inputFile.files[0].name;
+        } else {
+          response.respuesta = null;
+        }
+      }
+
+      else {
+        var input = parentElement.find('label:contains("' + field.label + '")').next('input, select');
+        response.respuesta = input.val();
+      }
+
+      respuestas.push(response);
+    }
+
+    return respuestas;
+  }
+
+  return leerCampos(formulario, form);
+}
+</script>
+
+<script type="application/javascript">
+const normalHead = function( d ){
+	const fullnombre = jQuery.trim( d['nombres'] ) + ' ' + jQuery.trim( d['apellidos'] );
+	
+	const html = [];
+	html.push('	<div class="mb-3">');
+    html.push('		<h1 class="mb-0">' + fullnombre + '</h1>');
+	html.push('		<span class="text-muted mb-3" style="font-size: 1.3em;">' + d['cursos'] + '</span>');
+	html.push('	</div>');
+	
+	return html.join('');
+};
+const tplAlumnosMini = function( d ){
+	const fullnombre = jQuery.trim( d['nombres'] ) + ' ' + jQuery.trim( d['apellidos'] );
+
+	let _href = "";
+	if ( Object.hasOwnProperty.call( d, 'href' ) ) {
+		_href = 'href="' + d['href'] + '"';
+	}
+	let _onclick = "";
+	if ( Object.hasOwnProperty.call( d, 'onclick' ) ) {
+		_onclick = 'onclick="' + d['onclick'] + '"';
+	}
+	let _lbl = "Seleccionar";
+	if ( Object.hasOwnProperty.call( d, 'lbl' ) ) {
+		_lbl = jQuery.trim( d['lbl'] );
+	}
+	let tipo = "a";
+	if ( Object.hasOwnProperty.call( d, 'tipo' ) ) {
+		tipo = jQuery.trim( d['tipo'] );
+	}
+	
+	const html = [];
+	html.push(' <div class="col-xxl-4 col-xl-4 col-lg-5 col-md-12 col-12"> ');
+    html.push('		<div class="card shadow-lg mb-4"> ');
+    html.push('			<div class="card-body" > ');
+    
+	var strimg = "temas/img/logo_no_institu_v2.png";
+	if( d['foto'] ){ strimg = "repo/avatar/" + d['foto']; }
+	    
+	html.push(' 			<div class="d-flex justify-content-center"> ');
+	
+	html.push('					<div class="text-center"> ');
+	html.push('						<img src="' + strimg + '" class="rounded-circle avatar-xl mb-3 me-3" alt="" > ');
+	html.push('						<h4 class="mb-0">' + fullnombre + '</h4> ');
+	html.push('					</div> ');
+	
+	html.push('				</div> ');
+	
+	html.push(' 			<div class="d-grid gap-2"> ');
+	html.push('					<' + tipo + ' class="btn btn-sm btn-outline-primary mt-1 mb-2 stretched-link" ' + _href + ' ' + _onclick + ' >' + _lbl + '</' + tipo + '> ');
+	html.push(' 			</div> ');
+	
+	html.push('			</div> ');
+	html.push('		</div> ');
+	html.push(' </div> ');
+	
+	return html.join('');
+};
+const tplAlumnos = function( d, full ){
+	const nwAgendas = d['nuevos'];
+	
+	var verfull = true;
+	if( !(typeof( full ) == "undefined") ){
+		verfull = full;
+	}
+	
+	const fullnombre = jQuery.trim( d['nombres'] ) + ' ' + jQuery.trim( d['apellidos'] );
+
+	const cumple = new Date( d['nacimiento'] );
+	const fulld = cumple.getFullYear() + "/" + (cumple.getMonth()+1) + "/" + cumple.getDate();
+
+	const html = [];
+	html.push(' <div class="col-xxl-4 col-xl-4 col-lg-5 col-md-12 col-12"> ');
+    html.push('		<div class="card shadow-lg mb-4"> ');
+    
+    if( verfull ){
+    	html.push('			<div class="d-flex position-absolute end-0 pe-2 pt-3"> ');
+    	html.push('				<div class="dropdown dropstart"> ');
+        html.push('					<a href="#" class="btn-icon btn btn-ghost btn-sm rounded-circle" id="ddMenu' + d['id'] + '" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> ');
+    	html.push('						<i class="bi bi-three-dots-vertical"></i> ');
+    	html.push('					</a> ');
+        html.push('			    	<div class="dropdown-menu" aria-labelledby="ddMenu' + d['id'] + '" style=""> ');
+    	html.push('						<span class="dropdown-header">Acciones</span> ');
+    	html.push('							<button class="dropdown-item" > ');
+    	html.push('								<i class="fe fe-user dropdown-item-icon"></i>Perfil ');
+    	html.push('							</button> ');
+    	
+    	
+    	var istarea = "&tarea=<?php echo md5( date('YmdHis') );?>";
+    	html.push('							<a class="dropdown-item" href="home.php?pageid=home/vwhome/Agenda.phtml&cursos_id=' + d['cursos_id'] + '&idhash=' + d['idhash'] + '' + istarea + '" > ');
+    	html.push('								<i class="fas fa-book dropdown-item-icon"></i> Tareas ');
+    	html.push('							</a> ');
+    	
+    	if( d['agenda'] == 1 ){
+        	html.push('							<a class="dropdown-item" href="home.php?pageid=home/vwhome/Agenda.phtml&cursos_id=' + d['cursos_id'] + '&idhash=' + d['idhash'] + '" > ');
+        	html.push('								<i class="fe fe-book dropdown-item-icon"></i> Agenda ');
+        	html.push('							</a> ');
+    	}
+    	
+    	html.push('							<li><hr class="dropdown-divider"></li> ');
+    	
+    	html.push('							<button data-nombre="' + fullnombre + '" data-idhash="' + d['idhash'] + '" class="dropdown-item" onclick="gbl_ModalNewPass( this );" > ');
+    	html.push('								<i class="fe fe-edit dropdown-item-icon"></i>Asignar Clave ');
+    	html.push('							</button> ');
+    	
+    	html.push('					</div> ');
+    	html.push('				</div> ');
+    	html.push('			</div> ');
+	}
+    
+	html.push('			<div class="card-body"> ');
+	
+	if( verfull ){
+		html.push(' 			<div class="text-center"> ');
+	}
+	else{
+		html.push(' 			<div class="d-flex justify-content-between "> ');
+	}
+	
+	var strimg = "temas/img/logo_no_institu_v2.png";
+	if( d['foto'] ){
+		strimg = "repo/avatar/" + d['foto'];
+	}
+	
+	if( verfull ){
+		html.push('					<img src="' + strimg + '" class="rounded-circle avatar-xl mb-3" alt="" > ');
+	}
+	else{
+		html.push('					<div> ');
+		html.push('						<img src="' + strimg + '" class="rounded-circle avatar-xl mb-3 me-3" alt="" > ');
+		html.push('					</div> ');
+	}
+	
+	if( !verfull ) html.push('					<div> ');
+	
+	html.push('					<h4 class="mb-0">' + fullnombre + '</h4> ');
+	html.push('					<p class="mb-0">C&oacute;digo: ' + jQuery.trim( d['codigo'] ) + '</p> ');
+	
+	if( !verfull ){
+		var istarea = "&tarea=<?php echo md5( date('YmdHis') );?>";
+    	
+    	let verBloque = "d-grid gap-2";
+    	//let btnStretch = "stretched-link";
+    	let btnStretch = "";
+    	let btnAgenda = "";
+    	if( d['agenda'] == 1 ){
+    		//const clsEsNuevaAg = ( nwAgendas['agenda'] ? 'nuevaInfo' : '' );
+    		const clsEsNuevaAg = ( nwAgendas['agenda'] ? '' : '' );
+    		
+    		verBloque = "d-flex justify-content-between";
+    		btnStretch = "";
+    		btnAgenda = '<a class="btn btn-sm btn-outline-primary mt-1 mb-2 ' + btnStretch + ' ' + clsEsNuevaAg + '" href="home.php?pageid=home/vwhome/Agenda.phtml&idhash=' + d['idhash'] + '&cursos_id=' + d['cursos_id'] + '" >Agenda</a>';
+    		//istarea = "";
+    	}
+    	
+    	//const clsEsNuevaTa = ( nwAgendas['tarea'] ? 'nuevaInfo' : '' );
+    	const clsEsNuevaTa = ( nwAgendas['tarea'] ? '' : '' );
+    	//html.push('					<div class="' + verBloque + '">');
+    	html.push('					<div class="d-grid gap-2">');
+    	html.push('						<div class="btn-group" role="group"> ');
+	html.push('								<a class="btn btn-sm btn-outline-primary mt-1 mb-2 ' + btnStretch + ' ' + clsEsNuevaTa + '" href="home.php?pageid=home/vwhome/Agenda.phtml&cursos_id=' + d['cursos_id'] + '&idhash=' + d['idhash'] + '' + istarea + '">Tareas</a> ');
+    	html.push( btnAgenda );
+    	html.push('						</div>');
+    	html.push('					</div>');
+	}
+	
+	if( !verfull ) html.push('					</div> ');
+	html.push('				</div> ');
+	
+	const fullnm = jQuery.trim( d['nombres'] + ' ' + d['apellidos'] );
+	
+	html.push('				<div class="dropdown"> ');
+	html.push('					<div class="d-grid gap-2"> ');
+	html.push('						<button class="btn btn-warning dropdown-toggle btn-sm py-1" type="button" id="dpdMacOpc' + d['id'] + '" data-bs-toggle="dropdown" aria-expanded="false"> ');
+	html.push('							M&aacute;s opciones ');
+	html.push('						</button> ');
+	html.push('						<ul class="dropdown-menu" aria-labelledby="dpdMacOpc' + d['id'] + '"> ');
+	html.push('							<li><a class="dropdown-item" href="home.php?pageid=home/vwhome/Horarios.phtml&idhash=' + d['idhash'] + '"><i class="fas fa-calendar-day me-3"></i> Horarios</a></li> ');
+	html.push('							<li><a class="dropdown-item" onclick="evaluarCarnet_Click( this );" href="#" data-nombre="' + fullnm + '" data-documento="' + d['documento'] + '" data-tipodoc_id="' + d['tipodoc_id'] + '" ><i class="fas fa-id-badge me-3"></i> Carnet</a></li> ');
+	html.push('							<li><a class="dropdown-item" href="home.php?pageid=home/vwhome/Boletines.phtml&idhash=' + d['idhash'] + '&documento=' + d['documento'] + '&cursos_id=' + d['cursos_id'] + '&pre=false" ><i class="fas fa-receipt me-3"></i> Informes</a></li> ');
+	html.push('						</ul> ');
+	html.push('					</div>');
+	html.push('				</div>');
+	
+    if( verfull ){
+    	html.push('				<div class="d-flex justify-content-between border-bottom py-2 mt-4"> ');
+    	html.push('					<span>Usuario</span> ');
+    	html.push('					<span class="text-dark">' + jQuery.trim( d['usuario'] ) + '</span> ');
+    	html.push('				</div> ');
+    	html.push('				<div class="d-flex justify-content-between border-bottom py-2"> ');
+    	html.push('					<span>Documento</span> ');
+    	html.push('					<span class="text-dark">' + jQuery.trim( d['documento'] ) + '</span> ');
+    	html.push('				</div> ');
+    	html.push('				<div class="d-flex justify-content-between border-bottom py-2"> ');
+    	html.push('					<span>Curso</span> ');
+    	html.push('					<span class="text-dark">' + jQuery.trim( d['cursos'] ) + '</span> ');
+    	html.push('				</div> ');
+    	html.push('				<div class="d-flex justify-content-between pt-2"> ');
+    	html.push('					<span>Cumplea&ntilde;os</span> ');
+    	html.push('					<span class="text-dark">' + fulld + '</span> ');
+    	html.push('				</div> ');
+	}
+	
+	html.push(' 		</div> ');
+    html.push('		</div> ');
+	html.push('	</div> ');
+	
+	
+	return html.join('');
+};
+
+const Home = function(){
+	const _this = this;
+	_this.recuperar = function( cls, fn ){
+    	ut.validarFrm( cls , function ( r ) {
+    		fn( r );
+    	});
+	};
+	
+	_this.tknGet = function( cls, fn ){
+		ut.validarFrm( cls , function ( r ) {
+    		fn( r );
+    	});
+	};
+	
+	_this.iniciar = function( cls, fn ){
+		ut.validarFrm( cls , function ( r ) {
+    		fn( r );
+    	});
+	};
+	
+	_this.iniciarb64 = function( cls, fn ){
+		ut.validarFrm( cls , function ( r ) {
+    		fn( ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+    	});
+	};
+	
+	_this.navLogin = function( fn ){
+		const dt = ut.GetDatosLocal('<?php echo $g_jsn; ?>');
+    	if( dt == null ){
+    		location.href = 'home.php';
+    	}else{
+        	if( typeof( fn ) == "function" ){
+        		fn();
+        	}
+    	}
+	};
+	
+	_this.navWorkspace = function( fn ){
+		const dt = ut.GetDatosLocal('<?php echo $g_jsn; ?>');
+    	if( dt != null ){
+    		location.href = 'home.php?pageid=home/Main.phtml';
+    	}
+    	else{
+    		if( typeof( fn ) == "function" ){
+				fn( );
+			}
+    	}
+	};
+	
+	<?php // Funcion que escribe los datos del perfil en la pagina ?>
+	
+	_this.writePerfil = function(){
+		const dt = ut.GetDatosLocal('<?php echo $g_jsn; ?>');
+    	if( dt == null ){
+    		// INI TODO
+    	<?php 
+		//https://demo.acappdemy.com/home.php?pageid=home/vwhome/Agenda.phtml&cursos_id=13&idhash=3416a75f4cea9109507cacd8e2f2aefc&id=56&materias_id=0&agenda_id=32&fechas=2024-07-10&verprev=true
+    	?>
+    	<?php if( isset( $_REQUEST['verprev'] ) ) : ?>
+		<?php     if( $_REQUEST['verprev'] ) : ?>
+		<?php         
+		              $path = $_SERVER['REQUEST_URI'];
+		              $urlNext = rtrim( Utiles::getBaseUrl(), "/") . $path;
+		?>
+			ut.SetDatosLocal('<?php echo $g_jsn . 'url'; ?>','<?php echo $urlNext; ?>');
+		<?php     endif; ?>
+		<?php endif; ?>
+    	<?php if ( isset( $_REQUEST['pageid'] ) ) : ?>
+    		location.href = 'home.php';
+    	<?php endif; ?>
+    		// FIN TODO
+    	}else{
+    	
+    		const dtUrlNext = ut.GetDatosLocal('<?php echo $g_jsn . 'url'; ?>');
+    		if( dtUrlNext == null ){
+			    const dtI = JSON.parse( ut.b64DecodeUnicode( dt ) );
+        		
+    		    for (const k in dtI ) {
+                    if (Object.hasOwnProperty.call(dtI, k)) {
+                    	const _el = dtI[ k ];
+                    	const _o = jQuery('#GBL_MAIN_' + ("" + k).toUpperCase() );
+                    	
+                    	if( _o.length ){
+                    		_o.html( _el );
+                    	}
+                    	
+                	}
+            	}
+            	
+            	return dt;
+    		
+    		}
+    		else{
+    			const urlNext = dtUrlNext;
+    			ut.DelDatosLocal('<?php echo $g_jsn . 'url'; ?>');
+    			location.href = urlNext;
+    		}
+    	
+    	}
+	};
+	
+	_this.navLogout = function(){
+		if( confirm('\xBFDesea cerrar su sesi\xF3n?') ){
+    		_this.navLogoutForce();
+    	}
+	};
+	
+	_this.navLogoutForce = function(){
+		ut.DelDatosLocal('<?php echo $g_jsn; ?>');
+    	location.href = 'home.php';
+	};
+	
+	_this.navUser = function( fn ){
+		const dt = ut.GetDatosLocal('<?php echo $g_jsn; ?>');
+		fn( dt );
+	};
+	
+	const generalNav = function( hash, params, fn ){
+		const dt = _this.writePerfil();
+		
+		const form_data = new FormData();
+		form_data.append('ajax', hash );
+		form_data.append('key', JSON.stringify( dt ) );
+		
+	    if( params != null ){
+	    	form_data.append('params', params );
+	    }
+		
+		__TransportarData(
+			form_data,
+			function( r ) {
+				if( typeof( fn ) == "function" ){
+					fn( r );
+				}
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                const rTxt = JSON.parse( err.responseText );
+                alerta.html( rTxt.err );
+
+                jQuery( objmdlErr ).modal('show');
+			}
+	    );
+	}
+	
+	_this.navMiPerfil = function( fn, opc ){
+		generalNav('<?php echo md5( IndexCtrl::API_MiPerfilHomeGet ); ?>', opc, fn);
+	};
+	
+	_this.entradasCampos = function( datos ){
+		const d = datos['d'];
+		const regId = datos['regId'] || '';
+	
+		let tipo = d['tipo'];
+		let id = d['id'];
+		let requerido = ( d['requerido'] ? required="required" : "");
+		let placeholder = d['placeholder'] || "";
+		let clase = d['clase'] || "";
+		let valor = d['valor'] || "";
+		let estilo = d['estilo']  || "";
+		let acepta = d['acepta'] || "";
+		
+        let elemento = "";
+        switch (tipo) {
+            case 'file':
+            	let url = "";
+            	if( ( "" + valor ).length > 0 ){
+            		let nw = ut.CrearId();
+            		requerido = "";
+            		const pthi = ut.pathInfo( valor );
+            		const uHtml = [];
+            		uHtml.push('<div>');
+            		uHtml.push('	<a href="' + valor + '" target="win' + nw + '" >' + pthi['basename'] + '</a>' );
+            		uHtml.push('</div>');
+            		url = uHtml.join('');
+            	}
+            	elemento = '<input onchange="chkArchivo( this );" class="form-control ' + clase + '" type="file" id="' + id + '" name="' + id + '" accept="' + acepta + '" ' + requerido + '>' + url;
+                break;
+            case 'text':
+                elemento = '<input type="text" class="form-control ' + clase + '" placeholder="' + placeholder + '" id="' + id + '" name="' + id + '" style="' + estilo + '" ' + requerido + ' value="' + valor + '" >';
+                break;
+            case 'textarea':
+                elemento = '<textarea class="form-control ' + clase + '" placeholder="' + placeholder + '" id="' + id + '" name="' + id + '" style="' + estilo + '" ' + requerido + ' >' + valor + '</textarea>';
+                break;
+            case 'checkbox':
+            	let chkstr = "";
+            	if( valor == 1 ) chkstr = 'checked="checked"';
+                elemento = '<div class="form-check ' + clase + '"><input class="form-check-input" type="checkbox" value="1" id="' + id + '" name="' + id + '" ' + requerido + ' ' + chkstr + '></div>';
+                break;
+            case 'datetime':
+                elemento = '<input type="text" class="form-control esfecha ' + clase + '" placeholder="' + placeholder + '" id="' + id + '" name="' + id + '" style="' + estilo + '" ' + requerido + ' value="' + valor + '" >';
+                break;
+            case 'formulario':
+            	elemento = renderEncuesta( JSON.parse( d['json'] ), regId );
+            	break;
+            default:
+                throw new Error('Tipo no soportado: ' + tipo);
+        }
+        
+        return elemento;
+	};
+};
+const home = new Home();
+</script>
+
+<script type="application/javascript">
+const gbl_SetNewPass = function( d ){
+	const _o = jQuery( d );
+	const dt = _o.data();
+	
+	const opc = ut.b64EncodeUnicode( JSON.stringify( { 'idhash' : dt['idhash'], 'text' : jQuery( dt['text'] ).val() } ) ); 
+	home.navMrkNewPass(
+    	function( res ){
+    		
+    		const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-success');
+    	
+        	const lsErr = [];
+            
+            lsErr.push( '<div class="card" > ' );
+			lsErr.push( '	<div class="card-header"> ' );
+			lsErr.push( '		Transacci&oacute;n exitosa - Datos de conexi&oacute;n ' );
+			lsErr.push( '	</div> ' );
+			lsErr.push( '	<ul class="list-group list-group-flush"> ' );
+            lsErr.push( '		<li class="list-group-item"><b>Url:</b> <a href="<?php echo Utiles::getBaseUrl() . "home.php"; ?>" target="newalumwin"><?php echo Utiles::getBaseUrl() . "home.php"; ?></a> </li> ' );
+            lsErr.push( '		<li class="list-group-item"><b>Tipo de documento:</b> ' + res['tipodoc'] + '</li> ' );
+            lsErr.push( '		<li class="list-group-item"><b>Documento:</b> ' + res['documento'] + '</li> ' );
+            lsErr.push( '		<li class="list-group-item"><b>Nueva clave:</b> ********** </li> ' );
+            lsErr.push( '	</ul> ' );
+            lsErr.push( '</div> ' );
+            
+            alerta.html( lsErr.join('')  );
+        
+            jQuery( objmdlErr ).modal('show');
+
+    	},
+	opc);
+};
+
+const gbl_ModalNewPass = function( d ){
+	const _o = jQuery( d );
+	const dt = _o.data();
+	
+	const html = [];
+	
+	const objmdl = mngModal.dibujar( { 'id' : 'mdlError', 'title' : dt['nombre'] + ' - Cambio de contrase&ntilde;a','btnCerrarX' : true, 'level' : 'err' } );
+    const alerta = jQuery(objmdl + ' div.alert');
+    alerta.attr('class','alert alert-primary');
+    
+    html.push('<label for="glo_AluSet"><h5>Ingrese nueva contrase&ntilde;a</h5></label>');
+    
+	html.push('	<div class="input-group mb-3"> ');
+    
+    html.push('		<div class="form-floating"> ');
+	html.push('			<input type="password" class="form-control" id="glo_AluSet" placeholder="Password"> ');
+    html.push('			<label for="glo_AluSet">Password</label> ');
+    html.push('		</div> ');
+    html.push('		<button data-target="#glo_AluSet" onclick="mostrarSecreto( this );" class="input-group-text" id="glo_AluSet-addon"> ');
+    html.push('			<i class="far fa-eye"></i> ');
+    html.push('		</button> ');
+    
+    html.push('	</div> ');
+    
+    html.push('<div class="d-grid gap-2"> ');
+	html.push('	<button data-idhash="' + dt['idhash'] + '" data-text="#glo_AluSet" onclick="gbl_SetNewPass( this );" class="btn btn-primary" type="button"><i class="far fa-save me-3"></i> Guardar</button> ');
+    html.push('</div> ');
+    
+    alerta.html( html.join('') );
+
+    jQuery( objmdl ).modal('show');
+    
+    //navMrkNewPass( fn, opc );
+};
+
+const nt_Principal = function( d ){
+	const html = [];
+	
+	const msj = ut.b64DecodeUnicode( d['mensaje'] );
+	
+	const maxChars = 100;
+	const summMsj = ( "" + jQuery( msj ).text() );
+	const puntos = (summMsj.length >= maxChars) ? "..." : '' ;
+	
+	html.push('	<div class="col-12" > ');
+	html.push('		<div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-lg h-md-250 position-relative">');
+	html.push('			<div class="col p-4 d-flex flex-column position-static">');
+	html.push('				<strong class="d-inline-block mb-2" style="color: #c1c1c1;" translate="no">Autor: ' + d['fullname'] + '</strong>');
+	html.push('				<h3 class="mb-0">' + d['titulo'] + '</h3>');
+	html.push('				<div class="mb-1 text-muted">' + d['fecha'] + '</div>');
+	html.push('					<p class="card-text mb-auto">' + summMsj.substr(0, maxChars) + puntos + '</p>');
+	
+	html.push('					<div>');
+    html.push('						<button onclick="home.newsMostrar( this );" data-mrk="false" data-id="msj' + d['id'] + '-' + d['idmsj'] + '" data-pic="' + d['thumbnail'] + '" data-adj="' + d['adjuntos'] + '" data-msj="' + d['mensaje'] + '" data-au="' + d['fullname'] + '" data-subject="' + d['titulo'] + '" data-fechap="' + d['publicardesde'] + '" data-hashid="' + d['hashid'] + '" class="btn btn-outline-primary stretched-link text-left " style="">Ver el mensaje completo</button>');
+    html.push('					</div>');
+	
+	html.push('				</div>');
+	html.push('				<div class="col-auto d-none d-lg-block">');
+	
+	var thm = "temas/img/sin_img.jpg";
+	if( ("" + d['thumbnail']).length > 0 ){
+		thm = "repo/com/" + d['thumbnail'];
+	}
+	
+	html.push('					<div class="bd-placeholder-img" style="background-image: url(' + thm + ');width: 293px;height: 210px;background-size: 120%;background-repeat: no-repeat;background-position: center;">');
+	html.push('				</div>');
+	html.push('			</div>');
+	html.push('		</div>');
+	html.push('	</div>');
+	
+	return html.join("");
+};
+
+const nt_normales = function( d ){
+	const html = [];
+	
+	const msj = ut.b64DecodeUnicode( d['mensaje'] );
+	
+	var thm = "temas/img/sin_img.jpg";
+	if( ("" + d['thumbnail']).length > 0 ){
+		thm = "repo/com/" + d['thumbnail'];
+	}
+	
+	
+	html.push('	<div class="col-xl-3 col-lg-12 col-md-12 col-12">');
+	html.push('		<div class="card shadow-lg mb-4">');
+	
+	html.push('			<div class="bd-placeholder-img card-img-top"> ');
+    html.push('			    <div class="bd-placeholder-img rounded-top" style="background-image: url(' + thm + '); width: auto; height: 210px; background-size: 120%;background-repeat: no-repeat;background-position: center;"></div>');
+    html.push('			</div>');
+	
+	html.push('			<div class="card-body d-flex justify-content-between">');
+	html.push('				<label class="me-3" >');
+	html.push('					' + d['titulo'] );
+	html.push('					<p><small class="text-muted" translate="no">Autor: ' + d['fullname'] + '</small></p>');
+	html.push('				</label>');
+	html.push('				<div>');
+	html.push('					<button onclick="home.newsMostrar( this );" data-mrk="false" data-id="msj' + d['id'] + '-' + d['idmsj'] + '" data-pic="' + d['thumbnail'] + '" data-adj="' + d['adjuntos'] + '" data-msj="' + d['mensaje'] + '" data-au="' + d['fullname'] + '" data-subject="' + d['titulo'] + '" data-fechap="' + d['publicardesde'] + '" data-hashid="' + d['hashid'] + '" class="btn btn-outline-primary btn-sm stretched-link">Ir</button>');
+	html.push('				</div>');
+	html.push('			</div>');
+	html.push('		</div>');
+	html.push('	</div> ');
+	
+	return html.join("");
+};
+
+const com_principal = function( d ){
+	const html = [];
+	
+	const msj = ut.b64DecodeUnicode( d['mensaje'] );
+	
+	const maxChars = 100;
+	const summMsj = ( "" + jQuery( msj ).text() );
+	const puntos = (summMsj.length >= maxChars) ? "..." : '' ;
+	
+	var thm = "temas/img/sin_img.jpg";
+	if( ("" + d['thumbnail']).length > 0 ){
+		thm = "repo/com/" + d['thumbnail'];
+	}
+	
+	var avatar = "temas/img/logo_no_institu_v2.png";
+	if( ("" + d['foto']).length > 0 ){
+		avatar = "repo/avatar/" + d['foto'];
+	}
+	
+	const fecha = ("" + d['fecha']);
+	const ymd = jQuery.trim( fecha.substr(0, 10) );
+	const hora = jQuery.trim( fecha.substr(10) );
+	
+	var mrk = ( d['leido'] == 1 ? "false" : "true");
+	
+	//html.push('<li class="list-group-item bg-light">');
+	html.push('<li class="list-group-item">');
+	html.push('	<div class="row">');
+	html.push('		<div class="col">');
+	html.push('			<a onclick="home.newsMostrar( this );" data-mrk="' + mrk + '" data-id="msj' + d['id'] + '-' + d['idmsj'] + '" data-pic="' + d['thumbnail'] + '" data-adj="' + d['adjuntos'] + '" data-msj="' + d['mensaje'] + '" data-au="' + d['fullname'] + '" data-subject="' + d['titulo'] + '" data-fechap="' + d['publicardesde'] + '" data-hashid="' + d['hashid'] + '" class="text-body" href="#">');
+	html.push('				<div class="d-flex">');
+	html.push('					<img src="' + avatar + '" alt="" class="avatar-md rounded-circle" style="object-fit: cover;" >');
+	html.push('					<div class="ms-3">');
+	//html.push('						<h5 class="fw-bold mb-1">' + d['fullname'] + ':</h5>');
+	html.push('						<h5 class="fw-bold mb-1">' + d['titulo'] + ':</h5>');
+	html.push('						<p class="mb-3">' + summMsj.substr(0, maxChars) + puntos + '</p>');
+	html.push('						<span class="fs-6 text-muted">');
+	html.push('							<span><span class="fe fe-thumbs-up text-success me-1"></span>' + ymd + '</span>');
+	html.push('							<span class="ms-1">' + hora + '</span>');
+	html.push('						</span>');
+	html.push('					</div>');
+	html.push('				</div>	');
+	html.push('			</a>');
+	html.push('		</div>');
+	html.push('		<div class="col-auto text-center me-2">');
+	
+	if( d['leido'] == 0 ){
+		html.push('			<a id="lk' + d['hashid'] + '" onclick="mkL( this );" data-mrk="true" data-hashid="' + d['hashid'] + '" href="#" class="badge-dot bg-info" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Mark as read" data-bs-original-title="Mark as read"></a>');
+	}
+	
+	html.push('			<div>');
+	html.push('				<a href="#" class="bg-transparent" data-bs-toggle="tooltip" data-bs-placement="top" aria-label="Remove" data-bs-original-title="Remove">');
+	html.push('					<i class="fe fe-x text-muted"></i>');
+	html.push('				</a>');
+	html.push('			</div>');
+	html.push('		</div>');
+	html.push('	</div>');
+	html.push('</li>');
+	
+	return html.join("");
+};
+
+const chkUploadFiles = function(o, mb, fn){
+	const errPreSrv = [];
+	jQuery.each( jQuery( o )[0].files, function(i, file) {
+		const fileMb = file['size'] / (1024 * 1024);
+		if ( fileMb > mb ) {
+			errPreSrv.push( '"<strong>' + file['name'] + '</strong>" debe ser menor o m\xE1ximo de ' + mb + 'MB de peso' );
+		}
+		else{
+    		if (file) {
+            	fn( file );
+            }
+		}
+	});
+	
+	if( errPreSrv.length > 0 ){
+	
+    	const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+        const alerta = jQuery(objmdlErr + ' div.alert');
+        alerta.attr('class','alert alert-danger');
+	
+    	const lsErr = [];
+        lsErr.push( "<p>Hemos encontrado algunos errores:</p>" );
+        lsErr.push( "<ul>" );
+        lsErr.push( "	<li>" + errPreSrv.join('</li><li>') + "</li>" );
+        lsErr.push( "</ul>" );
+        alerta.html( lsErr.join('')  );
+    
+        jQuery( objmdlErr ).modal('show');
+	
+	}
+};
+
+const mostrarSecreto = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	const tg = jQuery( dt['target'] );
+	
+	if ( tg.attr('type') == 'password' ){
+		tg.attr('type','text');
+		_o.html( '<i class="far fa-eye-slash"></i>' );
+	}
+	else{
+		tg.attr('type','password');
+		_o.html( '<i class="far fa-eye"></i>' );
+	}
+};
+
+const archivoExiste = function (url, callback) {
+	fetch(url, { method: 'HEAD' })
+	.then(function (response) {
+        if (response.ok) {
+            callback(true);
+        } else {
+	        callback(false);
+        }
+	})
+    .catch(function () {
+		callback(false);
+    });
+};
+
+const initSample = function( ckeCfg, configPath ) {
+    
+	var wysiwygareaAvailable = isWysiwygareaAvailable(),
+		isBBCodeBuiltIn = !!CKEDITOR.plugins.get( 'bbcode' );
+
+	return function() {
+	
+	    if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) CKEDITOR.tools.enableHtml5Elements( document );
+    
+        CKEDITOR.config.height = 150;
+        CKEDITOR.config.width = 'auto';
+	
+		var editorElement = CKEDITOR.document.getById( ckeCfg.contEditor );
+
+		if ( wysiwygareaAvailable ) {
+			CKEDITOR.replace( ckeCfg.contEditor, Object.assign({}, ckeCfg, { customConfig: configPath }));
+		} else {
+			editorElement.setAttribute( 'contenteditable', 'true' );
+			CKEDITOR.inline( ckeCfg.contEditor );
+		}
+	};
+
+	function isWysiwygareaAvailable() {
+		if ( CKEDITOR.revision == ( '%RE' + 'V%' ) ) { return true; }
+		return !!CKEDITOR.plugins.get( 'wysiwygarea' );
+	}
+};
+
+jQuery( document ).ready(function(){
+	const notisecs = jQuery('#notisecs');
+	const msjssecs = jQuery('#msjssecs');
+	const html = [];
+	const htmlmsj = [];
+	
+	if( <?php echo $logoutForce ?> == 1 ){
+		home.navLogoutForce();
+	}
+	else{
+
+    	jQuery('#db-wrapper').fadeIn('fast', function(){
+    	});
+	
+	}
+});
+
+</script>
+

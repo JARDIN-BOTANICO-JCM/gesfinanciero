@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta http-equiv="Content-type" content="<?php echo Config::CHARSET ?>">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    	<meta http-equiv="X-UA-Compatible" content="ie=edge">		
+        <meta name="description" content="">
+        <meta name="author" content="">
+
+		
+		<title><?php echo Config::NOMBRE_SITIO ?></title>
+		<!-- CSS -->		
+		<!-- CSS only -->
+		<link rel="stylesheet" href="./temas/js/bootstrap-5.2.0-dist/css/bootstrap.min.css">
+		<link rel="stylesheet" href="./temas/js/fontawesome-free-6.1.1-web/css/all.min.css" >
+		<link rel="stylesheet" href="./temas/js/flatpickr-4.6.13/flatpickr.min.css" >
+		<link rel="stylesheet" href="./temas/js/dragula/dist/dragula.min.css" >
+		<link rel="stylesheet" href="./temas/js/feather/feather.css">
+		<link rel="stylesheet" href="./temas/js/bootstrap-icons/font/bootstrap-icons.css" />
+		<link rel="stylesheet" href="./temas/js/bootstrap-select-1.14.0-beta2/dist/css/bootstrap-select.css">
+		<link rel="stylesheet" href="./temas/js/simplebar-5.3.8/dist/simplebar.min.css">
+		<link rel="stylesheet" href="./temas/js/DataTables/datatables.min.css" type="text/css"/>
+
+		
+		<link rel="shortcut icon" href="./temas/favicon/favicon_20x20.png" type="image/x-icon" />
+		<link rel="apple-touch-icon" href="./temas/favicon/favicon_180x180.png" sizes="180x180">
+        <link rel="icon" href="./temas/favicon/favicon_32x32.png" sizes="32x32" type="image/png">
+        <link rel="icon" href="./temas/favicon/favicon.ico" sizes="16x16" type="image/png">
+        <link rel="icon" href="./temas/favicon/favicon.ico">
+		
+		<!-- Custom -->
+		<link rel="stylesheet" href="./temas/css/theme.min.css">
+		
+		<style type="text/css">
+		.gnrl_page{
+            background-image: url("./temas/img/fnd_home_acappdemy.jpg");
+            background-position: center center;
+            background-size: cover;
+            backdrop-filter: blur(25px);
+		}
+		
+        table.dataTable thead>tr>th.sorting:before, table.dataTable thead>tr>th.sorting_asc:before, table.dataTable thead>tr>th.sorting_desc:before, table.dataTable thead>tr>th.sorting_asc_disabled:before, table.dataTable thead>tr>th.sorting_desc_disabled:before, table.dataTable thead>tr>td.sorting:before, table.dataTable thead>tr>td.sorting_asc:before, table.dataTable thead>tr>td.sorting_desc:before, table.dataTable thead>tr>td.sorting_asc_disabled:before, table.dataTable thead>tr>td.sorting_desc_disabled:before {
+            bottom: 50%;
+            content: url('temas/img/fl_arriba.png') !important;
+        }
+        table.dataTable thead>tr>th.sorting:after, table.dataTable thead>tr>th.sorting_asc:after, table.dataTable thead>tr>th.sorting_desc:after, table.dataTable thead>tr>th.sorting_asc_disabled:after, table.dataTable thead>tr>th.sorting_desc_disabled:after, table.dataTable thead>tr>td.sorting:after, table.dataTable thead>tr>td.sorting_asc:after, table.dataTable thead>tr>td.sorting_desc:after, table.dataTable thead>tr>td.sorting_asc_disabled:after, table.dataTable thead>tr>td.sorting_desc_disabled:after {
+            top: 50%;
+            content: url('temas/img/fl_abajo.png') !important;
+        }
+        .flatpickr-time input{
+            color: #47474a;
+        }
+        
+        .nuevaInfo {
+            animation: cambioColor 1s infinite alternate;
+        }
+        
+        @keyframes cambioColor {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                background-color: #7550fe;
+                color: #fff;
+                transform: scale(1.1);
+            }
+        }
+		</style>
+		
+		<!-- JS -->
+		<script type="text/javascript" src="./temas/js/jquery-3.6.0.min.js "></script>
+		<script type="text/javascript" src="./temas/js/utilidades.js?f=<?php echo date('YmdHis') ?>"></script>
+		<script type="text/javascript">var ut = new Utilidades();</script>
+		<script type="text/javascript" src="./temas/js/Colecciones.js?f=202207271743"></script>
+			
+		<script type="text/javascript">
+		// Existen cambios?
+		var CambiosGeneral = {
+			cambio : false,
+			setCambio : function() {
+				CambiosGeneral.cambio = true;
+			},
+			resetCambio : function() {
+				CambiosGeneral.cambio = false;
+			}
+		}		
+		var backRev = function( e, o ){	    	
+			if( CambiosGeneral.cambio ){
+				e.stopImmediatePropagation();
+				e.stopPropagation();
+		    	(e.preventDefault ? e.preventDefault() : (e.returnValue = false));
+		    	
+				var v = jQuery( o );
+		    	var r = confirm('\xBFDesea salir sin guardar cambios?');
+		    	if( r ){
+		        	location.href = v.attr("href"); 
+		        }
+			}
+		};
+
+		jQuery(document).ready(function(){
+		    jQuery(".backRev").on("click", function(e){
+		    	backRev( e, this );
+		    });	
+		});
+
+		var _allBtnTb = [
+			{ extend: 'copy', text: '<i class="fas fa-copy"></i>', className: 'btn-sm'},
+			{ extend: 'excel', text: '<i class="fas fa-file-excel"></i>', className: 'btn-sm'},
+			{ extend: 'csv', text: '<i class="fas fa-file-csv"></i>', className: 'btn-sm'},
+			{ extend: 'pdf', text: '<i class="fas fa-file-pdf"></i>', className: 'btn-sm'},
+			{ extend: 'print', text: '<i class="fas fa-print"></i>', className: 'btn-sm'}
+		];
+		var lengua_es = {
+			"lengthMenu": "Mostrar _MENU_ registros",
+			"zeroRecords": "No se encontr\xF3 nada - Lo siento",
+			"info": "P\xE1gina _PAGE_ de _PAGES_ de _MAX_ registros",
+			"infoEmpty": "No hay registros disponibles",
+			"infoFiltered": "(coincidencias _TOTAL_)",
+			"search":         "Buscar:",
+			"paginate": {
+				"first":      "Primero",
+				"last":       "\xDAltimo",
+				"next":       '<i class="fa-solid fa-forward"></i>',
+				"previous":   '<i class="fa-solid fa-backward"></i>'
+			}
+		};
+		</script>
+		
+	</head>
+	<?php if ( isset( $_REQUEST['pageid'] ) ) : ?>
+	<body >
+	<?php else: ?>
+	<body class="gnrl_page" >
+	<?php endif?>
+	

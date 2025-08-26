@@ -1,0 +1,434 @@
+<?php
+OperacionesCtrl::registrarVisita_Agregar( array() );
+$logoinst = OperacionesCtrl::obtener_LogoCompany();
+$g_jsn = HomeCtrl::JS_Name_get();
+
+$d_tipodoc = null;
+try {
+    $d_tipodoc = OperacionesCtrl::tipodoc_Obtener( array() );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+?>
+<div class="container d-flex flex-column ">
+    <div class="row align-items-center justify-content-center g-0 min-vh-100">
+
+        <div id="cplogin" class="col-lg-5 col-md-8 py-8 py-xl-0" style="display: none;">
+            <!-- Card -->
+            <div class="card shadow ">
+                <!-- Card body -->
+                <div class="card-body p-6">
+                    <div class="d-flex align-items-center mb-4">
+                        <p style="text-align: center;" class="m-0">
+                        	
+                            <a href="./home.php">
+                            	<img src="<?php echo $logoinst; ?>" height="92" class="mb-4" alt="" style="-webkit-border-radius: 45px; -moz-border-radius: 45px; border-radius: 45px;">
+                            </a>
+                        </p>
+                        <h1 class="ms-3 mb-1 fw-bold">Inicio de sesi&oacute;n</h1>
+                    </div>
+                    <!-- Form -->
+                    <form id="iniLogin" class="iniLoginCls" method="post" action="./home.php">
+                    	<!-- Username -->
+                    	<div class="mb-3">
+							<label for="tipodoc_id" class="form-label">Tipo de documento</label>
+							<select class="form-select" id="tipodoc_id" name="tipodoc_id" required="required">
+							<?php foreach ( $d_tipodoc as $v ) : ?>
+								<option value="<?php echo $v['id']; ?>"><?php echo $v['nombre']; ?></option>
+							<?php endforeach; ?>
+							</select>
+						</div>
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="documento" class="form-label">C&eacute;dula</label>
+                            <input type="number" id="documento" name="documento" class="form-control" placeholder="N&uacute;mero de documento" required="required" value="<?php echo ( isset( $_POST['documento'] ) ? $_POST['documento'] : "" ) ; ?>" >
+                        </div>
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label for="clave" class="form-label">Contrase&ntilde;a</label>
+                            <input type="password" id="clave" name="clave" class="form-control" placeholder="***********" required="required">
+                        </div>
+                        <!-- Checkbox -->
+                        <div class="d-lg-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="rememberme" name="rememberme">
+                                <label class="form-check-label " for="rememberme">Recordarme</label>
+                            </div>
+                            <!--
+                            <div>
+                                <button type="button" class="btn btn-link p-0" onclick="accionesShowHide('#cprecov', '#cplogin');">Olvid&eacute; mi contrase&ntilde;a</button>
+                            </div>
+                            -->
+                        </div>
+                        <div>
+                            <!-- Button -->
+                            <div class="d-grid">
+                                <button type="button" class="btn btn-primary mb-3" onclick="btnIniLogin_click('iniLoginCls');" >Iniciar</button>
+                                <button type="button" class="btn btn-warning mb-3" onclick="btnIniRegistro_click('iniLoginCls');" >Registrarme</button>
+                            </div>
+                        </div>
+                        <hr class="mt-4">
+                        <div class="m-0 text-center">
+                            <a href="./home.php"><img src="./temas/img/Acappdemy_r_text_logo.svg" height="64" class="mb-0" alt=""></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+		<div id="cprecov" class="col-lg-5 col-md-8 py-8 py-xl-0" style="display: none;">
+			<!-- Card -->
+			<div class="card shadow">
+				<!-- Card body -->
+				<div class="card-body p-6">
+					<div class="mb-4">
+						<a href="./home.php">
+							<img src="<?php echo $logoinst; ?>" height="92" class="mb-4" alt="" style="-webkit-border-radius: 45px; -moz-border-radius: 45px; border-radius: 45px;">
+						</a>
+						<h1 class="mb-1 fw-bold">Recuperaci&oacute;n de clave</h1>
+						<p>Ingrese los campos requeridos.</p>
+					</div>
+					<!-- Form -->
+					<form id="frmRecu" class="frmRecuCls" method="post">
+						<!-- Input -->
+						<div class="mb-3">
+							<label for="rec_tipodoc_id" class="form-label">Tipo de documento</label>
+							<select class="form-select" id="rec_tipodoc_id" name="tipodoc_id" required="required">
+							<?php foreach ( $d_tipodoc as $v ) : ?>
+								<option value="<?php echo $v['id']; ?>"><?php echo $v['nombre']; ?></option>
+							<?php endforeach; ?>
+							</select>
+						</div>
+						<!-- Input -->
+						<div class="mb-3">
+							<label for="rec_documento" class="form-label">N&uacute;mero de documento</label>
+							<input type="number" id="rec_documento" name="rec_documento" class="form-control" placeholder="Ingresa tu n&uacute;mero de documento" required="required">
+						</div>
+						<!-- Button -->
+						<div class="mb-3 d-grid">
+							<button type="button" class="btn btn-primary" onclick="btnRecupera_click( 'frmRecuCls' );">
+								Recuperar contrase&ntilde;a
+							</button>
+						</div>
+						<span>Volver a <button type="button" class="btn btn-link p-0" onclick="accionesShowHide('#cplogin', '#cprecov');">Login</button></span>
+					</form>
+				</div>
+			</div>
+		</div>
+        
+    </div>
+</div>
+
+<div id="frmRecuListMail" class="mdlCont" style="display:none;" >
+    <form id="frmSel" class="frmSelCls" method="post">
+
+        <div class="card mb-4">
+            <div class="card-body">
+            	<div id="recuAlerta" class="" style="display: none;"></div>
+                <div class="mb-4">
+                    <h4 class="mb-1">Informaci&oacute;n principal</h4>
+                </div>
+                <div id="cntLsEmail" class="row"></div>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end">
+            <!-- buttons -->
+            <a href="#" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Cerrar</a>
+            <button id="btnRecuGetCode" class="btn btn-primary" type="button" onclick="btnSolicitar_click('frmSelCls');">Solicitar c&oacute;digo</button>
+            <button id="btnRecuGoLogin" class="btn btn-success" type="button" data-bs-dismiss="modal" onclick="accionesShowHide('#cplogin', '#cprecov');" style="display: none;">Login</button>
+        </div>
+    </form>
+</div>
+
+<div id="frmRegistro" class="mdlCont" style="display:none;" >
+    <form id="frmReg" class="frmRegCls" method="post">
+    
+        <div class="card border-0 mb-4 grpReg">
+            <div class="card-body">
+            
+            	<h4>Informaci&oacute;n b&aacute;sica</h4>
+            	<p>Ingrese su informaci&oacute;n principal para realizar el registro de su cuenta</p>
+            
+                <div class="row">
+                    <div class="col-12 mb-3">
+                    
+                        <div class="form-floating">
+                            <select class="form-select" id="reg_tipodoc_id" name="reg_tipodoc_id" aria-label="" required="required">
+                            	<option selected disabled value="">Seleccione tipo de documento</option>
+                            	<?php foreach ( $d_tipodoc as $v ) : ?>
+								<option value="<?php echo $v['id']; ?>"><?php echo $v['nombre']; ?></option>
+								<?php endforeach; ?>
+                            </select>
+                            <label for="reg_tipodoc_id">Tipo de documento*</label>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" placeholder="N&uacute;mero de identificaci&oacute;n" id="reg_documento" name="reg_documento" required="required">
+                        	<label for="reg_documento">N&uacute;mero de identificaci&oacute;n*</label>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <div class="form-floating">
+                            <input type="email" class="form-control" placeholder="N&uacute;mero de identificaci&oacute;n" id="reg_mail" name="reg_mail" required="required">
+                        	<label for="reg_mail">Correo electr&oacute;nico*</label>
+                        	<small>A este correo va a llegar el correo con las instrucciones de acceso</small>
+                        </div>
+
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+// New version
+const btnIniRegistro_click = function( d ){
+	const objmdlReg = mngModal.dibujar( { 'id' : 'frmRegistro', 'title' : 'Registro','btnCerrarX' : true, 'level' : 'l1', 'size': 'modal-lg' } );
+    const pie = jQuery(objmdlReg + ' .modal-body');
+
+	const html = [];
+	html.push('<div class="modal-footer">');
+	html.push('	<a href="#" class="btn btn-outline-secondary me-2 grpReg" data-bs-dismiss="modal">Cerrar</a>');
+	html.push('	<button onclick="registrar_click( \'frmRegCls\' );" class="btn btn-outline-primary me-2 grpReg">Registrar</button>');
+	html.push('	<button class="btn btn-outline-primary me-2 grpRegAjax" style="display: none;" disabled="disabled">Procesando su solicitud <div class="spinner-border ms-5 spinner-border-sm" role="status" aria-hidden="true"></div></button>');
+	html.push('</div>');
+	pie.after( html.join('') );
+
+    jQuery( objmdlReg ).modal('show');
+};
+const registrar_click = function( d ){
+	home.iniciarb64(d, function( r ){
+		
+		accionesShowHide('.grpRegAjax', '.grpReg');
+		
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Home_Empleado_Registro ); ?>');
+		form_data.append('data', r );
+		
+		__TransportarData(
+			form_data,
+			function( rDt ) {
+			
+				jQuery('#stcMdl_l1').modal('hide');
+			
+				const mdlO = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(mdlO + ' div.alert');
+                alerta.attr('class','alert alert-success');
+                alerta.html( rDt.msj );
+                jQuery( mdlO ).modal('show');
+                
+                accionesShowHide('.grpReg','.grpRegAjax');
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                const rTxt = JSON.parse( err.responseJSON['err'] );
+                alerta.html( rTxt.msj );
+
+                jQuery( objmdlErr ).modal('show');
+                
+                accionesShowHide('.grpReg','.grpRegAjax');
+			}
+	    );
+	});
+};
+
+// Old version
+const btnIniLogin_click = function( d ){
+	home.tknGet(d, function( r ){
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Home_Login ); ?>');
+
+		for (const k in r) {
+        	if (Object.hasOwnProperty.call(r, k)) {
+        		const _el = r[ k ];
+        		form_data.append( k, _el );
+        	}
+    	}
+		
+		__TransportarData(
+			form_data,
+			function( r ) {
+				const lg = ut.b64EncodeUnicode( JSON.stringify( r ) );
+				ut.SetDatosLocal( '<?php echo $g_jsn; ?>', lg );
+				
+				location.href = "home.php?pageid=home/Main.phtml";
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                const rTxt = JSON.parse( err.responseText );
+                alerta.html( rTxt.err );
+
+                jQuery( objmdlErr ).modal('show');
+			}
+	    );
+		
+	});
+};
+
+const formatListaEmails = function( d ){
+	const html = [];
+	
+    for (const k in d) {
+        if (Object.hasOwnProperty.call(d, k)) {
+        	const _el = d[ k ];
+        	
+        	html.push( '<div class="mb-3 col-md-12"> ' );
+        	html.push( '	<div class="form-check"> ' );
+        	html.push( '		<input data-id="' + _el['id'] + '" data-tipo="' + _el['tipo'] + '" class="form-check-input flexRDDt" type="radio" name="flexRD" id="flexRD' + k + '" required="required" >' );
+        	html.push( '		<label class="form-check-label" for="flexRD' + k + '">' );
+        	html.push( '			' + _el['mail'] );
+        	html.push( '		</label> ' );
+        	html.push( '	</div>' );
+        	html.push( '</div>' );
+        }
+    }
+	
+	return html.join('');
+};
+
+const btnSolicitar_click = function( d ){
+	const recuAlerta = jQuery('#recuAlerta');
+	const btnRecuGetCode = jQuery('#btnRecuGetCode');
+	const btnRecuGoLogin = jQuery('#btnRecuGoLogin');
+	
+	home.tknGet(d, function( r ){
+	
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Home_SolicitarTkn ); ?>');
+		
+	    jQuery(".flexRDDt").each(function(i, o){
+	    	const _rd = jQuery( o );
+	    	
+	    	if( _rd.prop( "checked" ) ) {
+	    		form_data.append('id', _rd.data( 'id' ) );
+	    		form_data.append('tipo', _rd.data( 'tipo' ) );
+	    	}
+	    	
+	    });
+	    
+	    recuAlerta.html('<div class="d-flex align-items-center "><strong>Cargando...</strong><div class="spinner-border ms-auto spinner-border-sm" role="status" aria-hidden="true"></div></div>');
+		recuAlerta.attr('class','alert alert-warning');
+		recuAlerta.show('fast');
+		
+		btnRecuGetCode.hide('fast');
+	    
+	    __TransportarData(
+			form_data,
+			function( r ) {
+				btnRecuGoLogin.show('fast');
+				
+    			recuAlerta.html('A su correo se envi&oacute; su usuario y clave (revise tambi&eacute;n en la bandeja de SPAM).');
+    			recuAlerta.attr('class','alert alert-success');
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                const rTxt = JSON.parse( err.responseText );
+                alerta.html( rTxt.err );
+
+                jQuery( objmdlErr ).modal('show');
+                
+				btnRecuGetCode.show('fast');
+			}
+	    );
+	});
+};
+
+const btnRecupera_click = function( d ){
+	home.recuperar( d , function(){
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Home_RecuperaUsuario ); ?>');
+		form_data.append('tipodoc_id', jQuery('#rec_tipodoc_id').val() );
+		form_data.append('documento', jQuery('#rec_documento').val() );
+		
+		__TransportarData(
+			form_data,
+			function( o ) {
+    			const opc = { 'id' : 'frmRecuListMail', 'title' : 'Solicitar clave', 'btnCerrarX' : true, 'scrolling' : true, 'center' : true };
+                const frmRecu = mngModal.dibujar( opc );
+                
+                jQuery('#cntLsEmail').html( formatListaEmails( o ) );
+                
+				jQuery( frmRecu ).modal('show');
+				//setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+				const rTxt = JSON.parse( err.responseText );
+                alerta.html( rTxt.err );
+
+                jQuery( objmdlErr ).modal('show');
+				//setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	});
+};
+
+const accionesShowHide = function( s, h ){
+	jQuery( h ).hide( 'fast' , function(){
+		jQuery( s ).show( 'fast', function(){} );
+	});
+};
+
+<?php if ( isset( $_POST['las'] ) ) : ?>
+const loginAs = function(){
+	ut.DelDatosLocal('<?php echo $g_jsn; ?>');
+	const form_data = new FormData();
+	form_data.append( 'ajax', '<?php echo md5( IndexCtrl::API_Home_Login ); ?>' );
+	form_data.append( 'loginas', "<?php echo $_POST['las']; ?>" );
+	
+	__TransportarData(
+		form_data,
+		function( dt ) {
+			const lg = ut.b64EncodeUnicode( JSON.stringify( dt ) );
+			ut.SetDatosLocal( '<?php echo $g_jsn; ?>', lg );
+			
+			location.href = "home.php?pageid=home/Main.phtml";
+		},
+		function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            
+            const rTxt = JSON.parse( err.responseText );
+            alerta.html( rTxt.err );
+
+            jQuery( objmdlErr ).modal('show');
+		}
+    );
+};
+<?php endif; ?>
+
+jQuery(document).ready(function() {
+	home.navWorkspace(function(){
+		jQuery('#cplogin').show("fast");
+		<?php if ( isset( $_POST['las'] ) ) : ?>
+		loginAs();
+		<?php endif; ?>
+	});
+});
+
+</script>
