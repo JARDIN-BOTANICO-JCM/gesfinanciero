@@ -13,9 +13,17 @@ vendor/
 dist/
 
 # Ignorar carpetas completas
-repo/anexos/
-repo/avatar/
-repo/proc/
-repo/com/
-repo/recursos/
-repo/usuarios/
+repo/anexos/*
+repo/avatar/*
+repo/proc/*
+repo/com/*
+repo/recursos/*
+repo/usuarios/*
+
+# Excepto
+!repo/anexos/index.php
+!repo/avatar/index.php
+!repo/proc/index.php
+!repo/com/index.php
+!repo/recursos/index.php
+!repo/usuarios/index.php
