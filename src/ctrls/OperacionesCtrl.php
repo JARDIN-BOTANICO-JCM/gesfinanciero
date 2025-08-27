@@ -2088,6 +2088,15 @@ class OperacionesCtrl {
 			    }
 			}
 			
+			/*
+			 * @vnavarro
+			 * TODO: Tarea 2
+			 *   Vamos a controlar que el formulario de crear el empleado obtenga los datos
+			 *   1. Valida que $d tiene empleadosdetallescontrato_meses, empleadosdetallescontrato_dias
+			 *   2. Como esta funcion (mnguserAdd_Helper) solo es para creacion, entonces utiliza la funcion q creaste (empleadosdetallescontrato_agregar) para agregar los meses y los dias
+			 *   3. Usa la variable $idUsr para el campo empleados_id  
+			 */
+			
 			foreach ( $d as $anId => $anVl ) {
 			    if( Utiles::ComienzaEn($anId, self::USUARIOS_FORM_ANEXO_ID) ){
 			        $fld_base = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . "repo" . DIRECTORY_SEPARATOR . "anexos" . DIRECTORY_SEPARATOR;
@@ -2290,6 +2299,16 @@ class OperacionesCtrl {
 	    } catch (Exception $e) {
 	        throw $e;
 	    }
+	    
+	    /*
+	     * @vnavarro
+	     * TODO: Tarea 3
+	     *   Vamos a controlar que el formulario de modificar (el mismo de crear) el empleado obtenga los datos
+	     *   1. Valida que $d tiene empleadosdetallescontrato_meses, empleadosdetallescontrato_dias
+	     *   2. Utiliza la funcion q creaste (empleadosdetallescontrato_modificar) para actualizar los meses y los dias
+	     *   3. Usa la variable $d['id'] para el campo empleados_id
+	     *   4. Utiliza try/catch
+	     */
 	    
 	    return $r;
 	}
@@ -2735,6 +2754,16 @@ class OperacionesCtrl {
 		
 		$r = new Singleton();
 		$r::$lnk->query( self::SQL_BIG_SELECTS );
+		
+		/*
+		 * @vnavarro
+		 * TODO: tarea 1
+		 * 1. en los JOIN ($jn), agrega la tabla empleadosdetallescontrato
+		 * 2. en los campos ($vr), agrega:
+		 *        - empleadosdetallescontrato.meses como 'empleadosdetallescontrato_meses'
+		 *        - empleadosdetallescontrato.dias como 'empleadosdetallescontrato_dias'
+		 *        - empleadosdetallescontrato.fileactaini como 'empleadosdetallescontrato_fileactaini'
+		 */
 		
 		$vr  = "empl.`id`, empl.`tipodoc_id`, tpdc.nombre as tipodoc, empl.`documento`, empl.`lugarescedula_id`, ";
 		$vr .= "lugced.nombre as lugarescedula, empl.`nombres`, empl.`apellidos`, empl.`mail`, empl.`nacimiento`, ";
@@ -8520,8 +8549,18 @@ EOD;
 	// reflista FIN
 	
 	// empleadosdetallescontrato INI
-	// @Valeria Agregar las funciones de agregar (formularios_Agregar), obtener (formularios_Obtener), modificar (formularios_Modificar)
 	
+	/*
+	 * @vnavarro
+	 * TODO: tarea 8
+	 * Creamos controlador para agregar/modificar la tabla empleadosdetallescontrato
+	 * 1. crea una funcion statica y publica de nombre empleadosdetallescontrato_Helper_Agregar( $d )
+	 * 2. detecta si es una actualizacion o un nuevo registro
+	 * 3. agrega los datos a la base de datos con las funciones que creaste para agregar o modificar
+	 * 4. el retorno debe entrese con la funcion self::retorno
+	 */
+	
+	// @Valeria Agregar las funciones de agregar (formularios_Agregar), obtener (formularios_Obtener), modificar (formularios_Modificar)
 	public static function empleadosdetallescontrato_Agregar($d) {
 		date_default_timezone_set('America/Bogota');
 		
@@ -8641,6 +8680,10 @@ EOD;
 	    if ( isset( $d['id'] ) ) {
 	        $wh  = 'id = ?';
 	        $pr[]  = $d['id'];
+	    }
+	    if ( isset( $d['empleados_id'] ) ) {
+	        $wh  = 'empleados_id = ?';
+	        $pr[]  = $d['empleados_id'];
 	    }
 
 		 if ( $wh == '' ) {
@@ -9339,6 +9382,21 @@ EOD;
 	// --HomeCtrls FIN
 	
 	// Version 2
+
+	/**
+	 * Genera una respuesta estructurada en forma de array asociativo.
+	 *
+	 * Esta funcion esta disenada para estandarizar el formato de retorno en metodos
+	 * que requieren comunicar el resultado de una operacion, posibles errores y mensajes
+	 * informativos. Es especialmente util en APIs o controladores donde se necesita
+	 * mantener consistencia en las respuestas.
+	 *
+	 * @param mixed  $result Valor que representa el resultado de la operacion (puede ser booleano, array, objeto, etc.).
+	 * @param bool   $error  Indica si ocurrio un error (codigo de error)
+	 * @param string $msj    Mensaje descriptivo del estado o resultado de la operacion.
+	 *
+	 * @return array Retorna un array con las claves 'result', 'error' y 'msj'.
+	 */
 	public static function retorno( $result, $error, $msj){
 	    $msjr = array(
 	        'result' => $result,
