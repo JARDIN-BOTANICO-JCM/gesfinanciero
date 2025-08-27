@@ -8520,8 +8520,22 @@ EOD;
 	// reflista FIN
 	
 	// empleadosdetallescontrato INI
+	// @Valeria Agregar las funciones de agregar (formularios_Agregar), obtener (formularios_Obtener), modificar (formularios_Modificar)
+	
 	public static function empleadosdetallescontrato_Agregar($d) {
 		date_default_timezone_set('America/Bogota');
+		
+		// Requiere un sesion para obtener el usuario
+		$usu = null;
+		try {
+		    $usu = self::authRequ();
+		} catch (\Exception $e) {
+		    http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+		    throw new \Exception( "empleadosdetallescontrato_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+		}
+		
+		$tmpanyo = self::anyolectivo_Obtener();
+		$anyolectivo_id= $tmpanyo[0]['id'];
 
 		$o = new Empleadosdetallescontrato();
 		if (isset( $d['tipodoc_id'] ) ) {
@@ -8542,18 +8556,19 @@ EOD;
 		if (isset($d['dias'])) {
 			$o->setDias($d['dias']);
 		}
-		if (isset( $d['fecha'] ) ) {
-	        $o->setFecha( $d['fecha'] );
-	    }
-		if (isset( $d['usuario'] ) ) {
-			$o->setUsuario( $d['usuario'] );
-		}
-		if (isset( $d['fechamodifica'] ) ) {
-	        $o->setFechamodifica( $d['fechamodifica'] );
-	    }
-		if (isset( $d['anyolectivo_id'] ) ) {
-			$o->setAnyolectivo_id( $d['anyolectivo_id'] );
-		}
+		
+		// la fecha debe ser la fecha de la insercion
+		$o->setFecha( date("Y-m-d H:i:s") );
+		
+		// Los datos del usuario se obtienen de la sesion actual
+		$o->setUsuario( trim( $usu->getNombres() . " " . $usu-getApellidos() ) );
+		
+		// la fechamodifica debe ser la fecha de la insercion
+		$o->setFechamodifica( date("Y-m-d H:i:s") );
+		
+		// el anyolectivo es el que se tenga actualmente creado en la tabla anyolectivo
+		$o->setAnyolectivo_id( $anyolectivo_id );
+		
 		if (isset( $d['fileactaini'] ) ) {
 			$o->setFileactaini( $d['fileactaini'] );
 		}
@@ -8564,7 +8579,7 @@ EOD;
 		$id = $o->saveData();
 		if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
 			http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
-			throw new \Exception($o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+			throw new \Exception('empleadosdetallescontrato_Agregar: ' . $o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
 		}
 
 		if( $id > 0){
@@ -8572,18 +8587,21 @@ EOD;
 	    }
 	    else {
 	       http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
-	        throw new \Exception( 'formularios_Agregar: Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'empleadosdetallescontrato_Agregar: Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
 
 	public static function empleadosdetallescontrato_Modificar($d) {
 		date_default_timezone_set('America/Bogota');
-	    try {
-	        self::authRequ();
-	    } catch (\Exception $e) {
-	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
-	        throw new \Exception( $e->getMessage() );
-	    }
+		
+		// Requiere un sesion para obtener el usuario
+		$usu = null;
+		try {
+		    $usu = self::authRequ();
+		} catch (\Exception $e) {
+		    http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+		    throw new \Exception( "empleadosdetallescontrato_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+		}
 
 		$tb = "empleadosdetallescontrato ";
 		$aSt = array(); 
@@ -8606,18 +8624,11 @@ EOD;
 		if ( isset( $d['dias'] ) ) {
 			$aSt['dias'] = $d['dias'] ;
 		}
-		if ( isset( $d['fecha'] ) ) {
-			$aSt['fecha'] = $d['fecha'] ;
-		}
-		if ( isset( $d['usuario'] ) ) {
-			$aSt['usuario'] = $d['usuario'] ;
-		}
-		if ( isset( $d['fechamodifica'] ) ) {
-			$aSt['fechamodifica'] = $d['fechamodifica'] ;
-		}
-		if ( isset( $d['anyolectivo_id'] ) ) {
-			$aSt['anyolectivo_id'] = $d['anyolectivo_id'] ;
-		}
+		
+		$aSt['usuario'] = trim( $usu->getNombres() . " " . $usu-getApellidos() );
+		
+		$aSt['fechamodifica'] = date("Y-m-d H:i:s") ;
+		
 		if ( isset( $d['fileactaini'] ) ) {
 			$aSt['fileactaini'] = $d['fileactaini'] ;
 		}
@@ -8625,7 +8636,7 @@ EOD;
 			$aSt['fileactainivalorgestor'] = $d['fileactainivalorgestor'] ;
 		}
 
-		 $pr = [];
+        $pr = [];
 	    $wh  = '';
 	    if ( isset( $d['id'] ) ) {
 	        $wh  = 'id = ?';
@@ -8634,7 +8645,7 @@ EOD;
 
 		 if ( $wh == '' ) {
 	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
-	        throw new Exception( 'formularios_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'empleadosdetallescontrato_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 
 		$xt = $wh;
@@ -8644,7 +8655,7 @@ EOD;
 	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
 	    } catch (\Throwable $th) {
 	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
-	        throw new \Exception( 'formularios_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception( 'empleadosdetallescontrato_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
 	    }
 	    
 	    return $cu;
@@ -8654,17 +8665,18 @@ EOD;
 		$r = new Singleton();
 		$r::$lnk->query( self::SQL_BIG_SELECTS );
 
-		$vr  = "empdetcont.`id`, empdetcont.`tipodoc_id`, empdetcont.`documento`, empdetcont.`empleados_id`, empdetcont.`contrato`, ";
-		$vr .= "empdetcont.`meses`, empdetcont.`dias`, empdetcont.`fecha`, empdetcont.`usuario`, empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, ";
-		$vr .= "empdetcont.`fileactaini`, empdetcont.`fileactainivalorgestor`, ";
+		$vr  = 'empdetcont.`id`, empdetcont.`tipodoc_id`, tipod.nombre as tipodoc_nombre, ';
+		$vr .= 'empdetcont.`documento`, empdetcont.`empleados_id`, concat(emple.nombres, " ", emple.apellidos) as empleados_full, ';
+		$vr .= 'empdetcont.`contrato`, empdetcont.`meses`, empdetcont.`dias`, empdetcont.`fecha`, empdetcont.`usuario`, ';
+		$vr .= 'empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, empdetcont.`fileactaini`, empdetcont.`fileactainivalorgestor` ';
 
 		$tb  = '`empleadosdetallescontrato` as empdetcont ';
 
 		$jn  = 'LEFT JOIN empleados as emple on emple.id = empdetcont.empleados_id ';
 		$jn  .= "LEFT JOIN tipodoc as tipod on tipod.id = empdetcont.tipodoc_id ";
+		
 		$pr = [];
 		$wh = [];
-
 		if (isset($d['id'])) {
 			$wh[] = "empdetcont.`id` = ?";
 			$pr[] = $d['id'];
@@ -8683,7 +8695,7 @@ EOD;
 			$defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
 		}
 
-		$orden = "ORDER BY empDetCont.`id` DESC";
+		$orden = "ORDER BY empdetcont.`id` DESC";
 		if (isset($d['ordendesc'])) {
 			$orden = "ORDER BY " . $d['ordendesc'] . " DESC";
 		}
@@ -8710,9 +8722,6 @@ EOD;
 
 		return $r;
 	}
-
-
-	// TODO: @Valeria Agregar las funciones de agregar (formularios_Agregar), obtener (formularios_Obtener), modificar (formularios_Modificar)
 	// empleadosdetallescontrato FIN
 	
 	// Formularios INI
