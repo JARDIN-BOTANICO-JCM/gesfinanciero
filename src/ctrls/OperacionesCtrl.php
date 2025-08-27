@@ -8561,7 +8561,7 @@ EOD;
 		$o->setFecha( date("Y-m-d H:i:s") );
 		
 		// Los datos del usuario se obtienen de la sesion actual
-		$o->setUsuario( trim( $usu->getNombres() . " " . $usu-getApellidos() ) );
+		$o->setUsuario( trim($usu->getNombres() . " " . $usu->getApellidos()) );
 		
 		// la fechamodifica debe ser la fecha de la insercion
 		$o->setFechamodifica( date("Y-m-d H:i:s") );
@@ -8625,7 +8625,7 @@ EOD;
 			$aSt['dias'] = $d['dias'] ;
 		}
 		
-		$aSt['usuario'] = trim( $usu->getNombres() . " " . $usu-getApellidos() );
+		$aSt['usuario'] = trim( $usu->getNombres() . " " . $usu->getApellidos() );
 		
 		$aSt['fechamodifica'] = date("Y-m-d H:i:s") ;
 		
