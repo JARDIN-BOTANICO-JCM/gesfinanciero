@@ -197,6 +197,16 @@ class IndexCtrl extends Pagina {
 	const API_FormulariosGet = 'API_FormulariosGet';
 	// Formularios FIN
 	
+	// empleadosdetallescontrato INI
+	/*
+	 * @vnavarro
+	 * TODO: tarea 5
+	 * Debemos declarar la constante que enruta a la funcion que crearemos en el controlador principal
+	 * 1. el nombre de esta constante debe ser API_empleadosdetallescontrato_Helper_Add = "API_empleadosdetallescontrato_Helper_Add"
+	 * 2. el nombre de esta constante debe ser API_empleadosdetallescontrato_Get = "API_empleadosdetallescontrato_Get"
+	 */
+	// empleadosdetallescontrato FIN
+	
 	// HomeCtrls INI
 	// --Version2
 	const API_PaquetesHomeHelperAdd = 'API_PaquetesHomeHelperAdd';
@@ -1070,6 +1080,25 @@ class IndexCtrl extends Pagina {
 				    die("");
 				}
 				// Formularios FIN
+				
+				// empleadosdetallescontrato INI
+				/*
+				 * @vnavarro
+				 * TODO: tarea 6
+				 * Enrutamos a la funcion empleadosdetallescontrato_Obtener del controlador OperacionesCtrl.php
+				 * 1. copiar desde la linea 1072 hasta 1081
+				 * 2. la comparacion debe ser $_POST["ajax"] == md5( self::API_empleadosdetallescontrato_Get )
+				 * 3. la funcion debe ser $ok = OperacionesCtrl::empleadosdetallescontrato_Obtener( $_POST );
+				 */
+				
+				/*
+				 * @vnavarro
+				 * TODO: tarea 7
+				 * Enrutamos a la funcion empleadosdetallescontrato_Helper_Agregar del controlador OperacionesCtrl.php
+				 * 1. la comparacion debe ser $_POST["ajax"] == md5( self::API_empleadosdetallescontrato_Helper_Add )
+				 * 2. la funcion debe ser $ok = OperacionesCtrl::empleadosdetallescontrato_Helper_Agregar( $_POST );
+				 */
+				// empleadosdetallescontrato FIN
 				
 				// HomeCtrls INI
 				

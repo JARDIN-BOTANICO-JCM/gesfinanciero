@@ -344,66 +344,6 @@ var ls_generos = <?php echo json_encode( $d_generos ); ?>;
 var ls_cols = <?php echo json_encode( $columnas ) ?>;
 let tbAcuList = null;
 
-let bro = null;
-const Hermanos = function ( d ){
-	const _this = this;
-	let idinc = 0;
-	const inst = d['instancia'];
-	
-	_this.agregarGUI = function( o ){
-		const _o = jQuery( o );
-		const dt = _o.data();
-		const target = dt['target'];
-		
-		let _nombres = "";
-		let _edad = "";
-		
-		if( Object.hasOwnProperty.call( dt , 'nombres' ) ){
-			_nombres = dt['nombres'];
-		}
-		if( Object.hasOwnProperty.call( dt , 'edad' ) ){
-			_edad = dt['edad'];
-		}
-		
-		const idCol = "hrms_" + inst + "_" + idinc;
-		
-		const html = [];
-		html.push( '<div id="' + idCol + '" class="col-12 border-bottom mb-3 capahermanos"> ');
-		html.push( '	<div class="row"> ');
-		html.push( '		<div class="mb-3 col-md-7"> ');
-        html.push( '			<label class="form-label" for="hermanos_nombres_' + idinc + '">Nombre completo<sup>*</sup></label> ');
-        html.push( '			<input type="text" class="form-control campovariable" placeholder="Nombre completo" id="hermanos_nombres_' + idinc + '" name="hermanos_nombres_' + idinc + '" value="' + _nombres + '" required > ');
-    	html.push( '		</div> ');
-    	html.push( '		<div class="mb-3 col-md-4"> ');
-        html.push( '			<label class="form-label" for="hermanos_edad_' + idinc + '">Edad<sup>*</sup></label> ');
-        html.push( '			<input type="text" class="form-control campovariable" placeholder="Edad" id="hermanos_edad_' + idinc + '" name="hermanos_edad_' + idinc + '" value="' + _edad + '" required > ');
-    	html.push( '		</div> ');
-    	html.push( '		<div class="mb-3 col-md-1 justify-content-center align-items-end"> ');
-    	html.push( '			<div> ');
-        html.push( '				<button data-target="#' + idCol + '" rol="button" type="button" class="btn btn-outline-danger py-0 px-1" onclick="' + inst + '.eliminarGUI( this );" ><i class="far fa-trash-alt"></i></button> ');
-        html.push( '			</div> ');
-    	html.push( '		</div> ');
-    	html.push( '	</div> ');
-    	html.push( '</div> ');
-    	
-    	jQuery( target ).before( html.join('') );
-    	idinc++;
-	};
-	_this.eliminarGUI = function( o ){
-	
-		if( confirm('Desea eliminar este registro?') ){
-			const _o = jQuery( o );
-			const dt = _o.data();
-			const target = dt['target'];
-			
-			jQuery( target ).hide('fast', function(){
-				jQuery( target ).remove();
-			}) ;
-		}
-		
-	};
-};
-
 var tbInter = null;
 jQuery(document).ready( function () {
 
@@ -582,8 +522,6 @@ jQuery(document).ready( function () {
             }
         ]
     });
-
-	bro = new Hermanos( { 'instancia' : 'bro' } );
 });
 
 var btnAddRegistro = function ( ) {

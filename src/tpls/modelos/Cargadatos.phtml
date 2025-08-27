@@ -90,6 +90,28 @@ try {
 					</form>
 				</div>
 			</div>
+			
+<?php 
+/*
+ * @vnavarro
+ * TODO: tarea 4
+ * Vamos a darle la opcion a los administradores de pre-carga de datos de los 
+ * empleados que aun no se han creado pero que necesitan tener los datos de: Meses contrato y Dias contrato
+ * 1. Crea una Card (componente boootstrap) 
+ * 2. Crea un boton que permita cargar la informacion de los usuarios que estan en el archivo que previamente cargaron de nombre BOGDATA xlsx
+ * 3. Crea un formulario con los campos:
+ *       - tipodoc_id
+ *       - documento
+ *       - contrato
+ *       - meses
+ *       - dias
+ * 4. El formulario tiene 2 funcionalidades:
+ *      4.1. Modificar/Agregar los datos del usuario que se trae desde BOGDATA
+ *      4.2. Agregar un usuairo que no esta en BOGDATA pero el administrador conoce los datos
+ * 5. Para el guardado/modificado de datos puedes usur como ejemplo la funcion 'const actualizar' (linea 142)
+ */
+?>
+			
 
         </div>
 
@@ -118,15 +140,28 @@ const chkArchivo = function( o ){
 };
 
 const actualizar = function(){
+<?php
+/*
+- frmvalcls es el nombre de la clase del formulario, no el ID
+- El formulario siempre debe tener un ID diferente al nombre de la clase, TIP: la clase siempre la llamo igual que el id y le pongo al final "cls"
+- Todos los campos dentro del formulario deben tener ID y NAME y deben ser iguales
+- la funcion ut.validarFrm sirve para validar el formulario y r son todos los campos que estan dentro de ese formulario (incluso los vacios)
+ */
+?>
 	ut.validarFrm('frmvalcls', function ( r ) {
+<?php   // Este espacio simplemente muestra el "Cargando" del ajax ?>
         const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
         const objmdl = mngModal.dibujar( opc );
         jQuery( objmdl ).modal('show');
-        
+
+<?php   // Se capturan los datos que van a viajar por POST ?>        
         const form_data = new FormData();
+<?php   // IndexCtrl::API_Cargadatos_Upload, es la constante que se declara para no repetir funciones y asi se enruta al controlador principal ?>
         form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Cargadatos_Upload ); ?>');
+<?php   // ut.b64EncodeUnicode, convierte en Base64 los datos y JSON.stringify convierte el json en texto para luego decifrarlo en back ?>
         form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
-        
+
+<?php   // esta es la forma como se pueden cargar archivos de un campo tipo file ?>
         jQuery( '.evaluacionresflsClsData' ).each(function( i, ob ){
 			const _ob = jQuery( ob );
 			const _obDt = _ob.data();
@@ -134,18 +169,22 @@ const actualizar = function(){
 			form_data.append('fuentes_' + dtFItem, _ob.prop('files')[0] );
 		});
 
+<?php   // __TransportarData es la funcion que envia por AJAX los datos ?>
         __TransportarData(
+<?php   // form_data, es lo que se va a recibir por POST ?>
             form_data,
+<?php   // o es la respuesta del BACK (yo le puse o, pero le puedes poner como mejor te funcione) ?>
             function( o ) {
             	const result = o.result;
-            	
+
+<?php           // Abre un modal que entrega la respuesta del proceso, peudes usar los datos que necesites y q tu mismo(a) devolviste ?>            	
             	const objmdl2 = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Carga de datos','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
                 const alerta = jQuery(objmdl2 + ' div.alert');
                 alerta.attr('class','alert alert-success');
                 alerta.html( 'Carga correcta' );
 
                 jQuery( objmdl2 ).modal('show');
-
+<?php           // Cierra el modal "Cargando") ?>
                 setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
             },
             function ( err ) {
@@ -155,6 +194,7 @@ const actualizar = function(){
                 alerta.html( err.responseText );
 
                 jQuery( objmdlErr ).modal('show');
+<?php           // Cierra el modal "Cargando") ?>
                 setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
             }
         );
