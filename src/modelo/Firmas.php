@@ -6,35 +6,16 @@
  */
 class Firmas extends Clsdatos { 
 
-	private $id = 0; 
-    private $pdfid = "";
-    private $acudientes_id = 0;
-    private $acudientes = "";
-    private $documento = "";
-    private $tipodoc = "";
-    private $estudiantes_id = 0;
-    private $estudiantes = "";
-    private $est_documento = "";
-    private $est_tipodoc = "";
-    private $fecha = "1900-01-01 00:00:00";
-    private $mail = "";
-    
-    /**
-     * @return string
-     */
-    public function getMail()
-    {
-        return $this->mail;
-    }
-
-    /**
-     * @param string $mail
-     */
-    public function setMail($mail)
-    {
-        $this->mail = $mail;
-    }
-
+	private $id = 0;
+	private $pdfid = "";
+	private $perfilusuarios_id = 0;
+	private $firmante_id = 0;
+	private $nombrefull = "";
+	private $documento = "";
+	private $tipodoc = "";
+	private $fecha = "1900-01-01 00:00:00";
+	private $mail = "";
+	
     /**
      * @return number
      */
@@ -54,17 +35,25 @@ class Firmas extends Clsdatos {
     /**
      * @return number
      */
-    public function getAcudientes_id()
+    public function getPerfilusuarios_id()
     {
-        return $this->acudientes_id;
+        return $this->perfilusuarios_id;
+    }
+
+    /**
+     * @return number
+     */
+    public function getFirmante_id()
+    {
+        return $this->firmante_id;
     }
 
     /**
      * @return string
      */
-    public function getAcudientes()
+    public function getNombrefull()
     {
-        return $this->acudientes;
+        return $this->nombrefull;
     }
 
     /**
@@ -84,43 +73,19 @@ class Firmas extends Clsdatos {
     }
 
     /**
-     * @return number
-     */
-    public function getEstudiantes_id()
-    {
-        return $this->estudiantes_id;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEstudiantes()
-    {
-        return $this->estudiantes;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEst_documento()
-    {
-        return $this->est_documento;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEst_tipodoc()
-    {
-        return $this->est_tipodoc;
-    }
-
-    /**
      * @return string
      */
     public function getFecha()
     {
         return $this->fecha;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMail()
+    {
+        return $this->mail;
     }
 
     /**
@@ -140,19 +105,27 @@ class Firmas extends Clsdatos {
     }
 
     /**
-     * @param number $acudientes_id
+     * @param number $perfilusuarios_id
      */
-    public function setAcudientes_id($acudientes_id)
+    public function setPerfilusuarios_id($perfilusuarios_id)
     {
-        $this->acudientes_id = $acudientes_id;
+        $this->perfilusuarios_id = $perfilusuarios_id;
     }
 
     /**
-     * @param string $acudientes
+     * @param number $firmante_id
      */
-    public function setAcudientes($acudientes)
+    public function setFirmante_id($firmante_id)
     {
-        $this->acudientes = $acudientes;
+        $this->firmante_id = $firmante_id;
+    }
+
+    /**
+     * @param string $nombrefull
+     */
+    public function setNombrefull($nombrefull)
+    {
+        $this->nombrefull = $nombrefull;
     }
 
     /**
@@ -172,38 +145,6 @@ class Firmas extends Clsdatos {
     }
 
     /**
-     * @param number $estudiantes_id
-     */
-    public function setEstudiantes_id($estudiantes_id)
-    {
-        $this->estudiantes_id = $estudiantes_id;
-    }
-
-    /**
-     * @param string $estudiantes
-     */
-    public function setEstudiantes($estudiantes)
-    {
-        $this->estudiantes = $estudiantes;
-    }
-
-    /**
-     * @param string $est_documento
-     */
-    public function setEst_documento($est_documento)
-    {
-        $this->est_documento = $est_documento;
-    }
-
-    /**
-     * @param string $est_tipodoc
-     */
-    public function setEst_tipodoc($est_tipodoc)
-    {
-        $this->est_tipodoc = $est_tipodoc;
-    }
-
-    /**
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -211,6 +152,13 @@ class Firmas extends Clsdatos {
         $this->fecha = $fecha;
     }
 
-    
+    /**
+     * @param string $mail
+     */
+    public function setMail($mail)
+    {
+        $this->mail = $mail;
+    }
+	
 } 
 ?>

@@ -15,7 +15,75 @@ class Firmaslog extends Clsdatos {
 	private $pdfhash = "";
 	private $paginas = 0;
 	private $fecha = "1900-01-01 00:00:00";
+	private $perfilusuarios_id = 0;
+	private $nombrefull = "";
+	private $tipodoc = "";
+	private $documento = "";
 	
+    /**
+     * @return number
+     */
+    public function getPerfilusuarios_id()
+    {
+        return $this->perfilusuarios_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNombrefull()
+    {
+        return $this->nombrefull;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTipodoc()
+    {
+        return $this->tipodoc;
+    }
+
+    /**
+     * @return string
+     */
+    public function getDocumento()
+    {
+        return $this->documento;
+    }
+
+    /**
+     * @param number $perfilusuarios_id
+     */
+    public function setPerfilusuarios_id($perfilusuarios_id)
+    {
+        $this->perfilusuarios_id = $perfilusuarios_id;
+    }
+
+    /**
+     * @param string $nombrefull
+     */
+    public function setNombrefull($nombrefull)
+    {
+        $this->nombrefull = $nombrefull;
+    }
+
+    /**
+     * @param string $tipodoc
+     */
+    public function setTipodoc($tipodoc)
+    {
+        $this->tipodoc = $tipodoc;
+    }
+
+    /**
+     * @param string $documento
+     */
+    public function setDocumento($documento)
+    {
+        $this->documento = $documento;
+    }
+
     /**
      * @return string
      */
