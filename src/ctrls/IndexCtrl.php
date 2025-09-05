@@ -13,7 +13,7 @@ class IndexCtrl extends Pagina {
     const PERFILES_SUPER_USUARIO = 1;
     const PERFILES_ADMINISTRADOR = 2;
     const PERFILES_SUPERVISOR = 3;
-    const PERFILES_EMPLEADOS = 4;
+    const PERFILES_CONTRATISTA = 4;
     const PERFILES_ACUDIENTE = 5;
     const PERFILES_FINANCIERO = 6;
     const PERFILES_SUPERVISORADMIN = 7;
@@ -60,6 +60,7 @@ class IndexCtrl extends Pagina {
 	
 	const API_LNK_DESCARGAR_ALUMNOS = 'API_LNK_DESCARGAR_ALUMNOS';
 	const API_LNK_DESCARGAR_PDF = 'API_LNK_DESCARGAR_PDF';
+	const API_LNK_VISTA_PDF_PROC = 'API_LNK_VISTA_PDF_PROC';
 	const API_LNK_DESCARGAR_CERTIFICADOS = 'API_LNK_DESCARGAR_CERTIFICADOS';
 	const API_SESSION_ACTIVA = 'API_SESSION_ACTIVA';
 	const API_AgregarConfigCorp = 'API_AgregarConfigCorp';
@@ -150,7 +151,13 @@ class IndexCtrl extends Pagina {
 	const API_FirmasPreviaGet = 'API_FirmasPreviaGet';
 	const API_FirmasAgregarConfigCorp_Add = 'API_FirmasAgregarConfigCorp_Add';
 	const API_FirmasAgregarConfigCorp_Get = 'API_FirmasAgregarConfigCorp_Get';
+	
+	const API_FirmasproHelperAdd = 'API_FirmasproHelperAdd';
 	// Firmas FIN
+	
+	// Firmaslog INI
+	const API_FirmaslogHelperEvent = 'API_FirmaslogHelperEvent';
+	// Firmaslog FIN
 	
 	// ApiBox INI
 	const API_ApiboxGet = 'API_ApiboxGet';
@@ -225,6 +232,7 @@ class IndexCtrl extends Pagina {
 	
 	// Mascaras descarga
 	const MASK_FLD_REPO_ANEXOS = 'MASK_FLD_REPO_ANEXOS';
+	const MASK_FLD_REPO_PROCESOS = 'MASK_FLD_REPO_PROCESOS';
 	
 	public function __construct(){
 	    // Here se centralizan todas las operaciones de envio de datos: POST, GET, REQUEST
@@ -291,6 +299,15 @@ class IndexCtrl extends Pagina {
 	        if ( $_REQUEST["ajaxl"] == md5( self::API_LNK_DESCARGAR_PDF ) ) {
 	            try{
 	                $ok = OperacionesCtrl::crearUrlMask( $_REQUEST, self::MASK_FLD_REPO_ANEXOS );
+	            }catch (Exception $ex){
+	                $er = array("err" => $ex->getMessage());
+	                echo json_encode($er);
+	            }
+	            die("");
+	        }
+	        if ( $_REQUEST["ajaxl"] == md5( self::API_LNK_VISTA_PDF_PROC ) ) {
+	            try{
+	                $ok = OperacionesCtrl::crearUrlMask( $_REQUEST, self::MASK_FLD_REPO_PROCESOS );
 	            }catch (Exception $ex){
 	                $er = array("err" => $ex->getMessage());
 	                echo json_encode($er);
@@ -835,6 +852,7 @@ class IndexCtrl extends Pagina {
 				// Plantillas FIN
 				
 				// Firmas INI
+				
 				if ( $_POST["ajax"] == md5( self::API_FirmasGet ) ) {
 				    try{
 				        $ok = OperacionesCtrl::firmaspro_Helper_Obtener( $_POST );
@@ -845,6 +863,7 @@ class IndexCtrl extends Pagina {
 				    }
 				    die("");
 				}
+				
 				if ( $_POST["ajax"] == md5( self::API_FirmasPreviaGet ) ) {
 				    try{
 				        $ok = OperacionesCtrl::firmaspro_Preview_Obtener( $_POST );
@@ -875,7 +894,31 @@ class IndexCtrl extends Pagina {
 				    }
 				    die("");
 				}
+				// yalfonso - JBB
+				if ( $_POST["ajax"] == md5( self::API_FirmasproHelperAdd ) ) {
+				    try{
+				        $ok = OperacionesCtrl::firmaspro_Helper_FirmarDoc( $_POST );
+				        echo json_encode($ok);
+				    }catch (Exception $ex){
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
 				// Firmas FIN
+
+				// Firmaslog INI
+				if ( $_POST["ajax"] == md5( self::API_FirmaslogHelperEvent ) ) {
+				    try{
+				        $ok = OperacionesCtrl::firmaspro_Helper_EventsObtener( $_POST );
+				        echo json_encode($ok);
+				    }catch (Exception $ex){
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Firmaslog FIN
 				
 				// ApiBox INI
 				if ( $_POST["ajax"] == md5( self::API_ApiboxGet ) ) {

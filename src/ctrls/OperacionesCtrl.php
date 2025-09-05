@@ -607,7 +607,8 @@ class OperacionesCtrl {
 	// Mascaras URL INI
 	public static function crearUrlMask( $d, $msk ){
 	    $carpetas = array(
-	        IndexCtrl::MASK_FLD_REPO_ANEXOS => "repo/anexos"
+	        IndexCtrl::MASK_FLD_REPO_ANEXOS => "repo/anexos",
+	        IndexCtrl::MASK_FLD_REPO_PROCESOS => "repo/proc"
 	    );
 	    
 	    $bs = dirname(dirname(dirname( __FILE__ ))) ;
@@ -617,7 +618,7 @@ class OperacionesCtrl {
 	    
 	    $id = "";
 	    $fld_base = $bs . DIRECTORY_SEPARATOR . $fl;
-	    if ( $msk == IndexCtrl::MASK_FLD_REPO_CERTS ) {
+	    if ( $msk == IndexCtrl::MASK_FLD_REPO_PROCESOS ) {
 	        $fld_base .=  DIRECTORY_SEPARATOR . "" . $d['anyo'];
 	    }
 	    
@@ -2039,6 +2040,18 @@ class OperacionesCtrl {
 			        throw new \Exception ( 'mnguserAdd_Helper - empleados_Agregar: ' . $th->getMessage() );
 			    }
 			    
+			    // mk p12
+			    $reqP12 = $_d;
+			    $reqP12['tipousuario'] = self::FIRMASPRO_TIPOUSUARIO_CONTRATISTA;
+			    $reqP12['usuario_id'] = $idUsr['id'];
+			    $reqP12['clave'] = md5( $_d['clave'] );
+			    try {
+			        self::firmaspro_Helper_MkCert_p12( $reqP12 );
+			    } catch (Exception $e) {
+			        $msjr = self::retorno([], $e->getCode(),'mnguserAdd_Helper - firmaspro_Helper_MkCert_p12: ' . $e->getMessage() );
+			        throw new Exception( json_encode( $msjr ), $e->getCode() );
+			    }
+			    
 			}
 			else {
 			    $modD = $_d;
@@ -2526,6 +2539,18 @@ class OperacionesCtrl {
 	        } catch (Exception $e) {
 	            http_response_code( IndexCtrl::ERR_COD_CAMBIO_CLAVE_FALLIDO );
                 throw new Exception( "empleados_NuevaClaveAjax - empleados_ModificarClave: " . $e->getMessage() );
+	        }
+	        
+	        // mk p12
+	        $reqP12 = $dt;
+	        $reqP12['tipousuario'] = self::FIRMASPRO_TIPOUSUARIO_CONTRATISTA;
+	        $reqP12['usuario_id'] = $_id;
+	        $reqP12['clave'] = md5($clv);
+	        try {
+	            self::firmaspro_Helper_MkCert_p12( $reqP12 );
+	        } catch (Exception $e) {
+	            $msjr = self::retorno([], $e->getCode(),'empleados_NuevaClaveAjax - firmaspro_Helper_MkCert_p12: ' . $e->getMessage() );
+	            throw new Exception( json_encode( $msjr ), $e->getCode() );
 	        }
 	        
 	        if( $_notificar == 1 ){
@@ -3071,6 +3096,17 @@ class OperacionesCtrl {
 	                    throw new Exception( json_encode( $msjr ), $e->getCode() );
 	                }
 	                
+	                // mk p12
+	                $reqP12 = $nwU;
+	                $reqP12['tipousuario'] = self::FIRMASPRO_TIPOUSUARIO_CONTRATISTA;
+	                $reqP12['usuario_id'] = $idMngUsr['id'];
+	                $reqP12['clave'] = md5( $clave );
+	                try {
+	                    self::firmaspro_Helper_MkCert_p12( $reqP12 );
+	                } catch (Exception $e) {
+	                    $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - firmaspro_Helper_MkCert_p12: ' . $e->getMessage() );
+	                    throw new Exception( json_encode( $msjr ), $e->getCode() );
+	                }
 	                
 	            }
 	        }
@@ -4389,9 +4425,6 @@ class OperacionesCtrl {
 	// Usabilidad FIN
 
 	// Subir Foto Perfil
-	public static function SubirFotoPerfilMasiva ( $d ){
-	    
-	}
 	public static function SubirFotoPerfil( $d ){
 		try {
 			self::authRequ();
@@ -4942,8 +4975,9 @@ class OperacionesCtrl {
 	    $rDt = array();
 	    foreach ( $r as $kFlId ) {
 	        $flid = preg_replace('/^tpls_/', '', $kFlId['vl'] );
+	        $flid_html = $flid . ".html";
 	        $dtB64 = [ 
-	            'flid' => $flid . ".html"
+	            'flid' => $flid_html
 	        ];
 	        
 	        $dt = array();
@@ -4955,11 +4989,34 @@ class OperacionesCtrl {
 	        $dN['data'] = base64_encode( json_encode( $dtB64 ) );
 	        $dN['helperfilename'] = $id_pack;
 	        
+	        $genpdf = "";
 	        try {
-	            $rDt[] = self::firmaspro_Obtener( $dN, $dt );
+	            $genpdf = self::firmaspro_Obtener( $dN, $dt );
 	        } catch (Exception $e) {
 	            throw new Exception( 'editarPlantillas_JBB_Mezclar_Crear: ' . $e->getMessage() );
 	        }
+	        
+	        if ( $genpdf !== "" ) {
+	            $frmAdd = array();
+	            $frmAdd['pdfid'] = $genpdf['bs'];
+	            $frmAdd['perfilusuarios_id'] = $bind['empl_perfil_id'];
+	            $frmAdd['firmante_id'] = $bind['empl_id'];
+	            $frmAdd['nombrefull'] = trim( (string) $bind['empl_nombres'] . ' ' . $bind['empl_apellidos'] );
+	            $frmAdd['documento'] = $bind['empl_documento'];
+	            $frmAdd['tipodoc'] = $bind['empl_tipodoc_id'];
+	            $frmAdd['fecha'] = date('Y-m-d H:i:s');
+	            $frmAdd['mail'] = $bind['empl_mail'];
+	            
+	            $firmas_id = self::firmas_Helper_Agregar( $frmAdd );
+	            $firmas_id_data = [
+	                'firmas_id' => $firmas_id,
+	                'firmasestados_id' => 1,
+	                'firmaslog_id' => ''
+	            ]; 
+	            $genpdf['firmas_id'] = $firmas_id_data;
+	        }
+	        
+	        $rDt[] = $genpdf;
 	    }
 	    
 	    return $rDt;
@@ -5113,7 +5170,8 @@ class OperacionesCtrl {
 	    'formulario' => 'formulario',
 	    'fechacontratocompleto' => 'fechacontratocompleto',
 	    'moneda' => 'moneda',
-	    'flujofinanciero' => 'flujofinanciero'
+	    'flujofinanciero' => 'flujofinanciero',
+	    'campofirma' => 'campofirma'
 	];
 	
 	public static function editarPlantillas_CrearComponente( $d ){
@@ -5456,6 +5514,13 @@ class OperacionesCtrl {
 	            
 	            $html[] = implode("", $tbhtml);
 	        }
+	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['campofirma'] ) {
+	            $txt = array();
+	            $txt[] = '<span style="color: #FFFFFF; font-size: 12pt;">' . $d['valor'] . '</span><br />';
+	            $txt[] = '<span style="font-size: 45pt;">&nbsp;</span>';
+	            
+	            $html[] = implode("", $txt);
+	        }
 	    }
 	    
 	    //return json_encode( $d , JSON_UNESCAPED_SLASHES);
@@ -5546,11 +5611,9 @@ class OperacionesCtrl {
             }
 	    }
 	    
-	    
-	    
 	    echo "totalMesesContrato: " . $totalMesesContrato . "<br>";
 	    
-	    die( "dias: " . $diasTrabajados ) . "<br>";
+	    //die( "dias: " . $diasTrabajados ) . "<br>";
 	    
 	    $mesCompleto = ($diasTrabajados == 30);
 	    
@@ -5693,7 +5756,7 @@ class OperacionesCtrl {
 	    self::authRequOff();
 	    $data = base64_decode( $d[ 'data' ] );
 	    $json = json_decode( $data, true );
-	    
+	    /*
 	    $proc = $json[ 'proc' ];
 	    
 	    $resFir = array();
@@ -5770,19 +5833,19 @@ class OperacionesCtrl {
 	        
 	        $d['bind'] = $acu;
 	        if ( $proc == md5( self::FIRMAS_PROC_FIR ) ) {
-    	        if ( !$firC ) {
-    	            $d['firmar'] = true;
-    	            $d['flogid'] = $flogID;
-    	            
-    	            $_cer = "";
-    	            try {
-    	                $_cer = self::firmaspro_MkCert( $acu );
-    	            } catch (Exception $e) {
-    	                throw new Exception( 'firmaspro_Helper_Obtener - firmaspro_MkCert: ' . $e->getMessage() );
-    	            }
-    	            
-    	            $d['cer'] = $_cer;
-    	        }
+	            if ( !$firC ) {
+	                $d['firmar'] = true;
+	                $d['flogid'] = $flogID;
+	                
+	                $_cer = "";
+	                try {
+	                    $_cer = self::firmaspro_MkCert( $acu );
+	                } catch (Exception $e) {
+	                    throw new Exception( 'firmaspro_Helper_Obtener - firmaspro_MkCert: ' . $e->getMessage() );
+	                }
+	                
+	                $d['cer'] = $_cer;
+	            }
 	        }
 	        $resFir = self::firmaspro_Obtener( $d, $dt );
 	        
@@ -5801,10 +5864,244 @@ class OperacionesCtrl {
 	    }
 	    else{
 	        http_response_code( IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA );
-            throw new Exception( 'firmaspro_Helper_Obtener: no hay datos del firmante');
+	        throw new Exception( 'firmaspro_Helper_Obtener: no hay datos del firmante');
 	    }
 	    
 	    return $resFir;
+	    */
+	}
+	
+	const FIRMASPRO_CARPETAS = array(
+	    'proceso' => 'proc'
+	);
+	public static function firmaspro_Helper_FirmarDoc( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    self::authRequOff();
+	    
+	    include_once dirname(dirname(__FILE__)) . "/libs/setasign/SetAsign_Manage.php";
+	    include_once dirname(dirname(__FILE__)) . "/libs/setasign/PdfTextLocator.php";
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $udata = base64_decode( $d[ 'u' ] );
+	    $u = json_decode( $udata, true );
+	    
+	    $tipousuario = $json['tipousuario'];
+	    $fldcampo = $json['fldcampo'];
+	    
+	    $usr = array();
+	    if ( $tipousuario == self::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ) {
+	        $dtUsr = self::empleados_Helper_Obtener(['w_id_md5' => $u['id'] ]);
+	        $usr = $dtUsr[0];
+	    }
+	    $documento = $usr['documento'];
+	    $tipodoc_id = $usr['tipodoc_id'];
+	    $usuario_id = $usr['id'];
+	    $clave = $usr['clave'];
+	    
+	    $bs = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . "usuarios";
+	    $bs_tipousr = $bs . DIRECTORY_SEPARATOR . $json['tipousuario'];
+	    $bs_tipousr_usr = $bs_tipousr . DIRECTORY_SEPARATOR . $tipodoc_id . '_' . $documento;
+	    $flp12 = $bs_tipousr_usr . DIRECTORY_SEPARATOR . self::FIRMASPRO_NOMBRE_P12;
+	    
+	    if ( file_exists( $flp12 ) ) {
+	        $bs = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR;
+	        
+	        $fldtipo = self::FIRMASPRO_CARPETAS[ $json['fldtipo'] ];
+	        $url = explode( $fldtipo, $json['documento'] );
+	        
+	        $pdfid = Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . $fldtipo . $url[ 1 ];
+	        $flinput = $bs . $pdfid;
+	        
+	        $pfl = pathinfo($flinput);
+	        $floutput = $pfl['dirname'] . DIRECTORY_SEPARATOR . $pfl['filename'] . '_fir.' . $pfl['extension'];
+	        
+	        $firmas_id = 0;
+	        $qryFirmas = self::firmaslog_Obtener( [ 'w_pdfid' => $pdfid ] );
+	        foreach ( $qryFirmas as $kFirId ) {
+	            $firmas_id = $kFirId['firmas_id'];
+	        }
+	        
+	        $saliQr = $pfl['dirname'] . DIRECTORY_SEPARATOR . 'qr_' . $pfl['filename'] . '_fir.png';
+	        $rQr = self::firmaspro_MkQR( array('qr' => $saliQr, 'data' => rtrim( Utiles::getBaseUrl(), "/" ) . "/index.php/Revisar/" . md5( $firmas_id ) . "" . '?_=' . date('YmdHis') , 'jpg' => false ) );
+	        
+	        $locator = new PdfTextLocator();
+	        $locator->setSearchTerms( [ $fldcampo ] );
+	        $firmaOpcs = $locator->findInPdf( $flinput );
+	        
+	        $resFir = "";
+	        $paginas = 0;
+	        foreach ($firmaOpcs as $kFir ) {
+	            $pass = md5( $tipousuario . '' . $documento . '' . $tipodoc_id . '' . $usuario_id . '' . $clave );
+	            
+	            // Si existe el archivo _fir
+	            if ( file_exists( $floutput ) ) {
+	                // Entonces se usa como input, por q se va a validar
+	                // campos y todo lo que tenga para que no vuelve a ser firmado
+	                // por la misma persona
+	                $flinput = $floutput;
+	            }
+	            
+	            $kFir['entrada'] = $flinput;
+	            $kFir['salida'] = $floutput;
+	            $kFir['clave'] = $pass;
+	            $kFir['img'] = $rQr;
+	            $kFir['nombrecampo'] = $usr['perfil_id'] . '_' . $usr['usuario'];
+	            
+	            if ( isset( $json['razon'] ) ) {
+	                $kFir['razon'] = $json['razon'];
+	            }
+	            
+	            $sam = new SetAsign_Manage();
+	            $sam->setP12( $flp12 );
+	            
+	            $campos = $sam->obtenerCampos( $flinput );
+	            $paginas = $sam->obtenerTotalPaginas( $kFir );
+	            
+	            $nuevafirma = true;
+	            if ( count( $campos ) > 0 ) {
+	                foreach ($campos as $kCampo ) {
+	                    if ( $kFir['nombrecampo'] == $kCampo ) {
+	                        $nuevafirma = false;
+	                    }
+	                }
+	            }
+	            
+	            if( $nuevafirma ){
+	                try {
+	                    $resFir = $sam->firmarIncremental( $kFir );
+	                } catch (Exception $e) {
+	                    http_response_code( $e->getCode() );
+	                    return self::retorno([], $e->getCode(), $e->getMessage() );
+	                }
+	                
+	            }
+	            else {
+	                http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+	                return self::retorno( [], IndexCtrl::ERR_COD_REGISTRO_EXISTENTE, 'El usuario ' . $u['fullname'] . ' ya firm&oacute; el documento' );
+	            }
+	            
+	        }
+	        
+	        if ( $resFir !== "" ) {
+	            $qryUni = [ 'w_pdfid' => $pdfid ];
+	            
+	            $pdfFir = self::firmaslog_Obtener( $qryUni );
+	            
+	            if ( count( $pdfFir ) > 0 ) {
+	                $firId = $pdfFir[0];
+	                $nwlog = [
+	                    'flogid' => $firId['firmas_id'],
+	                    'firmasestados_id' => 2,
+	                    'pdf' => ['bs' => $pdfid, 'url' => rtrim( Utiles::getBaseUrl(), "/" ) . '/' . $pdfid ],
+	                    'paginas' => $paginas,
+	                    'fecha' => date('Y-m-d H:i:s'),
+	                    'perfilusuarios_id' => $usr['perfil_id'],
+	                    'nombrefull' => trim((string)$usr['nombres'] . ' ' . $usr['apellidos']),
+	                    'tipodoc' => $usr['tipodoc'],
+	                    'documento' => $usr['documento']
+	                ];
+	                self::firmas_Helper_Agregar( $nwlog );
+	            }
+	        }
+	        
+	        return self::retorno( [ 'bs' => $resFir ], 0, '' );
+	    }
+	    else {
+	        http_response_code(IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA);
+	        return self::retorno([], IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA, 'El certificado ' . $flp12 . ' no existe' );
+	    }
+	    
+	    return self::retorno([], IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA, 'Null = ' . $json['documento'] );
+	    
+	}
+	
+	const FIRMASPRO_EVENTO_REVISION = "1";
+	const FIRMASPRO_EVENTO_FIRMAR = "2";
+	const FIRMASPRO_EVENTO_ANULAR = "3";
+	public static function firmaspro_Helper_EventsObtener( $d ){
+	    include_once dirname(dirname(__FILE__)) . "/libs/setasign/SetAsign_Manage.php";
+	    $sam = new SetAsign_Manage();
+	    $bs = dirname(dirname(dirname(__FILE__)));
+	    
+	    date_default_timezone_set('America/Bogota');
+	    self::authRequOff();
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $udata = base64_decode( $d[ 'u' ] );
+	    $ujson = json_decode( $udata, true );
+	    
+	    $docinfoB64 = base64_decode( $ujson['jslgn'] );
+	    $docinfo = json_decode( $docinfoB64, true );
+	    
+	    $fldtipo = $json['fldtipo'];
+	    $anyo = $json['anyo'];
+	    $ide = $json['ide'];
+	    $pdf = $json['pdf'];
+	    
+	    if ( $json['evento'] == self::FIRMASPRO_EVENTO_REVISION ) {
+	        $tipo = IndexCtrl::PERFILES_CONTRATISTA;
+	        $firmasestados_id = 1;
+	        
+	        $rutafl = Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . self::FIRMASPRO_CARPETAS[ $fldtipo ] . DIRECTORY_SEPARATOR . $anyo . DIRECTORY_SEPARATOR . $ide . DIRECTORY_SEPARATOR . $pdf;
+	        $url = Utiles::getBaseUrl() . $rutafl;
+	        $absfile = $bs . DIRECTORY_SEPARATOR . $rutafl;
+	        // Consultar si el usuario ya creo un registro de Revision del archivo $rutafl
+	        $qryExiste = [ 
+	            'w_pdfid' => $rutafl
+	        ];
+            $qryr = self::firmaslog_Obtener( $qryExiste );
+            
+            $regLog = [];
+            $adduniqLog = true;
+            foreach ( $qryr as $kQry ) {
+                $regLog = $kQry;
+                
+                if ( $kQry['firmasestados_id'] == $firmasestados_id 
+                    && md5($kQry['firmante_id']) == $ujson['id'] 
+                    && $kQry['perfilusuarios_id'] == $tipo ) {
+                    $adduniqLog = false;
+                }
+            }
+            
+            if ( $adduniqLog ) {
+                if ( isset( $regLog['firmas_id'] ) ) {
+                    $tipodoc = self::tipodoc_Obtener(['id' => $docinfo['tipodoc_id']]);
+                    $nwFirLog = array(
+                        'fecha' => date('Y-m-d H:i:s'),
+                        'firmas_id' => $regLog['firmas_id'],
+                        'firmasestados_id' => $firmasestados_id,
+                        'ip' => Utiles::get_user_ip_address(),
+                        'pdfurl' => Utiles::getBaseUrl() . $rutafl,
+                        'paginas' => $sam->obtenerTotalPaginas( ['entrada' => $absfile ] ),
+                        'pdfhash' => md5_file( $absfile ),
+                        'pdfruta' => $rutafl,
+                        'perfilusuarios_id' => $tipo,
+                        'nombrefull' => $ujson['fullname'],
+                        'tipodoc' => $tipodoc[0]['nombre'],
+                        'documento' => $docinfo['documento']
+                    );
+                    self::firmaslog_Agregar( $nwFirLog );
+                }
+                else {
+                    http_response_code(IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+                    return self::retorno([], IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO, 'Genere nuevamente sus documentos');
+                }
+            }
+            // validar si existe un archivo _fir para mostrar
+            $piUrl = pathinfo( $absfile );
+            $url_fir = $piUrl['dirname'] . '/' . $piUrl['filename'] . '_fir.' . $piUrl['extension'];
+            
+            if ( file_exists( $url_fir ) ) {
+                $rutafl_fir = Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . self::FIRMASPRO_CARPETAS[ $fldtipo ] . DIRECTORY_SEPARATOR . $anyo . DIRECTORY_SEPARATOR . $ide . DIRECTORY_SEPARATOR . $piUrl['filename'] . '_fir.' . $piUrl['extension'];
+                $url = Utiles::getBaseUrl() . $rutafl_fir;
+            }
+            
+            return self::retorno([ 'url' => $url ], 0, '');
+	    }
 	}
 	
 	private static function firmaspro_MkQR( $d ){
@@ -5892,6 +6189,80 @@ class OperacionesCtrl {
 	    }
 	    
 	    return array( 'crt' => $crtFl, 'key' => $keyFl );
+	}
+	private static function firmaspro_MkCert_p12 ( $d ) {
+	    $nombre = $d['nombre'];
+	    $email = $d['correo'];
+	    $pais = 'CO';
+	    $password = $d['clave'];
+	    $outputFile = $d['archivop12'];
+	    
+	    $dn = [
+	        "countryName" => $pais,
+	        "stateOrProvinceName" => "N/A",
+	        "localityName" => "N/A",
+	        "organizationName" => "Firma Personal",
+	        "organizationalUnitName" => "Usuarios",
+	        "commonName" => $nombre,
+	        "emailAddress" => $email
+	    ];
+	    
+	    $config = [
+	        "private_key_bits" => 2048,
+	        "private_key_type" => OPENSSL_KEYTYPE_RSA,
+	        "digest_alg" => "sha256"
+	    ];
+	    
+	    $privateKey = openssl_pkey_new($config);
+	    $csr = openssl_csr_new($dn, $privateKey, $config);
+	    $cert = openssl_csr_sign($csr, null, $privateKey, 365, $config);
+	    $p12 = null;
+	    openssl_pkcs12_export($cert, $p12, $privateKey, $password);
+	    
+	    file_put_contents($outputFile, $p12);
+	    
+	    return $outputFile;
+	}
+	
+	const FIRMASPRO_TIPOUSUARIO_ADMIN = 'admin';
+	const FIRMASPRO_TIPOUSUARIO_CONTRATISTA = 'contra';
+	const FIRMASPRO_NOMBRE_P12 = 'mep12.p12';
+	public static function firmaspro_Helper_MkCert_p12( $d ) {
+	    $bs = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . "usuarios";
+	    
+	    $tipousuario = $d['tipousuario'];
+	    $bs_tipousr = $bs . DIRECTORY_SEPARATOR . $tipousuario;
+	    if ( !file_exists( $bs_tipousr ) ) {
+	        if( !mkdir( $bs_tipousr ) ){
+	            http_response_code(IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	            throw new Exception('No fue posible crear ' . $bs_tipousr, IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	        }
+	    }
+	    
+	    $tipodoc_id = $d['tipodoc_id'];
+	    $documento = $d['documento'];
+	    $bs_tipousr_usr = $bs_tipousr . DIRECTORY_SEPARATOR . $tipodoc_id . '_' . $documento;
+	    if ( !file_exists( $bs_tipousr_usr ) ) {
+	        if( !mkdir( $bs_tipousr_usr ) ){
+	            http_response_code(IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	            throw new Exception('No fue posible crear ' . $bs_tipousr_usr, IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	        }
+	    }
+	    
+	    $usuario_id = $d['usuario_id'];
+	    $clave = $d['clave'];
+	    
+	    $p12clave = md5( $tipousuario . '' . $documento . '' . $tipodoc_id . '' . $usuario_id . '' . $clave );
+	    $elp12 = array(
+	        'nombre' => $d['nombres'],
+	        'correo' => $d['mail'],
+	        'pais' => 'CO',
+	        'clave' => $p12clave,
+	        'archivop12' => $bs_tipousr_usr . '/' . self::FIRMASPRO_NOMBRE_P12
+	    );
+	    $p12 = self::firmaspro_MkCert_p12( $elp12 );
+	    
+	    return $p12;
 	}
 	
 	public static function firmaspro_Obtener( $d, &$dt ) {
@@ -6355,18 +6726,16 @@ EOD;
 	public static function firmaspro_Revisar( $d ){
 	    self::authRequOff();
 	    
-	    $data = array();
-	    $docente = false;
+	    $data = [];
 	    $cod = "";
 	    if ( isset( $d[0] ) ) {
 	        $cod = $d[0];
 	        
 	        try {
-	            $data = self::firmaslog_Obtener( array( 'w_firmaid_md5' => $cod, 'orden' => 10 ) );
+	            $data = self::firmaslog_Obtener( array( 'w_firmaid_md5' => $cod, 'ordenasc' => 9 ) );
 	        } catch (Exception $e) {
 	            throw new Exception( 'firmaspro_Revisar - firmaslog_Obtener: ' . $e->getMessage() );
 	        }
-	        
 	    }
 	    
 	    include_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'tpls' . DIRECTORY_SEPARATOR . 'Revisar.phtml';
@@ -6381,37 +6750,51 @@ EOD;
 	const FIRMAS_PROC_FIR = "firmasfir";
 	public static function firmas_Helper_Agregar ( $d ) {
 	    date_default_timezone_set('America/Bogota');
-	    $d[ 'acudientes' ] = $d[ 'fullname' ];
 	    
 	    $fid = 0;
 	    if ( isset( $d['flogid'] ) ) {
 	        $fid = $d['flogid'];
-	    }
-	    else {
+	        
+	        $salidabase = dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR ;
+	        $pdf = $d['pdf'];
+	        $flog = array(
+	            'firmas_id' => $fid,
+	            'firmasestados_id' => $d['firmasestados_id'],
+	            'ip' => Utiles::get_user_ip_address(),
+	            'pdfurl' => $pdf['url'],
+	            'pdfruta' => $pdf['bs'],
+	            'pdfhash' => md5_file( $salidabase . '/' . $pdf['bs'] ),
+	            'paginas' => $d['paginas'],
+	            'fecha' => date('Y-m-d H:i:s'),
+	            'perfilusuarios_id' => $d['perfilusuarios_id'],
+	            'nombrefull' => $d['nombrefull'],
+	            'tipodoc' => $d['tipodoc'],
+	            'documento' => $d['documento']
+	        );
+	        
 	        try {
-	            $fid = self::firmas_Agregar( $d );
+	            self::firmaslog_Agregar( $flog );
 	        } catch (Exception $e) {
-	            throw new Exception ( 'firmas_Helper_Agregar - firmas_Agregar: ' . $e->getMessage() ) ;
+	            throw new Exception ( 'firmas_Helper_Agregar - firmaslog_Agregar: ' . $e->getMessage() ) ;
 	        }
 	    }
-	    
-	    $salidabase = dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR ;
-	    $pdf = $d['pdf'];
-	    $flog = array(
-	        "firmas_id" => $fid ,
-	        "firmasestados_id" => $d['estado_id'],
-	        "ip" => $d['ip'],
-	        "pdfurl" => $pdf['url'],
-	        "pdfruta" => $pdf['bs'],
-	        "pdfhash" => md5_file( $salidabase . $pdf['bs'] ),
-	        "paginas" => $d['paginas'],
-	        "fecha" => date("Y-m-d H:i:s")
-	    );
-	    
-	    try {
-	        self::firmaslog_Agregar( $flog );
-	    } catch (Exception $e) {
-	        throw new Exception ( 'firmas_Helper_Agregar - firmaslog_Agregar: ' . $e->getMessage() ) ;
+	    else {
+	        $qryUni = [ 'w_pdfid' => $d['pdfid'] ];
+	        $pdfUnico = self::firmaslog_Obtener( $qryUni );
+	        
+	        $limpio = true;
+	        if (count( $pdfUnico ) > 0 ) {
+	            $limpio = self::firmaslog_Helper_Eliminar( $pdfUnico[0] ) ;
+	        }
+	        
+	        if ( $limpio ) {
+	            try {
+	                $fid = self::firmas_Agregar( $d );
+	            } catch (Exception $e) {
+	                throw new Exception ( 'firmas_Helper_Agregar - firmas_Agregar: ' . $e->getMessage() ) ;
+	            }
+	        }
+
 	    }
 	    
 	    return $fid;
@@ -6420,36 +6803,29 @@ EOD;
 	    date_default_timezone_set('America/Bogota');
 	    
 	    $o = new Firmas();
-	    if (isset( $d['acudientes'] ) ) {
-	        $o->setAcudientes( $d['acudientes'] );
+	    
+	    if (isset( $d['pdfid'] ) ) {
+	        $o->setPdfid( $d['pdfid'] );
 	    }
-	    if (isset( $d['acudientes_id'] ) ) {
-	        $o->setAcudientes_id($d['acudientes_id']);
+	    if (isset( $d['perfilusuarios_id'] ) ) {
+	        $o->setPerfilusuarios_id($d['perfilusuarios_id']);
+	    }
+	    if (isset( $d['firmante_id'] ) ) {
+	        $o->setFirmante_id( $d['firmante_id'] );
+	    }
+	    if (isset( $d['nombrefull'] ) ) {
+	        $o->setNombrefull( $d['nombrefull'] );
 	    }
 	    if (isset( $d['documento'] ) ) {
 	        $o->setDocumento( $d['documento'] );
 	    }
-	    if (isset( $d['est_documento'] ) ) {
-	        $o->setEst_documento( $d['est_documento'] );
-	    }
-	    if (isset( $d['est_tipodoc'] ) ) {
-	        $o->setEst_tipodoc( $d['est_tipodoc'] );
-	    }
-	    if (isset( $d['empleados'] ) ) {
-	        $o->setEmpleados( $d['empleados'] );
-	    }
-	    if (isset( $d['empleados_id'] ) ) {
-	        $o->setEmpleados_id( $d['empleados_id'] );
+	    if (isset( $d['tipodoc'] ) ) {
+	        $o->setTipodoc( $d['tipodoc'] );
 	    }
 	    if (isset( $d['fecha'] ) ) {
 	        $o->setFecha( $d['fecha'] );
 	    }
-	    if (isset( $d['pdfid'] ) ) {
-	        $o->setPdfid( $d['pdfid'] );
-	    }
-	    if (isset( $d['tipodoc'] ) ) {
-	        $o->setTipodoc( $d['tipodoc'] );
-	    }
+	    
 	    if ( isset( $d['mail'] ) ) {
 	        $o->setMail( $d['mail'] );
 	    }
@@ -6475,6 +6851,33 @@ EOD;
 	        throw new Exception( 'firmas_Obtener - firmaslog_Obtener: ' . $e->getMessage() );
 	    }
 	}
+	public static function firmas_Eliminar( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( "firmas_Eliminar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb = "firmas ";
+	    $xt = '';
+	    
+	    if ( isset( $d['id'] ) ) {
+	        $xt = "WHERE id = " . $d['id'] . " ";
+	    }
+	    
+	    if ( $xt == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'firmas_Eliminar: Debe indicar filtros',IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	    
+	    try {
+	        return Singleton::_classicDelete( $tb, $xt );
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'firmas_Eliminar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	}
 	// Firmas FIN
 	
 	// Firmaslog INI
@@ -6494,49 +6897,42 @@ EOD;
 	    $r = new Singleton();
 	    $r::$lnk->query( self::SQL_BIG_SELECTS );
 	    
-	    $vr  = "flog.`id`, flog.`firmas_id`, flog.`firmasestados_id`, fest.nombre as firmasestados ";
+	    $vr  = "flog.`id`, flog.`firmasestados_id`, fest.nombre as firmasestados  ";
 	    $vr .= ", flog.`ip`, flog.pdfurl, flog.`pdfruta`, flog.`pdfhash`, flog.`paginas`, flog.`fecha` as fechahora ";
-        $vr .= ",fir.id as firmaid, fir.pdfid, fir.acudientes_id, fir.acudientes, fir.documento, fir.tipodoc ";
-        $vr .= ",fir.empleados_id, fir.empleados, fir.est_documento, fir.est_tipodoc, fir.fecha, fir.mail ";
+        $vr .= ",fir.id as firmas_id, fir.pdfid, fir.fecha, fir.mail ";
+        $vr .= ", fir.firmante_id,flog.perfilusuarios_id, flog.nombrefull, flog.tipodoc, flog.documento ";
 	    
 	    $tb  = 'firmas as fir ';
 	    
 	    $jn  = 'LEFT JOIN firmaslog as flog on fir.id = flog.firmas_id ';
 	    $jn .= 'LEFT JOIN firmasestados as fest on fest.id = flog.firmasestados_id ';
 	    
+	    $pr = [];
 	    $wh  = array();
 	    if( isset( $d['id'] ) ){
-	        $wh[] = "flog.`id` = " . $d['id'] . " ";
+	        $wh[] = "flog.`id` = ?";
+	        $pr[] = $d['id'];
 	    }
-	    
+	    if( isset( $d['w_pdfid'] ) ){
+	        $wh[] = "fir.pdfid = ?";
+	        $pr[] = $d['w_pdfid'];
+	    }
 	    if( isset( $d['w_firmaid_md5'] ) ){
-	        $wh[] = 'md5( fir.id ) = "' . $d['w_firmaid_md5'] . '" ' ;
+	        $wh[] = 'md5( fir.id ) = ?' ;
+	        $pr[] = $d['w_firmaid_md5'];
 	    }
-	    
-	    if( isset( $d['w_firid'] ) ){
-	        $wh[] = "fir.id = " . $d['id'] . " ";
-	    }
-	    
-	    if ( isset( $d[ 'w_acudientes_id' ] ) ) {
-	        $wh[] = 'fir.acudientes_id = "' . $d[ 'w_acudientes_id' ] . '" ';
-	    }
-	    if ( isset( $d[ 'w_acudientes_id' ] ) && isset( $d[ 'w_empleados_id' ] ) ) {
-	        $wh[] = 'fir.acudientes_id = ' . $d[ 'w_acudientes_id' ] . ' AND fir.empleados_id = ' . $d[ 'w_empleados_id' ]  . ' ';
-	    }
-	    
-	    if ( isset( $d[ 'w_acudientes_id' ] ) && isset( $d[ 'w_empleados_id' ] ) && isset( $d[ 'w_pdfid' ] ) ) {
-	        $wh[] = 'fir.acudientes_id = ' . $d[ 'w_acudientes_id' ] . ' AND fir.empleados_id = ' . $d[ 'w_empleados_id' ]  . ' AND fir.pdfid = "' . $d['w_pdfid'] . '" ';
-	    }
-	    
 	    
 	    $defWh = "";
 	    if ( count( $wh ) > 0 ) {
 	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
 	    }
 	    
-	    $ord = "order by 1 ";
-	    if ( isset( $d['orden'] ) ) {
-	        $ord = "ORDER BY " . intval( $d['orden'] ) . " ";
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
 	    }
 	    
 	    $limite = "";
@@ -6544,13 +6940,15 @@ EOD;
 	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
 	    }
 	    
-	    $xt  = $jn . $defWh . $ord . $limite;
+	    $xt  = $jn . $defWh . $orden . $limite;
 	    
-	    //die( "SELECT " . $vr . "\nFROM " . $tb . "\n" . $xt );
-	    $r = Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr); //Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
 	    if ( isset( $r['err_info'] )) {
 	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
-	        throw new \Exception( '[' . IndexCtrl::ERR_COD_MSJ_ERR_COMUN . '] firmaslog_Obtener: ' . $r['err_info'] );
+	        throw new \Exception( 'firmaslog_Obtener: ' . $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
 	    }
 	    
 	    return $r;
@@ -6583,6 +6981,18 @@ EOD;
 	    if (isset( $d['pdfruta'] ) ) {
 	        $o->setPdfruta( $d['pdfruta'] );
 	    }
+	    if (isset( $d['perfilusuarios_id'] ) ) {
+	        $o->setPerfilusuarios_id( $d['perfilusuarios_id'] );
+	    }
+	    if (isset( $d['nombrefull'] ) ) {
+	        $o->setNombrefull( $d['nombrefull'] );
+	    }
+	    if (isset( $d['tipodoc'] ) ) {
+	        $o->setTipodoc( $d['tipodoc'] );
+	    }
+	    if (isset( $d['documento'] ) ) {
+	        $o->setDocumento( $d['documento'] );
+	    }
 	    
 	    $id = $o->saveData();
 	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
@@ -6596,6 +7006,67 @@ EOD;
 	    else {
 	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	        throw new \Exception( 'firmaslog_Agregar: Respuesta no implementada' );
+	    }
+	}
+	public static function firmaslog_Helper_Eliminar ( $d ) {
+	    self::authRequOff();
+	    
+	    $bs = dirname(dirname(dirname( __FILE__ )));
+	    $pdf_fir_pi = pathinfo( $d['pdfid'] );
+	    
+	    $pdf_fir = $bs . '/' . $pdf_fir_pi['dirname'] . '/' . $pdf_fir_pi['filename'] . '_fir.' . $pdf_fir_pi['extension'];
+	    
+	    $delFirmar = false;
+	    if ( !empty( $d['id'] ) ) {
+	        try {
+	            $delFirmar = self::firmaslog_Eliminar( [ 'w_firmas_id' => $d['firmas_id'] ] );
+	        } catch (Exception $e) {
+	            throw new Exception('firmaslog_Helper_Eliminar: ' . $e->getMessage(), $e->getCode() );
+	        }
+	    }
+	    else {
+	        $delFirmar = true;
+	    }
+	    
+	    $limpio = false;
+	    if ( $delFirmar ) {
+	        $limpio = self::firmas_Eliminar( [ 'id' => $d['firmas_id'] ] );
+	    }
+	    
+	    if ( file_exists( $pdf_fir ) ) {
+	        unlink( $pdf_fir );
+	    }
+	    
+	    return $limpio;
+	}
+	public static function firmaslog_Eliminar( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( "firmaslog_Eliminar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb = "firmaslog ";
+	    $xt = '';
+	    
+	    if ( isset( $d['id'] ) ) {
+	        $xt = "WHERE id = " . $d['id'] . " ";
+	    }
+	    if ( isset( $d['w_firmas_id'] ) ) {
+	        $xt = "WHERE firmas_id = " . $d['w_firmas_id'] . " ";
+	    }
+	    
+	    if ( $xt == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'firmaslog_Eliminar: Debe indicar filtros',IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	    
+	    try {
+	        return Singleton::_classicDelete( $tb, $xt );
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'firmaslog_Eliminar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
 	    }
 	}
 	// Firmaslog FIN
@@ -7579,14 +8050,18 @@ EOD;
 	    //die( 'ladata: ' . print_r( $ladata , true ) );
 	    $r = self::flujositems_Obtener( $cfg );
 	    $requerimientostpls_id = 0;
+	    $flujos_id = 0;
 	    foreach ( $r as $kR ) {
 	        $requerimientostpls_id = $kR['requerimientos'];
+	        $flujos_id = $kR['flujos_id'];
 	    }
 	    $t = array();
 	    if ( $requerimientostpls_id > 0 ) {
 	        $t = self::requerimientostplsitems_Obtener( array( 'w_requerimientostpls_id' => $requerimientostpls_id, 'ordenasc' => 1 ) );
 	    }
 	    //die( 'r: ' . print_r( $r , true ) );
+
+	    $todoelflujo = self::flujositems_Obtener( [ 'w_flujos_id' => $flujos_id, 'ordenasc' => 6 ] );
 	    
 	    $tDef = array();
 	    foreach ( $t as $kT ) {
@@ -7611,7 +8086,8 @@ EOD;
 	        'items' => $r,
 	        'requs' => $tDef,
 	        'res' => base64_encode( json_encode( $ladata ) ),
-	        'docs' => $docs
+	        'docs' => $docs,
+	        'flujoinfo' => $todoelflujo
 	    );
 	    
 	    return $arRes;
@@ -7643,9 +8119,20 @@ EOD;
 	                
 	                $flName = $flid . "_" . $paquetes_id . "_" . $c_anyo . ".pdf";
 	                $fl = $bs_urlbs_anyo . DIRECTORY_SEPARATOR . $flName;
+	                $resBsUrl = $urllink . "/" . $flName;
+	                
+	                $firId = self::firmaslog_Obtener([ 'w_pdfid' => ltrim( $resBsUrl, '/') , 'ordendesc' => 9, 'limite' => 1 ]);
+	                
 	                //echo $fl . "\n";
 	                if ( file_exists( $fl ) ) {
-	                    $r[] = [ 'bs' => $urllink . "/" . $flName, 'url' => rtrim( Utiles::getBaseUrl() , "/") . $urllink . "/" . $flName ];
+	                    $fReg = $firId[0];
+	                    $firmas_id_data = [ 
+	                        'firmas_id' => $fReg['firmas_id'], 
+	                        'firmasestados_id' => $fReg['firmasestados_id'], 
+	                        'firmaslog_id' => $fReg['id'] 
+	                    ];
+	                    
+	                    $r[] = [ 'bs' => $resBsUrl, 'url' => rtrim( Utiles::getBaseUrl() , "/") . $urllink . "/" . $flName, 'firmas_id' => $firmas_id_data ];
 	                    
 	                }
 	            }
