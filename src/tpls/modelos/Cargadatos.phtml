@@ -4,31 +4,31 @@ use src\sistema\Headerbar\Headerbar;
 
 $l_anyolectivo = array();
 try {
-    $l_anyolectivo = OperacionesCtrl::anyolectivo_Obtener();
+	$l_anyolectivo = OperacionesCtrl::anyolectivo_Obtener();
 } catch (\Throwable $th) {
-    throw new \Exception( $th->getMessage() );
+	throw new \Exception($th->getMessage());
 }
 
 $l_cargadatos = array();
 try {
-    $l_cargadatos = OperacionesCtrl::cargadatos_Obtener( array( 'ordenasc' => 1 ) );
+	$l_cargadatos = OperacionesCtrl::cargadatos_Obtener(array('ordenasc' => 1));
 } catch (\Throwable $th) {
-    throw new \Exception( $th->getMessage() );
+	throw new \Exception($th->getMessage());
 }
 ?>
 <div id="db-wrapper" class="">
-    <!-- navbar vertical -->
-    <!-- Sidebar -->
-    <?php $crum = Menubar::DibujarMenu(); ?>
+	<!-- navbar vertical -->
+	<!-- Sidebar -->
+	<?php $crum = Menubar::DibujarMenu(); ?>
 
-    <!-- Page Content -->
-    <div id="page-content">
+	<!-- Page Content -->
+	<div id="page-content">
 
-        <!-- Page Header -->
-        <?php Headerbar::DibujarHeader( ); ?>
-            
-        <!-- Container fluid -->
-        <div class="container-fluid p-4">
+		<!-- Page Header -->
+		<?php Headerbar::DibujarHeader(); ?>
+
+		<!-- Container fluid -->
+		<div class="container-fluid p-4">
 			<div class="row">
 				<div class="col-lg-12 col-md-12 col-12">
 					<div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
@@ -54,34 +54,44 @@ try {
 				<div class="card-body">
 					<h4 class="mb-0">Centro de control</h4>
 					<p class="mb-4">
-						Aqu&iacute; puede subir los archivos necesarios para que los usuarios puedan generar sus documentos autom&aacute;ticamente
+						Aqu&iacute; puede subir los archivos necesarios para que los usuarios puedan generar sus
+						documentos autom&aacute;ticamente
 					</p>
 					<form id="frmval" class="row frmvalcls ">
 						<div class="col-12 mb-3">
 							<label for="cargadatos_anyo_0" class="h2">A&ntilde;o para cargar</label>
-							<select class="form-select" id="cargadatos_anyo_0" name="cargadatos_anyo_0" required="required" >
-                            	<option selected disabled value="">Seleccione a&ntilde;o para cargar</option>
-                            	<?php foreach ( $l_anyolectivo as $kAnyo ) : ?>
-                            	<option value="<?php echo $kAnyo['id']; ?>"><?php echo $kAnyo['nombre']; ?></option>
-                            	<?php endforeach; ?>
-                        	</select>
+							<select class="form-select" id="cargadatos_anyo_0" name="cargadatos_anyo_0"
+								required="required">
+								<option selected disabled value="">Seleccione a&ntilde;o para cargar</option>
+								<?php foreach ($l_anyolectivo as $kAnyo): ?>
+									<option value="<?php echo $kAnyo['id']; ?>"><?php echo $kAnyo['nombre']; ?></option>
+								<?php endforeach; ?>
+							</select>
 						</div>
-						
+
 						<div class="col-12 mb-3">
 							<label for="cargadatos_src_0" class="h2">Fuente de datos</label>
-							<select class="form-select" id="cargadatos_src_0" name="cargadatos_src_0" required="required" onchange="archivosHelper( this );" >
-                            	<option selected disabled value="">Seleccione tipo de datos</option>
-                            	<?php foreach ( $l_cargadatos as $kCdata ) : ?>
-                            	<option value="<?php echo $kCdata['id']; ?>" data-nombre="<?php echo $kCdata['nombre']; ?>" data-multiple="<?php echo $kCdata['multiple']; ?>" data-tiposaceptados="<?php echo $kCdata['tiposaceptados']; ?>"><?php echo $kCdata['label']; ?></option>
-                            	<?php endforeach; ?>
-                        	</select>
+							<select class="form-select" id="cargadatos_src_0" name="cargadatos_src_0"
+								required="required" onchange="archivosHelper( this );">
+								<option selected disabled value="">Seleccione tipo de datos</option>
+								<?php foreach ($l_cargadatos as $kCdata): ?>
+									<option value="<?php echo $kCdata['id']; ?>"
+										data-nombre="<?php echo $kCdata['nombre']; ?>"
+										data-multiple="<?php echo $kCdata['multiple']; ?>"
+										data-tiposaceptados="<?php echo $kCdata['tiposaceptados']; ?>">
+										<?php echo $kCdata['label']; ?>
+									</option>
+								<?php endforeach; ?>
+							</select>
 						</div>
-						
-                        <div class="mb-3 col-12" >
-                        	<label for="cargadatos_fls_0" class="h2">Archivos</label>
-                        	<input onchange="chkArchivo( this );" data-proposito="" data-id="0" class="form-control evaluacionresflsClsData" type="file" id="cargadatos_fls_0" name="cargadatos_fls_0" accept=".xlsx,.pdf" required="required"> 
-                        </div>
-						
+
+						<div class="mb-3 col-12">
+							<label for="cargadatos_fls_0" class="h2">Archivos</label>
+							<input onchange="chkArchivo( this );" data-proposito="" data-id="0"
+								class="form-control evaluacionresflsClsData" type="file" id="cargadatos_fls_0"
+								name="cargadatos_fls_0" accept=".xlsx,.pdf" required="required">
+						</div>
+
 						<div class="col-12">
 							<button class="btn btn-primary" type="submit" onclick="actualizar();">
 								Cargar archivos
@@ -90,115 +100,461 @@ try {
 					</form>
 				</div>
 			</div>
-			
-<?php 
-/*
- * @vnavarro
- * TODO: tarea 4
- * Vamos a darle la opcion a los administradores de pre-carga de datos de los 
- * empleados que aun no se han creado pero que necesitan tener los datos de: Meses contrato y Dias contrato
- * 1. Crea una Card (componente boootstrap) 
- * 2. Crea un boton que permita cargar la informacion de los usuarios que estan en el archivo que previamente cargaron de nombre BOGDATA xlsx
- * 3. Crea un formulario con los campos:
- *       - tipodoc_id
- *       - documento
- *       - contrato
- *       - meses
- *       - dias
- * 4. El formulario tiene 2 funcionalidades:
- *      4.1. Modificar/Agregar los datos del usuario que se trae desde BOGDATA
- *      4.2. Agregar un usuairo que no esta en BOGDATA pero el administrador conoce los datos
- * 5. Para el guardado/modificado de datos puedes usur como ejemplo la funcion 'const actualizar' (linea 142)
- */
-?>
-			
 
-        </div>
+			<?php
+			/*
+			 * @vnavarro
+			 * TODO: tarea 4
+			 * Vamos a darle la opcion a los administradores de pre-carga de datos de los 
+			 * empleados que aun no se han creado pero que necesitan tener los datos de: Meses contrato y Dias contrato
+			 * 1. Crea una Card (componente boootstrap) 
+			 * 2. Crea un boton que permita cargar la informacion de los usuarios que estan en el archivo que previamente cargaron de nombre BOGDATA xlsx
+			 * 3. Crea un formulario con los campos:
+			 *       - tipodoc_id
+			 *       - documento
+			 *       - contrato
+			 *       - meses
+			 *       - dias
+			 * 4. El formulario tiene 2 funcionalidades:
+			 *      4.1. Modificar/Agregar los datos del usuario que se trae desde BOGDATA
+			 *      4.2. Agregar un usuairo que no esta en BOGDATA pero el administrador conoce los datos
+			 * 5. Para el guardado/modificado de datos puedes usur como ejemplo la funcion 'const actualizar' (linea 142)
+			 */
 
-    </div>
+			$d_tipodoc = null;
+			try {
+				$d_tipodoc = OperacionesCtrl::tipodoc_Obtener(array());
+			} catch (\Throwable $th) {
+				throw new \Exception($th->getMessage());
+			} ?>
+			<div class="card mt-4">
+				<div class="card-body">
+					<div class="d-lg-flex justify-content-between align-items-center mb-3">
+						<div>
+							<h4 class="mb-1">Pre-carga de datos de contrato</h4>
+							<p class="text-muted mb-0">
+								Ingresa manualmente los meses y días del contrato para empleados que aún no han sido
+								creados en el sistema.
+							</p>
+						</div>
+					</div>
+					<form id="frmcont" class="row g-3 frmcontCls">
+						<div class="col-md-3">
+							<label class="form-label" for="tipodoc_id">Tipo de documento</label>
+							<select class="form-select" aria-label="Default select example" id="tipodoc_id"
+								name="tipodoc_id" required="">
+								<option value="" disabled selected>Seleccione</option>
+								<?php foreach ($d_tipodoc as $v): ?>
+									<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+						<div class="col-md-3">
+							<label class="form-label" for="documento">N&uacute;mero de documento</label>
+							<input type="text" class="form-control" placeholder="N&uacute;mero de documento"
+								id="documento" name="documento" required="">
+						</div>
+						<div class="col-md-3">
+							<label for="contrato" class="form-label">Contrato</label>
+							<input type="text" class="form-control" id="contrato" name="contrato"
+								placeholder="Código del contrato">
+						</div>
+						<div class="col-md-2">
+							<label for="meses" class="form-label">Meses</label>
+							<input type="number" class="form-control" id="meses" name="meses" min="0" step="1" required>
+						</div>
+						<div class="col-md-1">
+							<label for="dias" class="form-label">Días</label>
+							<input type="number" class="form-control" id="dias" name="dias" min="0" step="1" required>
+						</div>
+						<div class="col-12 d-flex gap-2">
+							<button type="submit" class="btn btn-primary" onclick="guardarEmpleado();"
+								id="pc_btnGuardar"> Guardar </button> <button type="button" class="btn btn-light"
+								onclick="limpiarPreCarga();"> Limpiar </button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="card mt-4">
+				<div class="card-body">
+					<div class="d-lg-flex justify-content-between align-items-center mb-3">
+						<div>
+							<h4 class="mb-1">Carga de datos desde BOGDATA</h4>
+							<p class="text-muted mb-0">
+								<strong>Trae</strong> los datos del empleado desde BOGDATA.xlsx y
+								<strong>completa</strong> manualmente los meses y días del contrato,
+								agregándolos o actualizándolos según corresponda.
+							</p>
+						</div>
+						<div class="mt-3 mt-lg-0">
+							<button type="button" class="btn btn-outline-secondary" onclick="cargarBogdata();"> Cargar
+								desde BOGDATA </button>
+						</div>
+
+					</div>
+					<div>
+						<div class="my-3 mt-lg-0">
+							<button type="button" class="btn btn-outline-secondary"
+								onclick="guardarEmpleadoDesdeTabla();">
+								Actualizar
+							</button>
+						</div>
+						<table id="tbInter"
+							class="table table-sm table-bordered table-striped table-hover responsive tabla-bogdata"
+							style="width: 100%; font-size: 0.85em;">
+
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <script type="application/javascript">
-const archivosHelper = function( o ){
-	const _o = jQuery( o );
-	const sel = _o.find( 'option:selected' );
-	const dt = jQuery( sel ).data();
-	const cargadatos_fls = jQuery('#cargadatos_fls_0');
-	
-	document.getElementById('cargadatos_fls_0').value = '';
-	
-	if( dt['multiple'] == 1 ){
-		cargadatos_fls.prop('multiple', true);
-	}
-	cargadatos_fls.prop( 'accept',  dt['tiposaceptados'] );
-};
+	const archivosHelper = function (o) {
+		const _o = jQuery(o);
+		const sel = _o.find('option:selected');
+		const dt = jQuery(sel).data();
+		const cargadatos_fls = jQuery('#cargadatos_fls_0');
 
-const chkArchivo = function( o ){
-	chkUploadFiles( o, <?php echo Utiles::getPostMaxSizeMB() ; ?>, function( fl ){
-		console.log( fl );
-	});
-};
+		document.getElementById('cargadatos_fls_0').value = '';
 
-const actualizar = function(){
-<?php
-/*
-- frmvalcls es el nombre de la clase del formulario, no el ID
-- El formulario siempre debe tener un ID diferente al nombre de la clase, TIP: la clase siempre la llamo igual que el id y le pongo al final "cls"
-- Todos los campos dentro del formulario deben tener ID y NAME y deben ser iguales
-- la funcion ut.validarFrm sirve para validar el formulario y r son todos los campos que estan dentro de ese formulario (incluso los vacios)
- */
-?>
-	ut.validarFrm('frmvalcls', function ( r ) {
-<?php   // Este espacio simplemente muestra el "Cargando" del ajax ?>
-        const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
-        const objmdl = mngModal.dibujar( opc );
-        jQuery( objmdl ).modal('show');
+		if (dt['multiple'] == 1) {
+			cargadatos_fls.prop('multiple', true);
+		}
+		cargadatos_fls.prop('accept', dt['tiposaceptados']);
+	};
 
-<?php   // Se capturan los datos que van a viajar por POST ?>        
-        const form_data = new FormData();
-<?php   // IndexCtrl::API_Cargadatos_Upload, es la constante que se declara para no repetir funciones y asi se enruta al controlador principal ?>
-        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Cargadatos_Upload ); ?>');
-<?php   // ut.b64EncodeUnicode, convierte en Base64 los datos y JSON.stringify convierte el json en texto para luego decifrarlo en back ?>
-        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+	const chkArchivo = function (o) {
+		chkUploadFiles(o, <?php echo Utiles::getPostMaxSizeMB(); ?>, function (fl) {
+			console.log(fl);
+		});
+	};
 
-<?php   // esta es la forma como se pueden cargar archivos de un campo tipo file ?>
-        jQuery( '.evaluacionresflsClsData' ).each(function( i, ob ){
-			const _ob = jQuery( ob );
-			const _obDt = _ob.data();
-			const dtFItem = _obDt['id'];
-			form_data.append('fuentes_' + dtFItem, _ob.prop('files')[0] );
+	const actualizar = function () {
+		<?php
+		/*
+		- frmvalcls es el nombre de la clase del formulario, no el ID
+		- El formulario siempre debe tener un ID diferente al nombre de la clase, TIP: la clase siempre la llamo igual que el id y le pongo al final "cls"
+		- Todos los campos dentro del formulario deben tener ID y NAME y deben ser iguales
+		- la funcion ut.validarFrm sirve para validar el formulario y r son todos los campos que estan dentro de ese formulario (incluso los vacios)
+		*/
+		?>
+		ut.validarFrm('frmvalcls', function (r) {
+			<?php  // Este espacio simplemente muestra el "Cargando" del ajax ?>
+			const opc = { 'id': 'ajaxldr', 'size': 'modal-sm' };
+			const objmdl = mngModal.dibujar(opc);
+			jQuery(objmdl).modal('show');
+
+			<?php  // Se capturan los datos que van a viajar por POST ?>
+			const form_data = new FormData();
+			<?php  // IndexCtrl::API_Cargadatos_Upload, es la constante que se declara para no repetir funciones y asi se enruta al controlador principal ?>
+			form_data.append('ajax', '<?php echo md5(IndexCtrl::API_Cargadatos_Upload); ?>');
+			<?php  // ut.b64EncodeUnicode, convierte en Base64 los datos y JSON.stringify convierte el json en texto para luego decifrarlo en back ?>
+			form_data.append('data', ut.b64EncodeUnicode(JSON.stringify(r)));
+
+			<?php  // esta es la forma como se pueden cargar archivos de un campo tipo file ?>
+			jQuery('.evaluacionresflsClsData').each(function (i, ob) {
+				const _ob = jQuery(ob);
+				const _obDt = _ob.data();
+				const dtFItem = _obDt['id'];
+				form_data.append('fuentes_' + dtFItem, _ob.prop('files')[0]);
+			});
+
+			<?php  // __TransportarData es la funcion que envia por AJAX los datos ?>
+			__TransportarData(
+				<?php  // form_data, es lo que se va a recibir por POST ?>
+	  form_data,
+				<?php  // o es la respuesta del BACK (yo le puse o, pero le puedes poner como mejor te funcione) ?>
+	  function (o) {
+					const result = o.result;
+
+					<?php  // Abre un modal que entrega la respuesta del proceso, peudes usar los datos que necesites y q tu mismo(a) devolviste ?>
+					const objmdl2 = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Carga de datos', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+					const alerta = jQuery(objmdl2 + ' div.alert');
+					alerta.attr('class', 'alert alert-success');
+					alerta.html('Carga correcta');
+
+					jQuery(objmdl2).modal('show');
+					<?php // Cierra el modal "Cargando") ?>
+					setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+				},
+				function (err) {
+					const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+					const alerta = jQuery(objmdlErr + ' div.alert');
+					alerta.attr('class', 'alert alert-danger');
+					alerta.html(err.responseText);
+
+					jQuery(objmdlErr).modal('show');
+					<?php // Cierra el modal "Cargando") ?>
+					setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+				}
+			);
+
+		});
+	};
+
+	// vnavarro: Tarea 4 
+	const cargarBogdata = function () {
+		const cargando = mngModal.dibujar({ id: 'ajaxldr', size: 'modal-sm' });
+		jQuery(cargando).modal('show');
+
+		// 2) Enviar petición
+		const fd = new FormData();
+		fd.append('ajax', '<?php echo md5(IndexCtrl::API_Bogdata_Consultar); ?>');
+		fd.append('w_nombre', 'bogdata'); // <- ajusta si tu registro se llama distinto
+
+		__TransportarData(
+			fd,
+			function (o) {
+				jQuery(cargando).modal('hide');
+
+				renderTablaBogdata('#tbInter', o || []);
+
+				const mdl = mngModal.dibujar({ id: 'mdlBogdataOk', title: 'Datos importados', btnCerrarX: true, level: 'ok' });
+				const alerta = jQuery(mdl + ' div.alert');
+				alerta.attr('class', 'alert alert-success');
+				alerta.html(o.mensaje || 'Datos del BOGDATA cargados. Ingresá los meses y días manualmente.');
+				jQuery(mdl).modal('show');
+			},
+			function (err) {
+				jQuery(cargando).modal('hide');
+
+				let raw = (err && err.responseText) ? err.responseText : 'Error al consultar BOGDATA.';
+				let msg = 'Error al consultar BOGDATA', det = '';
+				try {
+					const j = JSON.parse(raw);
+					msg = j.mensaje || j.message || msg;
+					det = (j.data && (j.data.detalle || j.data.error)) ? (j.data.detalle || j.data.error) : det;
+				} catch (_) { det = raw; }
+
+				const mdlErr = mngModal.dibujar({ id: 'mdlBogdataError', title: 'Error', btnCerrarX: true, level: 'err' });
+				const alerta = jQuery(mdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html(det ? (msg + '<br><small><i>' + det + '</i></small>') : msg);
+				jQuery(mdlErr).modal('show');
+			}
+		);
+	};
+
+	const renderTablaBogdata = function (selector, data) {
+		let html = '';
+		if (!data || !Array.isArray(data) || data.length === 0) {
+			html = '<div class="alert alert-info">No hay datos en BOGDATA.</div>';
+			jQuery(selector).html(html);
+			return;
+		}
+
+		html += `
+			
+				<table class="table table-sm table-bordered table-striped table-hover responsive tabla-bogdata" style="width: 100%; font-size: 0.85em;">
+					<thead>
+						<tr>
+							<th>Tipo Doc</th>
+							<th>Documento</th>
+							<th>Contrato</th>
+							<th>Meses</th>
+							<th>Días</th>
+						</tr>
+					</thead>
+					<tbody>
+		`;
+
+		data.forEach(function (row, idx) {
+			const tipo = row.tipo_doc_bp_beneficiario || '';
+			const doc = row.nmero_doc_bp_beneficiario || '';
+			const contrato = row.no_compromiso || '';
+			const meses = (row.meses != null ? row.meses : '');
+			const dias = (row.dias != null ? row.dias : '');
+			html += `<tr 
+				data-idx="${idx}"
+				data-tipo-doc="${tipo.replace(/"/g, '&quot;')}"
+				data-documento="${doc.replace(/"/g, '&quot;')}"
+				data-contrato="${contrato.replace(/"/g, '&quot;')}">
+					<td style="width:20%">${tipo}</td>
+					<td style="width:20%">${doc}</td>
+					<td style="width:20%">${contrato}</td>
+					<td style="width:160px">
+					<input type="number" min="0" step="1"
+							class="form-control form-control-sm js-meses"
+							name="detalles[${idx}][meses]"
+							value="${meses}">
+					</td>
+					<td style="width:160px">
+					<input type="number" min="0" step="1"
+							class="form-control form-control-sm js-dias"
+							name="detalles[${idx}][dias]"
+							value="${dias}">
+					</td>
+				</tr>`;
 		});
 
-<?php   // __TransportarData es la funcion que envia por AJAX los datos ?>
-        __TransportarData(
-<?php   // form_data, es lo que se va a recibir por POST ?>
-            form_data,
-<?php   // o es la respuesta del BACK (yo le puse o, pero le puedes poner como mejor te funcione) ?>
-            function( o ) {
-            	const result = o.result;
 
-<?php           // Abre un modal que entrega la respuesta del proceso, peudes usar los datos que necesites y q tu mismo(a) devolviste ?>            	
-            	const objmdl2 = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Carga de datos','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
-                const alerta = jQuery(objmdl2 + ' div.alert');
-                alerta.attr('class','alert alert-success');
-                alerta.html( 'Carga correcta' );
+		html += `
+					</tbody>
+				</table>
+	   
+	`;
 
-                jQuery( objmdl2 ).modal('show');
-<?php           // Cierra el modal "Cargando") ?>
-                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
-            },
-            function ( err ) {
-                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
-                const alerta = jQuery(objmdlErr + ' div.alert');
-                alerta.attr('class','alert alert-danger');
-                alerta.html( err.responseText );
+		jQuery(selector).html(html);
+	};
 
-                jQuery( objmdlErr ).modal('show');
-<?php           // Cierra el modal "Cargando") ?>
-                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
-            }
-        );
+	const collectBogdataRows = function (selector) {
+		const rows = [];
+		const $root = selector ? jQuery(selector) : jQuery('.tabla-bogdata');
 
-	});
-};
+		if ($root.length === 0) return rows;
+
+
+		$root.find('tbody tr').each(function () {
+			const $tr = jQuery(this);
+			const tipo = ($tr.data('tipo-doc') || '').toString().trim();
+			const doc = ($tr.data('documento') || '').toString().trim();
+
+			const contrato = ($tr.data('contrato') || '').toString().trim();
+			const mesesVal = $tr.find('input.js-meses').val();
+			const diasVal = $tr.find('input.js-dias').val();
+
+			const meses = (mesesVal === '' || mesesVal == null) ? null : parseInt(mesesVal, 10);
+			const dias = (diasVal === '' || diasVal == null) ? null : parseInt(diasVal, 10);
+
+			if ((meses !== null && !Number.isNaN(meses)) || (dias !== null && !Number.isNaN(dias))) {
+				rows.push({
+					tipodoc_id: tipo,
+					documento: doc,
+					contrato: contrato,
+					meses: Number.isNaN(meses) ? null : meses,
+					dias: Number.isNaN(dias) ? null : dias
+				});
+			}
+		});
+
+		return rows;
+	}
+
+	const guardarEmpleadoDesdeTabla = function () {
+		const rows = collectBogdataRows('.tabla-bogdata');
+		if (!Array.isArray(rows) || rows.length === 0) {
+			const objmdlWarn = mngModal.dibujar({ id: 'mdlError', title: 'Sin cambios', btnCerrarX: true, level: 'err', size: 'modal-sm' });
+			const alerta = jQuery(objmdlWarn + ' div.alert');
+			alerta.attr('class', 'alert alert-warning');
+			alerta.html('No hay filas con meses o días para guardar.');
+			jQuery(objmdlWarn).modal('show');
+			return;
+		}
+
+		enviarEmpleadoPayload(rows, 'Actualización desde tabla');
+	};
+
+	const guardarEmpleado = function () {
+		ut.validarFrm('frmcontCls', function (r) {
+			const cargando = mngModal.dibujar({ id: 'ajaxldr', size: 'modal-sm' });
+			jQuery(cargando).modal('show');
+
+			const titulo = 'Validación BOGDATA';
+			const tipo = TIPODOC_DOS_LETRAS_JS[String(r.tipodoc_id)] || TIPODOC_DOS_LETRAS_JS[r.tipodoc_id] || '';
+			const documento = String(r.documento || '').trim();
+
+			const fd = new FormData();
+			fd.append('ajax', '<?php echo md5(IndexCtrl::API_Bogdata_Consultar); ?>');
+			fd.append('w_nombre', 'bogdata');
+			fd.append('buscarpor', JSON.stringify([
+				{ campo: 'Tipo Doc. BP Beneficiario', valor: tipo },
+				{ campo: 'Número Doc. BP Beneficiario', valor: documento }
+			]));
+
+			__TransportarData(
+				fd,
+				(resp) => {
+					jQuery(cargando).modal('hide');
+					const existe = Array.isArray(resp) && resp.length > 0;
+
+					if (!existe) {
+						const objmdl2 = mngModal.dibujar({ id: 'mdlError', title: titulo, btnCerrarX: true, center: true, level: 'err' });
+						const alerta = jQuery(objmdl2 + ' div.alert');
+						alerta.attr('class', 'alert alert-warning');
+						alerta.html('El usuario no existe en BOGDATA.');
+						jQuery(objmdl2).modal('show');
+						return;
+					}
+					// 2) si existe, envía el payload normal
+					enviarEmpleadoPayload(r, 'Datos de Empleado');
+				},
+				(err) => {
+					jQuery(cargando).modal('hide');
+
+					const objmdl2 = mngModal.dibujar({ id: 'mdlError', title: titulo, btnCerrarX: true, center: true, level: 'err' });
+					const alerta = jQuery(objmdl2 + ' div.alert');
+					alerta.attr('class', 'alert alert-danger');
+					alerta.html('No se pudo validar en BOGDATA. Intenta de nuevo.');
+					jQuery(objmdl2).modal('show');
+					setTimeout(function () { jQuery(objmdl2).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+				}
+			);
+		});
+	};
+
+	const enviarEmpleadoPayload = function (payload, titulo = 'Datos de Empleado') {
+		const opc = { id: 'ajaxldr' };
+		const objmdl = mngModal.dibujar(opc);
+		jQuery(objmdl).modal('show');
+
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_empleadosdetallescontrato_Helper_Add); ?>');
+		form_data.append('data', ut.b64EncodeUnicode(JSON.stringify(payload)));
+
+		__TransportarData(
+			form_data,
+			function (o) {
+				const objmdl2 = mngModal.dibujar({ id: 'mdlError', title: titulo, btnCerrarX: true, center: true, level: 'err' });
+				const alerta = jQuery(objmdl2 + ' div.alert');
+				alerta.attr('class', 'alert alert-success');
+				alerta.html(o?.error || 'Operación realizada correctamente.');
+				jQuery(objmdl2).modal('show');
+				setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function (err) {
+				const objmdlErr = mngModal.dibujar({ id: 'mdlError', title: 'Error', btnCerrarX: true, level: 'err', size: 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html(err?.error || 'Ocurrió un error al procesar la solicitud.');
+				jQuery(objmdlErr).modal('show');
+				setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	};
+
+	const limpiarPreCarga = function () {
+		const frm = document.getElementById('frmcont');
+    if (!frm) return;
+
+    // Resetea a valores por defecto del HTML
+    frm.reset();
+
+    // Asegura que el <select> quede en la opción placeholder
+    const sel = document.getElementById('tipodoc_id');
+    if (sel) sel.selectedIndex = 0; // primera opción: "Seleccione"
+
+    // Vacía explícitamente los numéricos (por si tenían un valor por defecto)
+    ['meses', 'dias'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    // Quita estados de validación de Bootstrap (si los usas)
+    frm.classList.remove('was-validated');
+    frm.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+      el.classList.remove('is-valid', 'is-invalid');
+    });
+
+    // Opcional: enfoca el primer campo
+    document.getElementById('tipodoc_id')?.focus();
+	};
+	const TIPODOC_DOS_LETRAS_JS = {
+		1: 'CC', 2: 'CE', 3: 'NIT', 4: 'TI', 5: 'PA',
+		6: 'TSE', 7: 'SE', 8: 'FID', 9: 'NITM', 10: 'RIF',
+		11: 'NITE', 12: 'NITPN', 13: 'RC', 14: 'NUIP', 15: 'PTP'
+	};
+
 </script>
