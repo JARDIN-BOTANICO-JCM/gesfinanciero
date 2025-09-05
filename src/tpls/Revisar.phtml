@@ -13,15 +13,12 @@ if ( sizeof( $data ) > 0 ) {
     
     $dtFirst = $data[0];
     
-    if ( $docente ) {
-        $dtFirst['estudiantes'] = $dtFirst["usuarios"];
-        $dtFirst['est_tipodoc'] = '';
-        $dtFirst['est_documento'] = $dtFirst["documento"];
-    }
-    
     $frmpg = json_decode( base64_decode( $_CFG_PDF_PAGECONFIG ) , true );
-    $piDoc = pathinfo( $dtFirst[ 'pdfid' ] );
-    $docinfo = json_decode( base64_decode( $frmpg[ $piDoc['filename'] ] ) , true );
+    $pdfidpi = pathinfo($dtFirst['pdfid']);
+    $partesPdfId = explode('_', $pdfidpi['filename']);
+    $pdfid = implode('_', array_slice($partesPdfId, 0, -2));
+    
+    $docinfo = json_decode( base64_decode( $frmpg[ $pdfid ] ) , true );
 }
 
 $logoinst = OperacionesCtrl::obtener_LogoCompany();
@@ -133,7 +130,6 @@ $inst = $instDt[0];
             <main>
             
             	<?php if ( $codId ) : ?>
-            	
             	<div class="row pt-3">
             		<div class="col-12 d-flex justify-content-center align-items-center">
             			<div class="me-3">
@@ -194,27 +190,20 @@ $inst = $instDt[0];
                                         <!-- col -->
                                         <div class="col-12 ">
                                             <div class="alert alert-success">
-                                                <span>El proceso de firmado inicia el <?php echo $dtFirst['fecha'] . ""; ?>, involucrando a <?php echo $dtFirst['estudiantes']?> identificado con <?php echo $dtFirst['est_tipodoc']?> n&uacute;mero <?php echo $dtFirst['est_documento']?></span>
+                                                <span>El proceso de firmado inicia el <?php echo $dtFirst['fecha'] . ""; ?> por <?php echo $dtFirst['nombrefull']?> identificado(a) con <?php echo $dtFirst['tipodoc']?> n&uacute;mero <?php echo $dtFirst['documento']?></span>
                                             </div>
                                         </div>
                                     </div>
                                     <hr>
                                 	<?php $urldocfirmado = ""; ?>
                                     <?php foreach ( $data as $vDt ) : ?>
-                                    <?php 
-                                    $docData = "";
-                                    if ( $docente ) {
-                                        $vDt['acudientes'] = $vDt['usuarios'];
-                                        $docData = "&docente=" . md5( OperacionesCtrl::FIRMAS_CERT_MODO_DOCENTE );
-                                    }
-                                    ?>
                                     <!-- row -->
                                     <div class="row justify-content-between ">
                                         <!-- col -->
                                         <div class="col-12 ">
                                             <div class="d-md-flex">
                                                 <div class="mt-2">
-                                                    <h5 class="mb-1"><?php echo $vDt['firmasestados']; ?> por <strong><?php echo $vDt['acudientes']; ?></strong></h5>
+                                                    <h5 class="mb-1"><?php echo $vDt['firmasestados']; ?> por <strong><?php echo $vDt['nombrefull']; ?></strong></h5>
                                                     <span><?php echo $vDt['tipodoc'] . ' No. ' . $vDt['documento']; ?></span>
                                                     <br>
                                                     <a href="mailto:<?php echo $vDt['mail']?>"><?php echo $vDt['mail']?></a>
@@ -235,11 +224,15 @@ $inst = $instDt[0];
                                         </div>
                                         <?php 
                                         $url_msk_dt = explode( "/", $vDt['pdfurl'] );
+                                        
+                                        $anyoMsk = $url_msk_dt[ sizeof( $url_msk_dt ) - 3 ];
                                         $idMsk = $url_msk_dt[ sizeof( $url_msk_dt ) - 2 ];
-                                        $dcMsk = $url_msk_dt[ sizeof( $url_msk_dt ) - 1 ];
+                                        
+                                        $dcMskPi = pathinfo( $url_msk_dt[ sizeof( $url_msk_dt ) - 1 ] );
+                                        $dcMsk = $dcMskPi['filename'] . "_fir." . $dcMskPi['extension'];
                                         
                                         if( $vDt['firmasestados_id'] == 2 ){
-                                            $urldocfirmado = "/index.php?ajaxl=" . md5(IndexCtrl::API_LNK_DESCARGAR_PDF) . "&id=" . md5( $idMsk ) . "&doc=" . $dcMsk . "" . $docData;
+                                            $urldocfirmado = "/index.php?ajaxl=" . md5(IndexCtrl::API_LNK_VISTA_PDF_PROC) . "&id=" . md5( $idMsk ) . "&doc=" . $dcMsk . "&anyo=" . $anyoMsk;
                                         }
                                         ?>
                                     </div>
@@ -284,7 +277,7 @@ $inst = $instDt[0];
             </main>
     
             <footer class="my-5 pt-5 text-muted text-center text-small">
-                <p class="mb-1">&copy; 2022 Acappdemy</p>
+                <p class="mb-1">&copy; 2025 Gestorfinanciero</p>
                 <ul class="list-inline">
                     <li class="list-inline-item"><a href="#">Privacy</a></li>
                     <li class="list-inline-item"><a href="#">Terms</a></li>

@@ -1,58 +1,57 @@
 <?php
-class IndexCtrl extends Pagina
-{
-	const CHARS_TO = 'utf-8';   // Codificacion a convertir
-	const CHARS_FR = 'utf-8';      // Codificacion fuente
-
-	// Config Uploadfiles
-	const CONFIG_UPLOAD_DEF = 10;
-
-	const GENERAL_CAMPOS_VISIBLE = 0;
-	const GENERAL_CAMPOS_OCULTO = 1;
-	const GENERAL_CAMPOS_INACTIVO = 2;
-
-	const PERFILES_SUPER_USUARIO = 1;
-	const PERFILES_ADMINISTRADOR = 2;
-	const PERFILES_SUPERVISOR = 3;
-	const PERFILES_EMPLEADOS = 4;
-	const PERFILES_ACUDIENTE = 5;
-	const PERFILES_FINANCIERO = 6;
-	const PERFILES_SUPERVISORADMIN = 7;
-	const PERFILES_PROVEEDOR = 8;
-	const PERFILES_RUTA = 9;
-
-	// IDs Usabilidad
-	const WEB_USR_LGN_OK = 'WEB_USR_LGN_OK';
-	const WEB_USR_TRK_VW = 'WEB_USR_TRK_VW';
-	const WEB_LGN_VISITA_APP = 'WEB_LGN_VISITA_APP';
-	const WEB_USR_ACU_LGN_OK = 'WEB_USR_ACU_LGN_OK';
-	const WEB_USR_CARGA_ARCHIVOS = 'WEB_USR_CARGA_ARCHIVOS';
-	// Mensajes Usabilidad
-	const USABILIDAD_MSJ_LOGINOK = 'ingreso login correcto';
-
-	// Codigos de error
-	const ERR_COD_SIN_PRIVILEGIOS = 520; // No tiene permisos suficientes
-	const ERR_COD_USUARIO_NO_EXISTE_BY_ID = 521; // El id del usuario no existe
-	const ERR_COD_ENVIO_MAIL_FALLIDO = 522; // Error enviando el correo
-	const ERR_COD_CAMBIO_CLAVE_FALLIDO = 523; // Error al cambiar clave
-	const ERR_COD_CAMPO_OBLIGATORIO = 524; // Falta campo obligatorio
-	const ERR_COD_COMUNICACIONES_SIN_DESTINATARIO = 525; // No agrego destinatarios al mensaje
-	const ERR_COD_COMUNICACIONES_AGREGANDO = 526; // No agrego destinatarios al mensaje
-	const ERR_COD_COMUNICACIONES_OBTENER_LISTA_POR_ENVIAR = 527; // No agrego destinatarios al mensaje
-	const ERR_COD_AGENDA_AGREGAR = 528; // No agrego destinatarios al mensaje
-	const ERR_COD_SESION_INACTIVA = 529; // Sesion cerrada por inactividad
-	const ERR_COD_MSJ_ERR_COMUN = 530; // Errores comunes al insertar
-	const ERR_COD_EST_CLAVE_NO_MODIFICADA = 531; // La clave del Empleado no fue modificada
-	const ERR_COD_CORREO_FAIL = 532; // No fue posible enviar el correo
-	const ERR_COD_USUARIO_EXISTE_PERO_SIN_DATOS = 533; // El usuario existe pero sin datos
-	const ERR_COD_ACUDIENTE_HIJOS_ACTIVOS = 534; // Acudiente sin hijos activos
-	const ERR_COD_USUARIO_O_CLAVE_INVALIDA = 535; // Usuario o clave invalida
-	const ERR_COD_PLANTILLA_NO_SALVADA = 536; // Plantilla no guardada
-	const ERR_COD_REGISTRO_EXISTENTE = 537; // Registro existente con los mismos datos
-	const ERR_COD_ACTUALIZACION_SQL = 538; // Error actualizando datos en sentencia SQL
-	const ERR_COD_ELIMINACION_SQL = 538; // Error eliminando datos en sentencia SQL
-	const ERR_COD_RESPUESTA_SQL_VACIA = 539; // Respuesta vacia
-
+class IndexCtrl extends Pagina {
+    const CHARS_TO = 'utf-8';   // Codificacion a convertir
+    const CHARS_FR = 'utf-8';      // Codificacion fuente
+    
+    // Config Uploadfiles
+    const CONFIG_UPLOAD_DEF = 10;
+    
+    const GENERAL_CAMPOS_VISIBLE = 0;
+    const GENERAL_CAMPOS_OCULTO = 1;
+    const GENERAL_CAMPOS_INACTIVO = 2;
+    
+    const PERFILES_SUPER_USUARIO = 1;
+    const PERFILES_ADMINISTRADOR = 2;
+    const PERFILES_SUPERVISOR = 3;
+    const PERFILES_CONTRATISTA = 4;
+    const PERFILES_ACUDIENTE = 5;
+    const PERFILES_FINANCIERO = 6;
+    const PERFILES_SUPERVISORADMIN = 7;
+    const PERFILES_PROVEEDOR = 8;
+    const PERFILES_RUTA = 9;
+    
+    // IDs Usabilidad
+    const WEB_USR_LGN_OK = 'WEB_USR_LGN_OK';
+    const WEB_USR_TRK_VW = 'WEB_USR_TRK_VW';
+    const WEB_LGN_VISITA_APP = 'WEB_LGN_VISITA_APP';
+    const WEB_USR_ACU_LGN_OK = 'WEB_USR_ACU_LGN_OK';
+    const WEB_USR_CARGA_ARCHIVOS = 'WEB_USR_CARGA_ARCHIVOS';
+    // Mensajes Usabilidad
+    const USABILIDAD_MSJ_LOGINOK = 'ingreso login correcto';
+    
+    // Codigos de error
+    const ERR_COD_SIN_PRIVILEGIOS = 520; // No tiene permisos suficientes
+    const ERR_COD_USUARIO_NO_EXISTE_BY_ID = 521; // El id del usuario no existe
+    const ERR_COD_ENVIO_MAIL_FALLIDO = 522; // Error enviando el correo
+    const ERR_COD_CAMBIO_CLAVE_FALLIDO = 523; // Error al cambiar clave
+    const ERR_COD_CAMPO_OBLIGATORIO = 524; // Falta campo obligatorio
+    const ERR_COD_COMUNICACIONES_SIN_DESTINATARIO = 525; // No agrego destinatarios al mensaje
+    const ERR_COD_COMUNICACIONES_AGREGANDO = 526; // No agrego destinatarios al mensaje
+    const ERR_COD_COMUNICACIONES_OBTENER_LISTA_POR_ENVIAR = 527; // No agrego destinatarios al mensaje
+    const ERR_COD_AGENDA_AGREGAR = 528; // No agrego destinatarios al mensaje
+    const ERR_COD_SESION_INACTIVA = 529; // Sesion cerrada por inactividad
+    const ERR_COD_MSJ_ERR_COMUN = 530; // Errores comunes al insertar
+    const ERR_COD_EST_CLAVE_NO_MODIFICADA = 531; // La clave del Empleado no fue modificada
+    const ERR_COD_CORREO_FAIL = 532; // No fue posible enviar el correo
+    const ERR_COD_USUARIO_EXISTE_PERO_SIN_DATOS = 533; // El usuario existe pero sin datos
+    const ERR_COD_ACUDIENTE_HIJOS_ACTIVOS = 534; // Acudiente sin hijos activos
+    const ERR_COD_USUARIO_O_CLAVE_INVALIDA = 535; // Usuario o clave invalida
+    const ERR_COD_PLANTILLA_NO_SALVADA = 536; // Plantilla no guardada
+    const ERR_COD_REGISTRO_EXISTENTE = 537; // Registro existente con los mismos datos
+    const ERR_COD_ACTUALIZACION_SQL = 538; // Error actualizando datos en sentencia SQL
+    const ERR_COD_ELIMINACION_SQL = 538; // Error eliminando datos en sentencia SQL
+    const ERR_COD_RESPUESTA_SQL_VACIA = 539; // Respuesta vacia
+    
 	const SIN_PRIVILEGIOS = "No tiene los permisos suficientes para crear usuarios.";
 	const USUARIO_NO_AUTENTICADO = "Para esta operaci&oacute;n es obligatorio estar autenticado.";
 
@@ -61,6 +60,7 @@ class IndexCtrl extends Pagina
 
 	const API_LNK_DESCARGAR_ALUMNOS = 'API_LNK_DESCARGAR_ALUMNOS';
 	const API_LNK_DESCARGAR_PDF = 'API_LNK_DESCARGAR_PDF';
+	const API_LNK_VISTA_PDF_PROC = 'API_LNK_VISTA_PDF_PROC';
 	const API_LNK_DESCARGAR_CERTIFICADOS = 'API_LNK_DESCARGAR_CERTIFICADOS';
 	const API_SESSION_ACTIVA = 'API_SESSION_ACTIVA';
 	const API_AgregarConfigCorp = 'API_AgregarConfigCorp';
@@ -152,8 +152,14 @@ class IndexCtrl extends Pagina
 	const API_FirmasPreviaGet = 'API_FirmasPreviaGet';
 	const API_FirmasAgregarConfigCorp_Add = 'API_FirmasAgregarConfigCorp_Add';
 	const API_FirmasAgregarConfigCorp_Get = 'API_FirmasAgregarConfigCorp_Get';
+	
+	const API_FirmasproHelperAdd = 'API_FirmasproHelperAdd';
 	// Firmas FIN
-
+	
+	// Firmaslog INI
+	const API_FirmaslogHelperEvent = 'API_FirmaslogHelperEvent';
+	// Firmaslog FIN
+	
 	// ApiBox INI
 	const API_ApiboxGet = 'API_ApiboxGet';
 	// ApiBox FIN
@@ -229,97 +235,105 @@ class IndexCtrl extends Pagina
 
 	// Mascaras descarga
 	const MASK_FLD_REPO_ANEXOS = 'MASK_FLD_REPO_ANEXOS';
-
-	public function __construct()
-	{
-		// Here se centralizan todas las operaciones de envio de datos: POST, GET, REQUEST
-		//Singleton::_modelos();
-
-		if (!isset($_SESSION)) {
-			session_start();
-		}
-		if (isset($_SESSION["usu"])) {
-			$_usu_tmp = $_SESSION["usu"];
-			if ($_usu_tmp->getEstado_id() > 1) {
-				Seguridad::logout();
-				echo "<script type=\"text/javascript\">alert(\"Usuario inactivo, bloqueado o eliminado\"); location.href='./index.php';</script>";
-				die("");
-			}
-		}
-
-		// Api REST
-		if (isset($_SERVER['PATH_INFO'])) {
-
-			$url_baseCtrls = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
-			$this->renderCtrl($url_baseCtrls . "OperacionesCtrl.php");
-
-			$url_baseCtrls = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
-			$this->renderCtrl($url_baseCtrls . "Rest.php");
-
-			Rest::handler();
-
-			die("");
-		}
-
-		// Controlar accesos de usuarios
-		if (isset($_POST["ajax"])) {
-			if (!($_POST["ajax"] == md5(self::API_IniciarLoginAsOtro))) {
-				if (isset($_SESSION["url"])) {
-					if (trim(strtolower($_SESSION["url"])) != trim(strtolower(Utiles::getBaseUrl()))) {
-						Seguridad::logout();
-						echo "<script type=\"text/javascript\">location.href='./index.php';</script>";
-						die("");
-					}
-				}
-
-			}
-		}
-
-		if (isset($_REQUEST["ajaxl"])) {
-			$url_baseCtrls = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
-			$this->renderCtrl($url_baseCtrls . "OperacionesCtrl.php");
-
-			if ($_REQUEST["ajaxl"] == md5(self::API_LNK_DESCARGAR_ALUMNOS)) {
-				try {
-					$ok = OperacionesCtrl::Empleados_Download_Obtener($_REQUEST);
-				} catch (Exception $ex) {
-					$er = array("err" => $ex->getMessage());
-					echo json_encode($er);
-				}
-
-				$flnm = date("YmdHis") . ".csv";
-				header('Content-Type: text/csv');
-				header('Content-Disposition: attachment; filename="' . $flnm . '";');
-				echo $ok;
-
-				die("");
-			}
-
-			if ($_REQUEST["ajaxl"] == md5(self::API_LNK_DESCARGAR_PDF)) {
-				try {
-					$ok = OperacionesCtrl::crearUrlMask($_REQUEST, self::MASK_FLD_REPO_ANEXOS);
-				} catch (Exception $ex) {
-					$er = array("err" => $ex->getMessage());
-					echo json_encode($er);
-				}
-				die("");
-			}
-
-			if ($_REQUEST["ajaxl"] == md5(self::API_SESSION_ACTIVA)) {
-				if (isset($_SESSION["usu"])) {
-					echo json_encode(['active' => true]);
-				} else {
-					echo json_encode(['active' => false]);
-				}
-				die("");
-			}
-
-		}
-
-		if (isset($_POST)) {
-			$url_baseCtrls = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
-			$this->renderCtrl($url_baseCtrls . "OperacionesCtrl.php");
-
+	const MASK_FLD_REPO_PROCESOS = 'MASK_FLD_REPO_PROCESOS';
+	
+	public function __construct(){
+	    // Here se centralizan todas las operaciones de envio de datos: POST, GET, REQUEST
+	    //Singleton::_modelos();
+	    
+	    if(!isset($_SESSION)){ session_start(); }	    
+	    if (isset( $_SESSION["usu"] )) {
+	        $_usu_tmp = $_SESSION["usu"];
+	        if( $_usu_tmp->getEstado_id() > 1){
+	            Seguridad::logout();
+	            echo "<script type=\"text/javascript\">alert(\"Usuario inactivo, bloqueado o eliminado\"); location.href='./index.php';</script>";
+	            die("");
+	        }
+	    }
+	    
+	    // Api REST
+	    if ( isset( $_SERVER['PATH_INFO'] ) ){
+	        
+	        $url_baseCtrls = dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
+	        $this->renderCtrl($url_baseCtrls . "OperacionesCtrl.php");
+	        
+	        $url_baseCtrls = dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
+	        $this->renderCtrl($url_baseCtrls . "Rest.php");
+	        
+	        Rest::handler();
+	        
+	        die("");
+	    }
+	    
+	    // Controlar accesos de usuarios
+	    if( isset( $_POST["ajax"] ) ){
+	        if( !($_POST["ajax"] == md5( self::API_IniciarLoginAsOtro )) ){
+	            if ( isset( $_SESSION["url"] ) ) {
+	                if ( trim(strtolower( $_SESSION["url"] )) != trim(strtolower( Utiles::getBaseUrl())) ) {
+	                    Seguridad::logout();
+	                    echo "<script type=\"text/javascript\">location.href='./index.php';</script>";
+	                    die("");
+	                }
+	            }
+	            
+	        }
+	    }
+	    
+	    if( isset($_REQUEST["ajaxl"]) ){
+	        $url_baseCtrls = dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
+	        $this->renderCtrl($url_baseCtrls . "OperacionesCtrl.php");
+	        
+	        if ( $_REQUEST["ajaxl"] == md5( self::API_LNK_DESCARGAR_ALUMNOS ) ) {
+	            try{
+	                $ok = OperacionesCtrl::Empleados_Download_Obtener( $_REQUEST );
+	            }catch (Exception $ex){
+	                $er = array("err" => $ex->getMessage());
+	                echo json_encode($er);
+	            }
+	            
+	            $flnm = date( "YmdHis" ) . ".csv";
+	            header('Content-Type: text/csv');
+	            header('Content-Disposition: attachment; filename="' . $flnm . '";');
+	            echo $ok;
+	            
+	            die("");
+	        }
+	        
+	        if ( $_REQUEST["ajaxl"] == md5( self::API_LNK_DESCARGAR_PDF ) ) {
+	            try{
+	                $ok = OperacionesCtrl::crearUrlMask( $_REQUEST, self::MASK_FLD_REPO_ANEXOS );
+	            }catch (Exception $ex){
+	                $er = array("err" => $ex->getMessage());
+	                echo json_encode($er);
+	            }
+	            die("");
+	        }
+	        if ( $_REQUEST["ajaxl"] == md5( self::API_LNK_VISTA_PDF_PROC ) ) {
+	            try{
+	                $ok = OperacionesCtrl::crearUrlMask( $_REQUEST, self::MASK_FLD_REPO_PROCESOS );
+	            }catch (Exception $ex){
+	                $er = array("err" => $ex->getMessage());
+	                echo json_encode($er);
+	            }
+	            die("");
+	        }
+	        
+	        if ( $_REQUEST["ajaxl"] == md5( self::API_SESSION_ACTIVA ) ) {
+	            if (isset( $_SESSION["usu"] )) {
+	                echo json_encode(['active' => true]);
+	            }
+	            else{
+	                echo json_encode(['active' => false]);
+	            }
+	            die("");
+	        }
+    	    
+	    }
+	    
+		if( isset( $_POST ) ){
+		    $url_baseCtrls = dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . "ctrls" . DIRECTORY_SEPARATOR;
+		    $this->renderCtrl($url_baseCtrls . "OperacionesCtrl.php");		    
+		    
 			// Agregar campos comunes
 			if (isset($_POST["ajax"])) {
 				if (!isset($_SESSION)) {
@@ -845,25 +859,27 @@ class IndexCtrl extends Pagina
 				// Plantillas FIN
 
 				// Firmas INI
-				if ($_POST["ajax"] == md5(self::API_FirmasGet)) {
-					try {
-						$ok = OperacionesCtrl::firmaspro_Helper_Obtener($_POST);
-						echo json_encode($ok);
-					} catch (Exception $ex) {
-						$er = array("err" => $ex->getMessage());
-						echo json_encode($er);
-					}
-					die("");
+				
+				if ( $_POST["ajax"] == md5( self::API_FirmasGet ) ) {
+				    try{
+				        $ok = OperacionesCtrl::firmaspro_Helper_Obtener( $_POST );
+				        echo json_encode($ok);
+				    }catch (Exception $ex){
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
 				}
-				if ($_POST["ajax"] == md5(self::API_FirmasPreviaGet)) {
-					try {
-						$ok = OperacionesCtrl::firmaspro_Preview_Obtener($_POST);
-						echo json_encode($ok);
-					} catch (Exception $ex) {
-						$er = array("err" => $ex->getMessage());
-						echo json_encode($er);
-					}
-					die("");
+				
+				if ( $_POST["ajax"] == md5( self::API_FirmasPreviaGet ) ) {
+				    try{
+				        $ok = OperacionesCtrl::firmaspro_Preview_Obtener( $_POST );
+				        echo json_encode($ok);
+				    }catch (Exception $ex){
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
 				}
 				if ($_POST["ajax"] == md5(self::API_FirmasAgregarConfigCorp_Add)) {
 					try {
@@ -885,8 +901,43 @@ class IndexCtrl extends Pagina
 					}
 					die("");
 				}
+				// yalfonso - JBB
+				if ( $_POST["ajax"] == md5( self::API_FirmasproHelperAdd ) ) {
+				    try{
+				        $ok = OperacionesCtrl::firmaspro_Helper_FirmarDoc( $_POST );
+				        echo json_encode($ok);
+				    }catch (Exception $ex){
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// yalfonso - JBB
+				if ( $_POST["ajax"] == md5( self::API_FirmasproHelperAdd ) ) {
+				    try{
+				        $ok = OperacionesCtrl::firmaspro_Helper_FirmarDoc( $_POST );
+				        echo json_encode($ok);
+				    }catch (Exception $ex){
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
 				// Firmas FIN
 
+				// Firmaslog INI
+				if ( $_POST["ajax"] == md5( self::API_FirmaslogHelperEvent ) ) {
+				    try{
+				        $ok = OperacionesCtrl::firmaspro_Helper_EventsObtener( $_POST );
+				        echo json_encode($ok);
+				    }catch (Exception $ex){
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Firmaslog FIN
+				
 				// ApiBox INI
 				if ($_POST["ajax"] == md5(self::API_ApiboxGet)) {
 					try {

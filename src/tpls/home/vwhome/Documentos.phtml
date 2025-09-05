@@ -68,6 +68,14 @@ try {
 			</div>
 			            
 			<div class="card" id="contProce" style="display: none;">
+				<div class="card-body">
+    				<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                        	<li class="breadcrumb-item"><a href="#">Home</a></li>
+                        	<li class="breadcrumb-item active" aria-current="page">Library</li>
+                        </ol>
+                    </nav>
+                </div>
 				<div id="cardDocs" class="card-body" style="display: none;" ></div>
 				<div id="cardProcs" class="card-body"></div>
 			</div>
@@ -185,6 +193,12 @@ const btnAgregarReg = function(){
 	jQuery( _m ).modal('show');	
 };
 
+const btnOkFirma = function( colorbtn ){
+	return '<button class="btn ' + colorbtn + ' flex-grow-1 firmaOkCls" ><i class="bi bi-check-circle me-1"></i>Documento firmado</button>';
+};
+
+const cntContinuar = 'cntContinuar';
+
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
 	const tablaCont = dC['tableContainer'];
@@ -212,6 +226,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const cardDocs = jQuery('#cardDocs');
 		cardDocs.hide();
 		cardDocs.html ( '' );
+		
+		jQuery( '#cardProcs' ).show('fast');
 	};
 	
 	const btnModInfoHtml = function( d ){
@@ -231,7 +247,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		</p>');
 		html.push('	</div>');
 		html.push('	<div>');
-		html.push('		<button class="btn-close" data-target="#contProce" onclick="reqs.btnCloseModInfo( this )" ></button>');
+		html.push('		<button id="btnVolverSolicitudes" class="btn btn-outline-danger" data-target="#contProce" onclick="reqs.btnCloseModInfo( this )" ><i class="bi bi-chevron-left"></i> Volver</button>');
 		html.push('	</div>');
 		html.push('</div>');
 			
@@ -346,10 +362,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
         		__TransportarData(
         			form_data,
         			function( o ) {
-        				//console.log( o );
+        			
+        				jQuery( "#" + cntContinuar  + ", .firmaOkCls"  ).hide('fast');
         				
         				documentosList( o['result'] );
-        				
         				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
         			},
         			function ( err ) {
@@ -435,27 +451,50 @@ const Requerimientos = function( dC ){ // dC = data constructor
         	        const bs = _el['bs'];
         	        const url = _el['url'];
         	        const fl = ut.pathInfo( bs );
+        	        const urlp = url.split('proc');
+        	        const prms = ("" + urlp[1]).split('/');
         	        
-        	        const fancy = ("" + fl['filename']).replace(/sig_/ig, "").replace(/_/ig," ");;
+        	        const firmasid = _el['firmas_id'];
+        	        
+        	        const fancy = ( "" + fl['filename'] ).replace(/sig_/ig, "").replace(/_/ig," ");
+        	        
+        	        const btnfirId = "btnFir_" + key;
+        	        const btnfirDown = "btnFirDown_" + key;
         	        
 					lista.push('<div class="col"> ');
 					lista.push('	<div class="card h-100 text-center"> ');
-					lista.push('		<a href="' + url + '" target="vwnew">');
+					lista.push('		<button data-target="#' + btnfirId + '" data-evento="<?php echo OperacionesCtrl::FIRMASPRO_EVENTO_REVISION; ?>" data-fldtipo="proceso" data-anyo="' + prms[1] + '" data-ide="' + prms[2] + '" data-pdf="' + prms[3] + '" class="btn" onclick="actividadRepo(this);" >');
 					lista.push('		<i class="bi bi-file-earmark-pdf display-4 mt-3 text-danger"></i> ');
 					lista.push('		<div class="card-body"> ');
 					lista.push('			<h5 class="card-title">' + fancy + '</h5> ');
 					lista.push('		</div> ');
-					lista.push('		</a>');
+					lista.push('		</button>');
 					
 					lista.push('		<div class="card-footer p-0"> ');
 					
 					lista.push('			<div class="btn-group w-100 d-flex"> ');
-					lista.push('				<a href="' + url + '" class="btn btn-primary flex-grow-1" target="vwnew"><i class="bi bi-pen me-1"></i>Firmar</a>');
-					lista.push('				<button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split flex-grow-0 px-2" style="width: 2rem;" data-bs-toggle="dropdown" aria-expanded="false"> ');
+					
+					let colorbtn = 'btn-primary';
+					let colorbtndown = 'btn-outline-primary';
+					
+					if( firmasid['firmasestados_id'] == 1 || firmasid['firmasestados_id'] == null ){
+    					let habilitado = '';
+    					if( firmasid['firmasestados_id'] == null ){
+    						habilitado = 'disabled="disabled"';
+    					}
+						lista.push('				<button id="' + btnfirId + '" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Revisado" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" class="btn ' + colorbtn + ' flex-grow-1 firmaNoCls" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button>');
+					}
+					else{
+						colorbtn = 'btn-success';
+						colorbtndown = 'btn-outline-success';
+						lista.push('				' + btnOkFirma( colorbtn ) );
+					}
+					
+					lista.push('				<button id="' + btnfirDown + '" type="button" class="btn ' + colorbtndown + ' dropdown-toggle dropdown-toggle-split flex-grow-0 px-2" style="width: 2rem;" data-bs-toggle="dropdown" aria-expanded="false"> ');
 					lista.push('					<span class="visually-hidden">Toggle Dropdown</span> ');
 					lista.push('				</button> ');
 					lista.push('				<ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start"> ');
-					lista.push('					<li><a class="dropdown-item" href="' + url + '" target="vwnew">Ver Archivo</a></li> ');
+					lista.push('					<li><button data-target="#' + btnfirId + '" data-evento="<?php echo OperacionesCtrl::FIRMASPRO_EVENTO_REVISION; ?>" data-fldtipo="proceso" data-anyo="' + prms[1] + '" data-ide="' + prms[2] + '" data-pdf="' + prms[3] + '" class="dropdown-item" href="' + url + '" onclick="actividadRepo(this);">Ver Archivo</button></li> ');
 					lista.push('				</ul> ');
 					lista.push('			</div > ');
 					
@@ -469,6 +508,15 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			const _html = [];
     		_html.push('<div class="row row-cols-1 row-cols-md-3 g-4">');
     		_html.push('	' + lista.join('') );
+    		_html.push('</div>');
+    		_html.push('<div id="' + cntContinuar + '" style="display: none;" class="row my-1 g-4">');
+    		_html.push('	<div class="col col mt-3">');
+    		_html.push('		<div class="d-flex">');
+    		_html.push('			<button onclick="modFormularios();" class="btn btn-warning flex-fill me-1 " >Editar nuevamente formularios</button>' );
+    		_html.push('			<button class="btn btn-primary flex-fill mx-1 " >Enviar Documentos a ...</button>' );
+    		_html.push('			<button class="btn btn-outline-danger flex-fill ms-1" onclick="reqs.btnCloseModInfo( \'#btnVolverSolicitudes\' );" ><i class="bi bi-chevron-left"></i> Volver</button>' );
+    		_html.push('		</div>');
+    		_html.push('	</div>');
     		_html.push('</div>');
     		
     		cardDocs.html ( _html.join('') );
@@ -508,7 +556,6 @@ const Requerimientos = function( dC ){ // dC = data constructor
     		__TransportarData(
     			form_data,
     			function( o ) {
-    				//console.log( o );
     				target.hide('fast');
     		
             		contProce.show("fast", function(){
@@ -519,6 +566,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
             			
             			documentosList( o );
             			
+            			if( o['docs'].length > 0 ){
+        					docOkFirmados();
+        				}
             		});
             		
     				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
@@ -540,7 +590,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	const btnInfoHtml = function( dtInfo ){
 		const html = [];
     	html.push('<button onclick="reqs.modInfo(this);" data-flujos_id="' + dtInfo.flujos_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
-        html.push('	<i class="fe fe-info fs-5"></i>');
+        html.push('	<i class="bi bi-eye-fill fs-5"></i>');
         html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
         html.push('		<h6 class="mb-0 text-white">Editar</h6>');
         html.push('	</div>');
@@ -628,6 +678,123 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			tbInter.ajax.reload(null, false);
         }
     };
+};
+
+const docOkFirmados = function(){
+	const faltan = jQuery( '.firmaNoCls' ).length;
+	if( faltan == 0 ){
+		jQuery( '#' + cntContinuar ).show('fast');
+		jQuery( '#cardProcs' ).hide('fast');
+	}
+};
+
+const modFormularios = function(){
+	jQuery( '#cardProcs' ).show('fast');
+};
+
+const firmarPdf = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	
+	const target = jQuery( dt['target'] );
+
+	closeAllModal();
+	
+	const opc = { 'id' : 'ajaxldr' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+    
+    home.navUser(function( uDt ){
+    	const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FirmasproHelperAdd ); ?>');
+        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+        form_data.append('u', uDt );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+				const result = o['result'];
+				
+				if ( Object.hasOwnProperty.call( result, 'bs' ) ) {
+					const flok = result['bs'];
+					if( flok !== "" ){
+					
+						target.removeClass('btn-outline-primary').addClass('btn-outline-success');
+    					_o.before( btnOkFirma( 'btn-success' ) );
+    					_o.remove();
+					
+					}
+					else{
+						alert('No se firm\xF3 el documento, probablemete no hay firmante en la plantilla del documento');
+					}
+				}
+				
+				docOkFirmados();
+			
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                let htmltxt = err.responseText;
+                try {
+					const res = JSON.parse( err.responseText );
+					htmltxt = res['msj'];
+				} catch (e) {
+					// nada
+				}
+                alerta.html( htmltxt );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+    });
+};
+
+const actividadRepo = function( o ){
+	const _o = jQuery( o );
+	const dt = _o.data();
+	const target = dt['target'];
+
+	closeAllModal();
+	
+    home.navUser(function( uDt ){
+    	const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FirmaslogHelperEvent ); ?>');
+        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+        form_data.append('u', uDt );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+				const result = o['result'];
+				const url = result['url'];
+				
+				jQuery( target ).removeAttr('disabled');
+				
+				window.open( url , '_blankpdf');
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                
+                let htmltxt = err.responseText;
+                try {
+					const res = JSON.parse( err.responseText );
+					htmltxt = res['msj'];
+				} catch (e) {
+					// nada
+				}
+                alerta.html( htmltxt );
+
+                jQuery( objmdlErr ).modal('show');
+			}
+		);
+    });
 };
 
 const chkArchivo = function( o ){
