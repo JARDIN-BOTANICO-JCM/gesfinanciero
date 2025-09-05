@@ -1928,10 +1928,11 @@ class OperacionesCtrl {
 	
 	public static function mnguserAdd_Helper( $d, $perfil ){
 	    // Modificar por ref
+		 
 	    self::mnguserAdd_Prepare($d, $perfil);
 	    
 	    //die( "_lugares_id: \n" . print_r( $d , true ) );
-	    
+	   
 	    $_lugares_id = 927;
 	    if( isset($d['lugares_id']) ) {
 	        if ( intval( $d['lugares_id'] ) > 0 ) {
@@ -2090,12 +2091,27 @@ class OperacionesCtrl {
 			
 			/*
 			 * @vnavarro
-			 * TODO: Tarea 2
+			 * TODO: Tarea 2 Listo
 			 *   Vamos a controlar que el formulario de crear el empleado obtenga los datos
 			 *   1. Valida que $d tiene empleadosdetallescontrato_meses, empleadosdetallescontrato_dias
 			 *   2. Como esta funcion (mnguserAdd_Helper) solo es para creacion, entonces utiliza la funcion q creaste (empleadosdetallescontrato_agregar) para agregar los meses y los dias
 			 *   3. Usa la variable $idUsr para el campo empleados_id  
 			 */
+			
+				if (isset($d['empleadosdetallescontrato_meses']) && isset($d['empleadosdetallescontrato_dias'])) {
+					$payload = array(
+						'empleados_id' => $idUsr['id'],
+						'meses' => intval($d['empleadosdetallescontrato_meses']),
+						'dias'  => intval($d['empleadosdetallescontrato_dias'])
+					);
+
+					try {
+						self::empleadosdetallescontrato_Agregar($payload);
+					} catch (\Throwable $th) {
+						throw new \Exception('mnguserAdd_Helper - empleadosdetallescontrato_Agregar: ' . $th->getMessage());
+					}
+				}
+			
 			
 			foreach ( $d as $anId => $anVl ) {
 			    if( Utiles::ComienzaEn($anId, self::USUARIOS_FORM_ANEXO_ID) ){
@@ -2299,16 +2315,40 @@ class OperacionesCtrl {
 	    } catch (Exception $e) {
 	        throw $e;
 	    }
-	    
+	
 	    /*
 	     * @vnavarro
-	     * TODO: Tarea 3
+	     * TODO: Tarea 3 Listo
 	     *   Vamos a controlar que el formulario de modificar (el mismo de crear) el empleado obtenga los datos
 	     *   1. Valida que $d tiene empleadosdetallescontrato_meses, empleadosdetallescontrato_dias
 	     *   2. Utiliza la funcion q creaste (empleadosdetallescontrato_modificar) para actualizar los meses y los dias
 	     *   3. Usa la variable $d['id'] para el campo empleados_id
 	     *   4. Utiliza try/catch
 	     */
+
+			
+		if ( isset($d['empleadosdetallescontrato_meses']) || isset($d['empleadosdetallescontrato_dias']) ) {
+			
+			try {
+				$detalleContrato = array(
+				'documento' => $d['documento'],
+				'tipodoc_id' => $d['tipodoc_id'],
+				'meses' => isset($d['empleadosdetallescontrato_meses']) ? intval($d['empleadosdetallescontrato_meses']) : 0,
+				'dias' => isset($d['empleadosdetallescontrato_dias']) ? intval($d['empleadosdetallescontrato_dias']) : 0,
+				'empleados_id' => $d['id']
+			);
+
+			$payload = [
+				'data' => base64_encode(
+					json_encode($detalleContrato, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)
+				)
+			];
+
+				self::empleadosdetallescontrato_Helper_Agregar($payload);
+			} catch (\Throwable $th) {
+				throw new \Exception('empleados_Helper_Modificar - empleadosdetallescontrato_modificar: ' . $th->getMessage());
+			}
+		}
 	    
 	    return $r;
 	}
@@ -2756,8 +2796,8 @@ class OperacionesCtrl {
 		$r::$lnk->query( self::SQL_BIG_SELECTS );
 		
 		/*
-		 * @vnavarro
-		 * TODO: tarea 1
+		 * @vnavarro 
+		 * TODO: tarea 1 Listo
 		 * 1. en los JOIN ($jn), agrega la tabla empleadosdetallescontrato
 		 * 2. en los campos ($vr), agrega:
 		 *        - empleadosdetallescontrato.meses como 'empleadosdetallescontrato_meses'
@@ -2771,7 +2811,10 @@ class OperacionesCtrl {
 		$vr .= "empl.`usuario`, empl.`clave`, empl.`foto`, empl.`direccion`, empl.`barrio`, empl.`loc_lugares_id`, ";
 		$vr .= "empl.`cargos_id`, carg.nombre as cargos, empl.`titulos_id`, empl.`creado`, empl.`perfil_id`, ";
 		$vr .= "prf.nombre as perfil, empl.`estado_id`, est.nombre as estado, empl.`eps`, empl.`ars`, empl.`oficio`, ";
-		$vr .= "empl.`salariomes`, empl.`contratoini`, empl.`contratofin`, empl.dependencias_id, depe.nombre as dependencias ";
+		$vr .= "empl.`salariomes`, empl.`contratoini`, empl.`contratofin`, empl.dependencias_id, depe.nombre as dependencias, ";
+		$vr .= "edc.meses as empleadosdetallescontrato_meses, ";
+		$vr .= "edc.dias as empleadosdetallescontrato_dias, ";
+		$vr .= "edc.fileactaini as empleadosdetallescontrato_fileactaini ";
 		
 		$tb  = '`empleados` as empl ';
 		
@@ -2785,7 +2828,8 @@ class OperacionesCtrl {
 		$jn .= 'LEFT JOIN perfilusuarios as prf on prf.id = empl.perfil_id ';
 		$jn .= 'LEFT JOIN estado as est on est.id = empl.estado_id ';
 		$jn .= 'LEFT JOIN dependencias as depe on depe.id = empl.dependencias_id ';
-		
+		$jn .= 'LEFT JOIN empleadosdetallescontrato as edc on edc.empleados_id = empl.id ';
+
 		$pr = [];
 		$wh  = array();
 		if( isset( $d['id'] ) ){
@@ -8549,7 +8593,7 @@ EOD;
 	// reflista FIN
 	
 	// empleadosdetallescontrato INI
-	
+	public static function empleadosdetallescontrato_Helper_Agregar( $d ) {
 	/*
 	 * @vnavarro
 	 * TODO: tarea 8
@@ -8558,7 +8602,61 @@ EOD;
 	 * 2. detecta si es una actualizacion o un nuevo registro
 	 * 3. agrega los datos a la base de datos con las funciones que creaste para agregar o modificar
 	 * 4. el retorno debe entrese con la funcion self::retorno
+	 * 
 	 */
+
+	  	$data = base64_decode( $d['data'] );
+	    $json = json_decode( $data , true );
+
+		$items = (isset($json[0]) && is_array($json[0])) ? $json : [$json];
+
+		foreach ($items as $it) {
+
+			if (!is_numeric($it['tipodoc_id'] )) {
+				$it['tipodoc_id'] = array_search(strtoupper(trim($it['tipodoc_id'])), self::TIPODOC_DOS_LETRAS, true);
+			}
+
+			$doc = trim((string)$it['documento']) ?? '';
+			$it['meses'] = isset($it['meses']) ? (int)$it['meses'] : 0;
+    		$it['dias']  = isset($it['dias'])  ? (int)$it['dias']  : 0;
+
+			$usrExiste = self::empleados_Obtener(['w_documento' => $doc]);
+			
+			if (!empty($usrExiste) && isset($usrExiste[0]['id'])) {
+				// Solo agregar empleados_id si hay data
+				$it['empleados_id'] = $usrExiste[0]['id'];
+    		}
+
+			$contExiste = self::empleadosdetallescontrato_Obtener(['documento' => $doc ] );
+
+			try {
+			
+			if ( count( $contExiste ) > 0 ) {
+				//Modificación
+				$detalleContrato = array(
+					'w_documento' => $it['documento'],
+					'w_tipodoc_id' => $it['tipodoc_id'],
+					'meses' => $it['meses'],
+					'dias' => $it['dias']
+				);
+				 if (isset($it['empleados_id'])) {
+					$detalleContrato['empleados_id'] = $it['empleados_id'];
+				}
+				if (isset($it['contrato']) && trim((string)$it['contrato']) !== '') {
+					$detalleContrato['contrato'] = trim((string)$it['contrato']);
+				}
+				self::empleadosdetallescontrato_modificar($detalleContrato);
+			} else {
+				// Nuevo registro
+				self::empleadosdetallescontrato_agregar($it);
+			}
+		} catch (\Throwable $th) {
+			return self::retorno('error', 'Error en empleadosdetallescontrato_Helper_Agregar: ' . $th->getMessage(), null, false);
+		}
+		}
+		return self::retorno('ok', 'Contratos procesados correctamente', null);
+		
+	}
 	
 	// @Valeria Agregar las funciones de agregar (formularios_Agregar), obtener (formularios_Obtener), modificar (formularios_Modificar)
 	public static function empleadosdetallescontrato_Agregar($d) {
@@ -8616,6 +8714,7 @@ EOD;
 		}
 
 		$id = $o->saveData();
+		
 		if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
 			http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
 			throw new \Exception('empleadosdetallescontrato_Agregar: ' . $o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
@@ -8641,8 +8740,8 @@ EOD;
 		    http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
 		    throw new \Exception( "empleadosdetallescontrato_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
 		}
-
-		$tb = "empleadosdetallescontrato ";
+		
+		$tb = 'empleadosdetallescontrato ';
 		$aSt = array(); 
 
 		if ( isset( $d['tipodoc_id'] ) ) {
@@ -8663,7 +8762,7 @@ EOD;
 		if ( isset( $d['dias'] ) ) {
 			$aSt['dias'] = $d['dias'] ;
 		}
-		
+
 		$aSt['usuario'] = trim( $usu->getNombres() . " " . $usu->getApellidos() );
 		
 		$aSt['fechamodifica'] = date("Y-m-d H:i:s") ;
@@ -8675,16 +8774,20 @@ EOD;
 			$aSt['fileactainivalorgestor'] = $d['fileactainivalorgestor'] ;
 		}
 
+		
+
         $pr = [];
 	    $wh  = '';
 	    if ( isset( $d['id'] ) ) {
 	        $wh  = 'id = ?';
 	        $pr[]  = $d['id'];
 	    }
-	    if ( isset( $d['empleados_id'] ) ) {
-	        $wh  = 'empleados_id = ?';
-	        $pr[]  = $d['empleados_id'];
-	    }
+
+	    if ( isset( $d['w_tipodoc_id'] ) && isset( $d['w_documento'] ) ) {
+		    $pr[] = $d['w_tipodoc_id'];
+			$pr[] = $d['w_documento'];
+		    $wh  = 'tipodoc_id = ? AND documento = ?';
+		}
 
 		 if ( $wh == '' ) {
 	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
@@ -8745,6 +8848,8 @@ EOD;
 		if (isset($d['ordenasc'])) {
 			$orden = "ORDER BY " . $d['ordenasc'] . " ASC";
 		}
+
+		
 
 		$limite = "";
 		if (isset($d['limite'])) {
