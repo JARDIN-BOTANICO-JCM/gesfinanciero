@@ -17,9 +17,26 @@ class Empleadosdetallescontrato extends Clsdatos {
 	private $usuario = "";
 	private $fechamodifica = "1900-01-01 00:00:00";
 	private $anyolectivo_id = 0; 
+	private $fechainicio = "1900-01-01 00:00:00";
 	private $fileactaini = "";
 	private $fileactainivalorgestor = "";
 	
+    /**
+     * @return string
+     */
+    public function getFechainicio()
+    {
+        return $this->fechainicio;
+    }
+
+    /**
+     * @param string $fechainicio
+     */
+    public function setFechainicio($fechainicio)
+    {
+        $this->fechainicio = $fechainicio;
+    }
+
     /**
      * @return number
      */

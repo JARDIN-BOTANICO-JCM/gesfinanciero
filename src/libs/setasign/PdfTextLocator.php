@@ -27,6 +27,7 @@ class PdfTextLocator
         preg_match_all('/obj(.*?)endobj/s', $content, $objects);
         
         foreach ($objects[1] as $object) {
+            
             // Identificar streams con contenido de texto
             if (preg_match('/stream(.*?)endstream/s', $object, $streamMatch)) {
                 $streamData = trim($streamMatch[1]);
@@ -53,6 +54,7 @@ class PdfTextLocator
         $currentY = 0;
         
         foreach ($lines as $line) {
+            
             // Detectar Tm (posición absoluta)
             if (preg_match('/(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+(-?\d+\.?\d*)\s+Tm/i', $line, $m)) {
                 $currentX = floatval($m[5]);

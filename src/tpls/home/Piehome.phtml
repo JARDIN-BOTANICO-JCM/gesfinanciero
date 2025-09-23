@@ -503,6 +503,68 @@ function obtenerRespuestas() {
 
   return leerCampos(formulario, form);
 }
+
+const RenderObligaciones = function( dC ){
+	const self = this;
+	
+	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
+	
+	self.tbInter = null;
+	
+	self.data = [];
+	self.regId = null;
+	
+	self.render = function(){
+        const html = [];
+        html.push( '<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;">' );
+        html.push( '	<thead> ');
+        html.push( '		<tr> ');
+        html.push( '			<th>Id</th>');
+        html.push( '			<th>Descripci&oacute;n</th>');
+        html.push( '			<th>Usuario</th>');
+        html.push( '			<th>Vigencia</th>');
+        html.push( '			<th style="width: 25%;">Comentario</th>');
+        html.push( '			<th style="width: 25%;">Evidencias</th>');
+        html.push( '		</tr> ');
+        html.push( '	</thead> ');
+        
+        html.push( '	<tbody> ');
+        const reg = self.data;
+        for (const k in reg ) {
+            if (Object.hasOwnProperty.call(reg, k)) {
+            	const _el = reg[ k ];
+            	
+            	const idEdit_v = "obliid_" + _el['id'];
+            	const idComm_v = "oblicom_" + _el['id'];
+            	const idFile_v = "oblifile_" + _el['id'];
+            	const regid_v = "obliregid_" + _el['id'];
+            	
+            	html.push( '		<tr data-regid="' + self.regId + '"> ');
+                html.push( '			<td>' + _el['id'] + '</td>');
+                html.push( '			<td>' + _el['descripcion'] + '</td>');
+                html.push( '			<td>' + _el['empleados_nombre'] + '</td>');
+                html.push( '			<td>' + _el['vigencia'] + '</td>');
+                html.push( '			<td> ');
+                html.push( '				<div class="form-floating" style="height: 100px"> ');
+                html.push( '					<textarea class="form-control" placeholder="Comentarios" id="' + idComm_v + '" name="' + idComm_v + '" style="min-height: 100px;" required="required"></textarea> ');
+                html.push( '  					<label for="' + idComm_v + '">Comentarios *</label> ');
+                html.push( '				</div>');
+                html.push( '				<input type="hidden" id="' + regid_v + '" name="' + regid_v + '" value="' + self.regId + '">');
+                html.push( '				<input type="hidden" id="' + idEdit_v + '" name="' + idEdit_v + '" value="">');
+                html.push( '			</td>');
+                html.push( '			<td>');
+				html.push( '				<input class="form-control" type="file" id="' + idFile_v + '" name="' + idFile_v + '" multiple>');
+                html.push( '			</td>');
+                html.push( '		</tr> ');
+        	}
+    	}
+        html.push( '	</tbody> ');
+        html.push( '</table> ');
+        
+		return html.join('');
+	};
+	
+};
 </script>
 
 <script type="application/javascript">
@@ -914,6 +976,13 @@ const Home = function(){
                 break;
             case 'formulario':
             	elemento = renderEncuesta( JSON.parse( d['json'] ), regId );
+            	break;
+            case 'obligaciones':
+            	const rObli = new RenderObligaciones( [] );
+            	rObli.data = d['json'];
+            	rObli.regId = regId;
+            	
+            	elemento = { 'html' : rObli.render(), 'obj' : rObli };
             	break;
             default:
                 throw new Error('Tipo no soportado: ' + tipo);

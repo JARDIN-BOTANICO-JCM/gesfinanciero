@@ -280,7 +280,7 @@ if ( strlen( trim($data['foto']) ) > 0) {
         
                             <div class="tab-pane fade" id="list-seguridad" role="tabpanel" >
 
-                                <div class="card">
+                                <div class="card mb-3">
                                     <!-- Card header -->
                                     <div class="card-header">
                                         <h3 class="mb-0">Seguridad</h3>
@@ -349,6 +349,20 @@ if ( strlen( trim($data['foto']) ) > 0) {
                                                 </div>
                                             </form>
                                         </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="card mb-3">
+                                    <!-- Card header -->
+                                    <div class="card-header">
+                                        <h3 class="mb-0">Crear certificado autofirmado</h3>
+                                        <p class="mb-0">
+                                            Este certificado sirve para firmar documentos
+                                        </p>
+                                    </div>
+                                    <!-- Card body -->
+                                    <div class="card-body">
+                                        <button type="button" class="btn btn-primary" onclick="actualizarp12( this );">Crear Certificado</button>
                                     </div>
                                 </div>
 
@@ -551,6 +565,39 @@ const actualizarpass = function(){
 			}
 		);
 	});
+};
+
+
+const actualizarp12 = function(){
+	const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+
+    var form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_FirmasproAdminP12Add ); ?>');
+
+	__TransportarData(
+		form_data,
+		function( o ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Estado de la operaci&oacute;n','btnCerrarX' : true, 'center' : true, 'level' : 'err','size' : 'modal-sm' } );
+            
+			const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-success');
+            alerta.html( 'Transacci&oacute;n exitosa' );
+
+			jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		},
+		function ( err ) {
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err','size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( err.responseText );
+
+            jQuery( objmdlErr ).modal('show');
+			setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+		}
+	);
 };
 
 const cambiarActivo = function( o ){

@@ -154,6 +154,7 @@ class IndexCtrl extends Pagina {
 	const API_FirmasAgregarConfigCorp_Get = 'API_FirmasAgregarConfigCorp_Get';
 	
 	const API_FirmasproHelperAdd = 'API_FirmasproHelperAdd';
+	const API_FirmasproAdminP12Add = 'API_FirmasproAdminP12Add';
 	// Firmas FIN
 	
 	// Firmaslog INI
@@ -184,10 +185,15 @@ class IndexCtrl extends Pagina {
 	const API_FlujositemsGet = 'API_FlujositemsGet';
 	const API_FlujositemsHelperGet = 'API_FlujositemsHelperGet';
 	const API_FlujositemsHelperDel = 'API_FlujositemsHelperDel';
+	
+	const API_FlujositemsRevDtGet = 'API_FlujositemsRevDtGet';
 	// Flujositems FIN
 
 	// Paquetes INI
+	const API_PaquetesGetAjax = 'API_PaquetesGetAjax';
 	const API_PaquetesHelperGetAjax = 'API_PaquetesHelperGetAjax';
+	const API_PaquetesHelperMoveReview = 'API_PaquetesHelperMoveReview';
+	const API_PaquetesHelperMoveAdmin = 'API_PaquetesHelperMoveAdmin';
 	// Paquetes FIN
 
 	// Paquetesrequ INI
@@ -912,10 +918,9 @@ class IndexCtrl extends Pagina {
 				    }
 				    die("");
 				}
-				// yalfonso - JBB
-				if ( $_POST["ajax"] == md5( self::API_FirmasproHelperAdd ) ) {
+				if ( $_POST["ajax"] == md5( self::API_FirmasproAdminP12Add ) ) {
 				    try{
-				        $ok = OperacionesCtrl::firmaspro_Helper_FirmarDoc( $_POST );
+				        $ok = OperacionesCtrl::firmaspro_Helper_Admin_MkCert_p12( $_POST );
 				        echo json_encode($ok);
 				    }catch (Exception $ex){
 				        $er = array("err" => $ex->getMessage());
@@ -1058,6 +1063,16 @@ class IndexCtrl extends Pagina {
 					}
 					die("");
 				}
+				if ($_POST["ajax"] == md5(self::API_FlujositemsRevDtGet)) {
+				    try {
+				        $ok = OperacionesCtrl::flujositems_Helper_ObtenerRevisorData($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
 				// Flujositems FIN
 
 				// Paquetes INI
@@ -1071,6 +1086,16 @@ class IndexCtrl extends Pagina {
 					}
 					die("");
 				}
+				if ($_POST["ajax"] == md5(self::API_PaquetesGetAjax)) {
+				    try {
+				        $ok = OperacionesCtrl::paquetes_Obtener_Ajax( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
 				if ($_POST["ajax"] == md5(self::API_PaquetesHelperGetAjax)) {
 					try {
 						$ok = OperacionesCtrl::paquetes_Helper_Obtener_Ajax($_POST);
@@ -1080,6 +1105,26 @@ class IndexCtrl extends Pagina {
 						echo json_encode($er);
 					}
 					die("");
+				}
+				if ($_POST["ajax"] == md5(self::API_PaquetesHelperMoveReview)) {
+				    try {
+				        $ok = OperacionesCtrl::paquetes_Helper_MoverRevisar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ($_POST["ajax"] == md5(self::API_PaquetesHelperMoveAdmin)) {
+				    try {
+				        $ok = OperacionesCtrl::paquetes_Helper_MoverAdmin($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
 				}
 				// Paquetes FIN
 

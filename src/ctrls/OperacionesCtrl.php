@@ -3228,6 +3228,66 @@ class OperacionesCtrl {
 	// Empleados FIN
 	
 	// empleadosobjetivos INI
+	public static function empleadosobjetivos_Obtener( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "eobj.`id`, eobj.`descripcion`, eobj.`empleados_id`, concat( empl.nombres , ' ', empl.apellidos) as empleados_nombre, ";
+	    $vr .= "eobj.`empleadosobjetivosestados_id`, eobjest.nombre as empleadosobjetivosestados_nombre, eobj.`vigencia`, eobj.`orden` ";
+	    
+	    $tb  = '`empleadosobjetivos` as eobj ';
+	    
+	    $jn  = 'LEFT JOIN empleados as empl on empl.id = eobj.empleados_id ';
+	    $jn .= 'LEFT JOIN empleadosobjetivosestados as eobjest on eobjest.id = eobj.empleadosobjetivosestados_id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "eobj.`id` = ?";
+	        $pr[] = $d['id'];
+	    }
+	    if( isset( $d['w_empleados_id_md5'] ) ){
+	        $wh[] = "md5( eobj.`empleados_id` ) = ?";
+	        $pr[] = $d['w_empleados_id_md5'];
+	    }
+	    if( isset( $d['w_empleados_id'] ) ){
+	        $wh[] = "eobj.empleados_id = ?";
+	        $pr[] = $d['w_empleados_id'];
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr); //Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( 'firmaslog_Obtener: ' . $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    
+	    return $r;
+	}
 	public static function empleadosobjetivos_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -3261,6 +3321,248 @@ class OperacionesCtrl {
 	    
 	}
 	// empleadosobjetivos FIN
+	
+	// empleadosobjetivoslog INI
+	public static function empleadosobjetivoslog_Obtener( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "eolog.`id`, eolog.`descripcion`, eolog.`archivos`, eolog.`archivosges`, eolog.paquetesrequ_id, ";
+	    $vr .= "preq.ref as paquetesrequ_ref,  eolog.`fecha`, eolog.`empleados`, eolog.`empleadosobjetivos_id`, ";
+	    $vr .= "empobj.descripcion as  empleadosobjetivos_descripcion, empobj.empleados_id,  eolog.`feedback`, ";
+	    $vr .= "eolog.`usuariofeedback`, eolog.`fechafeedback`, eolog.`requerimientostplsitems_id`, ";
+	    $vr .= "reqtplsitem.ref as requerimientostplsitems_ref ";
+	    
+	    $tb  = '`empleadosobjetivoslog` as eolog ';
+	    
+	    $jn  = 'LEFT JOIN empleadosobjetivos as empobj on empobj.id = eolog.empleadosobjetivos_id ';
+	    $jn .= 'LEFT JOIN requerimientostplsitems as reqtplsitem on reqtplsitem.id = eolog.requerimientostplsitems_id ';
+	    $jn .= 'LEFT JOIN paquetesrequ as preq on preq.id = eolog.paquetesrequ_id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "eobj.`id` = ?";
+	        $pr[] = $d['id'];
+	    }
+	    
+	    if( isset( $d['w_empleados_id'] ) ){
+	        $wh[] = "empobj.empleados_id = ?";
+	        $pr[] = $d['w_empleados_id'];
+	    }
+	    if( isset( $d['w_empleados_id_md5'] ) ){
+	        $wh[] = "md5( empobj.empleados_id ) = ?";
+	        $pr[] = $d['w_empleados_id_md5'];
+	    }
+	    if( isset( $d['w_empleadosobjetivos_id'] ) ){
+	        $wh[] = "eolog.empleadosobjetivos_id = ?";
+	        $pr[] = $d['w_empleadosobjetivos_id'];
+	    }
+	    if( isset( $d['w_requerimientostplsitems_id'] ) ){
+	        $wh[] = "eolog.requerimientostplsitems_id = ?";
+	        $pr[] = $d['w_requerimientostplsitems_id'];
+	    }
+	    if( isset( $d['w_paquetesrequ_id'] ) ){
+	        $wh[] = "eolog.paquetesrequ_id = ?";
+	        $pr[] = $d['w_paquetesrequ_id'];
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr); //Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( 'firmaslog_Obtener: ' . $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    
+	    return $r;
+	}
+	public static function empleadosobjetivoslog_Agregar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $o = new Empleadosobjetivoslog();
+	    if (isset( $d['descripcion'] ) ) {
+	        $o->setDescripcion( $d['descripcion'] );
+	    }
+	    if (isset( $d['archivos'] ) ) {
+	        $o->setArchivos( $d['archivos'] );
+	    }
+	    if (isset( $d['archivosges'] ) ) {
+	        $o->setArchivosges( $d['archivosges'] );
+	    }
+	    $o->setFecha( date("Y-m-d H:i:s") );
+	    if (isset( $d['empleados'] ) ) {
+	        $o->setEmpleados( $d['empleados'] );
+	    }
+	    if (isset( $d['empleadosobjetivos_id'] ) ) {
+	        $o->setEmpleadosobjetivos_id( $d['empleadosobjetivos_id'] );
+	    }
+	    if (isset( $d['feedback'] ) ) {
+	        $o->setFeedback( $d['feedback'] );
+	    }
+	    if (isset( $d['usuariofeedback'] ) ) {
+	        $o->setUsuariofeedback( $d['usuariofeedback'] );
+	    }
+	    if (isset( $d['fechafeedback'] ) ) {
+	        $o->setFechafeedback( $d['fechafeedback'] );
+	    }
+	    if (isset( $d['requerimientostplsitems_id'] ) ) {
+	        $o->setRequerimientostplsitems_id( $d['requerimientostplsitems_id'] );
+	    }
+	    if (isset( $d['paquetesrequ_id'] ) ) {
+	        $o->setPaquetesrequ_id( $d['paquetesrequ_id'] );
+	    }
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( 'empleadosobjetivos_Agregar: ' . $o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'empleadosobjetivos_Agregar: Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	}
+	public static function empleadosobjetivoslog_Modificar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $tb  = "empleadosobjetivoslog ";
+	    
+	    $aSt = array();
+	    if ( isset( $d['descripcion'] ) ) {
+	        $aSt['descripcion'] = $d['descripcion'] ;
+	    }
+	    if ( isset( $d['archivos'] ) ) {
+	        $aSt['archivos'] = $d['archivos'] ;
+	    }
+	    if ( isset( $d['archivosges'] ) ) {
+	        $aSt['archivosges'] = $d['archivosges'] ;
+	    }
+	    if ( isset( $d['feedback'] ) ) {
+	        $aSt['requerido'] = $d['feedback'] ;
+	    }
+	    if ( isset( $d['usuariofeedback'] ) ) {
+	        $aSt['usuariofeedback'] = $d['usuariofeedback'] ;
+	        $aSt['fechafeedback'] = date( "Y-m-d H:i:s" );
+	    }
+	    
+	    $pr = [];
+	    $wh  = [];
+	    if ( isset( $d['id'] ) ) {
+	        $wh[]  = 'id = ?';
+	        $pr[] = $d['id'];
+	    }
+	    if ( isset( $d['w_empleadosobjetivos_id'] ) ) {
+	        $wh[] = 'empleadosobjetivos_id = ?';
+	        $pr[] = $d['w_empleadosobjetivos_id'];
+	    }
+	    
+	    if ( count( $wh ) == 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'empleadosobjetivoslog_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    $xt = implode(" AND ", $wh);
+	    
+	    //die('UPDATE ' . $tb . ' SET ' . $st . ' ' . $xt);
+	    $cu = null;
+	    try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception( 'empleadosobjetivoslog_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    
+	    return $cu;
+	}
+	public static function empleadosobjetivoslog_Helper_Agregar( $d ){
+	    $regQry = [
+	        'w_empleadosobjetivos_id' => $d['empleadosobjetivos_id'],
+	        'w_requerimientostplsitems_id' => $d['requerimientostplsitems_id']
+	    ];
+	    $qryReg = self::empleadosobjetivoslog_Obtener( $regQry );
+	    
+	    $r = 0;
+	    if ( count( $qryReg ) > 0 ){
+	        $regUpd = [
+	            'descripcion' => $d['descripcion'],
+	            'w_empleadosobjetivos_id' => $d['empleadosobjetivos_id'],
+	            'w_requerimientostplsitems_id' => $d['requerimientostplsitems_id']
+	        ];
+	        
+	        if ( !empty( $d['archivos'] ) ) {
+	            $regUpd['archivos'] = $d['archivos'];
+	        }
+	        
+	        $r = self::empleadosobjetivoslog_Modificar( $regUpd );
+	    }
+	    else {
+	        $r = self::empleadosobjetivoslog_Agregar( $d );
+	    }
+	    
+	    return self::retorno(['result' => $r], 0, "");
+	}
+	public static function empleadosobjetivoslog_Helper_Archivos( $d ){
+	    $anyo = OperacionesCtrl::anyolectivo_Obtener();
+	    $c_anyo = $anyo[ 0 ]['id'];
+	    
+	    $idfileadjunto = $d['id'];
+	    $documento = $d['documento'];
+	    $archivos = "";
+	    
+	    $upfl = [
+	        'usr' => $documento,
+	        'carpeta' => 0,
+	        'campo' => $idfileadjunto
+	    ];
+	    $bs = dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR  . 'repo/anexos/' . $c_anyo . '/'  . $upfl['usr'] . '/' . self::PAQUETES_FLDS_NAME[ $upfl['carpeta'] ];
+	    
+	    if ( isset( $_FILES [$idfileadjunto]) && is_array( $_FILES [$idfileadjunto] ) && $_FILES [$idfileadjunto]['size'] > 0 ) {
+	        foreach(scandir( $bs ) as $file ){
+	            $pifl = pathinfo( $file );
+	            if ( $pifl['filename'] == $idfileadjunto ) {
+	                $oblifiledel = $bs . '/' . $pifl['basename'];
+	                if ( file_exists( $oblifiledel ) ) {
+	                    unlink( $oblifiledel );
+	                }
+	            }
+	        }
+	        
+	        $flsRes = self::paquetesrequ_Helper_Files( $upfl );
+	        $archivos = $flsRes['path'];
+	    }
+	    
+	    return $archivos;
+	}
+	// empleadosobjetivoslog FIN
 	
 	// Tipodoc INI
 	const TIPODOC_DOS_LETRAS = [
@@ -3413,7 +3715,6 @@ class OperacionesCtrl {
 	        http_response_code( 500 );
 	        throw new \Exception( $r['err_info'] );
 	    }
-	    
 	    return $r;
 	}
 	// Perfil FIN
@@ -5016,6 +5317,10 @@ class OperacionesCtrl {
 	    }
 	    $bind['mesaplica'] = $mesaplica;
 	    
+	    if ( isset( $d['obligaciones'] ) ) {
+	        $bind['obligaciones'] = $d['obligaciones'];
+	    }
+	    
 	    $rDt = array();
 	    foreach ( $r as $kFlId ) {
 	        $flid = preg_replace('/^tpls_/', '', $kFlId['vl'] );
@@ -5204,7 +5509,7 @@ class OperacionesCtrl {
 	    return $estu;
 	}
 	
-	const COMPONENTES_TAGS = [ 
+	const COMPONENTES_TAGS = [
 	    'anexosqr' => 'anexosqr',
 	    'anexosimg' => 'anexosimg',
 	    'fecha' => 'fecha',
@@ -5215,9 +5520,11 @@ class OperacionesCtrl {
 	    'fechacontratocompleto' => 'fechacontratocompleto',
 	    'moneda' => 'moneda',
 	    'flujofinanciero' => 'flujofinanciero',
-	    'campofirma' => 'campofirma'
+	    'campofirma' => 'campofirma',
+	    'obligaciones' => 'obligaciones',
+	    'mesesletras' => 'mesesletras'
 	];
-	
+
 	public static function editarPlantillas_CrearComponente( $d ){
 	    include_once ( dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'phpspreadsheet_1_23_0' . DIRECTORY_SEPARATOR . '/vendor/autoload.php' );
 	    
@@ -5348,6 +5655,24 @@ class OperacionesCtrl {
 	            
 	            $html[] = trim($valor);
 	        }
+	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['mesesletras'] ) {
+	            $mes = intval( $d['mes'] );
+	            $meses_es = [
+	                1 => "enero",
+	                2 => "febrero",
+	                3 => "marzo",
+	                4 => "abril",
+	                5 => "mayo",
+	                6 => "junio",
+	                7 => "julio",
+	                8 => "agosto",
+	                9 => "septiembre",
+	                10 => "octubre",
+	                11 => "noviembre",
+	                12 => "diciembre"
+	            ];
+	            return $meses_es[ $mes ];
+	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['fechacontratocompleto'] ) {
 	            $fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
 	            $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
@@ -5373,6 +5698,8 @@ class OperacionesCtrl {
 	                'fechaInicio' => $fechaInicio,
 	                'fechaFin' => $fechafinal,
 	                'mesCobro' => date("Y-m", strtotime( $d['mesaplica'] ) ),
+	                'meses' => $d['meses'],
+	                'dias' => $d['dias']
 	            ];
 	            
 	            if ( isset( $d['descuentos'] ) ) {
@@ -5482,22 +5809,22 @@ class OperacionesCtrl {
 	            $rubrodesc = $d['rubrodesc'];
 	            $tiporegistro = $d['tiporegistro'];
 	            $mesaplica = $d['mesaplica'];
+	            $meses = $d['meses'];
+	            $dias = $d['dias'];
 	             
 	            $valorContrato = $d['valortotal'];
 	            $inicioContrato = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
 	            $finContrato = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
 	            $mesCobro = date("Y-m", strtotime( $inicioContrato ) ) ;
 	            
-	            $inicio = new DateTime($inicioContrato);
-	            $fin = new DateTime($finContrato);
-	            
-	            $totalMesesContrato = (($fin->format('Y') - $inicio->format('Y')) * 12) + ($fin->format('m') - $inicio->format('m')) + 1;
 	            
 	            $dDt = [
 	                'valorContrato' => $valorContrato,
 	                'fechaInicio' => $inicioContrato,
 	                'fechaFin' => $finContrato,
 	                'mesCobro' => $mesCobro,
+	                'meses' => $meses,
+	                'dias' => $dias,
 	                'raw' => true,
 	                'debug' => false
 	            ];
@@ -5505,7 +5832,7 @@ class OperacionesCtrl {
 	            
 	            $calc = array();
 	            $calc[] = [ 'comprometido' => $valorContrato, 'pagar' => $valini['pago'], 'ejecutado' => $valini['pago'], 'porejecutado' => $valorContrato - $valini['pago'] ];
-	            for ($i = 1; $i < $totalMesesContrato; $i++) {
+	            for ($i = 1; $i < $meses; $i++) {
 	                $fechaac = new DateTime( $mesCobro . "-01" );
 	                $fechaac->modify("+" . $i . " months");
 	                
@@ -5522,6 +5849,10 @@ class OperacionesCtrl {
 	            }
 	            
 	            $tbCont = array();
+	            $sobrante = 0;
+	            $vcomprometido = 0;
+	            $vejecutado = 0;
+	            $noInf = 0;
 	            foreach ( $calc as $kCalc => $vCalc ) {
 	                $tbCont[] = '      <tr>';
 	                $tbCont[] = '          <td>' . $crp . '</td>';
@@ -5533,6 +5864,24 @@ class OperacionesCtrl {
 	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' =>$vCalc['pagar'] ]) . '</td>';
 	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' =>$vCalc['ejecutado'] ]) . '</td>';
 	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' =>$vCalc['porejecutado'] ]) . '</td>';
+	                $tbCont[] = '      </tr>';
+	                
+	                $vcomprometido = $vCalc['comprometido'];
+	                $vejecutado = $vCalc['ejecutado'];
+	                $sobrante = $vCalc['porejecutado'];
+	                $noInf = ($kCalc + 1);
+	            }
+	            if ( $sobrante > 0 ) {
+	                $tbCont[] = '      <tr>';
+	                $tbCont[] = '          <td>' . $crp . '</td>';
+	                $tbCont[] = '          <td>' . $fondos . " - " . $fondosdesc . '</td>';
+	                $tbCont[] = '          <td>' . $tiporegistro . '</td>';
+	                $tbCont[] = '          <td>' . $rubro . " - " . $rubrodesc . '</td>';
+	                $tbCont[] = '          <td>' . ($noInf + 1) . '</td>';
+	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vcomprometido ]) . '</td>';
+	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $sobrante ]) . '</td>';
+	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vejecutado + $sobrante ]) . '</td>';
+	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => 0 ]) . '</td>';
 	                $tbCont[] = '      </tr>';
 	            }
 	            
@@ -5565,6 +5914,38 @@ class OperacionesCtrl {
 	            
 	            $html[] = implode("", $txt);
 	        }
+	        elseif (self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['obligaciones'] ) {
+	            $tbhtml = [];
+	            if ( isset( $d['data'] )) {
+	                $b64 = base64_decode( $d['data'] );
+	                $json = json_decode( $b64  , true );
+	                
+	                $tbCont = [];
+	                $i = 1;
+	                foreach ( $json as $kJs ) {
+	                    $tbCont[] = '<tr>';
+	                    $tbCont[] = '  <td style="width: 10%;">' . $i . '</td>';
+	                    $tbCont[] = '  <td style="width: 45%;">' . $kJs['descripcion'] . '</td>';
+	                    $tbCont[] = '  <td style="width: 45%;">' . $kJs['valor'] . '</td>';
+	                    $tbCont[] = '</tr>';
+	                    $i++;
+	                }
+	               
+	                $tbhtml[] = '<table border="1" cellpadding="1" cellspacing="1" style="width:100%;">';
+	                $tbhtml[] = '  <thead>';
+	                $tbhtml[] = '      <tr> ';
+	                $tbhtml[] = '          <th style="width: 10%;"><strong>Nro.</strong></th>';
+	                $tbhtml[] = '          <th style="width: 45%;"><strong>Obligaci&oacute;n</strong></th>';
+	                $tbhtml[] = '          <th style="width: 45%;"><strong>Informe</strong></th>';
+	                $tbhtml[] = '      </tr> ';
+	                $tbhtml[] = '  </thead> ';
+	                $tbhtml[] = '  <tbody> ';
+	                $tbhtml[] = implode("", $tbCont);
+	                $tbhtml[] = '  </tbody> ';
+	                $tbhtml[] = '</table>';
+	            }
+	            $html[] = implode("", $tbhtml);
+	        }
 	    }
 	    
 	    //return json_encode( $d , JSON_UNESCAPED_SLASHES);
@@ -5592,62 +5973,24 @@ class OperacionesCtrl {
 	private static function editarPlantillas_CalcularPagoMensual( $d ) {
 	    $valorContrato = $d['valorContrato'];
 	    $inicioContrato = $d['fechaInicio'];
-	    $finContrato = $d['fechaFin'];
 	    $mesCobro = $d['mesCobro'];
 	    
 	    $inicio = new DateTime($inicioContrato);
-	    $fin = new DateTime($finContrato);
+	    $inicioMes = new DateTime($mesCobro . '-01');
 	    
-	    echo "fecha: " . $inicio->format('Y-m-d') . "<br>";
-	    echo "final: " . $fin->format('Y-m-d') . "<br>";
-	    echo "dia: " . $inicio->format('d') . "<br>";
+	    $meses = $d['meses'];
+	    $dias = $d['dias'];
 	    
-	    $mesestotal = intval( $fin->format("m") ) - (intval( $inicio->format('m') ) + 1);
-	    echo "meses total: " . $mesestotal . "<br>";
-	    
-	    $valorxmes = round( $valorContrato / $mesestotal );
-	    echo "valor mes: " . $valorxmes . "<br>";
+	    $nw_totaldias = ($meses * 30) + $dias;
+	    $nw_valordia = $valorContrato / $nw_totaldias;
 	    
 	    $diauno = intval( $inicio->format('d') );
-	    $diastotal = 30 - ($diauno - 1);
-	    
-	    /*
-	    if ( $diauno > 1 ) {
-	        $diastotal = 30 - $diauno;
-	    }
-	    */
-	    echo "dia total: " . $diastotal . "<br>";
-	    
-	    $valor30Ddias = ($valorxmes / $diastotal);
-	    $valorDia = ( $valor30Ddias * ($diastotal - $diauno ) );
-	    echo "valdia: " . $valorDia . "<br>";
-	    
-	    
-	    $inicioMes = new DateTime($mesCobro . '-01');
-	    $finMes = (clone $inicioMes)->modify('+1 month -1 day');
-	    
-	    if ($finMes < $inicio || $inicioMes > $fin) {
-	        return ['completo' => false, 'dias' => 0, 'pago' => 0];
-	    }
-	    
-	    $totalMesesContrato = (($fin->format('Y') - $inicio->format('Y')) * 12) + ($fin->format('m') - $inicio->format('m')) + 1;
-	    $totalDiasContrato = $totalMesesContrato * 30;
-	    
-	    $valorDiario = $valorContrato / $totalDiasContrato;
-	    
-	    $diaInicio = 1;
-	    $diaFin = 30;
-	    
+	    $diasTrabajados = 30 ;
 	    if ($inicioMes->format('Y-m') == $inicio->format('Y-m')) {
-	        $diaInicio = (int)$inicio->format('d');
+	        $diasTrabajados = 30 - ($diauno - 1);
 	    }
 	    
-	    if ($finMes->format('Y-m') == $fin->format('Y-m')) {
-	        $diaFin = (int)$fin->format('d');
-	        if ($diaFin > 30) $diaFin = 30;
-	    }
-	    
-	    $diasTrabajados = max(0, $diaFin - $diaInicio + 1);
+	    $pagoestemes = round( $diasTrabajados * $nw_valordia );
 	    
 	    if ( isset($d['descuentos']) ) {
 	        if ( $d['descuentos'] == false  ) {
@@ -5655,14 +5998,8 @@ class OperacionesCtrl {
             }
 	    }
 	    
-	    echo "totalMesesContrato: " . $totalMesesContrato . "<br>";
-	    
-	    //die( "dias: " . $diasTrabajados ) . "<br>";
-	    
 	    $mesCompleto = ($diasTrabajados == 30);
-	    
-	    $pago = $valorDiario * $diasTrabajados;
-	    $pagoround = round($pago, 0);
+	    $pagoround = round($pagoestemes, 0);
 	    
 	    $formatter = new Luecano\NumeroALetras\NumeroALetras();
 	    
@@ -5939,6 +6276,28 @@ class OperacionesCtrl {
 	        $dtUsr = self::empleados_Helper_Obtener(['w_id_md5' => $u['id'] ]);
 	        $usr = $dtUsr[0];
 	    }
+	    elseif ( $tipousuario == self::FIRMASPRO_TIPOUSUARIO_ADMIN ) {
+	        self::$AUTH_ACTIVE = true;
+	        $usu = self::authRequ();
+	        
+	        $tipodoc_id = $usu->getTipodoc_id();
+	        
+	        $tps = self::tipodoc_Obtener( ['id' => $tipodoc_id ] );
+	        
+	        $usr['documento'] = $usu->getDocumento();
+	        $usr['tipodoc_id'] = $tipodoc_id;
+	        $usr['id'] = $usu->getId();
+	        $usr['clave'] = $usu->getClave();
+	        $usr['usuario'] = $usu->getUsuario();
+	        $usr['nombres'] = $usu->getNombres();
+	        $usr['apellidos'] = $usu->getApellidos();
+	        $usr['tipodoc'] = $tps[0]['nombre'];
+	        $usr['perfil_id'] = $usu->getPerfil_id();
+	        
+	        $u = [];
+	        $u['fullname'] = trim((string)$usu->getNombres() . " " . $usu->getApellidos());
+
+	    }
 	    $documento = $usr['documento'];
 	    $tipodoc_id = $usr['tipodoc_id'];
 	    $usuario_id = $usr['id'];
@@ -5959,7 +6318,7 @@ class OperacionesCtrl {
 	        $flinput = $bs . $pdfid;
 	        
 	        $pfl = pathinfo($flinput);
-	        $floutput = $pfl['dirname'] . DIRECTORY_SEPARATOR . $pfl['filename'] . '_fir.' . $pfl['extension'];
+	        $floutput = $pfl['dirname'] . DIRECTORY_SEPARATOR . rtrim( (string ) $pfl['filename'], "_fir.") . '_fir.' . $pfl['extension'];
 	        
 	        $firmas_id = 0;
 	        $qryFirmas = self::firmaslog_Obtener( [ 'w_pdfid' => $pdfid ] );
@@ -6298,7 +6657,7 @@ class OperacionesCtrl {
 	    
 	    $p12clave = md5( $tipousuario . '' . $documento . '' . $tipodoc_id . '' . $usuario_id . '' . $clave );
 	    $elp12 = array(
-	        'nombre' => $d['nombres'],
+	        'nombre' => trim( (string) $d['nombres'] . ' ' . $d['apellidos'] ),
 	        'correo' => $d['mail'],
 	        'pais' => 'CO',
 	        'clave' => $p12clave,
@@ -6307,6 +6666,35 @@ class OperacionesCtrl {
 	    $p12 = self::firmaspro_MkCert_p12( $elp12 );
 	    
 	    return $p12;
+	}
+	
+	public static function firmaspro_Helper_Admin_MkCert_p12( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() );
+	    }
+	    $cfg = [
+	        'tipousuario' => self::FIRMASPRO_TIPOUSUARIO_ADMIN,
+	        'tipodoc_id' => $usu->getTipodoc_id(),
+	        'documento' => $usu->getDocumento(),
+	        'usuario_id' => $usu->getId(),
+	        'clave' => $usu->getClave(),
+	        'nombres' => trim((string)$usu->getNombres()),
+	        'apellidos' => trim((string)$usu->getApellidos()),
+	        'mail' => $usu->getMail()
+	    ];
+	    $r = "";
+	    try {
+	        $r = self::firmaspro_Helper_MkCert_p12( $cfg );
+	    } catch (Exception $e) {
+	        self::retorno( [], $e->getCode(), $e->getMessage());
+	    }
+	    
+	    return self::retorno([ 'result' => $r ], 0, 'Certificado creado correctamente');
 	}
 	
 	public static function firmaspro_Obtener( $d, &$dt ) {
@@ -8035,12 +8423,19 @@ EOD;
 	    $jn .= 'LEFT JOIN flujositemestados as fluitemest on flui.flujositemestados_id = fluitemest.id ';
 	    $jn .= 'LEFT JOIN usuarios as usr on usr.id = flui.usuarios_id ';
 	    
+	    $pr = [];
 	    $wh  = array();
 	    if( isset( $d['id'] ) ){
-	        $wh[] = "flui.`id` = " . $d['id'] . " ";
+	        $wh[] = "flui.`id` = ?";
+	        $pr[] = $d['id'];
 	    }
 	    if( isset( $d['w_flujos_id'] ) ){
-	        $wh[] = "flui.`flujos_id` = " . $d['w_flujos_id'] . " ";
+	        $wh[] = "flui.`flujos_id` = ?";
+	        $pr[] = $d['w_flujos_id'];
+	    }
+	    if ( isset( $d[ 'w_usuarios_id' ] ) ) {
+	        $wh[] = "flui.`usuarios_id` = ?";
+	        $pr[] = $d['w_usuarios_id'];
 	    }
 	    
 	    $defWh = "";
@@ -8063,11 +8458,14 @@ EOD;
 	    
 	    $xt  = $jn . $defWh . $orden . $limite;
 	    
-	    //die( "SELECT " . $vr . "\nFROM " . $tb . "\n" . $xt );
-	    $r = Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
-	    if ( isset( $r['err_info'] )) {
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    $r = array();
+	    try {
+	        $r = Singleton::_safeRawQuery($sql, $pr);
+	    } catch (Exception $e) {
 	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
-	        throw new \Exception( '[' . IndexCtrl::ERR_COD_MSJ_ERR_COMUN . '] flujositems_Obtener: ' . $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	        throw new \Exception( 'paquetes_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
 	    }
 	    
 	    return $r;
@@ -8092,6 +8490,9 @@ EOD;
 	    $ladata = self::paquetesrequ_Obtener( [ 'w_paquetes_id' => $json['id'] ] );
 	    
 	    //die( 'ladata: ' . print_r( $ladata , true ) );
+	    
+	    $obligacionesres = [];
+	    
 	    $r = self::flujositems_Obtener( $cfg );
 	    $requerimientostpls_id = 0;
 	    $flujos_id = 0;
@@ -8103,23 +8504,53 @@ EOD;
 	    if ( $requerimientostpls_id > 0 ) {
 	        $t = self::requerimientostplsitems_Obtener( array( 'w_requerimientostpls_id' => $requerimientostpls_id, 'ordenasc' => 1 ) );
 	    }
-	    //die( 'r: ' . print_r( $r , true ) );
-
+	    //die( "t: " . print_r( $t, true ) );
 	    $todoelflujo = self::flujositems_Obtener( [ 'w_flujos_id' => $flujos_id, 'ordenasc' => 6 ] );
 	    
 	    $tDef = array();
 	    foreach ( $t as $kT ) {
 	        if ( $kT['paquetereqtipos_id'] == 6 ) {
 	            $tempData = self::componenteHTML( array( 'html' => $kT['descripcion'], 'solohtml' => true ) );
-	            $jsonFrm = self::formularios_Obtener( array( 'id' => $tempData['id'] ) );
 	            
-	            foreach ( $jsonFrm as $vJson ) {
-	                $kT['descripcion'] = [ 'titulo' => $vJson['titulo'], 'descripcion' => $vJson['descripcion'], 'json' => $vJson['json'] ];
-	                $kT['ref_label'] = $tempData['id'];
-	                $tDef[] = $kT;
+	            $jsonFrm = [];
+	            if ( isset( $tempData['id'] ) ) {
+	                $jsonFrm = self::formularios_Obtener( array( 'id' => $tempData['id'] ) );
+	                
+	                foreach ( $jsonFrm as $vJson ) {
+	                    $kT['descripcion'] = [ 'titulo' => $vJson['titulo'], 'descripcion' => $vJson['descripcion'], 'json' => $vJson['json'] ];
+	                    $kT['ref_label'] = $tempData['id'];
+	                    $tDef[] = $kT;
+	                }
+	            
 	            }
 	            
-	        }else{
+	        }
+	        else if ( $kT['paquetereqtipos_id'] == 7 ) {
+	            $jsObj = self::empleadosobjetivos_Obtener( [ 'w_empleados_id_md5' => $uDt['id'] , 'ordenasc' => 1 ] );
+	            
+	            //die( "jsObj:\n" . print_r( $jsObj, true ) );
+	            
+	            $kT['descripcion'] = [ 'titulo' => 'Obligaciones', 'descripcion' => 'Carga la informaci&oacute;n y evidencias de tus avances', 'json' => $jsObj ];
+	            $kT['ref_label'] = $tempData['id'];
+	            
+	            $tDef[] = $kT;
+	            
+	            $tempobl = self::empleadosobjetivoslog_Obtener([
+	                "w_empleados_id_md5" => $uDt['id'],
+	                "w_requerimientostplsitems_id" => $kT['id']
+	            ]);
+	            foreach ($tempobl as $kTmp) {
+	                $obligacionesres[] = [
+	                    'archivos' => $kTmp['archivos'],
+	                    'archivosges' => $kTmp['archivosges'],
+	                    'descripcion' => $kTmp['descripcion'],
+	                    'empleadosobjetivos_id' => $kTmp['empleadosobjetivos_id'],
+	                    'id' => $kTmp['id'],
+	                    'requerimientostplsitems_id' => $kTmp['requerimientostplsitems_id']
+	                ];
+	            }
+	        }
+	        else{
 	            $tDef[] = $kT;
 	        }
 	    }
@@ -8127,6 +8558,7 @@ EOD;
 	    $docs = self::flujositems_Archivos_Helper_Obtener( [ 'paquetes_id' => $json['id'], 'documento' => $usr['documento'], 'id' => $d['flujos_id'] ] );
 	    
 	    $arRes = array(
+	        'obli' => base64_encode( json_encode( $obligacionesres ) ),
 	        'items' => $r,
 	        'requs' => $tDef,
 	        'res' => base64_encode( json_encode( $ladata ) ),
@@ -8135,6 +8567,55 @@ EOD;
 	    );
 	    
 	    return $arRes;
+	}
+	public static function flujositems_Helper_ObtenerRevisorData ( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( "flujositems_Helper_ObtenerRevisorData: " . $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $userQry = self::empleados_Obtener( [ 'id' => $json['empleados_id'] ] );
+	    $user = [];
+	    if ( count( $userQry ) > 0 ) {
+	        $user = $userQry[ 0 ];
+	    }
+	    $qry = [
+	        'documento' => $user[ 'documento' ],
+	        'id' => $json['flujos_id'],
+	        'paquetes_id' => $json['id'],
+	        'firmados' => true
+	    ];
+	    $docs = self::flujositems_Archivos_Helper_Obtener( $qry );
+	    
+	    $flujositems = self::flujositems_Obtener( ['w_flujos_id' => $json['flujos_id'], 'ordenasc' => 6 ] );
+	    
+	    $usrs = [];
+	    foreach ($flujositems as $kItem) {
+	        $actual = false;
+	        if ( $kItem['id']  == $json['flujositems_id'] ) {
+	            $actual = true;
+	        }
+	        $usractual = [
+	           'nombre' => $kItem['nombre'],
+	           'id' => $kItem['id'],
+	           'firmante' => $kItem['orden'] + 1,
+	            'actual' => $actual
+            ];
+	        $usrs[] = $usractual;
+	    }
+	    
+	    $result = [
+	        'docs' => $docs,
+	        'firmantes' => $usrs,
+	        'solicitante' => $user
+	    ];
+	    
+	    return self::retorno($result, 0, '');
 	}
 	public static function flujositems_Archivos_Helper_Obtener ( $d ){
 	    $cfg = OperacionesCtrl::LeerConfigCorp();
@@ -8167,6 +8648,15 @@ EOD;
 	                
 	                $firId = self::firmaslog_Obtener([ 'w_pdfid' => ltrim( $resBsUrl, '/') , 'ordendesc' => 9, 'limite' => 1 ]);
 	                
+	                if ( isset( $d[ 'firmados' ] ) ) {
+	                    if ( $d[ 'firmados' ] ) {
+	                        $oriflPi = pathinfo( $fl );
+	                        $fl = $oriflPi['dirname'] . "/" . $oriflPi['filename'] . "_fir." . $oriflPi['extension'];
+	                        
+	                        $flName = $flid . "_" . $paquetes_id . "_" . $c_anyo . "_fir.pdf";
+	                        $resBsUrl = $urllink . "/" . $flName;
+	                    }
+	                }
 	                //echo $fl . "\n";
 	                if ( file_exists( $fl ) ) {
 	                    $fReg = $firId[0];
@@ -8259,6 +8749,26 @@ EOD;
 	    return $r;
 	}
 	// flujosestados FIN
+	
+	// paquetesestados INI
+	public static function paquetesestados_Obtener( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA);
+	    }
+	    $d['tabla'] = 'paquetesestados';
+	    //$d['debug'] = true;
+	    $r = Singleton::_readEstado( $d );
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    return $r;
+	}
+	// paquetesestados FIN
 	
 	// paquetes INI
 	public static function paquetes_Modificar( $d ){
@@ -8442,6 +8952,76 @@ EOD;
 	    }
 	    
 	    return true;
+	}
+	
+	public static function paquetes_Helper_MoverRevisar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    self::authRequOff();
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    /*
+	    // Con estos datos llenar la tabla 'flujosseguimientos'
+	    $udata = base64_decode( $d[ 'u' ] );
+	    $u = json_decode( $udata, true );
+	    */
+	    
+	    $idMod = $json['idMod'];
+	    try {
+	        self::paquetes_Modificar(['paquetesestados_id' => 2, 'id' => $idMod ]);
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        return self::retorno([], $e->getCode(), $e->getMessage());
+	    }
+	    
+	    return self::retorno([ 'data' => true ], 0, '');
+	}
+	public static function paquetes_Helper_MoverAdmin( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( "empleadosdetallescontrato_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    
+	    $idMod = $json['idmod'];
+	    $usuariosmod = trim( (string) $usu->getNombres() . " " . $usu->getApellidos() );
+	    
+	    $modCfg = [];
+	    if ( isset( $json['fin'] ) ) {
+	        if( $json['fin'] ) {
+	            $modCfg = [];
+	            $modCfg['paquetesestados_id'] = 4;
+	            $modCfg['id'] = $idMod;
+	            $modCfg['usuariosmod'] = $usuariosmod;
+	            $modCfg['fechamodificado'] = date("Y-m-d H:i:s");
+	        }
+	    }
+	    else {
+	        $nid = $json['nid'];
+	        $modCfg = [
+	            'flujositems_id' => $nid,
+	            'usuariosmod' => $usuariosmod,
+	            'fechamodificado' => date("Y-m-d H:i:s"),
+	            'id' => $idMod
+	        ];
+	    }
+	    
+	    try {
+	        self::paquetes_Modificar( $modCfg );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        return self::retorno([], $e->getCode(), $e->getMessage());
+	    }
+	    
+	    return self::retorno([ 'data' => $json ], 0, '');
 	}
 	public static function paquetes_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
@@ -8800,6 +9380,66 @@ EOD;
 	            $msjReturn = 'Actualizaci\xF3n exitosa';
 	        }
 	        
+	        //echo "paquetesrequ_exists: ";
+	        //die( print_r( $paquetesrequ_exists ) );
+	        $primero = true;
+	        $paquetesrequ_id = 0;
+	        foreach ( $json as $kJs => $vJs ) {
+	            $partes = explode("_", $kJs);
+	            
+	            if ( isset ( $partes[1] ) ) {
+	                $formid = $partes[0];
+	                $idlog = $partes[1];
+	                
+	                if( Utiles::ComienzaEn($formid, 'oblicom') ){
+	                    
+	                    $requerimientostplsitems_id = $json[ 'obliregid_' . $idlog ];
+	                    
+	                    $idfileadjunto = 'oblifile_' . $idlog;
+	                    $archivos = self::empleadosobjetivoslog_Helper_Archivos( [ 'id' => $idfileadjunto, 'documento' => $empleado['documento'] ] );
+	                    
+	                    if ($primero) {
+	                        
+	                        foreach ( $paquetesrequ_exists as $pkEx ) {
+	                            if ($pkEx['ref'] == '[obligaciones]') {
+	                                $paquetesrequ_id = $pkEx['id'];
+	                            }
+	                        };
+	                        
+	                        if ( $paquetesrequ_id == 0 ) {
+	                            $regs = [
+	                                'ref' => '[obligaciones]',
+	                                'valor' => 'obligaciones',
+	                                'paquetesreqestados_id' => 1,
+	                                'paquetereqtipos_id' => 7,
+	                                'paquetes_id' => $json[ 'paquetes_id' ],
+	                                'flujositems_id' => $json['flujositems_id'],
+	                                'usuariomodifica' => trim((string)$empleado['nombres'] . ' ' . $empleado['apellidos']),
+	                                'perfilmodifica' => $empleado['perfil']
+	                            ];
+	                            try {
+	                                $paquetesrequ_id = self::paquetesrequ_Agregar( $regs );
+	                            } catch (Exception $e) {
+	                                throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Agregar (Obli): ' . $e->getMessage(), $e->getCode() );
+	                            }
+	                        }
+	                        $primero = false;
+	                    }
+	                    
+	                    $regsOb = [
+	                        'idlog' => $idlog,
+	                        'descripcion' => $vJs,
+	                        'archivos' => $archivos,
+	                        'empleados' => trim((string)$empleado['nombres'] . ' ' . $empleado['apellidos']),
+	                        'empleadosobjetivos_id' => $idlog,
+	                        'requerimientostplsitems_id' => $requerimientostplsitems_id,
+	                        'paquetesrequ_id' => $paquetesrequ_id
+	                    ];
+	                    self::empleadosobjetivoslog_Helper_Agregar( $regsOb );
+	                }
+	            }
+	        }
+	        
 	        // Campos con funciones especificas
 	        foreach ( $json as $kJs => $vJs ) {
 	            $partes = explode("_", $kJs);
@@ -8808,6 +9448,8 @@ EOD;
 	            if( !( Utiles::ComienzaEn($formid, 'field') || Utiles::ComienzaEn($formid, 'oculfield') ) ){
 	                // Campos con uso predefinido
 	                if( isset( $paquetereqtipos_by_nombre[ $formid ] ) ){
+	                    $paquetesrequ_id = 0;
+	                    
 	                    $tipocampo = $paquetereqtipos_by_nombre[ $formid ];
 	                    $valor = $vJs;
 	                    if ( $tipocampo['paquetereqtipos_id'] == 4 ) {
@@ -8822,14 +9464,30 @@ EOD;
 	                        'paquetereqtipos_id' => $tipocampo['paquetereqtipos_id'],
 	                        'paquetes_id' => $json[ 'paquetes_id' ],
 	                        'flujositems_id' => $json['flujositems_id'],
-	                        'usuariomodifica' => $empleado['nombres'],
+	                        'usuariomodifica' => trim((string)$empleado['nombres'] . ' ' . $empleado['apellidos']),
 	                        'perfilmodifica' => $empleado['perfil']
 	                    ];
 	                    if( $addnuevo ){
 	                        try {
 	                            self::paquetesrequ_Agregar( $regs );
 	                        } catch (Exception $e) {
-	                            throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Agregar: ' . $e->getMessage(), $e->getCode() );
+	                            throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Agregar (campos): ' . $e->getMessage(), $e->getCode() );
+	                        }
+	                    }
+	                    else {
+	                        if ( strlen( trim((string)$valor) ) > 1 ) {
+	                            foreach ( $paquetesrequ_exists as $pkEx ) {
+	                                if ($pkEx['ref'] == '[' . $formid . ']' ) {
+	                                    $paquetesrequ_id = $pkEx['id'];
+	                                }
+	                            };
+	                            
+	                            $regs['id'] = $paquetesrequ_id;
+	                            try {
+	                                self::paquetesrequ_Modificar( $regs );
+	                            } catch (Exception $e) {
+	                                throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Modificar (campos): ' . $e->getMessage(), $e->getCode() );
+	                            }
 	                        }
 	                    }
 	                }
@@ -8850,14 +9508,32 @@ EOD;
 	                    'paquetereqtipos_id' => 6,
 	                    'paquetes_id' => $json[ 'paquetes_id' ],
 	                    'flujositems_id' => $json['flujositems_id'],
-	                    'usuariomodifica' => $empleado['nombres'],
+	                    'usuariomodifica' => trim((string)$empleado['nombres'] . ' ' . $empleado['apellidos']),
 	                    'perfilmodifica' => $empleado['perfil']
 	                ];
+	                $paquetesrequ_id = 0;
+	                foreach ( $paquetesrequ_exists as $pkEx ) {
+	                    if ($pkEx['ref'] == $ref ) {
+	                        $paquetesrequ_id = $pkEx['id'];
+	                    }
+	                };
+	                if ( $paquetesrequ_id == 0) {
+	                    $addnuevo = true;
+	                }
+	                
 	                if( $addnuevo ){
 	                    try {
 	                        self::paquetesrequ_Agregar( $regs );
 	                    } catch (Exception $e) {
-	                        throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Agregar: ' . $e->getMessage(), $e->getCode() );
+	                        throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Agregar (forms): ' . $e->getMessage(), $e->getCode() );
+	                    }
+	                }
+	                else {
+	                    $regs['id'] = $paquetesrequ_id;
+	                    try {
+	                        self::paquetesrequ_Modificar( $regs );
+	                    } catch (Exception $e) {
+	                        throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Modificar (forms): ' . $e->getMessage(), $e->getCode() );
 	                    }
 	                }
 	            }
@@ -8869,7 +9545,27 @@ EOD;
 	        } catch (Exception $e) {
 	            throw new Exception ( 'paquetesrequ_Helper_Agregar - v2: ' . $e->getMessage(), $e->getCode() );
 	        }
-	        $docsgen = self::editarPlantillas_JBB_Mezclar_Crear( [ 'documentos' => $paquetes_flujos_id, 'empleado' => $empleado, 'paquetesrequ' => $paquetesrequ_exists ] );
+	        
+	        $obligaciones = [];
+	        foreach ($paquetesrequ_exists as $kPcks) {
+	            if ( $kPcks['ref'] == '[obligaciones]' ) {
+	                $objetivoslog = self::empleadosobjetivoslog_Obtener( [ 'w_paquetesrequ_id' => $kPcks['id'], 'ordenasc' => 1 ] );
+	                foreach ( $objetivoslog as $vObjLog ) {
+	                    $obligaciones[] = [
+	                        'archivos' => $vObjLog['archivos'],
+	                        'descripcion' => $vObjLog['empleadosobjetivos_descripcion'],
+	                        'valor' => $vObjLog['descripcion']
+	                    ];
+	                }
+	            };
+	        }
+	        
+	        $docsgen = self::editarPlantillas_JBB_Mezclar_Crear( [
+	            'documentos' => $paquetes_flujos_id, 
+	            'empleado' => $empleado, 
+	            'paquetesrequ' => $paquetesrequ_exists,
+	            'obligaciones' => base64_encode( json_encode( $obligaciones ) )
+	        ] );
 	        
 	        $retorno = [
 	            "creado" => true,
@@ -8969,6 +9665,7 @@ EOD;
 	    if ( isset( $d['flujositems_id'] ) ) {
 	        $aSt['flujositems_id'] = $d['flujositems_id'] ;
 	    }
+	    $aSt['fechamod'] = date('Y-m-d H:i:s');
 	    
 	    $pr = [];
 	    $wh  = '';
@@ -8981,6 +9678,11 @@ EOD;
 	        $pr[] = $d['w_flujositems_id'] ;
 	    }
 	    
+	    if ( isset( $d['w_ref'] ) ) {
+	        $wh  = 'ref = ?';
+	        $pr[] = $d['w_ref'] ;
+	    }
+	    
 	    if ( $wh == '' ) {
 	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	        throw new Exception( '[' . IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO . '] paquetesrequ_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
@@ -8988,7 +9690,7 @@ EOD;
 	    
 	    $xt = $wh;
 	    
-	    die('UPDATE ' . $tb . ' SET ' . implode(',', $aSt) . ' WHERE ' . $xt);
+	    //die('UPDATE ' . $tb . ' SET ' . implode(',', $aSt) . ' WHERE ' . $xt);
 	    $cu = null;
 	    try {
 	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
