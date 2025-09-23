@@ -219,7 +219,8 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                     </div>
                     <div class="mb-3 col-md-4">
                         <label class="form-label" for="mail">Email</label>
-                        <input type="email" class="form-control" placeholder="Correo electr&oacute;nico" id="mail" name="mail" >
+                        <input type="email" class="form-control" placeholder="Correo electr&oacute;nico"
+                         id="mail" name="mail" >
                     </div>
                     <div class="mb-3 col-md-4">
                         <label class="form-label" for="tel">N&uacute;mero de celular</label>
@@ -307,12 +308,30 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                 <div class="row">
                     <div class="mb-3 col-md-6">
                         <label class="form-label" for="empleadosdetallescontrato_meses">Meses</label>
-                        <input type="text" class="form-control" placeholder="Meses" id="empleadosdetallescontrato_meses" name="empleadosdetallescontrato_meses" >
+                        <input type="text" class="form-control" placeholder="Meses" 
+                        id="empleadosdetallescontrato_meses" name="empleadosdetallescontrato_meses" >
                     </div>
                     <div class="mb-3 col-md-6">
                         <label class="form-label" for="empleadosdetallescontrato_dias">D&iacute;as</label>
                         <input type="text" class="form-control" placeholder="D&iacute;as" id="empleadosdetallescontrato_dias" name="empleadosdetallescontrato_dias" >
-                    </div>
+                    </div> 
+                </div>
+                <div class="row">
+                    <div class="mb-3 col-md-6">
+						<label for="fechainicio" class="form-label">Fecha de inicio</label>
+						<input type="date" class="form-control" id="fechainicio" name="fechainicio" required
+								placeholder="Fecha de inicio">
+					</div>
+					<div class="mb-3 col-md-6">
+						<label for="fileactaini" class="form-label">Acta de inicio</label>
+						<input
+							required
+							accept=".pdf,application/pdf" type="file" 
+							class="form-control" id="fileactaini" 
+							name="fileactaini"
+							id="fileactaini"
+							placeholder="Acta de inicio">
+					</div>
                 </div>
 
             </div>

@@ -373,22 +373,39 @@ elseif ( $usu->getPerfil_id() == 2 ){
                         <label class="form-label" for="oficio">Oficio que desempeñar&aacute; el empleado</label>
                         <textarea class="form-control" placeholder="Oficio" id="oficio" name="oficio" ></textarea>
                     </div>
-					<div class="mb-3 col-md-6">
+					<div class="mb-3 col-md-4">
                         <label class="form-label" for="salariomes">Salario mensual <span id="lblsalario">($0,00)</span></label>
                     	<input type="number" data-target="#lblsalario" onkeyup="calcSalario( this );" step="any" class="form-control" placeholder="Salario mensual" id="salariomes" name="salariomes" >
                     </div>
-					<div class="mb-3 col-md-6">
+					<div class="mb-3 col-md-4">
                         <label class="form-label" for="contratoini">Fecha de inicio del contrato</label>
                         <div>
                         	<input type="text" class="form-control" placeholder="Inicio contrato" id="contratoini" name="contratoini" >
                         </div>
                     </div>
-					<div class="mb-3 col-md-6">
+					<div class="mb-3 col-md-4">
                         <label class="form-label" for="contratofin">Fecha de inicio de finalizaci&oacute;n</label>
                         <div>
                         	<input type="text" class="form-control" placeholder="Fin contrato" id="contratofin" name="contratofin" >
                         </div>
                     </div>
+                    <div class="row">
+                    <div class="mb-3 col-md-6">
+						<label for="fechainicio" class="form-label">Fecha de inicio</label>
+						<input type="date" class="form-control" id="fechainicio" name="fechainicio" required
+								placeholder="Fecha de inicio">
+					</div>
+					<div class="mb-3 col-md-6">
+						<label for="fileactaini" class="form-label">Acta de inicio</label>
+						<input
+							required
+							accept=".pdf,application/pdf" type="file" 
+							class="form-control" id="fileactaini" 
+							name="fileactaini"
+							id="fileactaini"
+							placeholder="Acta de inicio">
+					</div>
+                </div>
                 </div>
 
             </div>
