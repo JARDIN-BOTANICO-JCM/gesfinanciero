@@ -2111,11 +2111,13 @@ class OperacionesCtrl {
 			 *   3. Usa la variable $idUsr para el campo empleados_id  
 			 */
 			
-				if (isset($d['empleadosdetallescontrato_meses']) && isset($d['empleadosdetallescontrato_dias'])) {
+				if (isset($d['empleadosdetallescontrato_meses']) && isset($d['empleadosdetallescontrato_dias']) || isset($d['fechainicio']) && isset($d['fileactaini'])) {
 					$payload = array(
 						'empleados_id' => $idUsr['id'],
 						'meses' => intval($d['empleadosdetallescontrato_meses']),
-						'dias'  => intval($d['empleadosdetallescontrato_dias'])
+						'dias'  => intval($d['empleadosdetallescontrato_dias']),
+						'fechainicio' => $d['fechainicio'] ?? null,
+						'fileactaini' => $d['fileactaini'] ?? null
 					);
 
 					try {
@@ -2340,15 +2342,16 @@ class OperacionesCtrl {
 	     */
 
 			
-		if ( isset($d['empleadosdetallescontrato_meses']) || isset($d['empleadosdetallescontrato_dias']) ) {
-			
+		if ( isset($d['empleadosdetallescontrato_meses']) || isset($d['empleadosdetallescontrato_dias']) || isset($d['fechainicio']) || isset($d['fileactaini']) ) {
 			try {
 				$detalleContrato = array(
 				'documento' => $d['documento'],
 				'tipodoc_id' => $d['tipodoc_id'],
 				'meses' => isset($d['empleadosdetallescontrato_meses']) ? intval($d['empleadosdetallescontrato_meses']) : 0,
 				'dias' => isset($d['empleadosdetallescontrato_dias']) ? intval($d['empleadosdetallescontrato_dias']) : 0,
-				'empleados_id' => $d['id']
+				'empleados_id' => $d['id'],
+				'fechainicio' => $d['fechainicio'] ?? null,
+				'fileactaini' => $d['fileactaini'] ?? null
 			);
 
 			$payload = [
@@ -2839,8 +2842,9 @@ class OperacionesCtrl {
 		$vr .= "empl.`salariomes`, empl.`contratoini`, empl.`contratofin`, empl.dependencias_id, depe.nombre as dependencias, ";
 		$vr .= "edc.meses as empleadosdetallescontrato_meses, ";
 		$vr .= "edc.dias as empleadosdetallescontrato_dias, ";
-		$vr .= "edc.fileactaini as empleadosdetallescontrato_fileactaini ";
-		
+		$vr .= "edc.fileactaini as fileactaini,";
+		$vr .= "edc.fechainicio as fechainicio ";
+
 		$tb  = '`empleados` as empl ';
 		
 		$jn  = 'LEFT JOIN tipodoc as tpdc on tpdc.id = empl.tipodoc_id ';
@@ -9812,21 +9816,20 @@ EOD;
 			$usrExiste = self::empleados_Obtener(['w_documento' => $doc]);
 			
 			if (!empty($usrExiste) && isset($usrExiste[0]['id'])) {
-				// Solo agregar empleados_id si hay data
 				$it['empleados_id'] = $usrExiste[0]['id'];
     		}
 
-			$contExiste = self::empleadosdetallescontrato_Obtener(['documento' => $doc ] );
-
+			$contExiste = self::empleadosdetallescontrato_Obtener(['documento' => $doc ] );	
 			try {
-			
 			if ( count( $contExiste ) > 0 ) {
 				//Modificación
 				$detalleContrato = array(
 					'w_documento' => $it['documento'],
 					'w_tipodoc_id' => $it['tipodoc_id'],
 					'meses' => $it['meses'],
-					'dias' => $it['dias']
+					'dias' => $it['dias'],
+					'fechainicio' => $it['fechainicio'] ?? null,
+					'fileactaini' => $it['fileactaini'] ?? null
 				);
 				 if (isset($it['empleados_id'])) {
 					$detalleContrato['empleados_id'] = $it['empleados_id'];
@@ -9895,6 +9898,9 @@ EOD;
 		// el anyolectivo es el que se tenga actualmente creado en la tabla anyolectivo
 		$o->setAnyolectivo_id( $anyolectivo_id );
 		
+		if (isset( $d['fechainicio'] ) ) {
+			$o->setFechainicio( $d['fechainicio'] );
+		}
 		if (isset( $d['fileactaini'] ) ) {
 			$o->setFileactaini( $d['fileactaini'] );
 		}
@@ -9959,6 +9965,9 @@ EOD;
 		if ( isset( $d['fileactaini'] ) ) {
 			$aSt['fileactaini'] = $d['fileactaini'] ;
 		}
+		if ( isset( $d['fechainicio'] ) ) {
+			$aSt['fechainicio'] = $d['fechainicio'] ;
+		}
 		if ( isset( $d['fileactainivalorgestor'] ) ) {
 			$aSt['fileactainivalorgestor'] = $d['fileactainivalorgestor'] ;
 		}
@@ -10003,7 +10012,7 @@ EOD;
 		$vr  = 'empdetcont.`id`, empdetcont.`tipodoc_id`, tipod.nombre as tipodoc_nombre, ';
 		$vr .= 'empdetcont.`documento`, empdetcont.`empleados_id`, concat(emple.nombres, " ", emple.apellidos) as empleados_full, ';
 		$vr .= 'empdetcont.`contrato`, empdetcont.`meses`, empdetcont.`dias`, empdetcont.`fecha`, empdetcont.`usuario`, ';
-		$vr .= 'empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, empdetcont.`fileactaini`, empdetcont.`fileactainivalorgestor` ';
+		$vr .= 'empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, empdetcont.`fileactaini`, empdetcont.`fechainicio`, empdetcont.`fileactainivalorgestor` ';
 
 		$tb  = '`empleadosdetallescontrato` as empdetcont ';
 
