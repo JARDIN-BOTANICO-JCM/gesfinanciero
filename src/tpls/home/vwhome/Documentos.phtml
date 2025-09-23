@@ -10,6 +10,14 @@ try {
 } catch (Exception $e) {
     throw $e;
 }
+
+$l_paquetesestados_id = array();
+try {
+    $l_paquetesestados_id = OperacionesCtrl::paquetesestados_Obtener( array( 'w_flujosestados_id' => 2, 'ordenasc' => 1 ) );
+} catch (Exception $e) {
+    throw $e;
+}
+
 ?>
 <div id="db-wrapper" class="" style="background-color: #fefcfb; display: none;" >
     <!-- navbar vertical -->
@@ -24,7 +32,7 @@ try {
             
         <!-- Container fluid -->
         <div class="container-fluid p-4">
-        
+
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-12">
                     <div class="border-bottom pb-4 mb-4 d-lg-flex justify-content-between align-items-center">
@@ -70,10 +78,7 @@ try {
 			<div class="card" id="contProce" style="display: none;">
 				<div class="card-body">
     				<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                        	<li class="breadcrumb-item"><a href="#">Home</a></li>
-                        	<li class="breadcrumb-item active" aria-current="page">Library</li>
-                        </ol>
+                        <ol id="olBreadcrumbFlujo" class="breadcrumb"></ol>
                     </nav>
                 </div>
 				<div id="cardDocs" class="card-body" style="display: none;" ></div>
@@ -120,6 +125,10 @@ try {
 <script type="application/javascript">
 let idMod = null;
 let idFlId = null;
+let idPqEst = 1;
+
+const d_paquetesestados_id = <?php echo json_encode( $l_paquetesestados_id, JSON_UNESCAPED_UNICODE ); ?>
+
 const btnGuardar = function(){
 	home.navUser(function( uDt ){
 		ut.validarFrm('frmvalcls', function ( r ) {
@@ -198,6 +207,8 @@ const btnOkFirma = function( colorbtn ){
 };
 
 const cntContinuar = 'cntContinuar';
+const btnEditarForms = 'btnEditarForms';
+const btnEnviarRevisar = 'btnEnviarRevisar';
 
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
@@ -228,6 +239,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		cardDocs.html ( '' );
 		
 		jQuery( '#cardProcs' ).show('fast');
+		
+		idMod = null;
 	};
 	
 	const btnModInfoHtml = function( d ){
@@ -307,6 +320,17 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        	html.push('	<div class="text-muted mb-3">' + elCfgDt['descripcion'] + '</div>' );
     	        	html.push('	' + elObj.prop('outerHTML') );
     	        }
+    	        else if( _el['paquetereqtipos'] == 'obligaciones' ){
+    	        	const elCfgDt = _el['descripcion'];
+    	        	elemCfg['json'] = elCfgDt['json'];
+    	        	const elObj = home.entradasCampos( { 'd' : elemCfg, 'regId' : _el['id'] } );
+    	        	
+    	        	html.push('	<hr>' );
+    	        	html.push('	<span class="h3">' + elCfgDt['titulo'] + '</span><br>' );
+    	        	html.push('	<div class="text-muted mb-3">' + elCfgDt['descripcion'] + '</div>' );
+    	        	html.push('	' + elObj['html'] );
+    	        	
+    	        }
     	        else{
     	        	const jsondefv = JSON.parse( ut.b64DecodeUnicode( vals ) );
     	        	
@@ -325,14 +349,14 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		formu.push('<form id="frmval" class="frmvalcls">');
 		formu.push( html.join('') );
 		formu.push('	<div class="d-grid gap-2">');
-		formu.push('		<button data-formid="frmvalcls" onclick="reqs.guargaFormulario( this );" class="btn btn-primary" type="button" rol="button" >Generar documentos</button>');
+		formu.push('		<button data-formid="frmvalcls" onclick="reqs.guardaFormulario( this );" class="btn btn-primary" type="button" rol="button" >Guardar formularios y generar documentos</button>');
 		formu.push('	</div >');
 		formu.push('</form >');
 		
 		return formu.join('');
 	};
 	
-	_this.guargaFormulario = function( o ){
+	_this.guardaFormulario = function( o ){
 		const _o = jQuery( o );
 		const dt = _o.data();
 		
@@ -436,6 +460,25 @@ const Requerimientos = function( dC ){ // dC = data constructor
         }
 	};
 	
+	const formsDefObliVals = function( d ){
+		const data = d['data'];
+		for ( const key in data ) {
+    	    if ( Object.hasOwnProperty.call( data, key ) ) {
+    	    	const _el = data[ key ];
+    	    	
+    	    	const idEdit_v = "obliid_" + _el['empleadosobjetivos_id'];
+            	const idComm_v = "oblicom_" + _el['empleadosobjetivos_id'];
+            	const idFile_v = "oblifile_" + _el['empleadosobjetivos_id'];
+            	const regid_v = "obliregid_" + _el['empleadosobjetivos_id'];
+            	
+            	jQuery( "#" + idEdit_v ).val( _el['id'] );
+            	jQuery( "#" + idComm_v ).val( _el['descripcion'] );
+            	//jQuery( "#" + idFile_v ).val( _el['archivos'] );
+            	jQuery( "#" + regid_v ).val( _el['requerimientostplsitems_id'] );
+    	    }
+	    }
+	};
+	
 	const documentosList = function( dt ){
 		const cardDocs = jQuery('#cardDocs');
 		const docs = dt['docs'];
@@ -511,10 +554,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
     		_html.push('</div>');
     		_html.push('<div id="' + cntContinuar + '" style="display: none;" class="row my-1 g-4">');
     		_html.push('	<div class="col col mt-3">');
-    		_html.push('		<div class="d-flex">');
-    		_html.push('			<button onclick="modFormularios();" class="btn btn-warning flex-fill me-1 " >Editar nuevamente formularios</button>' );
-    		_html.push('			<button class="btn btn-primary flex-fill mx-1 " >Enviar Documentos a ...</button>' );
-    		_html.push('			<button class="btn btn-outline-danger flex-fill ms-1" onclick="reqs.btnCloseModInfo( \'#btnVolverSolicitudes\' );" ><i class="bi bi-chevron-left"></i> Volver</button>' );
+    		_html.push('		<div class="d-flex justify-content-end">');
+    		_html.push('			<button class="btn btn-outline-danger" onclick="reqs.btnCloseModInfo( \'#btnVolverSolicitudes\' );" ><i class="bi bi-chevron-left"></i> Volver</button>' );
+    		_html.push('			<button id="' + btnEditarForms + '" onclick="modFormularios();" class="btn btn-secondary ms-1 " ><i class="bi bi-pencil-square me-3"></i>Editar nuevamente formularios</button>' );
+    		_html.push('			<button id="' + btnEnviarRevisar + '" class="btn btn-primary ms-1 " onclick="reqs.enviarRevisar( this )" ><i class="bi bi-send me-3"></i>Enviar a revisar</button>' );
     		_html.push('		</div>');
     		_html.push('	</div>');
     		_html.push('</div>');
@@ -523,6 +566,63 @@ const Requerimientos = function( dC ){ // dC = data constructor
     		cardDocs.show('fast');
 		}
 		
+		_this.enviarRevisar = function( o ){
+    		const _o = jQuery( o );
+    		const dt = _o.data();
+    		dt['idMod'] = idMod;
+        		
+        	closeAllModal();
+        	
+    		const opc = { 'id' : 'ajaxldr' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+            home.navUser(function( uDt ){
+            	const form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesHelperMoveReview ); ?>');
+                form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+                form_data.append('u', uDt );
+        
+        		__TransportarData(
+        			form_data,
+        			function( o ) {
+        				_this.recargarTabla();
+        				
+        				_this.btnCloseModInfo( '#btnVolverSolicitudes' );
+        				
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			},
+        			function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+        
+                        jQuery( objmdlErr ).modal('show');
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			}
+        		);
+            });
+		};
+		
+	};
+	
+	const breadcrumbFlujo = function( dt ){
+		const flujoinfo = dt['flujoinfo'];
+		const olBreadcrumbFlujo = jQuery('#olBreadcrumbFlujo');
+		
+		const li = [];
+		li.push( '<li class="breadcrumb-item"><a href="#">Flujo de aprobaci&oacute;n</a></li>' );
+		
+		for ( const key in flujoinfo ) {
+    	    if ( Object.hasOwnProperty.call( flujoinfo, key ) ) {
+    	        const _el = flujoinfo[ key ];
+    	        
+    	        li.push( '<li class="breadcrumb-item">' + _el['nombre'] + ' (' + _el['flujosroles'] + ')' + '</li>' );
+	        }
+        }
+		
+		olBreadcrumbFlujo.html( li.join('') );
 	};
 
 	_this.modInfo = function( o ){
@@ -532,6 +632,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		idMod = dt['id'];
 		idFlId = dt['flujositems_id'];
 		idFlujo = dt['flujos_id'];
+		idPqEst = dt['paquetesestados_id'];
 		
 		const target = jQuery( dt['target'] );
 		
@@ -564,11 +665,19 @@ const Requerimientos = function( dC ){ // dC = data constructor
             			const jsondefv = JSON.parse( ut.b64DecodeUnicode( o['res'] ) );
             			formsDefVals( { 'data' : jsondefv } );
             			
+            			const jsonoblig = JSON.parse( ut.b64DecodeUnicode( o['obli'] ) );
+            			formsDefObliVals( { 'data' : jsonoblig } );
+            			
             			documentosList( o );
+            			
+            			breadcrumbFlujo( o );
             			
             			if( o['docs'].length > 0 ){
         					docOkFirmados();
         				}
+        				
+        				vistaPorEstado();
+        				
             		});
             		
     				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
@@ -589,7 +698,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	
 	const btnInfoHtml = function( dtInfo ){
 		const html = [];
-    	html.push('<button onclick="reqs.modInfo(this);" data-flujos_id="' + dtInfo.flujos_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
+    	html.push('<button onclick="reqs.modInfo(this);" data-paquetesestados_id="' + dtInfo.paquetesestados_id + '" data-flujos_id="' + dtInfo.flujos_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
         html.push('	<i class="bi bi-eye-fill fs-5"></i>');
         html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
         html.push('		<h6 class="mb-0 text-white">Editar</h6>');
@@ -647,7 +756,30 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 		}
                 	} 
             	},
-                { 'title' : 'Estado', data: 'paquetesestados_id' },
+                {
+                	'title' : 'Estado', 
+                	data: 'paquetesestados_id',
+                	render: function(data, type, row){
+                		let txt = data;
+                		for ( const key in d_paquetesestados_id ) {
+                    	    if ( Object.hasOwnProperty.call( d_paquetesestados_id, key ) ) {
+                    	        const _el = d_paquetesestados_id[ key ];
+                    	        if( _el['id'] == data ){
+                    	        	let bgcolor = 'bg-secondary';
+                    	        	if( data == 1 ){
+                    	        		bgcolor = 'bg-primary';
+                    	        	}
+                    	        	else if( data == 2 ){
+                    	        		bgcolor = 'bg-warning text-dark';
+                    	        	}
+                    	        	txt = '<span class="badge ' + bgcolor + '">' + _el['nombre'] + '</span>';
+                    	        }
+                    	        
+                	        }
+            	        }
+            	        return txt;
+                	} 
+            	},
                 { 'title' : 'Plantilla', data: 'flujos_id' },
                 {
                     title: 'Acciones',
@@ -678,6 +810,12 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			tbInter.ajax.reload(null, false);
         }
     };
+};
+
+const vistaPorEstado = function(){
+	if( idPqEst == 2 ){
+		jQuery('#' + btnEditarForms + ', #' + btnEnviarRevisar ).remove();
+	}
 };
 
 const docOkFirmados = function(){

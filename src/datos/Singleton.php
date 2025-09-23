@@ -485,9 +485,11 @@ class Singleton {
 	    $tb  = $tabla . ' as cus ';
 	    $jn  = ' ';
 	    
+	    $pr = array();
 	    $wh  = array();
 	    if( isset( $d['id'] ) ){
-	        $wh[] = "cus.`id` = " . $d['id'] . " ";
+	        $wh[] = "cus.`id` = ? ";
+	        $pr[] = $d['id'];
 	    }
 	    
 	    $defWh = "";
@@ -509,13 +511,14 @@ class Singleton {
 	    }
 	    
 	    $xt  = $jn . $defWh . $orden . $limite;
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
 	    
 	    if ( isset( $d['debug'] ) ) {
 	        if( $d['debug'] ){
-	            die( "SELECT " . $vr . "\nFROM " . $tb . "\n" . $xt );
+	            die( $sql );
 	        }
 	    }
-	    
+	    /*
 	    $charsetfrom = IndexCtrl::CHARS_TO;
 	    if ( isset( $d['charset_from'] ) ) {
 	        $charsetfrom = $d['charset_from'];
@@ -524,8 +527,8 @@ class Singleton {
 	    if ( isset( $d['charset_to'] ) ) {
 	        $charsetto = $d['charset_to'];
 	    }
-	    
-	    $r = Singleton::_readInfoChar($tb,$vr,$xt, $charsetfrom, $charsetto);
+	    */
+	    $r = Singleton::_safeRawQuery($sql, $pr);
 	    if ( isset( $r['err_info'] )) {
 	        throw new \Exception( $r['err_info'] );
 	    }
