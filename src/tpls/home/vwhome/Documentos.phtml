@@ -525,7 +525,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
     					if( firmasid['firmasestados_id'] == null ){
     						habilitado = 'disabled="disabled"';
     					}
-						lista.push('				<button id="' + btnfirId + '" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Revisado" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" class="btn ' + colorbtn + ' flex-grow-1 firmaNoCls" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button>');
+						lista.push('				<button id="' + btnfirId + '" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" class="btn ' + colorbtn + ' flex-grow-1 firmaNoCls" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button>');
 					}
 					else{
 						colorbtn = 'btn-success';
@@ -750,10 +750,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 	'title' : 'Revisado', 
                 	data: 'fechamodificado',
                 	render: function(data, type, row){
-                		if(!data) return '';
                 		if( data == '1900-01-01 00:00:00' ){
                 			return '';
                 		}
+                		return data;
                 	} 
             	},
                 {
@@ -771,6 +771,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
                     	        	}
                     	        	else if( data == 2 ){
                     	        		bgcolor = 'bg-warning text-dark';
+                    	        	}
+                    	        	else if( data == 7 ){
+                    	        		bgcolor = 'bg-success text-dark';
                     	        	}
                     	        	txt = '<span class="badge ' + bgcolor + '">' + _el['nombre'] + '</span>';
                     	        }
@@ -813,7 +816,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 };
 
 const vistaPorEstado = function(){
-	if( idPqEst == 2 ){
+	if( idPqEst == 2 || idPqEst == 4 ){
 		jQuery('#' + btnEditarForms + ', #' + btnEnviarRevisar ).remove();
 	}
 };

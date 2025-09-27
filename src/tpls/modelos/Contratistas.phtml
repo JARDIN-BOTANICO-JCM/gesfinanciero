@@ -707,8 +707,8 @@ const btnModRegistro = function ( o ) {
                             if (Object.hasOwnProperty.call(_el, key)) {
                                 const _elDiv = _el[key];
                                 
-                                if ( key == 'loc_lugares_id' ) {
-                                    jQuery('#' + key ).val( _elDiv );
+                                if ( key == 'loc_lugares' ) {
+                                    jQuery('#loc_lugares_id_livesearch' ).val( _elDiv );
                                 }
                                 else if ( key == 'lugarescedula' ) {
                                 	jQuery('#lugarescedula_id_livesearch').val( _elDiv );

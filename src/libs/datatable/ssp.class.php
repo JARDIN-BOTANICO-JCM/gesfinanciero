@@ -203,6 +203,10 @@ class SSP {
      * NOTE this does not match the built-in DataTables filtering which does it
      * word by word on any field. It's possible to do here performance on large
      * databases would be very poor
+     * 
+     * Forma de consulta 2
+     * d.columns[4]['search']['value'] = { values: [8,6,4], operator: "OR" };
+     * d.columns[6]['search']['value'] = { values: [2,7], operator: "AND" };
      *
      *  @param  array $request Data sent to server by DataTables
      *  @param  array $columns Column information array
@@ -250,6 +254,7 @@ class SSP {
                 $columnIdx = array_search( $requestColumn['data'], $dtColumns );
                 $column = $columns[ $columnIdx ];
                 
+                /*
                 $str = $requestColumn['search']['value'];
                 
                 if ( $requestColumn['searchable'] == 'true' &&
@@ -267,6 +272,40 @@ class SSP {
                             }
                         }
                     }
+                    */
+                $str = $requestColumn['search']['value'];
+                
+                if ($requestColumn['searchable'] == 'true' && $str !== '' && !empty($column['db'])) {
+                    // Caso nuevo: objeto con values + operator
+                    if (is_array($str) && isset($str['values']) && is_array($str['values'])) {
+                        $operator = (isset($str['operator']) && strtoupper($str['operator']) === 'OR') ? 'OR' : 'AND';
+                        $inBindings = [];
+                        foreach ($str['values'] as $vOpc) {
+                            $inBindings[] = self::bind($bindings, $vOpc, PDO::PARAM_INT);
+                        }
+                        $condition = "`".$column['db']."` IN (".implode(',', $inBindings).")";
+                        
+                        if ($operator === 'OR') {
+                            $columnOrSearch[] = $condition;
+                        } else {
+                            $columnSearch[] = $condition;
+                        }
+                    }
+                    // Caso array simple → IN (…)
+                    elseif (is_array($str)) {
+                        $inBindings = [];
+                        foreach ($str as $vOpc) {
+                            $inBindings[] = self::bind($bindings, $vOpc, PDO::PARAM_INT);
+                        }
+                        $columnSearch[] = "`".$column['db']."` IN (".implode(',', $inBindings).")";
+                    }
+                    // Caso string simple → LIKE
+                    else {
+                        $binding = self::bind($bindings, '%'.$str.'%', PDO::PARAM_STR);
+                        $columnSearch[] = "`".$column['db']."` LIKE ".$binding;
+                    }
+                }
+                
             }
         }
         
