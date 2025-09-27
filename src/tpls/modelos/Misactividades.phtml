@@ -98,6 +98,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	let tbInter = null;
 	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
 	
+	let flujosroles = "";
+	let flujosroles_id = 0;
 	let nofirmante = 0;
 	let nextname = "";
 	let nextid = 0;
@@ -212,6 +214,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const dt = _o.data();
 		
 		const _urlpdf = dt['url'];
+		const _esfirmable = dt['esfirmable'];
 		
 		const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Vista previa','btnCerrarX' : true, 'level' : 'l1', 'size' : 'modal-lg' } );
         const cuerpo = jQuery(objmdlErr + ' .modal-body');
@@ -228,7 +231,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
         pieHtml.push('	<a href="' + _urlpdf + '" target="_blank" class="btn btn-outline-primary">');
         pieHtml.push('		Abrir en nueva pestaña');
         pieHtml.push('	</a>');
-        pieHtml.push('	<button data-razon="Aprobado" data-fldcampo="FIRMA_' + nofirmante + '" data-fldtipo="proceso" data-documento="' + _urlpdf + '" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_ADMIN ?>" type="button" class="btn btn-primary" onclick="reqs.firmarPdf( this );" >Firmar</button>');
+        if( _esfirmable ){
+        	pieHtml.push('	<button data-razon="' + flujosroles + '" data-fldcampo="FIRMA_' + nofirmante + '" data-fldtipo="proceso" data-documento="' + _urlpdf + '" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_ADMIN ?>" type="button" class="btn btn-primary" onclick="reqs.firmarPdf( this );" >Firmar</button>');
+        }
         pieHtml.push('	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>');
 		pieHtml.push('</div>');
         cuerpo.after( pieHtml.join('') );
@@ -247,6 +252,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		li.push( '<li class="breadcrumb-item text-muted" style="text-transform: capitalize;">' + nombrefull + '</li>' );
 		
 		let nextfir = false;
+		let tmpnofir = 1;
 		for ( const key in flujoinfo ) {
     	    if ( Object.hasOwnProperty.call( flujoinfo, key ) ) {
     	        const _el = flujoinfo[ key ];
@@ -259,9 +265,16 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        let txt = _el['nombre'];
     	        if( _el['actual'] == true ){
     	        	txt = '<a href="#"><strong>' + _el['nombre'] + '</strong></a>';
-    	        	nofirmante = _el['firmante'];
+    	        	
     	        	nextfir = true;
     	        }
+    	        
+    	        if( _el['usuarios_id'] == <?php echo $usu->getId() ?> ){
+    	        	nofirmante = tmpnofir;
+    	        	flujosroles = _el['flujosroles'];
+    	        	flujosroles_id = _el['flujosroles_id'];
+    	        }
+    	        tmpnofir++;
     	        
     	        li.push( '<li class="breadcrumb-item">' + txt + '</li>' );
 	        }
@@ -275,6 +288,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const docs = res['docs'];
 		const firmantes = res['firmantes'];
 		const solicitante = res['solicitante'];
+		const pks = res['paquete'];
 		
 		const nombrefull = ( "" + jQuery.trim( solicitante['nombres'] + ' ' + solicitante['apellidos'] )).toLowerCase();
 		
@@ -294,8 +308,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('			<button style="display: none;" id="btnFinalizar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
 		html.push('		</div>');
 		html.push('	</div>');
+		
 		html.push('	<div class="mt-3">');
-		html.push('		<h4 class="mb-0">Documentos</h4>');
+		html.push('		<h4 class="mb-2">Documentos para Firmar</h4>');
 		html.push('		<div class="list-group">');
 		
 		for (const key in docs) {
@@ -308,11 +323,71 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        
     	        const fancy = ( "" + fl['filename'] ).replace(/sig_/ig, "").replace(/_/ig," ");
     	        
-				html.push('			<button data-url="' + _el['bs'] + '" data-firmantes=" + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + " onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + fancy + '</button>');
+				html.push('			<button data-url="' + _el['bs'] + '" data-firmantes="' + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + '" data-esfirmable="true" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + fancy + '</button>');
 			}
 		}
 		html.push('		</div>');
 		html.push('	</div>');
+		
+		html.push('	<div class="mt-3">');
+		html.push('		<h4 class="mb-2">Archivos adjuntos</h4>');
+		html.push('		<div class="list-group">');
+		
+		let confilesadj = false;
+		for (const key in pks) {
+    	    if (Object.hasOwnProperty.call( pks, key ) ) {
+    	        const _el = pks[key];
+    	        
+    	        if( _el['paquetereqtipos_id'] !== 6 ){
+    	        	if( ("" +  jQuery.trim( _el['valor'] ) ).length > 0 ){
+    	        		confilesadj = true;
+    	        		html.push('			<button data-url="' + _el['valor'] + '" data-esfirmable="false" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _el['ref_label'] + '</button>');
+    	        	}
+    	        }
+			}
+		}
+		
+		if( !confilesadj ){
+			html.push('			<li class="list-group-item list-group-item-action">Sin adjuntos</li>');
+		}
+		
+		html.push('		</div>');
+		html.push('	</div>');
+		
+		html.push('	<div class="mt-3">');
+		html.push('		<h4 class="mb-2">Adjuntos de los formularios</h4>');
+		html.push('		<div class="list-group">');
+		
+		let confiles = false;
+		for (const key in pks) {
+    	    if (Object.hasOwnProperty.call( pks, key ) ) {
+    	        const _el = pks[key];
+    	        
+    	        if( _el['paquetereqtipos_id'] == 6 ){
+    	        	const vljs = JSON.parse( _el['valor'] );
+    	        	
+    	        	for (const kJs in vljs) {
+                	    if (Object.hasOwnProperty.call( vljs, kJs ) ) {
+                	        const _eJs = vljs[kJs];
+                	        
+                	        if( _eJs['file'] == 1 ){
+                	        	confiles = true
+                	        	html.push('			<button data-url="' + _el['value'] + '" data-esfirmable="false" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _eJs['label'] + '</button>');
+                	        }
+            	        }
+        	        }
+    	        
+    	        }
+			}
+		}
+		
+		if( !confiles ){
+			html.push('			<li class="list-group-item list-group-item-action">Sin adjuntos</li>');
+		}
+		
+		html.push('		</div>');
+		html.push('	</div>');
+		
 		//html.push('</div>');
 
     	return html.join('');
@@ -435,7 +510,12 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 data : function(d){
                 	d.ajax = '<?php echo md5( IndexCtrl::API_PaquetesGetAjax ); ?>';
                 	d.columns[ 6 ]['search']['value'] = 2;
-                	d.columns[ 4 ]['search']['value'] = d_paraRevisar;
+                	if( d_paraRevisar.length > 0 ){
+                		d.columns[ 4 ]['search']['value'] = d_paraRevisar;
+                	}
+                	else{
+                		d.columns[ 4 ]['search']['value'] = 0;
+                	}
                 },
                 type: 'POST'
             },

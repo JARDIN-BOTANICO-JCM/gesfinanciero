@@ -2445,7 +2445,9 @@ class OperacionesCtrl {
 		
 		$xt = $wh;
         $pr = [ $id ];
-		//die('UPDATE ' . $tb . ' SET ' . $st . ' ' . $xt);
+        
+        //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+        //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' ' . $xt);
 		
 		$cu = null;
 		try {
@@ -2837,7 +2839,7 @@ class OperacionesCtrl {
 		$vr .= "lugced.nombre as lugarescedula, empl.`nombres`, empl.`apellidos`, empl.`mail`, empl.`nacimiento`, ";
 		$vr .= "empl.`generos_id`, empl.`lugares_id`, lug.nombre as lugares, empl.`gruposanguineo`, empl.`codigo`, ";
 		$vr .= "empl.`usuario`, empl.`clave`, empl.`foto`, empl.`direccion`, empl.`barrio`, empl.`loc_lugares_id`, ";
-		$vr .= "empl.`cargos_id`, carg.nombre as cargos, empl.`titulos_id`, empl.`creado`, empl.`perfil_id`, ";
+		$vr .= "loclug.nombre as loc_lugares, empl.`cargos_id`, carg.nombre as cargos, empl.`titulos_id`, empl.`creado`, empl.`perfil_id`, ";
 		$vr .= "prf.nombre as perfil, empl.`estado_id`, est.nombre as estado, empl.`eps`, empl.`ars`, empl.`oficio`, ";
 		$vr .= "empl.`salariomes`, empl.`contratoini`, empl.`contratofin`, empl.dependencias_id, depe.nombre as dependencias, ";
 		$vr .= "edc.meses as empleadosdetallescontrato_meses, ";
@@ -2849,6 +2851,7 @@ class OperacionesCtrl {
 		
 		$jn  = 'LEFT JOIN tipodoc as tpdc on tpdc.id = empl.tipodoc_id ';
 		$jn .= 'LEFT JOIN lugares as lugced on lugced.id = empl.lugarescedula_id ';
+		$jn .= 'LEFT JOIN lugares as loclug on loclug.id = empl.`loc_lugares_id` ';
 		$jn .= 'LEFT JOIN generos as gene on gene.id = empl.generos_id ';
 		$jn .= 'LEFT JOIN lugares as lug on lug.id = empl.lugares_id ';
 		$jn .= 'LEFT JOIN lugares as luglc on luglc.id = empl.loc_lugares_id ';
@@ -3372,6 +3375,10 @@ class OperacionesCtrl {
 	        $wh[] = "eolog.paquetesrequ_id = ?";
 	        $pr[] = $d['w_paquetesrequ_id'];
 	    }
+	    if( isset( $d['w_paquetes_id'] ) ){
+	        $wh[] = "preq.paquetes_id = ?";
+	        $pr[] = $d['w_paquetes_id'];
+	    }
 	    
 	    $defWh = "";
 	    if ( count( $wh ) > 0 ) {
@@ -3394,7 +3401,7 @@ class OperacionesCtrl {
 	    $xt  = $jn . $defWh . $orden . $limite;
 	    
 	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
-	    //die( $sql );
+	    //die( print_r($pr,true) . "\n" . $sql );
 	    
 	    $r = Singleton::_safeRawQuery($sql, $pr); //Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
 	    if ( isset( $r['err_info'] )) {
@@ -5346,7 +5353,7 @@ class OperacionesCtrl {
 	        try {
 	            $genpdf = self::firmaspro_Obtener( $dN, $dt );
 	        } catch (Exception $e) {
-	            throw new Exception( 'editarPlantillas_JBB_Mezclar_Crear: ' . $e->getMessage() );
+	            throw new Exception( 'editarPlantillas_JBB_Mezclar_Crear - firmaspro_Obtener: ' . $e->getMessage() );
 	        }
 	        
 	        if ( $genpdf !== "" ) {
@@ -5678,8 +5685,19 @@ class OperacionesCtrl {
 	            return $meses_es[ $mes ];
 	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['fechacontratocompleto'] ) {
-	            $fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
-	            $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
+	            
+	            $fechaInicio = $d['fechainibogdata'];
+	            if ( isset( $d['esexcel'] ) ) {
+	                if ( $d['esexcel']  ) {
+	                    $fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
+	                }
+	            }
+	            try {
+	                $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
+	            } catch (Exception $e) {
+	                throw new Exception('fechacontratocompleto: ' . $e->getMessage(), $e->getCode());
+	            }
+	            
 	            
 	            $fecha = new DateTime( $fechaInicio );
 	            $primerDia = new DateTime($fecha->format("Y-m-01"));
@@ -5694,8 +5712,13 @@ class OperacionesCtrl {
 	            
 	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['valorpordia'] ) {
-	            $fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
-	            $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
+	            //$fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
+	            try {
+	                $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
+	            } catch (Exception $e) {
+	                throw new Exception('fechacontratocompleto: ' . $e->getMessage(), $e->getCode());
+	            }
+	            $fechaInicio = $d['fechainibogdata'];
 	            
 	            $dDt = [
 	                'valorContrato' => $d['valortotal'],
@@ -5760,11 +5783,19 @@ class OperacionesCtrl {
 	            $html[] = $res;
 	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['nofactura'] ) {
-	            $fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
-	            $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
+	            try {
+	                $fechaInicioTmp = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
+	            } catch (Exception $e) {
+	                throw new Exception('nofactura - fechaInicioTmp: ' . $e->getMessage(), $e->getCode());
+	            }
+	            try {
+	                $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
+	            } catch (Exception $e) {
+	                throw new Exception('nofactura - fechafinal: ' . $e->getMessage(), $e->getCode());
+	            }
 	            
 	            $dDt = [
-	                'fechaInicio' => $fechaInicio,
+	                'fechaInicio' => $fechaInicioTmp,
 	                'fechaFin' => $fechafinal,
 	                'mesCobro' => date("Y-m", strtotime( $d['mesaplica'] ) )
 	            ];
@@ -5817,10 +5848,15 @@ class OperacionesCtrl {
 	            $dias = $d['dias'];
 	             
 	            $valorContrato = $d['valortotal'];
-	            $inicioContrato = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
-	            $finContrato = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
-	            $mesCobro = date("Y-m", strtotime( $inicioContrato ) ) ;
+	            //$inicioContrato = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
+	            $inicioContrato = $d['fechainibogdata'];
+	            try {
+	                $finContrato = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
+	            } catch (Exception $e) {
+	                throw new Exception('flujofinanciero - finContrato: ' . $e->getMessage(), $e->getCode());
+	            }
 	            
+	            $mesCobro = date("Y-m", strtotime( $inicioContrato ) ) ;
 	            
 	            $dDt = [
 	                'valorContrato' => $valorContrato,
@@ -6031,7 +6067,11 @@ class OperacionesCtrl {
 	private static function editarPlantillas_Componente_EsMesDeInicio( $d ) {
 	    $mesaplica = date("Y-m-d", strtotime( $d['mesaplica'] ) );
 	    $mesaplicam = date("m", strtotime( $mesaplica ) );
-	    $fechabogdata = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] );
+	    try {
+	        $fechabogdata = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] );
+	    } catch (Exception $e) {
+	        throw new Exception('editarPlantillas_Componente_EsMesDeInicio: ' . $e->getMessage(), $e->getCode() );
+	    }
 	    
 	    $formato = 'Y-m-d';
 	    if ( isset( $d['formato'] ) ) {
@@ -6336,6 +6376,11 @@ class OperacionesCtrl {
 	        $locator = new PdfTextLocator();
 	        $locator->setSearchTerms( [ $fldcampo ] );
 	        $firmaOpcs = $locator->findInPdf( $flinput );
+	        
+	        /*
+	        echo "Busca: " . $fldcampo . "\n";
+	        die( "firmaOpcs: " . print_r($firmaOpcs, true ) );
+	        */
 	        
 	        $resFir = "";
 	        $paginas = 0;
@@ -8541,7 +8586,8 @@ EOD;
 	            
 	            $tempobl = self::empleadosobjetivoslog_Obtener([
 	                "w_empleados_id_md5" => $uDt['id'],
-	                "w_requerimientostplsitems_id" => $kT['id']
+	                "w_requerimientostplsitems_id" => $kT['id'],
+	                'w_paquetes_id' => $json['id']
 	            ]);
 	            foreach ($tempobl as $kTmp) {
 	                $obligacionesres[] = [
@@ -8598,6 +8644,8 @@ EOD;
 	    
 	    $flujositems = self::flujositems_Obtener( ['w_flujos_id' => $json['flujos_id'], 'ordenasc' => 6 ] );
 	    
+	    $pkreq = self::paquetesrequ_Obtener([ 'w_paquetes_id' => $json['id'] ]);
+	    
 	    $usrs = [];
 	    foreach ($flujositems as $kItem) {
 	        $actual = false;
@@ -8605,10 +8653,13 @@ EOD;
 	            $actual = true;
 	        }
 	        $usractual = [
-	           'nombre' => $kItem['nombre'],
-	           'id' => $kItem['id'],
-	           'firmante' => $kItem['orden'] + 1,
-	            'actual' => $actual
+                'nombre' => $kItem['nombre'],
+                'usuarios_id' => $kItem['usuarios_id'],
+                'id' => $kItem['id'],
+                'firmante' => $kItem['orden'] + 1,
+                'actual' => $actual,
+	            'flujosroles' => $kItem['flujosroles'],
+	            'flujosroles_id' => $kItem['flujosroles_id']
             ];
 	        $usrs[] = $usractual;
 	    }
@@ -8616,7 +8667,8 @@ EOD;
 	    $result = [
 	        'docs' => $docs,
 	        'firmantes' => $usrs,
-	        'solicitante' => $user
+	        'solicitante' => $user,
+	        'paquete' => $pkreq
 	    ];
 	    
 	    return self::retorno($result, 0, '');
@@ -8892,13 +8944,14 @@ EOD;
 	        throw new Exception( 'paquetes_Helper_Agregar - flujositems_Obtener: ' . $e->getMessage(), $e->getCode() );
 	    }
 	    
+	    $qryPks = [ 'w_empleados_id' => $empleadosinfo['id'], 'w_mesaplica' => $mesaplica, 'w_flujos_id' => $flujos_id ];	    
 	    $objPaquetesFechaUnica = array();
 	    try {
-	        $objPaquetesFechaUnica = self::paquetes_Obtener( array( 'w_empleados_id' => $empleadosinfo['id'], 'w_mesaplica' => $mesaplica, 'w_flujos_id' => $flujos_id ) );
+	        $objPaquetesFechaUnica = self::paquetes_Obtener( $qryPks );
 	    } catch (Exception $e) {
 	        throw new Exception( 'paquetes_Helper_Agregar - paquetes_Obtener: ' . $e->getMessage(), $e->getCode() );
 	    }
-	    if ( count( $objPaquetesFechaUnica ) > 0 ) {
+	    if ( count( $objPaquetesFechaUnica ) > 0 ) { 
 	        http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
 	        throw new Exception('No es posible radicar una solicitud en el mismo proceso y en el mismo mes', IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
 	    }
@@ -9187,6 +9240,10 @@ EOD;
 	}
 	// paquetes FIN
 	
+	// paquetesadminreg INI
+	// TODO: Tarea 11 - ERP
+	// paquetesadminreg FIN
+	
 	// paquetesrequ INI
 	public static function paquetesrequ_Obtener( $d ){	    
 	    $r = new Singleton();
@@ -9345,10 +9402,13 @@ EOD;
 	        throw new Exception( 'paquetesrequ_Helper_Agregar - empleados_Obtener: ' . $e->getMessage(), $e->getCode() );
 	    }
 	    
+	    //$empleadosContract = [];
 	    if ( count( $empleados ) > 0 ) {
 	        $empleado = $empleados[0];
 	        //die( print_r( $empleado, true ) );
 	        //die( print_r( $json, true ) );
+	        
+	        //$empleadosContract = self::empleadosdetallescontrato_Obtener( [ 'empleados_id' => $empleado['id'] ] );
 	        
 	        $requerimientostplsitems = self::requerimientostplsitems_Obtener( [] );
 	        $paquetereqtipos_by_nombre = array();
@@ -9567,6 +9627,7 @@ EOD;
 	        $docsgen = self::editarPlantillas_JBB_Mezclar_Crear( [
 	            'documentos' => $paquetes_flujos_id, 
 	            'empleado' => $empleado, 
+	            //'emplcontract' => $empleadosContract,
 	            'paquetesrequ' => $paquetesrequ_exists,
 	            'obligaciones' => base64_encode( json_encode( $obligaciones ) )
 	        ] );
