@@ -227,6 +227,8 @@ class IndexCtrl extends Pagina {
 	// --Version2
 	const API_PaquetesHomeHelperAdd = 'API_PaquetesHomeHelperAdd';
 
+	const API_PaquetesAdminReg_Helper_Add = 'API_PaquetesAdminReg_Helper_Add';
+
 	// --Version1
 	const API_Home_RecuperaUsuario = 'API_Home_RecuperaUsuario';
 	const API_Home_SolicitarTkn = 'API_Home_SolicitarTkn';
@@ -1139,7 +1141,19 @@ class IndexCtrl extends Pagina {
 					}
 					die("");
 				}
+
 				// Paquetesrequ FIN
+
+				if ($_POST["ajax"] == md5(self::API_PaquetesAdminReg_Helper_Add)) {
+					try {
+						$ok = OperacionesCtrl::paquetesAdminReg_Helper_Agregar($_POST);
+						echo json_encode($ok);
+					} catch (Exception $ex) {
+						$er = array("err" => $ex->getMessage());
+						echo json_encode($er);
+					}
+					die("");
+				}
 
 				// Reflista INI
 				if ($_POST["ajax"] == md5(self::API_ReflistaGet)) {

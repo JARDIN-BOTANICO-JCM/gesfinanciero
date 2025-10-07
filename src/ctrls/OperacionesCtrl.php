@@ -9242,6 +9242,138 @@ EOD;
 	
 	// paquetesadminreg INI
 	// TODO: Tarea 11 - ERP
+	public static function paquetesadminreg_Agregar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $o = new Paquetesadminreg();
+	    if (isset( $d['paquetes_id'] ) ) {
+	        $o->setPaquetes_id( $d['paquetes_id'] );
+	    }
+	    if (isset( $d['razon'] ) ) {
+	        $o->setRazon( $d['razon'] );
+	    }
+	    if (isset( $d['valor'] ) ) {
+	        $o->setValor( $d['valor'] );
+	    }
+	    if (isset( $d['fecha'] ) ) {
+	        $o->setFecha( $d['fecha'] );
+	    }
+	    if (isset( $d['usuarios'] ) ) {
+	        $o->setUsuarios( $d['usuarios'] );
+	    }
+	   
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	}
+	public static function paquetesadminreg_Helper_Agregar( $d ){ 
+		date_default_timezone_set('America/Bogota');
+
+		$usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( "paquetesadminreg_Helper_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+
+		$valueForm = [
+        "usuario_creado" => $json['usuario'] ?? null,
+        "fecha_creacion" => $json['fecha'] ?? null,
+		];
+		$jsonValores = json_encode($valueForm);
+
+		// Insertar en tabla de auditoría
+		$dataAuditoria = [
+			"paquetes_id" => $json['paquetes_id'], 
+			"razon"       => Paquetesadminreg::CREACION_TERCERO,
+			"valor"       => $jsonValores,
+			"fecha"       => date("Y-m-d H:i:s"),
+			"usuarios"    => $usu ? $usu->getId() : null
+		];
+
+		$id = 0;
+		
+	    try {
+	        $id = self::paquetesadminreg_Agregar( $dataAuditoria );
+	    } catch (Exception $e) {
+	        throw new Exception( 'paquetesadminreg_Helper_Agregar - paquetesadminreg_Agregar: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    return true;
+	    
+	}
+
+	public static function paquetesadminreg_Modificar( $d ){ 
+		date_default_timezone_set('America/Bogota');
+		try {
+			self::authRequ();
+		} catch (\Exception $e) {
+			http_response_code(IndexCtrl::ERR_COD_SESION_INACTIVA);
+			throw new \Exception('paquetesadminreg_Helper_Modificar: ' . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA);
+		}
+		$tb = 'paquetesadminreg';
+		$aSt = array();
+		if (isset($json['usuario'])) {
+			$aSt['usuario_creado'] = $d['usuario'];
+		}
+		if (isset($d['fecha'])) {
+			$aSt['fecha_creacion'] = $d['fecha'];
+		}
+		if (isset($d['valor'])) {
+			$aSt['valor'] = $d['valor']; 
+		}
+		if (isset($d['usuariosmod'])) {
+			$aSt['usuariosmod'] = $d['usuariosmod'];
+		}
+		if (isset($d['fechamodificado'])) {
+			$aSt['fechamodificado'] = $d['fechamodificado'];
+		}
+
+		if (empty($aSt)) {
+			http_response_code(IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
+			throw new \Exception('[Error] paquetesadminreg_Helper_Modificar: No hay campos válidos para actualizar');
+		}
+
+		$wh = '';
+		$pr = [];
+
+		if (isset($d['id'])) {
+			$wh = 'id = ?';
+			$pr = [$d['id']];
+		} 
+
+		if (isset($d['w_paquetes_id'])) {
+			$wh = 'paquetes_id = ?';
+			$pr = [$d['w_paquetes_id']];
+		} 
+		
+		if ($wh == '') {
+			http_response_code(IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
+			throw new \Exception('[Error] paquetesadminreg_Modificar: Debe indicar un id o paquetes_id para actualizar');
+		}
+		try {
+			$res = Singleton::_safeUpdate($tb, $aSt, $wh, $pr);
+		} catch (\Throwable $th) {
+			http_response_code(IndexCtrl::ERR_COD_ACTUALIZACION_SQL);
+			throw new \Exception('paquetesadminreg_Modificar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ACTUALIZACION_SQL);
+		}
+
+		return $res;
+	}
 	// paquetesadminreg FIN
 	
 	// paquetesrequ INI
