@@ -6,13 +6,14 @@
  */
 class Paquetesadminreg extends Clsdatos { 
 
+    public const CREACION_TERCERO = "Registro confirmación creación tercero";
 	private $id = 0; 
     private $paquetes_id = 0;
     private $razon = ""; // Registro confirmación creación tercero ERP”, “Solicitud de algo al usuario”',
     private $valor = ""; // Debe tener un registro JSON con los valores de algún formulario
     private $fecha = "1900-01-01 00:00:00";
     private $usuarios = "";
-    
+   
     /**
      * @return number
      */

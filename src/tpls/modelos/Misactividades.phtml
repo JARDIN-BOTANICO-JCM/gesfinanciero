@@ -256,7 +256,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		for ( const key in flujoinfo ) {
     	    if ( Object.hasOwnProperty.call( flujoinfo, key ) ) {
     	        const _el = flujoinfo[ key ];
-    	        
+				
     	        if( nextfir == true ){
     	        	nextname = _el['nombre'];
     	        	nextid = _el['id'];
@@ -295,6 +295,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		breadcrumbFlujo( { 'firmantes' : firmantes, 'solicitante' : solicitante } );
 		
 		const html = [];
+
 		///html.push('<div class="">');
 		html.push('	<div class="d-flex justify-content-between">');
 		html.push('		<div class="">');
@@ -459,7 +460,15 @@ const Requerimientos = function( dC ){ // dC = data constructor
 				target.hide('fast');
 		
         		contProce.show("fast", function(){
-        			card.html( btnModInfoHtml( { 'res': result } ) );
+        			const contenidoHtml = btnModInfoHtml( { 'res': result } );
+
+					let htmlFinal = contenidoHtml;
+					if (Number(flujosroles_id) === 3) {
+						htmlFinal += rol3FormHtml();
+					}
+
+					card.html(htmlFinal);
+
         			
         			if( nextname === "" ){
         				jQuery('#btnFinalizar').show('fast');
@@ -486,6 +495,69 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		
 		
 	};
+	
+	const rol3FormHtml = function() {
+		const html = [];
+		html.push('<div class="mt-3">');
+		html.push('  <h4 class="mb-2">Creación de Terceros</h4>');
+		html.push('  <form id="frmter" class="row g-3 frmtercls ">');
+
+		html.push('    <div class="col-md-6">');
+		html.push('      <label class="form-label">El usuario fue creado *</label>');
+		html.push('      <select class="form-select" id="usuario" name="usuario" required="required">');
+		html.push('        <option value="si">Sí</option>');
+		html.push('        <option value="no" selected>No</option>');
+		html.push('      </select>');
+		html.push('    </div>');
+
+		html.push('    <div class="col-md-6">');
+		html.push('      <label class="form-label">Fecha de creación *</label>');
+		html.push('      <input type="date" class="form-control" id="fecha" name="fecha" required="required">');
+		html.push('    </div>');
+
+		html.push('    <div class="col-12 text-end mt-3">');
+		html.push('      <button class="btn btn-primary" type="button" onclick="reqs.crearTercero(this);"  >Crear Tercero</button>');
+		html.push('    </div>');
+
+		html.push('  </form>');
+		html.push('</div>');
+		return html.join("");
+	};
+
+	_this.crearTercero = function( o ) {
+		
+		
+		ut.validarFrm('frmtercls', function (r) {
+			r.paquetes_id = idMod;
+			const form_data = new FormData();
+			form_data.append('ajax', '<?php echo md5(IndexCtrl::API_PaquetesAdminReg_Helper_Add); ?>');
+			form_data.append('data', ut.b64EncodeUnicode(JSON.stringify(r)));
+			__TransportarData(
+	  form_data,
+	  function (o) {
+					const result = o.result;
+					const objmdl2 = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Carga de datos', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+					const alerta = jQuery(objmdl2 + ' div.alert');
+					alerta.attr('class', 'alert alert-success');
+					alerta.html('Carga correcta');
+
+					jQuery(objmdl2).modal('show');
+					setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+				},
+				function (err) {
+					const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+					const alerta = jQuery(objmdlErr + ' div.alert');
+					alerta.attr('class', 'alert alert-danger');
+					alerta.html(err.responseText);
+
+					jQuery(objmdlErr).modal('show');
+					setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+				}
+			);
+		});
+		
+	};
+	
 	
 	const btnInfoHtml = function( dtInfo ){
 		const html = [];
