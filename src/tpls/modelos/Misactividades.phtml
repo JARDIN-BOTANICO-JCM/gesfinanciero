@@ -88,6 +88,15 @@ foreach ($l_flujositems as $kFluI ) {
 
 <script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
 <script type="application/javascript">
+<?php 
+/*
+ * @yalfonso
+ * TODO: Tarea 31 - Mostrar las deduccioes que se calculan basado en el valor de la cuenta de cobro
+ * TODO: Tarea 32 - Calcular el valor de cada descuento
+ * TODO: Tarea 33 - Agregar registros de forma din&aacute;mica por si el usuario revisor requiere otras deducciones
+ */
+?>
+
 let idMod = null;
 
 const d_paraRevisar = <?php echo json_encode( $paraRevisar ); ?>;
@@ -104,6 +113,13 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	let nextname = "";
 	let nextid = 0;
 	
+	let indexCom = 0;
+	
+	const TIPODOCS_SIGNS = 0;
+	const TIPODOCS_PACKS = 1;
+	const TIPODOCS_ATTACHED = 2;
+	
+	
 	_this.dibujarTb = function(){
 		const html = [];
 		
@@ -116,55 +132,72 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const _o = jQuery( o );
 		const dt = _o.data();
 		
-		const target = jQuery( dt['target'] );
+		controlgbl.intentarContinuar(function(puedeSeguir) {
+    		if (puedeSeguir) {
+    			const target = jQuery( dt['target'] );
 		
-		const contCardProcs = jQuery('#contCardProcs');
-		
-		target.hide('fast');
-		contCardProcs.show('fast');
-		
-		idMod = null;
+        		const contCardProcs = jQuery('#contCardProcs');
+        		
+        		target.hide('fast');
+        		contCardProcs.show('fast');
+        		
+        		idMod = null;
+    		} else {
+    			alert("Debes guardar o descartar antes de continuar");
+    		}
+    	});
 	};
 	
 	_this.continuar = function( o ){
 		const _o = jQuery( o );
     	const dt = _o.data();
+    	
+		controlgbl.intentarContinuar(function(puedeSeguir) {
+    		if (puedeSeguir) {
+    			
+    			if( confirm( '\xBFDesea ' + (dt['msj']).toLowerCase() + '?' ) ){    			
+    				const opc = { 'id' : 'ajaxldr' };
+                    const objmdl = mngModal.dibujar( opc );
+                    jQuery( objmdl ).modal('show');
+                    
+                    const form_data = new FormData();
+                    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesHelperMoveAdmin ); ?>');
+                    form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+            
+            		__TransportarData(
+            			form_data,
+            			function( oDt ) {
+            				_this.btnCloseModInfo( o );
+            				_this.recargarTabla();
+            				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            			},
+            			function ( err ) {
+                            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                            const alerta = jQuery(objmdlErr + ' div.alert');
+                            alerta.attr('class','alert alert-danger');
+                            
+                            let htmltxt = err.responseText;
+                            try {
+            					const res = JSON.parse( err.responseText );
+            					htmltxt = res['msj'];
+            				} catch (e) {
+            					// nada
+            				}
+                            alerta.html( htmltxt );
+            
+                            jQuery( objmdlErr ).modal('show');
+            				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            			}
+            		);
+    			
+    			}
+    			
+    		} else {
+    			alert("Debes guardar o descartar antes de continuar");
+    		}
+    	});
     
     	closeAllModal();
-    	
-    	const opc = { 'id' : 'ajaxldr' };
-        const objmdl = mngModal.dibujar( opc );
-        jQuery( objmdl ).modal('show');
-        
-        const form_data = new FormData();
-        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesHelperMoveAdmin ); ?>');
-        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
-
-		__TransportarData(
-			form_data,
-			function( oDt ) {
-				_this.btnCloseModInfo( o );
-				_this.recargarTabla();
-				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
-			},
-			function ( err ) {
-                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
-                const alerta = jQuery(objmdlErr + ' div.alert');
-                alerta.attr('class','alert alert-danger');
-                
-                let htmltxt = err.responseText;
-                try {
-					const res = JSON.parse( err.responseText );
-					htmltxt = res['msj'];
-				} catch (e) {
-					// nada
-				}
-                alerta.html( htmltxt );
-
-                jQuery( objmdlErr ).modal('show');
-				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
-			}
-		);
 		
 	};
 	
@@ -186,7 +219,6 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		__TransportarData(
 			form_data,
 			function( o ) {
-				
 				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
 			},
 			function ( err ) {
@@ -208,6 +240,32 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			}
 		);
     };
+    
+	_this.mincomentarios = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const minimizar = dt[ 'minimizar' ];
+		
+		const target = jQuery( dt[ 'target' ] );
+		const maximiza = jQuery( dt['maximiza'] );
+		const ocultar = jQuery( dt['ocultar'] );
+		const hideobj = jQuery( dt['hideobj'] );
+		
+		_o.hide('fast');
+		target.show('fast');
+		
+		if( minimizar === true || minimizar === "true" ){
+			maximiza.attr('class','col-11');
+			ocultar.attr('class','col-1');
+			hideobj.hide('fast');
+		}
+		else{
+			maximiza.attr('class','col-9');
+			ocultar.attr('class','col-3');
+			hideobj.show('fast');
+		}
+	};
 	
 	_this.verPdf = function( o ){	
 		const _o = jQuery( o );
@@ -216,12 +274,49 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const _urlpdf = dt['url'];
 		const _esfirmable = dt['esfirmable'];
 		
-		const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Vista previa','btnCerrarX' : true, 'level' : 'l1', 'size' : 'modal-lg' } );
+		const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Vista previa','btnCerrarX' : true, 'level' : 'l1', 'size' : 'modal-xl' } );
         const cuerpo = jQuery(objmdlErr + ' .modal-body');
         
         const _html = [];
-        _html.push( '<div class="modal-body p-0" style="height: 50vh;">' );
-        _html.push( '	<iframe src="' + _urlpdf + '#toolbar=1" style="width:100%; height:100%; border:none;"  allowfullscreen ></iframe>' );
+        _html.push( '<div class="modal-body p-0">' );
+        _html.push( '	<div class="row" >' );
+        _html.push( '		<div id="comdivcont_pdf" class="col-9" style="height: 50vh;" >' );
+        _html.push( '			<iframe src="' + _urlpdf + '#toolbar=1" style="width:100%; height:100%; border:none;"  allowfullscreen ></iframe>' );
+        _html.push( '		</div >' );
+        
+<?php // TODO: Tarea 45 - Agregar soporte en el front para comentarios en documentos subidos ?>
+        _html.push( '		<div id="comdivcont_coms" class="col-3" >' );
+        
+        _html.push( '			<div class="d-flex d-flex justify-content-between">' );
+        _html.push( '				<div>' );
+        _html.push( '					<h5>Notas</h5>' );
+        _html.push( '				</div>' );
+        _html.push( '				<div>');
+        _html.push( '					<a id="comdivcont_btnmin" data-maximiza="#comdivcont_pdf" data-ocultar="#comdivcont_coms" data-minimizar="true" data-hideobj=".comdivcontcls" data-target="#comdivcont_btnmax" class="p-0 m-0 btn-sm" href="#" onclick="reqs.mincomentarios( this );"> ');
+        _html.push( '						<i class="far fa-minus-square"></i>');
+        _html.push( '					</a> ');
+        _html.push( '					<a id="comdivcont_btnmax" data-maximiza="#comdivcont_pdf" data-ocultar="#comdivcont_coms" data-minimizar="false" data-hideobj=".comdivcontcls" data-target="#comdivcont_btnmin" class="p-0 m-0 btn-sm" style="display: none;" href="#" onclick="reqs.mincomentarios( this );"> ');
+        _html.push( '						<i class="far fa-window-maximize"></i>');
+        _html.push( '					</a> ');
+        _html.push( '				</div>' );
+        _html.push( '			</div>' );
+        
+        _html.push( '			<ul class="list-group mb-3 comdivcontcls">' );
+		_html.push( '				<li class="list-group-item p-0">' );
+		_html.push( '					<div class="form-floating">' );
+		_html.push( '						<textarea class="form-control" placeholder="Comentario aqu&iacute;" id="comdivcont_comentario"></textarea>' );
+		_html.push( '  						<label for="comdivcont_comentario">Comentario</label>' );
+		_html.push( '					</div>' );
+		_html.push( '				</li>' );
+		_html.push( '				<li class="list-group-item p-0 mt-1">' );
+		_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetesrequ_id="' + dt['id'] + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+		_html.push( '				</li>' );
+		_html.push( '			</ul>' );
+		
+		_html.push( '			<ul id="comdivcont_listcom" class="list-group comdivcontcls overflow-auto" style="height: 34vh;"></ul>' );
+        
+        _html.push( '		</div >' );
+        _html.push( '	</div >' );
         _html.push( '</div >' );
         
         cuerpo.html( _html.join('') );
@@ -237,8 +332,272 @@ const Requerimientos = function( dC ){ // dC = data constructor
         pieHtml.push('	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>');
 		pieHtml.push('</div>');
         cuerpo.after( pieHtml.join('') );
+        
+        if( dt['tipodoc'] == TIPODOCS_PACKS ){
+        	indexCom = 0;
+            const cfgGetCom = {
+            	'data' : dt,
+            	'fn' : function( oDt ){
+            		const dtcomms = oDt;
+                    for ( const key in dtcomms ) {
+                        if ( Object.hasOwnProperty.call( dtcomms, key ) ) {
+                            const _el = dtcomms[ key ];
+                            
+                            const comdivcont_item = "comdivcont_item_" + indexCom;
+                            const itemHtml = _this.comentarios_tpl({
+                    			'id' : comdivcont_item,
+                    			'firma' : ("" + _el['firma']).replace("==", "").replace("=",""),
+                    			'creador' : _el['usuarios'],
+                    			'texto' : _el['valor'],
+                    			'fecha' : _el['fecha'],
+                    			'idreg' : _el['id'],
+                    			'paquetesreqcomentariosestados_id' : _el['paquetesreqcomentariosestados_id']
+                    		});
+                            
+                            jQuery('#comdivcont_listcom').append( itemHtml );
+                            indexCom++;
+                        }
+                    }
+                    
+                    jQuery('[data-toggle="tooltip"]').tooltip();
+            	}
+            };
+            _this.comentarios_Obtener( cfgGetCom );
+        }
 
         jQuery( objmdlErr ).modal('show');
+	};
+
+<?php // TODO: Tarea 51 - Controlar en el front la carga de los comentarios desde el servidor ?>
+	_this.comentarios_Obtener = function( o ){
+		const dt = o['data'];
+		
+		dt['idmod'] = idMod;
+		const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperGet ); ?>');
+        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+		__TransportarData(
+			form_data,
+			function( oR ) {
+				const fn = o['fn'];
+				fn( oR );
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+			}
+		);
+	};
+	
+<?php // TODO: Tarea 55 - Controlar en el front enviar datos al servidor ?>
+	_this.comentarios_Agregar = function( o ){
+		const data = o['data'];
+		
+		let api = '';
+		if( data['tipodoc'] == TIPODOCS_PACKS ){
+			api = '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperAdd ); ?>';
+		}
+		
+		if( api === '' ){
+			alert('Api no implementada');
+		}
+		else{
+			const dt = { "valor" : data['valor'] , "paquetesrequ_id" : data['paquetesrequ_id'] };
+    		const form_data = new FormData();
+            form_data.append( 'ajax', api);
+            form_data.append( 'data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+            
+    		__TransportarData(
+    			form_data,
+    			function( oR ) {
+    				const fn = o['fn'];
+    				fn( oR );
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    			}
+    		);
+		}
+	};
+	
+<?php // TODO: Tarea 46 - Controlar en el front agregar comentarios  ?>
+	_this.comentarios_Agregar_Click = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const target = jQuery( dt['target'] );
+		const textobj = jQuery( dt['texto'] );
+		const texto = ("" + jQuery.trim( textobj.val() ) );
+		
+		if( texto.length > 5 ){
+			textobj.removeClass('is-invalid');
+			const cleantxt = texto
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+            
+            const firma = ut.b64EncodeUnicode( cleantxt ).replace("==", '').replace("=","");
+            
+            const existe = target.find('[data-firma="' + firma + '"]');
+            if (existe.length > 0) {
+            	alert('Comentario ya existe');
+            	
+            	existe.css({ backgroundColor: '#fff3cd', transition: 'background-color 1s ease' });
+                setTimeout(function(){ existe.css('backgroundColor', ''); }, 1000);
+                //target.animate({ scrollTop: existe.position().top + target.scrollTop() }, 400);
+                
+    			var container = target[0];
+                var elem = existe[0];
+                try {
+                    const containerRect = container.getBoundingClientRect();
+                    const elemRect = elem.getBoundingClientRect();
+                    const delta = elemRect.top - containerRect.top;
+                    const newpos = container.scrollTop + delta;
+                    jQuery(container).animate({ scrollTop: newpos }, 400);
+                } catch (e) {
+                    const fallback = elem.offsetTop || 0;
+                    jQuery(container).animate({ scrollTop: fallback }, 400);
+                }
+                
+            }
+            else{
+            	
+                const cfgAgregar = {
+        			'data' : { 'valor' : cleantxt , 'paquetesrequ_id' : dt['paquetesrequ_id'], 'tipodoc' : dt['tipodoc'] },
+        			'fn' : function( oR ){
+        				const result = oR['result'];
+        				
+        				const fahora = new Date();
+                        const hh = (fahora.getHours() > 9 ? fahora.getHours() : "0" + fahora.getHours() );
+                        const mm = (fahora.getMinutes() > 9 ? fahora.getMinutes() : "0" + fahora.getMinutes() );
+                        const ss = (fahora.getSeconds() > 9 ? fahora.getSeconds() : "0" + fahora.getSeconds() );
+                        const fnow = ut.formatoYYYYMMDD(fahora) + " " + hh + ":" + mm + ":" + ss ;
+                        
+                        const comdivcont_item = "comdivcont_item_" + indexCom;
+                		
+                		const _html = _this.comentarios_tpl({
+                			'id' : comdivcont_item,
+                			'firma' : firma,
+                			'creador' : "<?php echo $usu->getNombres() . " " . $usu->getApellidos() ?>",
+                			'texto' : cleantxt,
+                			'fecha' : fnow,
+                			'idreg' : result['idreg'],
+                			'paquetesreqcomentariosestados_id' : 1
+                		});
+                		
+                		const oHtml = jQuery( _html );
+                        
+                        target.append( oHtml );
+                        
+                        target.animate({ scrollTop: target[0].scrollHeight }, 400);
+                        oHtml.css({ backgroundColor: '#fff3cd', transition: 'background-color 1s ease' });
+                        setTimeout(function(){ oHtml.css('backgroundColor', ''); }, 1000);
+                        
+                        indexCom++;
+                        
+                        jQuery('[data-toggle="tooltip"]').tooltip();
+        				
+        			}
+        		};
+        		
+        		_this.comentarios_Agregar( cfgAgregar );
+            }
+            
+		}
+		else{
+			textobj.addClass('is-invalid');
+		}
+
+	};
+	_this.comentarios_tpl = function( o ){
+	
+		const _icons = {
+			'1' : {'ico' : '<i class="fas fa-star-of-life"></i>', 'nombre' : 'Nuevo'}, 
+			'2' : {'ico' : '<i class="fas fa-check"></i>', 'nombre' : 'Revisado'}, 
+			'3' : {'ico' : '<i class="fas fa-eraser"></i>', 'nombre' : 'Modificado'}, 
+			'4' : {'ico' : '<i class="fas fa-check-double"></i>', 'nombre' : 'Cerrado'}, 
+			'5' : {'ico' : '<i class="fas fa-trash-alt"></i>', 'nombre' : 'Eliminado'}
+		};
+	
+		const _id = o['id'];
+		const _firma = o['firma'];
+		const _creador = o['creador'];
+		const _texto = o['texto'];
+		const _fecha = o['fecha'];
+		const _idreg = o['idreg'];
+		const _paquetesreqcomentariosestados_id = o['paquetesreqcomentariosestados_id'];
+		
+		const _html = [];
+        _html.push('<div id="' + _id + '" data-idreg="' + _idreg + '" data-firma="' + _firma + '" class="list-group-item " aria-current="true"> ');
+        _html.push('	<h5 class="mb-1">' + _creador + '</h5> ');
+        _html.push('	<p class="mb-2 lh-1">' + _texto + '</p> ');
+		_html.push('	<small class="d-flex w-100 justify-content-between text-muted"> ');
+		_html.push('		<small>' + _fecha + '</small> ');
+		_html.push('		<div> ');
+		_html.push('			<a href="#" style="font-size: 0.8em;" data-target="#' + _id + '" data-idreg="' + _idreg + '" onclick="reqs.comentarios_Eliminar_Click( this );" ><i class="fas fa-trash"></i></a> ');
+		_html.push('			<span data-toggle="tooltip" data-placement="top" title="' + _icons[ _paquetesreqcomentariosestados_id ]['nombre'] + '">' + _icons[ _paquetesreqcomentariosestados_id ]['ico'] + '</span> ');
+		_html.push('		</div> ');
+		_html.push('	</small> ');
+		_html.push('</div>');
+		
+		return _html.join('');
+	};
+	
+<?php // TODO: Tarea 58 - Controlar en el front enviar datos al servidor para eliminar ?>
+	_this.comentarios_Eliminar = function( o ){
+		const data = o['data'];
+		
+		const dt = { "id" : data['idreg'] };
+		const form_data = new FormData();
+        form_data.append( 'ajax', '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperDel ); ?>' );
+        form_data.append( 'data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+        
+		__TransportarData(
+			form_data,
+			function( oR ) {
+				const fn = o['fn'];
+				fn( oR );
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+			}
+		);
+	};
+<?php // TODO: Tarea 47 - Controlar en el front eliminar comentarios  ?>
+	_this.comentarios_Eliminar_Click = function( o ){
+		if(confirm('Elimiar este elemento?')){
+			const _o = jQuery( o );
+    		const dt = _o.data();
+    		
+    		const cfgDel = {
+    			'data' : dt,
+    			'fn' :  function( oR ){
+    				const target = jQuery( dt['target'] );
+    				
+    				target.hide('fast', function(){
+            			target.remove();
+            		});
+    			}
+    		};
+    		
+    		_this.comentarios_Eliminar( cfgDel );
+		}
 	};
 	
 	const breadcrumbFlujo = function( dt ){
@@ -260,6 +619,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        if( nextfir == true ){
     	        	nextname = _el['nombre'];
     	        	nextid = _el['id'];
+    	        	nextfir = false;
     	        }
     	        
     	        let txt = _el['nombre'];
@@ -305,8 +665,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		//html.push('			<button id="btnDevolver" class="btn btn-warning" data-target="#contProce" onclick="reqs.btnCloseModInfo( this )" >Devolver a <span style="text-transform: capitalize;">' + nombrefull + '</span></button>');
 		html.push('		</div>');
 		html.push('		<div class="">');
-		html.push('			<button style="display: none;" id="btnContinuar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
-		html.push('			<button style="display: none;" id="btnFinalizar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
+		html.push('			<button style="display: none;" id="btnContinuar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
+		html.push('			<button style="display: none;" id="btnFinalizar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Finalizar solicitud" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
 		html.push('		</div>');
 		html.push('	</div>');
 		
@@ -324,7 +684,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        
     	        const fancy = ( "" + fl['filename'] ).replace(/sig_/ig, "").replace(/_/ig," ");
     	        
-				html.push('			<button data-url="' + _el['bs'] + '" data-firmantes="' + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + '" data-esfirmable="true" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + fancy + '</button>');
+				html.push('			<button data-url="' + _el['bs'] + '" data-firmantes="' + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + '" data-esfirmable="true" data-tipodoc="' + TIPODOCS_SIGNS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + fancy + '</button>');
 			}
 		}
 		html.push('		</div>');
@@ -342,7 +702,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        if( _el['paquetereqtipos_id'] !== 6 ){
     	        	if( ("" +  jQuery.trim( _el['valor'] ) ).length > 0 ){
     	        		confilesadj = true;
-    	        		html.push('			<button data-url="' + _el['valor'] + '" data-esfirmable="false" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _el['ref_label'] + '</button>');
+    	        		html.push('			<button data-id="' + _el['id'] + '" data-url="' + _el['valor'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_PACKS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _el['ref_label'] + '</button>');
     	        	}
     	        }
 			}
@@ -373,7 +733,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 	        
                 	        if( _eJs['file'] == 1 ){
                 	        	confiles = true
-                	        	html.push('			<button data-url="' + _el['value'] + '" data-esfirmable="false" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _eJs['label'] + '</button>');
+                	        	html.push('			<button data-id="' + _el['id'] + '" data-url="' + _el['value'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_ATTACHED + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _eJs['label'] + '</button>');
                 	        }
             	        }
         	        }
@@ -455,8 +815,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 
 		__TransportarData(
 			form_data,
-			function( o ) {
-				const result = o['result'];
+			function( oR ) {
+				const result = oR['result'];
 				target.hide('fast');
 		
         		contProce.show("fast", function(){
@@ -466,10 +826,12 @@ const Requerimientos = function( dC ){ // dC = data constructor
 					if (Number(flujosroles_id) === 3) {
 						htmlFinal += rol3FormHtml();
 					}
+					else if( parseInt( flujosroles_id ) === 4 ){
+						htmlFinal += rol4FormHtml( result );
+					}
 
 					card.html(htmlFinal);
 
-        			
         			if( nextname === "" ){
         				jQuery('#btnFinalizar').show('fast');
         				jQuery('#btnContinuar').hide('fast');
@@ -502,39 +864,92 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('  <h4 class="mb-2">Creación de Terceros</h4>');
 		html.push('  <form id="frmter" class="row g-3 frmtercls ">');
 
-		html.push('    <div class="col-md-6">');
-		html.push('      <label class="form-label">El usuario fue creado *</label>');
+		html.push('    <div class="col-md-5">');
+		html.push('      <label class="form-label" for="usuario">El usuario fue creado *</label>');
 		html.push('      <select class="form-select" id="usuario" name="usuario" required="required">');
-		html.push('        <option value="si">Sí</option>');
+		html.push('        <option value="si">S&iacute;</option>');
 		html.push('        <option value="no" selected>No</option>');
 		html.push('      </select>');
 		html.push('    </div>');
 
-		html.push('    <div class="col-md-6">');
-		html.push('      <label class="form-label">Fecha de creación *</label>');
+		html.push('    <div class="col-md-5">');
+		html.push('      <label class="form-label" for="fecha">Fecha de creaci&oacute;n *</label>');
 		html.push('      <input type="date" class="form-control" id="fecha" name="fecha" required="required">');
 		html.push('    </div>');
 
-		html.push('    <div class="col-12 text-end mt-3">');
-		html.push('      <button class="btn btn-primary" type="button" onclick="reqs.crearTercero(this);"  >Crear Tercero</button>');
+		html.push('    <div class="col-md-2 mt-3 d-flex align-items-end">');
+		html.push('      <button class="btn btn-primary" type="button" onclick="reqs.crearTercero(this);"  >Confirmar creaci&oacute;n</button>');
 		html.push('    </div>');
 
 		html.push('  </form>');
 		html.push('</div>');
 		return html.join("");
 	};
+	
+	const rol4FormHtml = function( d ) {
+		const datosmes = d['datosmes'];
+		const ddones = datosmes['deducciones'];
+		
+		const valorccobro = datosmes['valorccobro'];
+		
+		deducciones.valorIndiceId( 0 );
+		
+		let totaldesc = 0;
+		const fieldsTmp = [];
+        for (const key in ddones) {
+    	    if (Object.hasOwnProperty.call( ddones, key ) ) {
+    	        const _el = ddones[key];
+    	        
+    	        const dtCamps = deducciones.tplcampos( { "cod" : _el['cod'], "desc" : _el['desc'], "perc" : _el['perc'], "baser" : valorccobro } );
+    	        fieldsTmp.push ( dtCamps['html'] );
+    	        
+    	        totaldesc += dtCamps['descuento'];
+	        }
+        }
+	
+		const html = [];
+		html.push('<div class="mt-3">');
+		html.push('	<h4 class="mb-2">Deducciones</h4>');
+		html.push('	<form id="frmcuarto" class="row frmcuartocls mb-3" >');
+		html.push('		' + fieldsTmp.join('') );
+		html.push('	</form>');
+
+		const totaldescformat = ut.intToPesos( (totaldesc || 0) ,2,',','.');
+		html.push('	<div class="row mb-3 d-flex justify-content-end border-top pt-2" >');
+		html.push('		<div class="col-1 text-end">');
+		html.push('			<strong>Total</strong>');
+		html.push('		</div>');
+		html.push('		<div class="col-3" id="lbltotaldescuentos">');
+		html.push('			$ ' + totaldescformat + '');
+		html.push('		</div>');
+		html.push('		<div class="col-1"></div>');
+		html.push('	</div>');
+		
+		html.push('	<div class="mt-3"> ');
+		html.push('		<div class="row"> ');
+		html.push('			<div class="col-6"> ');
+		html.push('					<button data-target="#frmcuarto" data-valorccobro="' + valorccobro +'" onclick="deducciones.agregar_click( this );" class="btn btn-secondary w-100" type="button">Agregar deducci&oacute;n</button>');
+		html.push('			</div> ');
+		html.push('			<div class="col-6"> ');
+		html.push('				<button type="button" class="btn btn-primary w-100" onclick="reqs.actualizarDeducciones( this ); ">Guardar estas deducciones</button> ');
+		html.push('			</div> ');
+		html.push('		</div> ');
+		html.push('	</div> ');
+		
+		html.push('</div>');
+		
+		return html.join("");
+	};
 
 	_this.crearTercero = function( o ) {
-		
-		
 		ut.validarFrm('frmtercls', function (r) {
 			r.paquetes_id = idMod;
 			const form_data = new FormData();
 			form_data.append('ajax', '<?php echo md5(IndexCtrl::API_PaquetesAdminReg_Helper_Add); ?>');
 			form_data.append('data', ut.b64EncodeUnicode(JSON.stringify(r)));
 			__TransportarData(
-	  form_data,
-	  function (o) {
+				form_data,
+				function (o) {
 					const result = o.result;
 					const objmdl2 = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Carga de datos', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
 					const alerta = jQuery(objmdl2 + ' div.alert');
@@ -542,7 +957,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 					alerta.html('Carga correcta');
 
 					jQuery(objmdl2).modal('show');
-					setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+					//setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
 				},
 				function (err) {
 					const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
@@ -561,7 +976,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	
 	const btnInfoHtml = function( dtInfo ){
 		const html = [];
-    	html.push('<button onclick="reqs.modInfo(this);" data-flujos_id="' + dtInfo.flujos_id + '" data-empleados_id="' + dtInfo.empleados_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
+    	html.push('<button onclick="reqs.modInfo(this);" data-mesaplica="' + dtInfo.mesaplica + '" data-flujos_id="' + dtInfo.flujos_id + '" data-empleados_id="' + dtInfo.empleados_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
         html.push('	<i class="bi bi-eye-fill fs-5"></i>');
         html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
         html.push('		<h6 class="mb-0 text-white">Editar</h6>');
@@ -644,14 +1059,51 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			tbInter.ajax.reload(null, false);
         }
     };
-};
+    
+    _this.actualizarDeducciones = function( d ){
+    	ut.validarFrm('frmcuartocls', function (r) {
+			const opc = { 'id' : 'ajaxldr' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+			
+			const form_data = new FormData();
+			form_data.append( 'ajax', '<?php echo md5(IndexCtrl::API_DeduccionesHelperAdd ); ?>');
+			form_data.append( 'data', ut.b64EncodeUnicode(JSON.stringify(r)));
+			form_data.append( 'idMod', idMod );
+			
+			__TransportarData(
+				form_data,
+				function (o) {
+					controlgbl.setCambios( false );
+				
+					const result = o.result;
+					const objmdl2 = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Guardado', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+					const alerta = jQuery(objmdl2 + ' div.alert');
+					alerta.attr('class', 'alert alert-success');
+					alerta.html('Guardado correctamente');
+
+					jQuery(objmdl2).modal('show');
+					setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+				},
+				function (err) {
+					const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+					const alerta = jQuery(objmdlErr + ' div.alert');
+					alerta.attr('class', 'alert alert-danger');
+					alerta.html( err.responseText );
+
+					jQuery(objmdlErr).modal('show');
+					setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+				}
+			);
+		});
+    };
+}
 
 const chkArchivo = function( o ){
 	chkUploadFiles( o, <?php echo Utiles::getPostMaxSizeMB() ; ?>, function( fl ){
 		console.log( fl );
 	});
 };
-
 
 let reqs = null;
 const listaProcesos = function(){
@@ -661,7 +1113,31 @@ const listaProcesos = function(){
 	reqs = new Requerimientos ( dataConstruct );
 	reqs.dibujarDataTable();
 };
+
+// obj deducciones
+let deducciones;
+
+// Control Global de modificaciones
+let controlgbl = null;
 jQuery( document ).ready(function(){
 	listaProcesos();
+	
+	controlgbl = new ControlCambiosGlobal({
+    	usarModalBootstrap: true,
+    	onSave: function(done) {
+    		setTimeout(function() {
+    			console.log("Cambios guardados.");
+    			done(true);
+    		}, 1000);
+        },
+    	onDiscard: function() {
+    		alert("No guard\xF3 los cambios");
+    	}
+    });
+	
+	deducciones = new Deducciones();
+	deducciones.instanceName = "deducciones";
+	deducciones.instanceNameCtrlCambios = controlgbl;
+	deducciones.labeltotal = "#lbltotaldescuentos";
 });
 </script>

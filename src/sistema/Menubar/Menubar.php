@@ -138,7 +138,8 @@ class Menubar {
         
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN )
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO )
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::ACTIVIDADES_MIACTIVIDADES );
@@ -182,7 +183,8 @@ class Menubar {
 
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN )
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO )
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::SISTEMA_PREFERENCIAS );

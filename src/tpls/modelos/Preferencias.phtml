@@ -4,7 +4,11 @@ use src\sistema\Headerbar\Headerbar;
 
 $cfg = OperacionesCtrl::LeerConfigCorp();
 
+// Almacenamiento
 $_CFG_ALMACENAMIENTO_TAMANO = intval( isset( $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]) ? $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]["val"] : '5' );
+
+// Deducciones
+//$_CFG_DEDUCCIONES_DATA = intval( isset( $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]) ? $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]["val"] : base64_encode( '[]' ) );
 
 $usu = null;
 if ( Seguridad::isLogin() ) {
@@ -72,7 +76,7 @@ try {
 
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-12">
-                    <h4 class="mb-1">Configuraciones de la plataforma</h4>
+                    <h4 class="mb-3">Configuraciones de la plataforma</h4>
                 	
                 	<?php if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ) :?>
                 	<div class="row">
@@ -99,6 +103,108 @@ try {
                         </div>
                 	</div>
                 	<?php endif; ?>
+                	
+                	<?php if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
+                	    $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
+                	    $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO ) : ?>
+                	<div class="row">
+                        <div class="col-12 mb-3" >
+                        
+                        	<div class="card">
+                    			<div class="card-body">
+                    				<h5 >Estandar deducciones</h5>
+                    				<p class="mb-4">Personalice las deducciones que se realizaran a los usuarios</p>
+                    				
+                    				<div class="row">
+                    					<div class="col-12">
+                    						
+                    						<ul class="nav nav-tabs mb-3" id="pills-tab" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                	<button class="nav-link active" id="pills-crear-tab" data-bs-toggle="pill" data-bs-target="#pills-crear" type="button" role="tab" aria-controls="pills-crear" aria-selected="true">Crear Condiciones</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                	<button class="nav-link" id="pills-guardados-tab" data-bs-toggle="pill" data-bs-target="#pills-guardados" type="button" role="tab" aria-controls="pills-guardados" aria-selected="false" onclick="listarDeducciones( this );">Disponibles</button>
+                                                </li>
+                                            </ul>
+                                            <div class="tab-content" id="pills-tabContent">
+                                                <div class="tab-pane fade show active" id="pills-crear" role="tabpanel" aria-labelledby="pills-crear-tab">
+                                                	<form id="frmcomp" class="frmcompcls">
+                                                    	<div class="row">
+                                                    	
+                                                    		<div class="col-2 pe-0">
+    															<label class="visually-hidden" for="deduc_comparador">Comparador</label>
+    															<div class="input-group">
+    																<select data-target="#deduc_lbl_valor" data-compare="#deduc_comparador" data-valor="#deduc_valor" data-compare2="#deduc_comparador2" data-valor2="#deduc_valor2" onchange="deducciones.resumen( this );" class="form-select" id="deduc_comparador" name="deduc_comparador">
+                                                                        <option disabled selected value="">Seleccione</option>
+                                                                        <option value="na">No aplica</option>
+                                                                        <option value="menor">&lt;</option>
+                                                                        <option value="menorigual">&lt;=</option>
+                                                                        <option value="mayor">&gt;</option>
+                                                                        <option value="mayorigual">&gt;=</option>
+    																</select>
+    															</div>
+    														</div>
+    														<div class="col-3 ps-0">
+    															<label class="visually-hidden" for="deduc_valor">Comparador</label>
+    															<input data-target="#deduc_lbl_valor" data-compare="#deduc_comparador" data-valor="#deduc_valor" data-compare2="#deduc_comparador2" data-valor2="#deduc_valor2" onkeyup="deducciones.resumen( this );" type="number" id="deduc_valor" name="deduc_valor" class="form-control" aria-label="Monto">
+    														</div>
+    														
+    														<div class="col-2 d-flex justify-content-center align-items-center px-0">
+    															<label>Y</label>
+    														</div>
+    														
+    														<div class="col-2 pe-0">
+    															<label class="visually-hidden" for="deduc_comparador2">Comparador</label>
+    															<div class="input-group">
+    																<select data-target="#deduc_lbl_valor" data-compare="#deduc_comparador" data-valor="#deduc_valor" data-compare2="#deduc_comparador2" data-valor2="#deduc_valor2" onchange="deducciones.resumen( this );" class="form-select" id="deduc_comparador2" name="deduc_comparador2">
+                                                                        <option disabled selected value="">Seleccione</option>
+                                                                        <option value="na">No aplica</option>
+                                                                        <option value="menor">&lt;</option>
+                                                                        <option value="menorigual">&lt;=</option>
+                                                                        <option value="mayor">&gt;</option>
+                                                                        <option value="mayorigual">&gt;=</option>
+    																</select>
+    															</div>
+    														</div>
+    														<div class="col-3 ps-0">
+    															<label class="visually-hidden" for="deduc_valor2">Comparador 2</label>
+    															<input data-target="#deduc_lbl_valor" data-compare="#deduc_comparador" data-valor="#deduc_valor" data-compare2="#deduc_comparador2" data-valor2="#deduc_valor2" onkeyup="deducciones.resumen( this );" type="number" id="deduc_valor2" name="deduc_valor2" class="form-control" aria-label="Monto">
+    														</div>
+                                                    		
+                                                    		<div id="deduc_lbl_valor" class="col-12 text-muted fs-6 mt-1 mb-2">&nbsp;</div>
+                                                    	</div>
+                                                    	
+                                                    	<div class="row">
+                                                			<div id="frmcuarto" class="row mb-3" ></div>
+    														<div class="d-grid gap-2">
+    															<button data-target="#frmcuarto" onclick="deducciones.agregar_click( this );" class="btn btn-secondary" type="button">Agregar deducci&oacute;n</button>
+    															<button id="btndeducGuardar" data-formcls="frmcompcls" data-firma="#deduc_lbl_valor" data-modificar="false" onclick="btnDeduccionGuardar( this );" class="btn btn-primary" type="button">Guardar deducciones</button>
+    															<button id="btndeducModificar" data-formcls="frmcompcls" data-firma="#deduc_lbl_valor" data-modificar="true" onclick="btnDeduccionGuardar( this );" class="btn btn-primary btnsMods" type="button" style="display: none;">Modificar deducciones</button>
+    															<button id="btndeducCancelar" data-modificar="false" onclick="btnDeducCancelar( this );" class="btn btn-danger" type="button" style="display: none;">Cancelar Cambio</button>
+    														</div>
+                                                    	</div>
+                                                	</form>
+                                                </div>
+                                                <div class="tab-pane fade" id="pills-guardados" role="tabpanel" aria-labelledby="pills-guardados-tab">
+                                                	<div class="row" id="contTb">
+                                                    	<div class="col-3">
+                                                        	<div class="d-flex align-items-center">
+                                                              <strong>Loading...</strong>
+                                                              <div class="spinner-border spinner-border-sm ms-auto" role="status" aria-hidden="true"></div>
+                                                            </div>
+                                                    	</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                    					</div>
+                    				</div>
+                    				
+                    			</div>
+                    		</div>
+                        
+                        </div>
+                    </div>
+                    <?php endif; ?>
 
                 </div>
 
@@ -109,7 +215,80 @@ try {
     </div>
 </div>
 
+<script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
 <script type="application/javascript">
+<?php 
+/*
+ * @yalfonso
+ * TODO: Tarea 20 - Crear m&eacute;todo que guarda la configuraci&oacute;n global de los perfiles de contabilidad
+ */
+?>
+const btnDeduccionGuardar = function( o ){
+	deducciones.guardar_click( o , function(){
+		jQuery('#pills-guardados-tab').trigger('click');
+		jQuery('#frmcuarto').html('');
+		document.getElementById('frmcomp').reset();
+		jQuery('#deduc_comparador,#deduc_valor,#deduc_comparador2,#deduc_valor2').prop('disabled', false);
+	});
+};
+<?php 
+/*
+ * @yalfonso
+ * TODO: Tarea 21 - Crear m&eacute;todo que modifica la configuraci&oacute;n global de los perfiles de contabilidad
+ */
+?>
+const btnDeduccionEditar = function( o ){
+	jQuery( o ).attr('data-target', '#frmcuarto');
+	deducciones.editar_click( o , function( dt ){
+		jQuery('#pills-crear-tab').tab('show');
+		jQuery('#frmcuarto').html('');
+		document.getElementById('frmcomp').reset();
+		jQuery('#deduc_comparador,#deduc_valor,#deduc_comparador2,#deduc_valor2').prop('disabled', true);
+		jQuery('#btndeducModificar, #btndeducCancelar').show('fast');
+		jQuery('#btndeducGuardar').hide('fast');
+	});
+};
+
+const btnDeducCancelar = function( o ){
+	jQuery('#frmcuarto, #deduc_lbl_valor').html('');
+	document.getElementById('frmcomp').reset();
+	jQuery('#deduc_comparador,#deduc_valor,#deduc_comparador2,#deduc_valor2').prop('disabled', false);
+	jQuery('#btndeducModificar, #btndeducCancelar').fadeOut('fast');
+	jQuery('#btndeducGuardar').show('fast');
+};
+<?php 
+/*
+ * @yalfonso
+ * TODO: Tarea 22 - Crear m&eacute;todo lista las posibles deducciones que aplican para el usuario que radica cuenta de cobro
+ */
+?>
+const listarDeducciones = function(){
+    const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+    
+    const form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_DeduccionesVirtualGetAjax ); ?>');
+    
+    __TransportarData(
+        form_data,
+        function( o ) {
+        	deducciones.dibujarDataTable( { 'contenedor' : '#contTb', 'data' : o , 'editar' : 'btnDeduccionEditar' } );
+        	setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        },
+        function ( err ) {
+        	const oErr = err.responseJSON;
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( oErr['msj'] );
+    
+            jQuery( objmdlErr ).modal('show');
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        }
+    );
+};
+
 const btnFirmCfgFrm = function( o ){
     const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
     const objmdl = mngModal.dibujar( opc );
@@ -149,4 +328,8 @@ const btnFirmCfgFrm = function( o ){
     
 };
 
+let deducciones;
+jQuery( document ).ready(function(){
+	deducciones = new Deducciones();
+});
 </script>

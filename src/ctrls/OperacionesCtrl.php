@@ -817,6 +817,9 @@ class OperacionesCtrl {
 	// Espacio almacenamiento
 	const CFG_ALMACENAMIENTO_TAMANO = 'cfgalmacenamientotamano';
 	
+	// Deducciones precargadas
+	const CFG_DEDUCCIONES_DATA = 'cfgdeduccionesdata';
+	
 	// Configuracion para requerimientos
 	const CFG_REQUERIMIENTOS_MEZCLA = 'cfgrequerimientosmezcla';
 	
@@ -3496,6 +3499,11 @@ class OperacionesCtrl {
 	        $pr[] = $d['w_empleadosobjetivos_id'];
 	    }
 	    
+	    if ( isset( $d['w_paquetesrequ_id'] ) ) {
+	        $wh[] = 'paquetesrequ_id = ?';
+	        $pr[] = $d['w_paquetesrequ_id'];
+	    }
+	    
 	    if ( count( $wh ) == 0 ) {
 	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	        throw new Exception( 'empleadosobjetivoslog_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
@@ -3517,7 +3525,8 @@ class OperacionesCtrl {
 	public static function empleadosobjetivoslog_Helper_Agregar( $d ){
 	    $regQry = [
 	        'w_empleadosobjetivos_id' => $d['empleadosobjetivos_id'],
-	        'w_requerimientostplsitems_id' => $d['requerimientostplsitems_id']
+	        //'w_requerimientostplsitems_id' => $d['requerimientostplsitems_id']
+	        'w_paquetesrequ_id' => $d['paquetesrequ_id']
 	    ];
 	    $qryReg = self::empleadosobjetivoslog_Obtener( $regQry );
 	    
@@ -3526,7 +3535,8 @@ class OperacionesCtrl {
 	        $regUpd = [
 	            'descripcion' => $d['descripcion'],
 	            'w_empleadosobjetivos_id' => $d['empleadosobjetivos_id'],
-	            'w_requerimientostplsitems_id' => $d['requerimientostplsitems_id']
+	            //'w_requerimientostplsitems_id' => $d['requerimientostplsitems_id']
+	            'w_paquetesrequ_id' => $d['paquetesrequ_id']
 	        ];
 	        
 	        if ( !empty( $d['archivos'] ) ) {
@@ -4724,6 +4734,646 @@ class OperacionesCtrl {
 	}
 	// Apibox FIN
 	
+	// Datosmes INI
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 14 - Crear controlador tipo helper del modelo datos mes para Agregar
+	 */
+	public static function datosmes_Helper_Agregar ( $d ) {
+	    $empleados_id = $d['empleados_id'];
+	    
+	    $qryem = self::empleados_Obtener( [ 'id' => $empleados_id ] );
+	    $nombrefull = "";
+	    foreach ( $qryem as $kEmpl ) {
+	        $nombrefull = $kEmpl['nombres'] . " " .$kEmpl['apellidos'];
+	    }
+	    
+	    $existe = [];
+	    try {
+	        $existe = self::datosmes_Obtener([ 'w_mesaplica' => $d['mesaplica'], 'w_empleados_id' => $empleados_id ]);
+	    } catch (Exception $e) {
+	        throw new Exception( 'datosmes_Obtener: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    $dAdd = [
+	        'contrato' => $d['contrato'],
+	        'empleados_id' => $empleados_id,
+	        'mesaplica' => $d['mesaplica'],
+	        'valorccobro' => preg_replace('/\D/', '', $d['valorccobro'] ),
+	        'usuariosmod' => $nombrefull
+	    ];
+	    
+	    if ( count( $existe ) > 0 ) {
+	        $datosmesDt = $existe[0];
+	        $dAdd['id'] = $datosmesDt['id'];
+	        
+	        try {
+	            self::datosmes_Modificar( $dAdd );
+	        } catch (Exception $e) {
+	            throw new Exception( 'datosmes_Modificar: ' . $e->getMessage(), $e->getCode() );
+	        }
+	    }
+	    else {
+	        try {
+	            self::datosmes_Agregar( $dAdd );
+	        } catch (Exception $e) {
+	            throw new Exception( 'datosmes_Agregar: ' . $e->getMessage(), $e->getCode() );
+	        }
+	    }
+	    
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 15 - Crear controlador del modelo datos mes para Obtener
+	 */
+	public static function datosmes_Obtener( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "dtmes.`id`, dtmes.`mesaplica`, dtmes.`valorccobro`, dtmes.`contrato`, dtmes.`fecha`, ";
+	    $vr .= "dtmes.empleados_id, concat( empl.nombres, ' ', empl.apellidos ) as empleados_fullname, ";
+	    $vr .= "dtmes.`usuariosmod`, dtmes.fechamod, dtmes.`paquetes_id`, pkg.nombre as paquetes_nombres ";
+
+	    $tb  = 'datosmes as dtmes ';
+	    
+	    $jn  = 'LEFT JOIN paquetes as pkg on pkg.id = dtmes.paquetes_id ';
+	    $jn .= 'LEFT JOIN empleados as empl on empl.id = dtmes.empleados_id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "dtmes.`id` = ?";
+	        $pr[] = $d['id'];
+	    }
+	    if( isset( $d['w_mesaplica'] ) ){
+	        $wh[] = "dtmes.`mesaplica` = ?";
+	        $pr[] = $d['w_mesaplica'];
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr);
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( 'datosmes_Obtener: ' . $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    return $r;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 16 - Crear controlador del modelo datos mes para Agregar
+	 */
+	public static function datosmes_Modificar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() );
+	    }
+	    
+	    $tb  = "datosmes ";
+	    $aSt = array();
+	    if ( isset( $d['valorccobro'] ) ) {
+	        $aSt['valorccobro'] = $d['valorccobro'] ;
+	    }
+	    if ( isset( $d['contrato'] ) ) {
+	        $aSt['contrato'] = $d['contrato'] ;
+	    }
+	    if ( isset( $d['usuariosmod'] ) ) {
+	        $aSt['usuariosmod'] = $d['usuariosmod'] ;
+	    }
+	    $aSt['fechamod'] = date('Y-m-d H:i:s');
+	    
+	    $pr = [];
+	    $wh  = '';
+	    if ( isset( $d['id'] ) ) {
+	        $wh  = 'id = ?';
+	        $pr[]  = $d['id'];
+	    }
+	    if ( isset( $d['w_usuariosmod'] ) ) {
+	        $wh  = 'id = ?';
+	        $pr[]  = $d['w_usuariosmod'];
+	    }
+	    if ( $wh == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'formularios_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    $xt = $wh;
+	    
+	    //die('UPDATE ' . $tb . ' SET ' . $st . ' ' . $xt);
+	    $cu = null;
+	    try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception( 'formularios_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    
+	    return $cu;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 17 - Crear controlador del modelo datos mes para Agregar
+	 */
+	public static function datosmes_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $o = new Datosmes();
+	    if (isset( $d['mesaplica'] ) ) {
+	        $o->setMesaplica( $d['mesaplica'] );
+	    }
+	    if (isset( $d['titulo'] ) ) {
+	        $o->setTitulo( $d['titulo'] );
+	    }
+	    if (isset( $d['valorccobro'] ) ) {
+	        $o->setValorccobro( $d['valorccobro'] );
+	    }
+	    if (isset( $d['contrato'] ) ) {
+	        $o->setContrato( $d['contrato'] );
+	    }
+	    if (isset( $d['empleados_id'] ) ) {
+	        $o->setEmpleados_id( $d['empleados_id'] );
+	    }
+	    if (isset( $d['usuariosmod'] ) ) {
+	        $o->setUsuariosmod( $d['usuariosmod'] );
+	    }
+	    if (isset( $d['paquetes_id'] ) ) {
+	        $o->setPaquetes_id( $d['paquetes_id'] );
+	    }
+	    $o->setFecha( date("Y-m-d H:i:s") );
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	}
+	// Datosmes FIN
+	
+	// Deducciones INI
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 37 - Crear funci&oacute;n que ayude a agregar o modificar las deducciones
+	 */
+	public static function deducciones_Helper_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $regQry = [];
+	    try {
+	        $regQry = self::deducciones_Obtener( [ "w_paquetes_id" => $d['idMod'] ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        return self::retorno( [], $e->getCode(), 'deducciones_Helper_Agregar - deducciones_Obtener: ' . $e->getMessage() ) ;
+	    }
+	    
+	    if ( count( $regQry ) > 0 ) {
+	        $dedu = $regQry[ 0 ];
+	        try {
+	            self::deducciones_Modificar( [ "id" => $dedu['id'], "valor" => $data ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'deducciones_Helper_Agregar - deducciones_Modificar: ' . $e->getMessage() ) ;
+	        }
+	    }
+	    else {
+	        try {
+	            self::deducciones_Agregar( [ "paquetes_id" => $d['idMod'], "valor" => $data ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'deducciones_Helper_Agregar - deducciones_Agregar: ' . $e->getMessage() ) ;
+	        }
+	    }
+	    
+	    return self::retorno( [ "data" => $json, "idMod" => $d['idMod'], "regQry" => $regQry ], 0, '') ;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 38 - Crear funci&oacute;n que agregue las deducciones
+	 */
+	public static function deducciones_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $o = new Deducciones();
+	    if (isset( $d['paquetes_id'] ) ) {
+	        $o->setPaquetes_id( $d['paquetes_id'] );
+	    }
+	    if (isset( $d['valor'] ) ) {
+	        $o->setValor( $d['valor'] );
+	    }
+	    $o->setUsuarios( $usu->getNombres() . ' ' . $usu->getApellidos() );
+	    $o->setFecha( date('Y-m-d H:i:s') );
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( '[' . IndexCtrl::ERR_COD_MSJ_ERR_COMUN . '] firmaslog_Agregar: ' . $o->obtenerError() );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'firmaslog_Agregar: Respuesta no implementada' );
+	    }
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 39 - Crear funci&oacute;n que obtenga las deducciones
+	 */
+	public static function deducciones_Obtener( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "deds.`id`, deds.`paquetes_id`, pks.nombre as paquetes_nombre, pks.empleados_id as paquetes_empleados_id, ";
+	    $vr .= "pks.empleados as empleados_empleados, pks.mesaplica as paquetes_mesaplica, deds.`valor`, deds.`usuarios`, deds.`fecha` ";
+	    
+	    $tb  = '`deducciones` as deds ';
+	    
+	    $jn  = 'LEFT JOIN paquetes as pks on pks.id = deds.paquetes_id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "deds.`id` = ?";
+	        $pr[] = $d['id'];
+	    }
+	    if( isset( $d['w_paquetes_id'] ) ){
+	        $wh[] = "deds.paquetes_id = ?";
+	        $pr[] = $d['w_paquetes_id'];
+	    }
+	    if( isset( $d['w_empleados_id'] ) ){
+	        $wh[] = 'pks.empleados_id = ?' ;
+	        $pr[] = $d['w_empleados_id'];
+	    }
+	    if( isset( $d['w_mesaplica'] ) ){
+	        $wh[] = 'pks.mesaplica = ?' ;
+	        $pr[] = $d['w_mesaplica'];
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr); //Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    
+	    return $r;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 40 - Crear funci&oacute;n que modifique las deducciones
+	 */
+	public static function deducciones_Modificar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb  = "deducciones ";
+	    $aSt = array();
+	    if (isset( $d['valor'] ) ) {
+	        $aSt['valor'] = $d['valor'] ;
+	    }
+	    $aSt['usuarios'] = $usu->getNombres() . ' ' . $usu->getApellidos();
+	    $aSt['fecha'] = date('Y-m-d H:i:s') ;
+	    
+	    $pr = [];
+	    $wh  = '';
+	    if ( isset( $d['id'] ) ) {
+	        $wh  = 'id = ?';
+	        $pr[] = $d['id'];
+	    }
+	    if ( isset( $d['w_paquetes_id'] ) ) {
+	        $wh  = 'paquetes_id = ?';
+	        $pr[] = $d['w_paquetes_id'] ;
+	    }
+	    
+	    if ( $wh == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    $xt = $wh;
+	    
+	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' WHERE ' . $xt);
+	    
+	    $cu = null;
+	    try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception($th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    
+	    return $cu;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 41 - Crear funci&oacute;n que eliminar las deducciones
+	 */
+	public static function deducciones_Eliminar( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb = "deducciones ";
+	    $xt = '';
+	    
+	    if ( isset( $d['id'] ) ) {
+	        $xt = "WHERE id = " . $d['id'] . " ";
+	    }
+	    
+	    if ( $xt == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'Debe indicar filtros',IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	    
+	    try {
+	        return Singleton::_classicDelete( $tb, $xt );
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	}
+	// Deducciones FIN
+	
+	// Deducciones (virtual) INI
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 23 - Crear funci&oacute;n que obtenga la configuraci&oacute;n de las posibles deducciones
+	 */
+	public static function deducciones_Config_Obtener( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'deducciones_Config_Obtener - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_DEDUCCIONES_DATA = isset( $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]) ? $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]["val"] : base64_encode( '{}' );
+	    
+	    $cfgDt = json_decode( base64_decode( $_CFG_DEDUCCIONES_DATA ) , true );
+	    
+	    if ( isset( $cfgDt[ $d['firma'] ] ) ) {
+	        return $cfgDt[ $d['firma'] ];
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_USUARIO_NO_EXISTE_BY_ID );
+	        return self::retorno([], IndexCtrl::ERR_COD_USUARIO_NO_EXISTE_BY_ID, 'deducciones_Config_Obtener - Registro ' . $d['firma'] . ' no existe');
+	    }
+	    
+	    
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 24 - Crear funci&oacute;n que obtenga la configuraci&oacute;n de las posibles deducciones en formato legible para DataTable
+	 */
+	public static function deducciones_Config_Obtener_Ajax( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'deducciones_Config_Obtener_Ajax - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    	    
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_DEDUCCIONES_DATA = isset( $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]) ? $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]["val"] : base64_encode( '{}' );
+	    
+	    $cfgDt = json_decode( base64_decode( $_CFG_DEDUCCIONES_DATA ) , true );
+	    
+	    $data = [];
+	    foreach ( $cfgDt as $kDt ) {
+	        $data[] = [
+	            "firma" => $kDt['firma'],
+	            "criterio" => base64_decode( $kDt['firma'] ),
+	            "deducciones" => count($kDt['deducciones']),
+	            "fecha" => $kDt['fecha'],
+	            "usuario" => $kDt['usuario'],
+	            "fechamod" => $kDt['fechamod'],
+	            "registro" => $kDt //base64_encode( json_encode( $kDt ) )
+	        ];
+	    }
+	    
+	    return $data;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 25 - Crear funci&oacute;n que elimina la configuraci&oacute;n de las posibles deducciones
+	 */
+	public static function deducciones_Config_Eliminar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'deducciones_Config_Eliminar - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $firma = str_replace("==","",$json['firma']);
+	    $firma = str_replace("=","",$firma);
+	    
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_DEDUCCIONES_DATA = isset( $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]) ? $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]["val"] : base64_encode( '{}' );
+	    
+	    $cfgDt = json_decode( base64_decode( $_CFG_DEDUCCIONES_DATA ) , true );
+	    
+	    if ( isset( $cfgDt[ $firma ] ) ) {
+	        unset( $cfgDt[ $firma ] );
+	    }
+	    
+	    $newCfg = [
+	        "id" => OperacionesCtrl::CFG_DEDUCCIONES_DATA,
+	        "vl" => base64_encode( json_encode( $cfgDt ) ),
+	        "ufull" => trim( $usu->getNombres() . " " . $usu->getApellidos())
+	    ];
+	    try {
+	        self::EscribirConfig( $newCfg );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        return self::retorno([], IndexCtrl::ERR_COD_MSJ_ERR_COMUN, 'deducciones_Config_Eliminar - EscribirConfig: ' . $e->getMessage());
+	    }
+	    
+	    return self::retorno(['return' => true], '', '') ;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 26 - Crear funci&oacute;n que agrege las deducciones que se aplicar&aacute;n a los usuarios
+	 */
+	public static function deducciones_Config_Agregar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'deducciones_Config_Agregar - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    //die( 'json: ' . print_r( $json , true ) );
+	    
+	    $firma = str_replace("==","",$json['firma']);
+	    $firma = str_replace("=","",$firma);
+	    $modificar = filter_var( isset( $json['modificar'] ) ? $json['modificar'] : false , FILTER_VALIDATE_BOOLEAN);
+	    
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_DEDUCCIONES_DATA = isset( $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]) ? $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]["val"] : base64_encode( '{}' );
+	    
+	    $cfgDt = json_decode( base64_decode( $_CFG_DEDUCCIONES_DATA ) , true );
+	    
+	    //echo ( "json: " . print_r( $json, true ) );
+	    if ( $modificar ) {
+	        if ( isset( $cfgDt[ $firma ] ) ) {
+	            //$json['fechamod'] = date("Y-m-d H:i:s");
+	            //$cfgDt[ $firma ] = $json;
+	            foreach ( $cfgDt[ $firma ] as $kJsn => $vJsn ) {
+	                if( isset( $json[ $kJsn ] ) ){
+	                   $cfgDt[ $firma ][ $kJsn ] = $json[ $kJsn ];
+	                }
+	                else {
+	                    $cfgDt[ $firma ][ $kJsn ] = $vJsn;
+	                }
+	            }
+	            $cfgDt[ $firma ]['fechamod'] = date("Y-m-d H:i:s");
+	        }
+	        else {
+	            http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	            return self::retorno([], IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO, 'Esta condici&oacute;n no existe');
+	        }
+	    }
+	    else {
+	        if ( isset( $cfgDt[ $firma ] ) ) {
+	            http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+	            return self::retorno([], IndexCtrl::ERR_COD_REGISTRO_EXISTENTE, 'Esta condici&oacute;n ya existe');
+	        }
+	        $json['fecha'] = date("Y-m-d H:i:s");
+	        $json['usuario'] = trim( $usu->getNombres() . " " . $usu->getApellidos());
+	        $json['fechamod'] = "";
+	        $cfgDt[ $firma ] = $json;
+	        
+	    }
+	    
+	    //echo ( "cfgDt: " . print_r( $cfgDt, true ) );
+	    //die();
+	    
+	    $newCfg = [
+	        "id" => OperacionesCtrl::CFG_DEDUCCIONES_DATA,
+	        "vl" => base64_encode( json_encode( $cfgDt ) ),
+	        "ufull" => trim( $usu->getNombres() . " " . $usu->getApellidos())
+	    ];
+	    try {
+	        self::EscribirConfig( $newCfg );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        return self::retorno([], IndexCtrl::ERR_COD_MSJ_ERR_COMUN, 'deducciones_Config_Agregar - EscribirConfig: ' . $e->getMessage());
+	    }
+	    
+	    return self::retorno(['return' => true], '', '') ;
+	}
+	// Deducciones (virtual) INI
+	
 	// Usabilidad INI
 	public static function Usabilidad_Helper_Agregar( $d ){
 	    $_olg = array(
@@ -5190,7 +5840,7 @@ class OperacionesCtrl {
 	                foreach ( $r_frm as $kFrmIDs ) {
 	                    $newRefId = $kFrmIDs['id'];
 	                    
-	                    $jsfullfrm = array(); // aqui se almacenan las etiquetas y las respuesetas del formulario
+	                    $jsfullfrm = array(); // aqui se almacenan las etiquetas y las respuestas del formulario
 	                    foreach ( $jsonFrm as $kJsFrm ) {
 	                        $tmpval = ( ($kJsFrm['value'] == null) ? "" : trim( $kJsFrm['value'] ) );
 	                        if ( $tmpval == "on" ) {
@@ -5353,7 +6003,8 @@ class OperacionesCtrl {
 	        try {
 	            $genpdf = self::firmaspro_Obtener( $dN, $dt );
 	        } catch (Exception $e) {
-	            throw new Exception( 'editarPlantillas_JBB_Mezclar_Crear - firmaspro_Obtener: ' . $e->getMessage() );
+	            http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	            throw new Exception( 'editarPlantillas_JBB_Mezclar_Crear - firmaspro_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
 	        }
 	        
 	        if ( $genpdf !== "" ) {
@@ -5740,6 +6391,31 @@ class OperacionesCtrl {
 	            
 	            $res = $pago['pago'];
 	            
+	            /*
+	             * @yalfonso
+	             * TODO: Tarea 13 - Agregar soporte para registrar el valor de la cuenta de cobro y el mes en que se solicita
+	             */ 
+	            if ( isset( $d['datosmes'] ) ) {
+	                if ( $d['datosmes'] ) {
+	                    if ( isset( $d['contrato'] ) && isset( $d['empleados_id'] ) ) {
+	                        $dtmData = [
+	                            'contrato' => $d['contrato'],
+	                            'empleados_id' => $d['empleados_id'],
+	                            'mesaplica' => $d['mesaplica'],
+	                            'valorccobro' => $res
+                            ];
+	                        try {
+	                            self::datosmes_Helper_Agregar( $dtmData );
+	                        } catch (Exception $e) {
+	                            throw new Exception( 'editarPlantillas_CrearComponente - valorpordia - datosmes_Helper_Agregar: ' . $e->getMessage(), $e->getCode() );
+	                        }
+	                    }
+	                    else {
+	                        throw new Exception( 'editarPlantillas_CrearComponente - valorpordia - datosmes_Helper_Agregar: Los campos mesaplica, contrato o empleados_id no est&aacute;n llenos', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	                    }
+	                }
+	            }
+	            
 	            if ( isset( $d['letras'] ) ) {
 	                if( $d['letras'] ){
 	                    $res = $pago['letras'];
@@ -5959,7 +6635,7 @@ class OperacionesCtrl {
 	            if ( isset( $d['data'] )) {
 	                $b64 = base64_decode( $d['data'] );
 	                $json = json_decode( $b64  , true );
-	                
+	                //die( 'rev: ' . print_r( $json, true ) );
 	                $tbCont = [];
 	                $i = 1;
 	                foreach ( $json as $kJs ) {
@@ -8618,6 +9294,7 @@ EOD;
 	    
 	    return $arRes;
 	}
+	
 	public static function flujositems_Helper_ObtenerRevisorData ( $d ){
 	    try {
 	        self::authRequ();
@@ -8628,7 +9305,7 @@ EOD;
 	    
 	    $data = base64_decode( $d[ 'data' ] );
 	    $json = json_decode( $data, true );
-	    
+
 	    $userQry = self::empleados_Obtener( [ 'id' => $json['empleados_id'] ] );
 	    $user = [];
 	    if ( count( $userQry ) > 0 ) {
@@ -8646,11 +9323,14 @@ EOD;
 	    
 	    $pkreq = self::paquetesrequ_Obtener([ 'w_paquetes_id' => $json['id'] ]);
 	    
+	    $usr_perfilactual = 0;
 	    $usrs = [];
 	    foreach ($flujositems as $kItem) {
 	        $actual = false;
 	        if ( $kItem['id']  == $json['flujositems_id'] ) {
 	            $actual = true;
+	            
+	            $usr_perfilactual = $kItem['flujosroles_id'];
 	        }
 	        $usractual = [
                 'nombre' => $kItem['nombre'],
@@ -8661,18 +9341,143 @@ EOD;
 	            'flujosroles' => $kItem['flujosroles'],
 	            'flujosroles_id' => $kItem['flujosroles_id']
             ];
+	        
 	        $usrs[] = $usractual;
+	    }
+	    
+	    $mesAplica = [];
+	    if ( $usr_perfilactual == 4 ) {
+	        
+	        // obtener las deducciones del supervisor contabilidad
+	        $deduccDt = [];
+	        $qryDeducc = self::deducciones_Obtener( [ 'w_paquetes_id' => $json['id'] ] );
+	        foreach ($qryDeducc as $kDeduc) {
+	            $deduccDt = json_decode( $kDeduc['valor'], true );
+	        }
+	        
+	        // obtener datos de config por defecto
+	        $qryMesAplica = self::datosmes_Obtener( [ 'w_mesaplica' => $json['mesaplica'] ] );
+	        foreach ( $qryMesAplica as $kMesA ) {
+	            $mesAplica = $kMesA;
+	        }
+	        $rEval = self::flujositems_Helper_EvaluarCriterio( $mesAplica );
+	        
+	        // reemplazamos los datos por defecto y dejamos los que puso el supervisor contabilidad
+	        $i_v = 0;
+	        foreach ($deduccDt as $kDed => $vDed) {
+	            if (Utiles::ComienzaEn( $kDed, "deduc_cod")) {
+	                $parts = explode("_", $kDed);
+	                $rEval[ $i_v ]['cod'] = $deduccDt[ 'deduc_cod_' . $parts[ 2 ] ];
+	                $rEval[ $i_v ]['desc'] = $deduccDt[ 'deduc_desc_' . $parts[ 2 ] ];
+	                $rEval[ $i_v ]['perc'] = $deduccDt[ 'deduc_perc_' . $parts[ 2 ] ];
+	                $i_v++;
+	            }
+	        }
+	        
+	        $mesAplica['deducciones'] = $rEval;
 	    }
 	    
 	    $result = [
 	        'docs' => $docs,
 	        'firmantes' => $usrs,
 	        'solicitante' => $user,
-	        'paquete' => $pkreq
+	        'paquete' => $pkreq,
+	        'datosmes' => $mesAplica
 	    ];
 	    
 	    return self::retorno($result, 0, '');
 	}
+	
+	public static function flujositems_Helper_EvaluarCriterio ( $d ){
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_DEDUCCIONES_DATA = isset( $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]) ? $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]["val"] : base64_encode( '{}' );
+	    $cfgDt = json_decode( base64_decode( $_CFG_DEDUCCIONES_DATA ) , true );
+	    
+	    $valorccobro = $d['valorccobro'];
+	    
+	    foreach ( $cfgDt as $kCfg ) {
+	        $criterio = $kCfg['criterio'];
+	        if ( count( $criterio ) == 1 ) {
+	            $comp1 = $criterio[0];
+	            if( $comp1['comparador'] == "mayor" ){
+	                if( $valorccobro > intval( $comp1['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            elseif( $comp1['comparador'] == "mayorigual" ){
+	                if( $valorccobro >= intval( $comp1['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            elseif( $comp1['comparador'] == "menor" ){
+	                if( $valorccobro < intval( $comp1['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            elseif( $comp1['comparador'] == "menorigual" ){
+	                if( $valorccobro <= intval( $comp1['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	        }
+	        elseif ( count( $criterio ) == 2 ) {
+	            $comp1 = $criterio[0];
+	            $comp2 = $criterio[1];
+	            
+	            //> <
+	            if( $comp1['comparador'] == "mayor" && $comp2['comparador'] == "menor" ){
+	                if( $valorccobro > intval( $comp1['valor'] ) && $valorccobro < intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            // >= <
+	            elseif( $comp1['comparador'] == "mayorigual" && $comp2['comparador'] == "menor" ){
+	                if( $valorccobro >= intval( $comp1['valor'] ) && $valorccobro < intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            // > >
+	            elseif( $comp1['comparador'] == "mayor" && $comp2['comparador'] == "mayor" ){
+	                if( $valorccobro > intval( $comp1['valor'] ) && $valorccobro > intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            // >= <= 
+	            elseif( $comp1['comparador'] == "mayorigual" && $comp2['comparador'] == "menorigual" ){
+	                if( $valorccobro >= intval( $comp1['valor'] ) && $valorccobro <= intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            // > <=
+	            elseif( $comp1['comparador'] == "mayor" && $comp2['comparador'] == "menorigual" ){
+	                if( $valorccobro > intval( $comp1['valor'] ) && $valorccobro <= intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            // >= >=
+	            elseif( $comp1['comparador'] == "mayorigual" && $comp2['comparador'] == "mayorigual" ){
+	                if( $valorccobro >= intval( $comp1['valor'] ) && $valorccobro <= intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            // < <
+	            elseif( $comp1['comparador'] == "menor" && $comp2['comparador'] == "menor" ){
+	                if( $valorccobro < intval( $comp1['valor'] ) && $valorccobro < intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	            // <= <=
+	            elseif( $comp1['comparador'] == "menorigual" && $comp2['menorigual'] == "menor" ){
+	                if( $valorccobro <= intval( $comp1['valor'] ) && $valorccobro <= intval( $comp2['valor'] ) ){
+	                    return $kCfg['deducciones'];
+	                }
+	            }
+	        }
+	    }
+	    
+	    return [];
+	}
+	
 	public static function flujositems_Archivos_Helper_Obtener ( $d ){
 	    $cfg = OperacionesCtrl::LeerConfigCorp();
 	    $_CFG_REQUERIMIENTOS_MEZCLA = json_decode( (isset( $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]) ? $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]["val"] : '[]' ), true );
@@ -8722,7 +9527,7 @@ EOD;
 	                        'firmaslog_id' => $fReg['id'] 
 	                    ];
 	                    
-	                    $r[] = [ 'bs' => $resBsUrl, 'url' => rtrim( Utiles::getBaseUrl() , "/") . $urllink . "/" . $flName, 'firmas_id' => $firmas_id_data ];
+	                    $r[] = [ 'bs' => $resBsUrl, 'url' => rtrim( Utiles::getBaseUrl() , "/") . $urllink . "/" . $flName, 'firmas_id' => $firmas_id_data, 'paquetes_id' => $paquetes_id ];
 	                    
 	                }
 	            }
@@ -8833,7 +9638,7 @@ EOD;
 	        self::authRequ();
 	    } catch (\Exception $e) {
 	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
-	        throw new \Exception( $e->getMessage() );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
 	    }
 	    
 	    $tb  = "paquetes "; 
@@ -9296,19 +10101,16 @@ EOD;
 		];
 		$jsonValores = json_encode($valueForm);
 
-		// Insertar en tabla de auditoría
+		// Insertar en tabla de auditoria
 		$dataAuditoria = [
 			"paquetes_id" => $json['paquetes_id'], 
 			"razon"       => Paquetesadminreg::CREACION_TERCERO,
 			"valor"       => $jsonValores,
 			"fecha"       => date("Y-m-d H:i:s"),
-			"usuarios"    => $usu ? $usu->getId() : null
+		    "usuarios"    => trim($usu->getNombres() . " " . $usu->getApellidos())
 		];
-
-		$id = 0;
-		
 	    try {
-	        $id = self::paquetesadminreg_Agregar( $dataAuditoria );
+	        self::paquetesadminreg_Agregar( $dataAuditoria );
 	    } catch (Exception $e) {
 	        throw new Exception( 'paquetesadminreg_Helper_Agregar - paquetesadminreg_Agregar: ' . $e->getMessage(), $e->getCode() );
 	    }
@@ -9323,11 +10125,11 @@ EOD;
 			self::authRequ();
 		} catch (\Exception $e) {
 			http_response_code(IndexCtrl::ERR_COD_SESION_INACTIVA);
-			throw new \Exception('paquetesadminreg_Helper_Modificar: ' . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA);
+			throw new \Exception('paquetesadminreg_Modificar: ' . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA);
 		}
 		$tb = 'paquetesadminreg';
 		$aSt = array();
-		if (isset($json['usuario'])) {
+		if (isset($d['usuario'])) {
 			$aSt['usuario_creado'] = $d['usuario'];
 		}
 		if (isset($d['fecha'])) {
@@ -9345,7 +10147,7 @@ EOD;
 
 		if (empty($aSt)) {
 			http_response_code(IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
-			throw new \Exception('[Error] paquetesadminreg_Helper_Modificar: No hay campos válidos para actualizar');
+			throw new \Exception('[Error] paquetesadminreg_Modificar: No hay campos válidos para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
 		}
 
 		$wh = '';
@@ -9355,15 +10157,10 @@ EOD;
 			$wh = 'id = ?';
 			$pr = [$d['id']];
 		} 
-
-		if (isset($d['w_paquetes_id'])) {
-			$wh = 'paquetes_id = ?';
-			$pr = [$d['w_paquetes_id']];
-		} 
 		
 		if ($wh == '') {
 			http_response_code(IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
-			throw new \Exception('[Error] paquetesadminreg_Modificar: Debe indicar un id o paquetes_id para actualizar');
+			throw new \Exception('[Error] paquetesadminreg_Modificar: Debe indicar un id o paquetes_id para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
 		}
 		try {
 			$res = Singleton::_safeUpdate($tb, $aSt, $wh, $pr);
@@ -9520,6 +10317,8 @@ EOD;
 	    $data = base64_decode( $d['data'] );
 	    $json = json_decode( $data , true );
 	    
+	    //die( 'json: ' . print_r( $json, true ) );
+	    
 	    $usr = [];
 	    try {
 	        $usr = self::home_Is_Login_Get( $json['token'] );
@@ -9577,7 +10376,7 @@ EOD;
 	        }
 	        
 	        //echo "paquetesrequ_exists: ";
-	        //die( print_r( $paquetesrequ_exists ) );
+	        //die( print_r( $paquetesrequ_exists , true ) );
 	        $primero = true;
 	        $paquetesrequ_id = 0;
 	        foreach ( $json as $kJs => $vJs ) {
@@ -9928,7 +10727,334 @@ EOD;
 	        throw new \Exception( 'paquetesrequ: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
 	    }
 	}
-	// paquetesrequ FINN
+	// paquetesrequ FIN
+	
+	// paquetesreqcomentarios INI
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 46 - Crear funci&oacute;n que ayude a agregar o modificar la tabla paquetesreqcomentarios
+	 */
+	public static function paquetesreqcomentarios_Helper_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $idreg = 0;
+	    
+	    $texto = trim($json['valor']);
+	    if( !(strlen( $texto ) > 0)  ){
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        return self::retorno( [], IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO, 'paquetesreqcomentarios_Helper_Agregar: El campo valor no tiene datos' ) ;
+	    }
+	    $valor = strip_tags($texto);
+	    $valor = htmlspecialchars($valor, ENT_QUOTES, 'UTF-8');
+	    $valor = trim($valor);
+	    
+	    if ( isset( $json['id'] ) ) {
+	        $idreg = $json['id'];
+	        try {
+	            self::paquetesreqcomentarios_Modificar( [ "id" => $json['id'], "valor" => $valor ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'paquetesreqcomentarios_Helper_Agregar - paquetesreqcomentarios_Modificar: ' . $e->getMessage() ) ;
+	        }
+	    }
+	    else {
+	        try {
+	            $idreg = self::paquetesreqcomentarios_Agregar( [ "paquetesrequ_id" => $json['paquetesrequ_id'], "valor" => $valor ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'paquetesreqcomentarios_Helper_Agregar - paquetesreqcomentarios_Agregar: ' . $e->getMessage() ) ;
+	        }
+	    }
+	    
+	    return self::retorno( [ "success" => true , 'idreg' => $idreg ], 0, '') ;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 47 - Crear funci&oacute;n que agregue datos a la tabla paquetesreqcomentarios
+	 */
+	public static function paquetesreqcomentarios_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $o = new Paquetesreqcomentarios();
+	    if (isset( $d['valor'] ) ) {
+	        $o->setValor( $d['valor'] );
+	    }
+	    if (isset( $d['paquetesrequ_id'] ) ) {
+	        $o->setPaquetesrequ_id( $d['paquetesrequ_id'] );
+	    }
+	    if (isset( $d['paquetesreqcomentariosestados_id'] ) ) {
+	        $o->setPaquetesreqcomentariosestados_id( $d['paquetesreqcomentariosestados_id'] );
+	    }
+	    if (isset( $d['empleados'] ) ) {
+	        $o->setEmpleados( $d['empleados'] );
+	    }
+	    if (isset( $d['empleados_id'] ) ) {
+	        $o->setEmpleados_id( $d['empleados_id'] );
+	    }
+	    if (isset( $d['empleadosfecha'] ) ) {
+	        $o->setEmpleadosfecha( $d['empleadosfecha'] );
+	    }
+	    // TODO: Tarea 56 agregar el campo usuarios_id en la funcion paquetesreqcomentarios_Agregar
+	    $o->setUsuarios_id( $usu->getId() );
+	    $o->setUsuarios( $usu->getNombres() . " " . $usu->getApellidos() );
+	    $o->setFecha( date('Y-m-d H:i:s'));
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $o->obtenerError(), IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	}
+	
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 54 - Crear funci&oacute;n maneje los parametros que se envian para obtener data de la tabla paquetesreqcomentarios
+	 */
+	public static function paquetesreqcomentarios_Helper_Obtener( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $qryPkcom = [];
+	    try {
+	        $qryPkcom = self::paquetesreqcomentarios_Obtener( [ 'w_paquetesrequ_id' => $json['id'], 'w_paquetesreqcomentariosestados_ids' => [1,2,3,4], 'ordenasc' => 6 ] );
+	    } catch (Exception $e) {
+	        throw new Exception('paquetesreqcomentarios_Helper_Obtener - paquetesreqcomentarios_Obtener: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    return $qryPkcom;
+	}
+	
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 48 - Crear funci&oacute;n que obtenga los datos de la tabla paquetesreqcomentarios
+	 */
+	public static function paquetesreqcomentarios_Obtener( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "pkrequcom.`id`, pkrequcom.`usuarios_id`, pkrequcom.`usuarios`, pkrequcom.`valor`, TO_BASE64(pkrequcom.`valor`) as firma, pkrequcom.`fecha`, pkrequcom.`paquetesrequ_id` ";
+	    $vr .= ", pkrequ.descripcion as paquetesrequ_descripcion, pkrequcom.`paquetesreqcomentariosestados_id`, ";
+	    $vr .= "pkrcomestados.nombre as paquetesreqcomentariosestados_nombre, pkrequcom.`empleados_id`, ";
+	    $vr .= "pkrequcom.`empleados`, pkrequcom.`empleadosfecha` ";
+	    
+	    $tb  = '`paquetesreqcomentarios` as pkrequcom ';
+	    
+	    $jn  = 'LEFT JOIN `paquetesrequ` as pkrequ on pkrequ.id = pkrequcom.paquetesrequ_id ';
+	    $jn .= 'LEFT JOIN `paquetesreqcomentariosestados` as pkrcomestados on pkrcomestados.id = pkrequcom.paquetesreqcomentariosestados_id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "pkrequcom.`id` = ?";
+	        $pr[] = $d['id'];
+	    }
+	    if( isset( $d['w_paquetesrequ_id'] ) ){
+	        $wh[] = "pkrequcom.`paquetesrequ_id` = ?";
+	        $pr[] = $d['w_paquetesrequ_id'];
+	    }
+	    if( isset( $d['w_empleados_id'] ) ){
+	        $wh[] = 'pkrequcom.`empleados_id` = ?' ;
+	        $pr[] = $d['w_empleados_id'];
+	    }
+	    if( isset( $d['w_paquetesreqcomentariosestados_ids'] ) ){
+	        $ids = $d['w_paquetesreqcomentariosestados_ids'];
+	        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+	        $wh[] = "pkrequcom.`paquetesreqcomentariosestados_id` IN (" . $placeholders . ")";
+	        
+	        foreach ( $ids as $vPr ) {
+	            $pr[] = $vPr;
+	        }
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr); //Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    
+	    return $r;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 49 - Crear funci&oacute;n que modifique los datos de la tabla paquetesreqcomentarios
+	 */
+	public static function paquetesreqcomentarios_Modificar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb  = "paquetesreqcomentarios ";
+	    $aSt = array();
+	    if (isset( $d['valor'] ) ) {
+	        $aSt['valor'] = $d['valor'] ;
+	    }
+	    if (isset( $d['paquetesreqcomentariosestados_id'] ) ) {
+	        $aSt['paquetesreqcomentariosestados_id'] = $d['paquetesreqcomentariosestados_id'] ;
+	    }
+	    if (isset( $d['empleados'] ) ) {
+	        $aSt['empleados'] = $d['empleados'] ;
+	        $aSt['empleadosfecha'] = date('Y-m-d H:i:s') ;
+	    }
+	    if (isset( $d['empleados_id'] ) ) {
+	        $aSt['empleados_id'] = $d['empleados_id'] ;
+	    }
+	    
+	    $pr = [];
+	    $wh  = '';
+	    if ( isset( $d['id'] ) ) {
+	        $wh  = 'id = ?';
+	        $pr[] = $d['id'];
+	    }
+	    if ( isset( $d['w_paquetesrequ_id'] ) ) {
+	        $wh  = 'paquetesrequ_id = ?';
+	        $pr[] = $d['w_paquetesrequ_id'] ;
+	    }
+	    
+	    if ( $wh == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    $xt = $wh;
+	    
+	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' WHERE ' . $xt);
+	    
+	    $cu = null;
+	    try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception($th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    
+	    return $cu;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 50 - Crear funci&oacute;n que eliminar los datos de la tabla la tabla paquetesreqcomentarios
+	 */
+	public static function paquetesreqcomentarios_Eliminar( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $xt = '';
+	    if ( isset( $d['id'] ) ) {
+	        $xt = "SIID";
+	        try {
+	            self::paquetesreqcomentarios_Modificar( ['id' => $d['id'], 'paquetesreqcomentariosestados_id' => 5 ] );
+	        } catch (Exception $e) {
+	            throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        }
+	    }
+	    
+	    if ( $xt == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'Debe indicar filtros',IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	    
+	    return  true;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 57 - Crear funci&oacute;n maneje los comentarios eliminados de la tabla paquetesreqcomentarios
+	 */
+	public static function paquetesreqcomentarios_Helper_Eliminar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $qryPkcom = [];
+	    try {
+	        $qryPkcom = self::paquetesreqcomentarios_Eliminar( $json );
+	    } catch (Exception $e) {
+	        throw new Exception('paquetesreqcomentarios_Helper_Eliminar - paquetesreqcomentarios_Eliminar: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    return $qryPkcom;
+	}
+	// paquetesreqcomentarios FIN
 	
 	// reflista INI
 	public static function reflista_Obtener ( $d ){

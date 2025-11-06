@@ -23,7 +23,7 @@
 	<tbody>
 		<tr>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Contratista</span></strong></th>
-			<td><span style="font-size:11px">{$empl_nombres}&nbsp;{$empl_apellidos}</span></td>
+			<td><span style="font-size:11px">{$empl_nombres} {$empl_apellidos}</span></td>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Documento de identidad</span></strong></th>
 			<td><span style="font-size:11px">{$empl_documento}</span></td>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Tipo Doc.&nbsp;</span></strong></th>
@@ -36,9 +36,9 @@
 	<tbody>
 		<tr>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha inicial del contrato</span></strong></th>
-			<td><span style="font-size:11px">[fecha valor={$bogdata_fecha_de_entrada} esexcel=true]</span></td>
+			<td><span style="font-size:11px">[fecha valor={$empl_fechainicio}&nbsp;esexcel=false]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha final del contrato</span></strong></th>
-			<td><span style="font-size:11px">[fechacontratocompleto fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} esexcel=true]</span></td>
+			<td><span style="font-size:11px">[fechacontratocompleto fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} esexcel=false]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Correo electr&oacute;nico</span></strong></th>
 			<td><span style="font-size:11px">{$empl_mail}</span></td>
 		</tr>
@@ -68,11 +68,11 @@
 	<tbody>
 		<tr>
 			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Periodo objeto del informe</span></strong></th>
-			<td style="width:16%"><span style="font-size:11px">[fechaxls&nbsp;mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} formato=Y-m-d] hasta [fecha&nbsp;valor={$mesaplica} formato=Y-m-t]</span></td>
+			<td style="width:16%"><span style="font-size:11px">[fechaxls mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} formato=Y-m-d] hasta [fecha valor={$mesaplica} formato=Y-m-t]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Fecha inicial informe</span></strong></th>
-			<td style="width:16%"><span style="font-size:11px">[fecha valor={$bogdata_fecha_de_entrada} esexcel=true]</span></td>
-			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Fecha final &nbsp;informe</span></strong></th>
-			<td style="width:20%"><span style="font-size:11px">[fecha valor={$bogdata_fecha_de_entrada} esexcel=true formato=Y-m-t]</span></td>
+			<td style="width:16%"><span style="font-size:11px">[fecha valor={$empl_fechainicio} esexcel=false]</span></td>
+			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Fecha final informe</span></strong></th>
+			<td style="width:20%"><span style="font-size:11px">[fecha valor={$empl_fechainicio} esexcel=false formato=Y-m-t]</span></td>
 		</tr>
 	</tbody>
 </table>
@@ -98,9 +98,9 @@
 			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Plazo adicional</span></strong></th>
 			<td style="width:12%"><span style="font-size:11px">0</span></td>
 			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Valor mensual del contrato</span></strong></th>
-			<td style="width:12%"><span style="font-size:11px">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=false descuentos=false]</span></td>
+			<td style="width:12%"><span style="font-size:11px">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=false descuentos=false]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Valor a pagar</span></strong></th>
-			<td style="width:16%"><span style="font-size:11px">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=false]</span></td>
+			<td style="width:16%"><span style="font-size:11px">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=false]</span></td>
 		</tr>
 	</tbody>
 </table>
@@ -123,7 +123,7 @@
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Valor adici&oacute;n</span></strong></th>
 		</tr>
 		<tr>
-			<th style="text-align:left">&nbsp;&nbsp;</th>
+			<th style="text-align:left">&nbsp;</th>
 			<th style="text-align:left">&nbsp;</th>
 			<th style="text-align:left">&nbsp;</th>
 			<th style="text-align:left">&nbsp;</th>
@@ -132,16 +132,36 @@
 	</tbody>
 </table>
 
-<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+<table border="1" cellpadding="1" cellspacing="1" style="font-size:11px; width:100%">
 	<tbody>
 		<tr>
 			<td style="text-align:left"><span style="font-size:11px">3 - Aportes seguridad social</span></td>
 		</tr>
+		<tr>
+			<td style="text-align:left"><b>{$frmlbl_8_field_0_11}:</b> {$frmvlr_8_field_0_11}</td>
+		</tr>
+		<tr>
+			<td style="text-align:left"><b>{$frmlbl_8_field_1_11}:</b> {$frmvlr_8_field_1_11}</td>
+		</tr>
 	</tbody>
 </table>
 
-<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+<table border="1" cellpadding="1" cellspacing="1" style="font-size:11px; width:100%">
 	<tbody>
+		<tr>
+			<th style="background-color:#bbbbbb; text-align:left"><span style="font-size:11px">Periodo planilla aportes&nbsp;</span></th>
+			<th style="background-color:#bbbbbb; text-align:left"><span style="font-size:11px">Numero planilla aportes</span></th>
+			<th style="background-color:#bbbbbb; text-align:left"><span style="font-size:11px">Entidad Fondo de pensiones obligatorias</span></th>
+			<th style="background-color:#bbbbbb; text-align:left"><span style="font-size:11px">Entidad Salud Obligatoria</span></th>
+			<th colspan="2" style="background-color:#bbbbbb; text-align:left"><span style="font-size:11px">Entidad Aseguradora de Riesgos Profesionales ARL</span></th>
+		</tr>
+		<tr>
+			<td style="text-align:left">{$frmvlr_8_field_4_11}</td>
+			<td style="text-align:left">{$frmvlr_8_field_3_11}</td>
+			<td style="text-align:left">{$frmvlr_8_field_7_11}</td>
+			<td style="text-align:left">{$frmvlr_8_field_5_11}</td>
+			<td colspan="2" style="text-align:left">{$frmvlr_8_field_9_11}</td>
+		</tr>
 		<tr>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">IBC Per&iacute;odo de Cotizaci&oacute;n</span></strong></th>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Clase Riesgo ARL</span></strong></th>
@@ -152,11 +172,11 @@
 		</tr>
 		<tr>
 			<td style="text-align:left">[fecha valor={$mesaplica} formato=m]</td>
-			<td style="text-align:left">&nbsp;</td>
-			<td style="text-align:left">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false pension=true descuentos=false meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias}]</td>
-			<td style="text-align:left">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false salud=true descuentos=false meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias}]</td>
-			<td style="text-align:left">0</td>
-			<td style="text-align:left">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} letras=false totalaportes=true descuentos=false meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias}]</td>
+			<td style="text-align:left">{$frmvlr_8_field_11_11}</td>
+			<td style="text-align:left">{$frmvlr_8_field_8_11}</td>
+			<td style="text-align:left">{$frmvlr_8_field_6_11}</td>
+			<td style="text-align:left">{$frmvlr_8_field_10_11}</td>
+			<td style="text-align:left">{$frmvlr_8_field_13_11}</td>
 		</tr>
 	</tbody>
 </table>
@@ -174,7 +194,7 @@
 		<tr>
 			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Fecha Inicia Novedad</span></strong></th>
 			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Fecha Termina Novedad</span></strong></th>
-			<th style="background-color:#bbbbbb; text-align:left; width:25%">D&iacute;as</th>
+			<th style="background-color:#bbbbbb; text-align:left; width:25%"><span style="font-size:11px">D&iacute;as</span></th>
 			<th style="background-color:#bbbbbb; text-align:left; width:25%"><strong><span style="font-size:11px">Novedad</span></strong></th>
 		</tr>
 		<tr>
@@ -204,24 +224,80 @@
 	</tbody>
 </table>
 
-<p>[flujofinanciero&nbsp;crp={$bogdata_nmero_de_crp} fondos={$bogdata_fondos} fondosdesc={$bogdata_descripcion_del_fondo} rubro={$bogdata_rubro}&nbsp;rubrodesc={$bogdata_descripcin_del_rubro}&nbsp;tiporegistro=PRESUPUESTAL mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final}&nbsp; valortotal={$bogdata_valor_crp} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} ]</p>
+<p>[flujofinanciero crp={$bogdata_nmero_de_crp} fondos={$bogdata_fondos} fondosdesc={$bogdata_descripcion_del_fondo} rubro={$bogdata_rubro} rubrodesc={$bogdata_descripcin_del_rubro} tiporegistro=PRESUPUESTAL mesaplica={$mesaplica} fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} valortotal={$bogdata_valor_crp} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} ]</p>
 
 <p>[obligaciones data={$obligaciones} ]</p>
 
-<p>Firmas:</p>
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="vertical-align:top">
+			<p>Obligaciones del Contrato&nbsp;</p>
+			</td>
+		</tr>
+		<tr>
+			<td>{$formulario_10}</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>&nbsp;</p>
+
+<p>Firma:</p>
 
 <table border="0" cellpadding="1" cellspacing="1" style="width:100%">
 	<tbody>
 		<tr>
 			<td>[campofirma valor=FIRMA_CONTR_1 ]<br />
 			<strong>Contratista</strong></td>
-			<td>[campofirma valor=FIRMA_1 ]<br />
-			<strong>Revisor</strong></td>
-		</tr>
-		<tr>
-			<td>[campofirma valor=FIRMA_2 ]<br />
-			<strong>Aprobador</strong></td>
-			<td>&nbsp;</td>
 		</tr>
 	</tbody>
 </table>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="background-color:#bbbbbb; text-align:center">APROBACI&Oacute;N POR EL SUPERVISOR</td>
+		</tr>
+		<tr>
+			<td style="vertical-align:top">
+			<p>El/la contratista, <span style="font-size:11px">{$empl_nombres}</span>&nbsp;cumpli&oacute; con las obligaciones contra&iacute;das en el contrato <span style="font-size:11px">JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</span> presentando el respectivo informe de actividades desarrolladas, productos y dem&aacute;s obligaciones pactadas en el contrato y en el per&iacute;odo se&ntilde;alado en el concepto del pago, correspondiente al contrato principal.&nbsp;</p>
+
+			<p>Igualmente se certifica que de conformidad con las disposiciones legales efectu&oacute; el pago a los aportes respectivos al sistema de seguridad social integral en salud y pensiones y/o aportes parafiscales. (Se anexan comprobantes de pago de los aportes).&nbsp;</p>
+
+			<p>Por lo anterior, se debe pagar a la contratista la suma de <span style="font-size:11px">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=false]</span></p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>Firmas:</p>
+
+<p>&nbsp;</p>
+
+<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td>[campofirma valor=FIRMA_2 ]<br />
+			<strong>Aprobador</strong></td>
+			<td>[campofirma valor=FIRMA_1 ]<br />
+			<strong>Revisor</strong></td>
+		</tr>
+	</tbody>
+</table>
+
+<p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<table border="1" cellpadding="1" cellspacing="1" style="width:100%">
+	<tbody>
+		<tr>
+			<td style="background-color:#bbbbbb; vertical-align:top">
+			<p>Los arriba firmantes declaramos que hemos revisado el presente documento y lo encontramos ajustado a las normas, disposiciones legales vigentes, t&eacute;rminos contractuales y por lo tanto, bajo nuestra responsabilidad, lo presentamos para la firma de (Cargo de supervisor/interventor).&nbsp;</p>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+<p>&nbsp;</p>
