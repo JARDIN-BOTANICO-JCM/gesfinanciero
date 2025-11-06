@@ -164,6 +164,17 @@ class IndexCtrl extends Pagina {
 	// ApiBox INI
 	const API_ApiboxGet = 'API_ApiboxGet';
 	// ApiBox FIN
+	
+	// Deducciones INI
+	const API_DeduccionesHelperAdd = 'API_DeduccionesHelperAdd';
+	// Deducciones FIN
+	
+	// Deducciones Virtual INI
+	const API_DeduccionesVirtualAdd = 'API_DeduccionesVirtualAdd';
+	const API_DeduccionesVirtualGet = 'API_DeduccionesVirtualGet';
+	const API_DeduccionesVirtualGetAjax = 'API_DeduccionesVirtualGetAjax';
+	const API_DeduccionesVirtualDel = 'API_DeduccionesVirtualDel';
+	// Deducciones Virtual FIN
 
 	// requerimientos INI
 	const API_RequerimientostplsGetAjax = 'API_RequerimientostplsGetAjax';
@@ -199,6 +210,12 @@ class IndexCtrl extends Pagina {
 	// Paquetesrequ INI
 	const API_PaquetesrequHelperAdd = 'API_PaquetesrequHelperAdd';
 	// Paquetesrequ FIN
+	
+	// Paquetesreqcomentarios INI
+	const API_PaquetesreqcomentariosHelperGet = 'API_PaquetesreqcomentariosHelperGet';
+	const API_PaquetesreqcomentariosHelperAdd = 'API_PaquetesreqcomentariosHelperAdd';
+	const API_PaquetesreqcomentariosHelperDel = 'API_PaquetesreqcomentariosHelperDel';
+	// Paquetesreqcomentarios FIN
 
 	// Reflista INI
 	const API_ReflistaGet = 'API_ReflistaGet';
@@ -957,6 +974,63 @@ class IndexCtrl extends Pagina {
 					die("");
 				}
 				// ApiBox FIN
+				
+				// Deducciones INI
+				if ( $_POST["ajax"] == md5( self::API_DeduccionesHelperAdd ) ) {
+				    try {
+				        $ok = OperacionesCtrl::deducciones_Helper_Agregar( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Deducciones FIN
+				
+				// Deducciones Virtual INI
+				if ( $_POST["ajax"] == md5( self::API_DeduccionesVirtualAdd ) ) {
+				    try {
+				        $ok = OperacionesCtrl::deducciones_Config_Agregar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_DeduccionesVirtualGet ) ) {
+				    try {
+				        $ok = OperacionesCtrl::deducciones_Config_Obtener($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_DeduccionesVirtualGetAjax ) ) {
+				    try {
+				        $ok = OperacionesCtrl::deducciones_Config_Obtener_Ajax($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				
+				if ( $_POST["ajax"] == md5( self::API_DeduccionesVirtualDel ) ) {
+				    try {
+				        $ok = OperacionesCtrl::deducciones_Config_Eliminar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Deducciones Virtual FIN
 
 				// requerimientostpls INI
 				if ($_POST["ajax"] == md5(self::API_RequerimientostplsGetAjax)) {
@@ -1143,6 +1217,39 @@ class IndexCtrl extends Pagina {
 				}
 
 				// Paquetesrequ FIN
+				
+				// paquetesreqcomentarios INI
+				if ($_POST["ajax"] == md5(self::API_PaquetesreqcomentariosHelperGet)) {
+				    try {
+				        $ok = OperacionesCtrl::paquetesreqcomentarios_Helper_Obtener( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ($_POST["ajax"] == md5(self::API_PaquetesreqcomentariosHelperAdd)) {
+				    try {
+				        $ok = OperacionesCtrl::paquetesreqcomentarios_Helper_Agregar( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ($_POST["ajax"] == md5(self::API_PaquetesreqcomentariosHelperDel)) {
+				    try {
+				        $ok = OperacionesCtrl::paquetesreqcomentarios_Helper_Eliminar( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// paquetesreqcomentarios FIN
 
 				if ($_POST["ajax"] == md5(self::API_PaquetesAdminReg_Helper_Add)) {
 					try {

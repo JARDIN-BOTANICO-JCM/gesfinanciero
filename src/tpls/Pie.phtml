@@ -1244,6 +1244,628 @@ const agregarAgarre = function( d ){
 };
 </script>
 
+<script type="application/javascript">
+<?php
+/*
+ * TODO: Tarea 27 - Controlar c&oacute;mo se agregan las deducciones
+ * TODO: Tarea 28 - Controlar c&oacute;mo se obtienen las deducciones y dibujar los resultados
+ * TODO: Tarea 29 - Controlar c&oacute;mo se eliminan las deducciones
+ * TODO: Tarea 30 - Controlar c&oacute;mo se modifican las deducciones
+ * TODO: Tarea 31 - Controlar el env&iacute;o de datos al servidor
+ */
+?>
+const Deducciones = function( ){
+	const self = this;
+	let ri = 0;
+	
+	let tableId = "tbInt" + ut.GetUUID();
+	
+	self.totaldeduciones = 0;
+	self.labeltotal = "";
+	
+	self.instanceName = "";
+	
+	self.instanceNameCtrlCambios = null;
+	
+	let dibujarLabeltotal = function(){
+		if( jQuery( self.labeltotal ).length ){
+			jQuery( self.labeltotal ).html( "$ " + ut.intToPesos( self.totaldeduciones ,2,',','.') );
+		}
+	};
+	
+	self.calcular = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const labeltarget = jQuery( dt['labeltarget'] );
+		const inputtarget = jQuery( dt['inputtarget'] );
+		const valorccobro = parseFloat( dt['valorccobro'] );
+		const porcentaje = parseFloat( _o.val() );
+		const def = valorccobro * porcentaje;
+		
+		const bser = ut.intToPesos( (def || 0) ,2,',','.');
+		
+		labeltarget.html( "$ " + bser );
+		inputtarget.val( def );
+		
+		self.totaldeduciones = 0;
+		jQuery('.deductotalesCls').each(function(i, obj){
+			self.totaldeduciones += parseFloat( jQuery( obj ).val() );
+		});
+		dibujarLabeltotal();
+	};
+	
+	self.disparadores = function( d ){
+		obj = self.instanceNameCtrlCambios;
+		obj.setCambios(true);
+	};
+	
+	self.valorIndiceId = function( d ){
+		ri = d;
+	};
+	
+	self.tplcampos = function(d) {
+        const html = [];
+        const idrow = "deduc_row_" + ri;
+    
+    	let multiret = false;
+        const campos = [];
+        if (typeof d === "object") {
+            campos.push('cod');
+            campos.push('desc');
+            campos.push('perc');
+            if ('baser' in d) {
+            	campos.push('baser');
+            	campos.push('valded');
+            	multiret = true;
+        	}
+        	campos.push('del');
+        }
+        
+        let trigger = "";
+        if( self.instanceName !== "" ){
+        	trigger = self.instanceName + ".disparadores( this );";
+        }
+
+        const totalCampos = campos.length || 1;
+        const ancho = Math.floor(12 / totalCampos);
+    
+        html.push(`<div class="row mb-1" id="${idrow}">`);
+    
+        if (campos.includes('cod')) {
+            html.push( '	<div class="col-md-' + ancho + '">' );
+            html.push( '		<div class="form-floating">' );
+            html.push( '			<input type="text" class="form-control" onkeyup="' + trigger + '" id="deduc_cod_' + ri + '" name="deduc_cod_' + ri + '" placeholder="Descripci&oacute;n" value="' + (d.cod || '') + '" required="required" >' );
+            html.push( '			<label for="deduc_cod_' + ri + '">C&oacute;digo</label>' );
+            html.push( '		</div>' );
+            html.push( '	</div >' );
+
+        }
+        if (campos.includes('desc')) {
+            html.push( '	<div class="col-md-' + ancho + '">' );
+            html.push( '		<div class="form-floating">' );
+            html.push( '			<input type="text" class="form-control" onkeyup="' + trigger + '" id="deduc_desc_' + ri + '" name="deduc_desc_' + ri + '" placeholder="Descripci&oacute;n" value="' + (d.desc || '') + '" required="required" >' );
+            html.push( '			<label for="deduc_desc_' + ri + '">Descripci&oacute;n</label>' );
+            html.push( '		</div>' );
+            html.push( '	</div >' );
+        }
+        if (campos.includes('perc')) {
+            html.push( '	<div class="col-md-' + ancho + '">' );
+            html.push( '		<div class="form-floating">' );
+            html.push( '			<input data-labeltarget="#deduc_lbltotal_' + ri + '" data-inputtarget="#deduc_txttotal_' + ri + '" data-valorccobro="' + (d.baser || 0) + '" onkeyup="' + trigger + 'deducciones.calcular( this );" type="text" class="form-control" id="deduc_perc_' + ri + '" name="deduc_perc_' + ri + '" placeholder="Porcentajes" value="' + (d.perc || '') + '" required="required" >' );
+            html.push( '			<label for="deduc_perc_' + ri + '">Porcentajes</label>' );
+            html.push( '		</div>' );
+            html.push( '	</div >' );
+        }
+        
+        let comoRev = false;
+        let descuento = 0;
+        if (campos.includes('baser')) {
+        	const bser = ut.intToPesos( (d.baser || 0) ,2,',','.');
+            html.push(`
+            	<div class="col-md-${ancho}">
+                	<div class="form-floating" >
+                    	<span class="form-control" >\$ ${bser}</span>
+                    	<label style="opacity: .65;transform: scale(.85) translateY(-.5rem) translateX(.15rem);">Base</label>
+                	</div>
+            	</div>`);
+                
+            descuento = d.baser * d.perc;
+            comoRev = true;
+        }
+        if (campos.includes('valded')) {
+        	const descval = ut.intToPesos( (descuento || 0) ,2,',','.');
+            html.push(`
+            	<div class="col-md-${ancho+1}">
+                	<div class="form-floating" >
+                    	<span id="deduc_lbltotal_${ri}" class="form-control" >\$ ${descval}</span>
+                    	<label style="opacity: .65;transform: scale(.85) translateY(-.5rem) translateX(.15rem);">Descuento</label>
+                	</div>
+                	<input type="hidden" id="deduc_txttotal_${ri}" name="deduc_txttotal_${ri}" value="${descuento}" class="deductotalesCls">
+            	</div>`);
+        }
+        
+        if (campos.includes('cod')) {
+        	let sizecomp = "" + ancho + "";
+        	if( comoRev ){
+        		sizecomp = "1";
+        	}
+        	
+        	html.push(`
+            	<div class="col-md-${sizecomp} d-flex align-items-center">
+                	<button type="button" rol="button" data-target="#${idrow}" onclick="deducciones.eliminarcampo_click( this );" class="btn-close"></button>
+            	</div>`);
+        }
+    
+        html.push(`</div>`);
+    
+        ri++;
+    	if( multiret ){
+    		return {"descuento" : ( descuento || 0 ), "html" : html.join('')};
+    	}
+    	else{
+    		return html.join('');
+    	}
+    };
+	
+	self.eliminarcampo_click = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		if( confirm('Desea eliminar el registro') ){
+		
+    		const target = jQuery( dt['target'] );
+    		
+    		target.hide('fast', function(){
+    			target.remove();
+    		});
+		
+		}
+		
+	};
+	
+	self.agregar_click = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const target = jQuery( dt['target'] );
+		
+		const fieldslist = [];
+		fieldslist['desc'] = 0;
+		if( Object.hasOwnProperty.call( dt, 'valorccobro' ) ){
+			fieldslist['baser'] = dt['valorccobro'];
+			fieldslist['perc'] = 0;
+		}
+		
+		const campos = self.tplcampos( fieldslist );
+		target.append( (campos['html'] || campos) );
+	};
+	
+	self.editar_click = function( o, fn ){
+		const opc = { 'id' : 'ajaxldr','size' : 'modal-lg' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_DeduccionesVirtualGet ); ?>');
+        form_data.append('firma', dt['id'] );
+        
+        __TransportarData(
+            form_data,
+            function( oR ) {
+            	console.log( oR );
+            	fn( oR );
+            	
+            	ri = 0;
+            	
+            	let obCamp;
+            	for (const rDt in oR ) {
+                	if ( Object.hasOwnProperty.call( oR, rDt ) ) {
+                		const _el = oR[ rDt ];
+                		
+                		if( rDt == "criterio" ){
+                			for (const iCri in _el ) {
+                				if ( Object.hasOwnProperty.call( _el, iCri ) ) {
+                					const criEl = _el[ iCri ];
+                					
+                					jQuery( criEl['targetcomparador'] ).val( criEl['comparador'] );
+                					jQuery( criEl['targetvalor'] ).val( criEl['valor'] );
+                					
+                					if( jQuery( criEl['targetvalor'] ).length ){
+                						obCamp = jQuery( criEl['targetvalor'] );
+                					}
+                				}
+            				}
+                		}
+                		
+                		if( rDt == "deducciones" ){
+                			for (const iDed in _el ) {
+                				if ( Object.hasOwnProperty.call( _el, iDed ) ) {
+                					const dedEl = _el[ iDed ];
+                					
+                					const targetcampos = jQuery( dt['target'] );
+                					campos = self.tplcampos( { "cod" : dedEl['cod'], "desc" : dedEl['desc'], "perc" : dedEl['perc'] } );
+                					targetcampos.append( campos );
+                					
+                					
+									self.resumen( obCamp );
+                				}
+            				}
+                		}
+            		}
+        		}
+            	
+            	setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            },
+            function ( err ) {
+            	const oErr = err.responseJSON;
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( oErr['msj'] );
+        
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            }
+        );
+	};
+	
+	self.guardar_click = function( o, fn ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		const formcls = dt['formcls'] ;
+		const modificar = dt['modificar'];
+		
+		ut.validarFrm( formcls , function (r) {
+    		const opc = { 'id' : 'ajaxldr','size' : 'modal-lg' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+        
+			const comparador = r['deduc_comparador'];
+			const valor = r['deduc_valor'];
+			
+			const comparador2 = r['deduc_comparador2'];
+			const valor2 = r['deduc_valor2'];
+			
+			const condicion = [];
+			
+			let comp1 = false;
+			if( !(comparador == null || comparador == "na") ){
+				if( parseInt( valor ) > 0 ){
+					comp1 = true;
+					
+					condicion.push( { 'comparador' : comparador, 'targetcomparador' : '#deduc_comparador', 'valor' : valor, 'targetvalor' : '#deduc_valor' } );
+				}
+			}
+			
+			let comp2 = false;
+			if( !(comparador2 == null || comparador2 == "na") ){
+				if( parseInt( valor2 ) > 0 ){
+					comp2 = true;
+					
+					condicion.push( { 'comparador' : comparador2, 'targetcomparador' : '#deduc_comparador2', 'valor' : valor2, 'targetvalor' : '#deduc_valor2' } );
+				}
+			}
+			
+			let data = {};
+			const deducdata = [];
+			if( comp1 || comp2 ){
+			
+				for (const rDt in r ) {
+                	if ( Object.hasOwnProperty.call( r, rDt ) ) {
+                		const parts = rDt.split("_");
+            			const fld = parts[ 1 ];
+            			
+            			if( fld == "desc" ){
+            				deducdata.push( {
+            					"desc" : r[ 'deduc_desc_' + parts[ 2 ] ],
+            					"perc" : r[ 'deduc_perc_' + parts[ 2 ] ],
+            					"cod" : r[ 'deduc_cod_' + parts[ 2 ] ],
+            				} );
+            			}
+                		
+            		}
+        		}
+        		
+        		const firmab64 = ut.b64EncodeUnicode( jQuery( dt['firma'] ).text() );
+        		data = {
+    				"firma" : firmab64.replace(/=/ig,''),
+    				"criterio" : condicion,
+    				"deducciones" : deducdata,
+    				"modificar" : modificar
+    			};
+			
+			}
+        
+            const form_data = new FormData();
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( data ) ) );
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_DeduccionesVirtualAdd ); ?>');
+        
+            __TransportarData(
+                form_data,
+                function( oR ) {
+                	ri = 0;
+                	fn( oR );
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                },
+                function ( err ) {
+                	const oErr = err.responseJSON;
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( oErr['msj'] );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+		});
+	};
+	
+	self.eliminar_click = function( o ){
+		if( confirm('Desea eliminar este registro?') ){
+			const opc = { 'id' : 'ajaxldr','size' : 'modal-lg' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+    		const _o = jQuery( o );
+    		const dt = _o.data();
+    		
+    		const data = { "firma" : dt['id'] };
+    		
+    		const form_data = new FormData();
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( data ) ) );
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_DeduccionesVirtualDel ); ?>');
+                
+    		__TransportarData(
+                form_data,
+                function( oR ) {
+                    const fila = _o.closest('tr');
+                    tbInter.row(fila).remove().draw();
+    
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                },
+                function ( err ) {
+                	const oErr = err.responseJSON;
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( oErr['msj'] );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+		}
+	};
+	
+	self.resumen = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		const target = jQuery( dt['target'] );
+		
+		const compare = jQuery( dt['compare'] + " option:selected" ).text();
+		const comparevl = jQuery( dt['compare'] + " option:selected" ).val();
+		const vdef = jQuery( dt['valor' ] ).val();
+		
+		const compare2 = jQuery( dt['compare2'] + " option:selected" ).text();
+		const comparevl2 = jQuery( dt['compare2'] + " option:selected" ).val();
+		const vdef2 = jQuery( dt['valor2' ] ).val();
+		
+		const valor = ut.intToPesos( parseInt( vdef ) > 0 ? vdef : 0, 2,',','.');
+		const valor2 = ut.intToPesos( parseInt( vdef2 ) > 0 ? vdef2 : 0, 2,',','.');
+		
+		let mostrar = false;
+		
+		let res1 = "";
+		if( !(comparevl == "na" || comparevl == "") ){
+			if( parseInt( valor ) > 0 ){
+				mostrar = true;
+				res1 = compare + ' $ ' + valor ;
+			}
+		}
+		
+		let res2 = "";
+		if( !(comparevl2 == "na" || comparevl2 == "") ){
+			if( parseInt( valor2 ) > 0 ){
+				mostrar = true;
+				res2 = compare2 + ' $ ' + valor2 ;
+			}
+		}
+		
+		const resDef = [];
+		if( mostrar ){
+			resDef.push( 'Si el sueldo es ' );
+			resDef.push( res1 );
+			if( res1 != "" && res2 != ""){
+				resDef.push( " y " );
+			}
+			resDef.push( res2 );
+		}
+		else{
+			resDef.push( '&nbsp;' );
+		}
+		
+		target.html( resDef.join('') );
+	};
+	
+	self.dibujarTb = function(){
+		const html = [];
+		
+		html.push('<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;"></table>');
+		
+		return html.join('');
+	};
+	
+	self.dibujarDataTable = function( dt ){
+		const tb = self.dibujarTb();
+		jQuery( dt['contenedor'] ).html( tb );
+		
+		tbInter = jQuery( '#' + tableId ).DataTable({
+            data: dt['data'],
+            columns: [
+                { 'title' : 'Criterios', data: 'criterio' },
+                { 'title' : 'Deducciones', data: 'deducciones' },
+                { 'title' : 'Creaci&oacute;n', data: 'fecha' },
+                { 'title' : 'Creador', data: 'usuario' },
+                { 'title' : 'Modificaci&oacute;n', data: 'fechamod' },
+                { 
+                	'title' : 'Acciones', 
+                	data: null,
+                	render : function(data, type, row){
+                    	const html = [];
+                        html.push('<button onclick="' + dt['editar'] + '(this);" data-id="' + data['firma'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip" data-template="one' + data['firma'] + '">');
+                        html.push(' <i class="fe fe-edit fs-5"></i> ');
+                        html.push(' <div id="one' + data['firma'] + '" class="d-none"> ');
+                        html.push('     <h6 class="mb-0 text-white">Editar</h6> ');
+                        html.push(' </div> ');
+                        html.push('</button> ');
+                        
+                        <?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR || $usu->getPerfil_id() == IndexCtrl::PERFILES_FINANCIERO ) : ?>
+                        html.push('<button onclick="deducciones.eliminar_click(this);" data-id="' + data['firma'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover ms-3 texttooltip" data-template="two' + data['firma'] + '"> ');
+                        html.push(' <i class="fe fe-trash-2 fs-5"></i> ');
+                        html.push(' <div id="two' + data['firma'] + '" class="d-none"> ');
+                        html.push('     <h6 class="mb-0 text-white">Eliminar</h6> ');
+                        html.push(' </div> ');
+                        html.push('</button> ');
+                        <?php endif; ?>
+                        
+                		return html.join('');
+                	}
+            	}
+            ],
+            order: [[0, 'desc']],
+            responsive: false,
+            language: lengua_es,
+            processing: true
+        });
+	};
+};
+
+<?php
+/*
+ * @yalfonso
+ * TODO: Tarea 34 - Controlar si hay o no cambios para continuar hasta que se guarden los cambios
+ */
+?>
+const ControlCambiosGlobal = function(opciones) {
+    const self = this;
+
+    // Opciones por defecto
+    self.opts = $.extend({
+        mensaje: "Tiene cambios sin guardar. ¿Desea guardarlos antes de continuar?",
+        onSave: function(done){ done(true); },
+        onDiscard: function(){},
+        usarModalBootstrap: false  // si prefieres confirm() nativo, dejalo en false
+    }, opciones || {});
+
+    self.cambios = false;
+
+    // Marcar que hay o no cambios
+    self.setCambios = function(estado) {
+        self.cambios = !!estado;
+    };
+
+    // Consultar si hay cambios
+    self.hayCambios = function() {
+        return self.cambios;
+    };
+
+    // Intentar continuar (requiere guardar o descartar si hay cambios)
+    self.intentarContinuar = function(callback) {
+        if (!self.cambios) {
+            callback(true);
+            return;
+        }
+
+        if (self.opts.usarModalBootstrap) {
+            self.mostrarModalBootstrap(callback);
+        } else {
+            self.mostrarConfirmNativo(callback);
+        }
+    };
+
+    // Confirm clasico del navegador
+    self.mostrarConfirmNativo = function(callback) {
+        var guardar = confirm(self.opts.mensaje);
+        if (guardar) {
+            self.guardar(callback);
+        } else {
+            var descartar = confirm("¿Desea descartar los cambios?");
+            if (descartar) {
+                self.descartar(callback);
+            } else {
+                callback(false);
+            }
+        }
+    };
+
+    // Modal de Bootstrap 5 (opcional)
+    self.mostrarModalBootstrap = function(callback) {
+        const modalHtml = 
+            '<div class="modal fade" id="modalCambios" tabindex="-1">' +
+              '<div class="modal-dialog modal-dialog-centered">' +
+                '<div class="modal-content">' +
+                  '<div class="modal-header">' +
+                    '<h5 class="modal-title">Cambios sin guardar</h5>' +
+                    '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
+                  '</div>' +
+                  '<div class="modal-body">' + self.opts.mensaje + '</div>' +
+                  '<div class="modal-footer">' +
+                  	'<button type="button" class="btn btn-danger" id="btnGloCtrlCancelar" data-bs-dismiss="modal">Cancelar</button>' +
+                    '<button type="button" class="btn btn-secondary" id="btnGloCtrlDescartar">Descartar</button>' +
+                    '<button type="button" class="btn btn-primary" id="btnGloCtrlGuardar">Guardar</button>' +
+                  '</div>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+
+        var $modal = jQuery( modalHtml );
+        jQuery("body").append($modal);
+
+        var modal = new bootstrap.Modal( $modal[0] );
+        modal.show();
+
+        $modal.find("#btnGloCtrlGuardar").on("click", function() {
+            modal.hide();
+            self.guardar(callback);
+        });
+
+        $modal.find("#btnGloCtrlDescartar").on("click", function() {
+            modal.hide();
+            self.descartar(callback);
+        });
+
+        $modal.on("hidden.bs.modal", function() {
+            $modal.remove();
+        });
+    };
+
+    // Accion guardar
+    self.guardar = function(callback) {
+        self.opts.onSave(function(exito) {
+            if (exito) {
+                self.cambios = false;
+                callback(true);
+            } else {
+                callback(false);
+            }
+        });
+    };
+
+    // Accion descartar
+    self.descartar = function(callback) {
+        self.opts.onDiscard();
+        self.cambios = false;
+        callback(true);
+    };
+};
+</script>
+
+
 <!-- JavaScript Bundle with Popper -->
 <script src="/temas/js/bootstrap-5.2.0-dist/js/bootstrap.bundle.min.js" ></script>
 <script src="/temas/js/flatpickr-4.6.13/flatpickr.min.js" ></script>

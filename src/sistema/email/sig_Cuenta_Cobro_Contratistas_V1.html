@@ -1,43 +1,43 @@
-<p style="text-align:center"><strong>CUENTA DE COBRO - JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}<br />
+<p style="text-align:center"><span style="font-size:14px"><strong>CUENTA DE COBRO - JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}<br />
 <br />
 EL JARD&Iacute;N BOT&Aacute;NICO DE BOGOT&Aacute;</strong><br />
 NIT 860.030.197-0<br />
-<strong>DEBE A:&nbsp;</strong></p>
+<strong>DEBE A:&nbsp;</strong></span></p>
 
 <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
 	<tbody>
 		<tr>
-			<td style="background-color:#cccccc; width:25%">Nombre:</td>
+			<td style="background-color:#d3e9c1; width:25%">Nombre:</td>
 			<td style="width:25%">{$empl_fullname}</td>
-			<td style="background-color:#cccccc; width:25%">N&uacute;mero de Identificaci&oacute;n:</td>
+			<td style="background-color:#d3e9c1; width:25%">N&uacute;mero de Identificaci&oacute;n:</td>
 			<td style="width:25%">{$empl_documento}</td>
 		</tr>
 		<tr>
-			<td style="background-color:#cccccc">No. Contrato:</td>
+			<td style="background-color:#d3e9c1">No. Contrato:</td>
 			<td>JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</td>
-			<td style="background-color:#cccccc">No. Informe:</td>
+			<td style="background-color:#d3e9c1">No. Informe:</td>
 			<td>[nofactura mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final}]</td>
 		</tr>
 		<tr>
-			<td style="background-color:#cccccc">Valor:</td>
-			<td colspan="3">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=false]</td>
+			<td style="background-color:#d3e9c1">Valor:</td>
+			<td colspan="3">$ [valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=false datosmes=true contrato={$bogdata_no_compromiso} empleados_id={$empl_id} ]</td>
 		</tr>
 		<tr>
-			<td style="background-color:#cccccc">Valor en letras:</td>
-			<td colspan="3">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechafinalbogdata={$bogdata_fecha_final} fechainibogdata={$bogdata_fecha_de_entrada}&nbsp;meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=true] PESOS M/C</td>
+			<td style="background-color:#d3e9c1">Valor en letras:</td>
+			<td colspan="3">[valorpordia valortotal={$bogdata_valor_crp} mesaplica={$mesaplica} fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} meses={$empl_empleadosdetallescontrato_meses} dias={$empl_empleadosdetallescontrato_dias} letras=true] PESOS M/C</td>
 		</tr>
 		<tr>
-			<td style="background-color:#cccccc">Objeto:</td>
+			<td style="background-color:#d3e9c1">Objeto:</td>
 			<td colspan="3" rowspan="1" style="text-align:justify">{$bogdata_objeto}</td>
 		</tr>
 		<tr>
-			<td style="background-color:#cccccc">Periodo desde:</td>
-			<td>[fechaxls&nbsp;mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} formato=Y-m-d]</td>
-			<td style="background-color:#cccccc">Periodo hasta:</td>
-			<td>[fecha&nbsp;valor={$mesaplica} formato=Y-m-t]</td>
+			<td style="background-color:#d3e9c1">Periodo desde:</td>
+			<td>[fechaxls mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} formato=Y-m-d]</td>
+			<td style="background-color:#d3e9c1">Periodo hasta:</td>
+			<td>[fecha valor={$mesaplica} formato=Y-m-t]</td>
 		</tr>
 		<tr>
-			<td style="background-color:#cccccc">Observaciones:</td>
+			<td style="background-color:#d3e9c1">Observaciones:</td>
 			<td colspan="3" rowspan="1">&nbsp;</td>
 		</tr>
 	</tbody>
@@ -62,3 +62,5 @@ NIT 860.030.197-0<br />
 		</tr>
 	</tbody>
 </table>
+
+<p>&nbsp;</p>
