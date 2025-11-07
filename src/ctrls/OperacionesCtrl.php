@@ -2719,7 +2719,7 @@ class OperacionesCtrl {
 	        Singleton::_safeUpdate(trim($tb),$st,$xt,$pr);
 	    } catch (\Throwable $th) {
 	        http_response_code( 500 );
-	        throw new \Exception( 'empleados_Eliminar_1: ' . $th->getMessage() );
+	        throw new \Exception( 'empleados_Activar: ' . $th->getMessage() );
 	    }
 	    
 	    return true;
@@ -11055,6 +11055,88 @@ EOD;
 	    return $qryPkcom;
 	}
 	// paquetesreqcomentarios FIN
+	
+	// apoyos INI
+	/*
+	 * @vnavarro
+	 * TODO: Tarea 62 - Crear funci&oacute;n que agregue datos a la tabla apoyos
+	 */
+	public static function apoyos_Agregar( $d ) {
+	    // usa la Tarea 47 como ejemplo
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	}
+	
+	/*
+	 * @vnavarro
+	 * TODO: Tarea 63 - Crear funci&oacute;n que obtenga los datos de la tabla apoyos
+	 */
+	public static function apoyos_Obtener( $d ) {
+	    // usa la Tarea 48 como ejemplo
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	}
+	/*
+	 * @vnavarro
+	 * TODO: Tarea 64 - Crear funci&oacute;n que modifique los datos de la tabla apoyos
+	 */
+	public static function apoyos_Modificar( $d ) {
+	    // usa la Tarea 49 como ejemplo
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	}
+	/*
+	 * @vnavarro
+	 * TODO: Tarea 65 - Crear funci&oacute;n que eliminar los datos de la tabla la tabla apoyos
+	 */
+	public static function apoyos_Eliminar( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    //Usa esta funcion para eliminar
+	    //Singleton::_safeDelete($table, $where);
+	}
+	/*
+	 * @vnavarro
+	 * TODO: Tarea 66 - Crear funci&oacute;n que ayude a agregar o modificar la tabla apoyos
+	 */
+	public static function apoyos_Helper_Agregar( $d ) {
+	    // usa la Tarea 46 como ejemplo
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    //$data = base64_decode( $d[ 'data' ] );
+	    //$json = json_decode( $data, true );
+	    
+	    // usa esta funcion para retornar los datos en esta funcion
+	    //return self::retorno( [ "success" => true ], 0, '') ;
+	}
+	// apoyos FIN
 	
 	// reflista INI
 	public static function reflista_Obtener ( $d ){

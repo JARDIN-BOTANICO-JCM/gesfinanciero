@@ -129,6 +129,7 @@ elseif ( $usu->getPerfil_id() == 2 ){
 
                         </div>
                         <div>
+<?php // TODO: Tarea 59 - Apoyo a supervisor - En la vista "src/tpls/modelos/Usuarios.phtml" agrega botón para asignar apoyo a supervisor ?>
                         	<?php //if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO ) : ?>
                             <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stcMdl_l2" onclick="btnAddRegistro();">Agregar registro</a>
                             <?php //endif; ?>
@@ -363,7 +364,7 @@ elseif ( $usu->getPerfil_id() == 2 ){
             </div>
         </div>
         
-        <div class="card mb-4">
+        <div class="card mb-4" style="display: none;">
             <div class="card-body">
                 <div class="mb-4">
                     <h4 class="mb-1">Informaci&oacute;n contractual</h4>
@@ -410,7 +411,6 @@ elseif ( $usu->getPerfil_id() == 2 ){
 </div>
 
 <script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
-
 <script type="text/javascript">
 var idMod = null;
 var ls_generos = <?php echo json_encode( $d_generos ); ?>;
@@ -776,3 +776,5 @@ const eliminar = function( o ){
     }
 };
 </script>
+
+<?php // TODO: Tarea 60 - Apoyo supervisor - El modal debe tener 2 listas bootstrap (https://getbootstrap.com/docs/5.1/components/list-group/#checkboxes-and-radios), mas info github (https://github.com/JARDIN-BOTANICO-JCM/gesfinanciero/issues/77)  ?>
