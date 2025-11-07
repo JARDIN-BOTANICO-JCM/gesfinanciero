@@ -216,6 +216,16 @@ class IndexCtrl extends Pagina {
 	const API_PaquetesreqcomentariosHelperAdd = 'API_PaquetesreqcomentariosHelperAdd';
 	const API_PaquetesreqcomentariosHelperDel = 'API_PaquetesreqcomentariosHelperDel';
 	// Paquetesreqcomentarios FIN
+	
+	// Apoyos INI
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 67 - Agregar constantes para enrutar procedimientos front - back para la Apoyo supervisor
+	 */
+	const API_ApoyosGet = 'API_ApoyosGet';
+	const API_ApooyosHelperAdd = 'API_ApooyosHelperAdd';
+	const API_ApoyosDel = 'API_ApoyosDel';
+	// Apoyos FIN
 
 	// Reflista INI
 	const API_ReflistaGet = 'API_ReflistaGet';
@@ -1250,6 +1260,43 @@ class IndexCtrl extends Pagina {
 				    die("");
 				}
 				// paquetesreqcomentarios FIN
+				
+				/*
+				 * @yalfonso
+				 * TODO: Tarea 68 Agregar controlador de enrutamiento para Apoyo supervisor
+				 */
+				// Apoyos INI
+				if ( $_POST["ajax"] == md5(self::API_ApoyosGet) ) {
+				    try {
+				        $ok = OperacionesCtrl::apoyos_Obtener($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5(self::API_ApooyosHelperAdd) ) {
+				    try {
+				        $ok = OperacionesCtrl::apoyos_Helper_Agregar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5(self::API_ApoyosDel) ) {
+				    try {
+				        $ok = OperacionesCtrl::apoyos_Eliminar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Apoyos FIN
 
 				if ($_POST["ajax"] == md5(self::API_PaquetesAdminReg_Helper_Add)) {
 					try {
