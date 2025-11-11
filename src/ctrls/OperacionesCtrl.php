@@ -8071,7 +8071,7 @@ EOD;
 	        $pr[] = $d['id'];
 	    }
 	    if( isset( $d['w_pdfid'] ) ){
-	        $wh[] = "fir.pdfid = ?";
+	        $wh[] = "fir.pdfid like ?";
 	        $pr[] = $d['w_pdfid'];
 	    }
 	    if( isset( $d['w_firmaid_md5'] ) ){
@@ -8229,6 +8229,363 @@ EOD;
 	// Firmaslog FIN
 	
 	// Version 2 INI
+	
+	// Firmascomentarios INI
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 70 - Crear funci&oacute;n que ayude a agregar o modificar la tabla firmascomentarios
+	 */
+	public static function firmascomentarios_Helper_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $idreg = 0;
+	    
+	    $texto = trim($json['valor']);
+	    if( !(strlen( $texto ) > 0)  ){
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        return self::retorno( [], IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO, 'firmascomentarios_Helper_Agregar: El campo valor no tiene datos' ) ;
+	    }
+	    $valor = strip_tags($texto);
+	    $valor = htmlspecialchars($valor, ENT_QUOTES, 'UTF-8');
+	    $valor = trim($valor);
+	    
+	    if ( isset( $json['id'] ) ) {
+	        $idreg = $json['id'];
+	        try {
+	            self::firmascomentarios_Modificar( [ "id" => $json['id'], "valor" => $valor ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'firmascomentarios_Helper_Agregar - firmascomentarios_Modificar: ' . $e->getMessage() ) ;
+	        }
+	    }
+	    else {
+	        $pdfid = ltrim( strtolower( $json['url'] ) , "/");
+	        $pdfid = '%' . str_replace( "_fir.pdf", ".pdf", $pdfid );
+	        
+	        $firQry = [];
+	        try {
+	            $firQry = self::firmaslog_Obtener( [ "w_pdfid" => $pdfid, "limite" => 1 ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'firmascomentarios_Helper_Agregar - firmaslog_Obtener: ' . $e->getMessage() ) ;
+	        }
+	        
+	        if ( count( $firQry ) > 0 ) {
+	            $firmasreg = $firQry[ 0 ];
+	            try {
+	                $idreg = self::firmascomentarios_Agregar( [ "firmas_id" => $firmasreg['firmas_id'], "paquetes_id" => $json['paquetes_id'], "valor" => $valor ] );
+	            } catch (Exception $e) {
+	                http_response_code( $e->getCode() );
+	                return self::retorno( [], $e->getCode(), 'firmascomentarios_Helper_Agregar - paquetesreqcomentarios_Agregar: ' . $e->getMessage() ) ;
+	            }
+	        }
+	        
+	    }
+	    
+	    return self::retorno( [ "success" => true , 'idreg' => $idreg ], 0, '') ;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 71 - Crear funci&oacute;n que agregue datos a la tabla firmascomentarios
+	 */
+	public static function firmascomentarios_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $o = new Firmascomentarios();
+	    if (isset( $d['valor'] ) ) {
+	        $o->setValor( $d['valor'] );
+	    }
+	    if (isset( $d['paquetes_id'] ) ) {
+	        $o->setPaquetes_id( $d['paquetes_id'] );
+	    }
+	    if (isset( $d['firmas_id'] ) ) {
+	        $o->setFirmas_id( $d['firmas_id'] );
+	    }
+	    if (isset( $d['empleados'] ) ) {
+	        $o->setEmpleados( $d['empleados'] );
+	    }
+	    if (isset( $d['empleados_id'] ) ) {
+	        $o->setEmpleados_id( $d['empleados_id'] );
+	    }
+	    if (isset( $d['empleadosfecha'] ) ) {
+	        $o->setEmpleadosfecha( $d['empleadosfecha'] );
+	    }
+	    if (isset( $d['firmascomentariosestados_id'] ) ) {
+	        $o->setFirmascomentariosestados_id( $d['firmascomentariosestados_id'] );
+	    }
+	    $o->setUsuarios_id( $usu->getId() );
+	    $o->setUsuarios( $usu->getNombres() . " " . $usu->getApellidos() );
+	    $o->setFecha( date('Y-m-d H:i:s'));
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $o->obtenerError(), IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	}
+	
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 72 - Crear funci&oacute;n maneje los parametros que se envian para obtener data de la tabla firmascomentarios
+	 */
+	public static function firmascomentarios_Helper_Obtener( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $pdfid = ltrim( strtolower( $json['url'] ) , "/");
+	    $pdfid = '%' . str_replace( "_fir.pdf", ".pdf", $pdfid );
+	    
+	    $firQry = [];
+	    try {
+	        $firQry = self::firmaslog_Obtener( [ "w_pdfid" => $pdfid, "limite" => 1 ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        return self::retorno( [], $e->getCode(), 'firmascomentarios_Helper_Agregar - firmaslog_Obtener: ' . $e->getMessage() ) ;
+	    }
+	    
+	    $qryPkcom = [];
+	    if ( count( $firQry ) > 0 ) {
+	        $firmasreg = $firQry[ 0 ];
+	        try {
+	            $qryPkcom = self::firmascomentarios_Obtener( [ 'w_firmas_id' => $firmasreg['firmas_id'], 'w_firmascomentariosestados_ids' => [1,2,3,4], 'ordenasc' => 6 ] );
+	        } catch (Exception $e) {
+	            throw new Exception('firmascomentarios_Helper_Obtener - firmascomentarios_Obtener: ' . $e->getMessage(), $e->getCode() );
+	        }
+	    }
+	    
+	    return $qryPkcom;
+	}
+	
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 73 - Crear funci&oacute;n que obtenga los datos de la tabla firmascomentarios
+	 */
+	public static function firmascomentarios_Obtener( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "fircom.`id`, fircom.`usuarios_id`, fircom.`usuarios`, fircom.`valor`, ";
+	    $vr .= "TO_BASE64(fircom.`valor`) as firma, fircom.`fecha`, fircom.`paquetes_id`, ";
+	    $vr .= "pks.nombre as paquetes_nombre, fircom.firmas_id, firs.pdfid as firmas_pdfid, ";
+	    $vr .= "fircom.`firmascomentariosestados_id`, fircomestados.nombre as firmascomentariosestados_nombre, ";
+	    $vr .= "fircom.`empleados_id`, fircom.`empleados`, fircom.`empleadosfecha` ";
+	    
+	    $tb  = '`firmascomentarios` as fircom ';
+	    
+	    $jn  = 'LEFT JOIN `firmas` as firs on firs.id = fircom.firmas_id ';
+	    $jn .= 'LEFT JOIN `paquetes` as pks on pks.id = fircom.paquetes_id ';
+	    $jn .= 'LEFT JOIN `firmascomentariosestados` as fircomestados on fircomestados.id = fircom.firmascomentariosestados_id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "fircom.`id` = ?";
+	        $pr[] = $d['id'];
+	    }
+	    if( isset( $d['w_paquetes_id'] ) ){
+	        $wh[] = "fircom.`paquetes_id` = ?";
+	        $pr[] = $d['w_paquetes_id'];
+	    }
+	    if( isset( $d['w_empleados_id'] ) ){
+	        $wh[] = 'fircom.`empleados_id` = ?' ;
+	        $pr[] = $d['w_empleados_id'];
+	    }
+	    if( isset( $d['w_firmascomentariosestados_ids'] ) ){
+	        $ids = $d['w_firmascomentariosestados_ids'];
+	        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+	        $wh[] = "fircom.`firmascomentariosestados_id` IN (" . $placeholders . ")";
+	        
+	        foreach ( $ids as $vPr ) {
+	            $pr[] = $vPr;
+	        }
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr); //Singleton::_readInfoChar($tb,$vr,$xt, IndexCtrl::CHARS_TO, IndexCtrl::CHARS_FR);
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    
+	    return $r;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 74 - Crear funci&oacute;n que modifique los datos de la tabla firmascomentarios
+	 */
+	public static function firmascomentarios_Modificar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb  = "firmascomentarios ";
+	    $aSt = array();
+	    if (isset( $d['valor'] ) ) {
+	        $aSt['valor'] = $d['valor'] ;
+	    }
+	    if (isset( $d['firmascomentariosestados_id'] ) ) {
+	        $aSt['firmascomentariosestados_id'] = $d['firmascomentariosestados_id'] ;
+	    }
+	    if (isset( $d['empleados'] ) ) {
+	        $aSt['empleados'] = $d['empleados'] ;
+	        $aSt['empleadosfecha'] = date('Y-m-d H:i:s') ;
+	    }
+	    if (isset( $d['empleados_id'] ) ) {
+	        $aSt['empleados_id'] = $d['empleados_id'] ;
+	    }
+	    
+	    $pr = [];
+	    $wh  = '';
+	    if ( isset( $d['id'] ) ) {
+	        $wh  = 'id = ?';
+	        $pr[] = $d['id'];
+	    }
+	    
+	    if ( $wh == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    $xt = $wh;
+	    
+	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' WHERE ' . $xt);
+	    
+	    $cu = null;
+	    try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception($th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    
+	    return $cu;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 75 - Crear funci&oacute;n que eliminar los datos de la tabla la tabla firmascomentarios
+	 */
+	public static function firmascomentarios_Eliminar( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $xt = '';
+	    if ( isset( $d['id'] ) ) {
+	        $xt = "SIID";
+	        try {
+	            self::firmascomentarios_Modificar( ['id' => $d['id'], 'firmascomentariosestados_id' => 5 ] );
+	        } catch (Exception $e) {
+	            throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        }
+	    }
+	    
+	    if ( $xt == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'Debe indicar filtros',IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	    
+	    return  true;
+	}
+	/*
+	 * @yalfonso
+	 * TODO: Tarea 76 - Crear funci&oacute;n maneje los comentarios eliminados de la tabla firmascomentarios
+	 */
+	public static function firmascomentarios_Helper_Eliminar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $qryPkcom = [];
+	    try {
+	        $qryPkcom = self::firmascomentarios_Eliminar( $json );
+	    } catch (Exception $e) {
+	        throw new Exception('firmascomentarios_Helper_Eliminar - firmascomentarios_Eliminar: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    return $qryPkcom;
+	}
+	
+	// Firmascomentarios FIN
 	
 	// Paquetereqtipos INI
 	public static function paquetereqtipos_Obtener( $d ){

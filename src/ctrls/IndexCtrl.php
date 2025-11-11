@@ -161,6 +161,12 @@ class IndexCtrl extends Pagina {
 	const API_FirmaslogHelperEvent = 'API_FirmaslogHelperEvent';
 	// Firmaslog FIN
 	
+	// Firmascomentarios INI
+	const API_FirmascomentariosHelperGet = 'API_FirmascomentariosHelperGet';
+	const API_FirmascomentariosHelperAdd = 'API_FirmascomentariosHelperAdd';
+	const API_FirmascomentariosHelperDel = 'API_FirmascomentariosHelperDel';
+	// Firmascomentarios FIN
+	
 	// ApiBox INI
 	const API_ApiboxGet = 'API_ApiboxGet';
 	// ApiBox FIN
@@ -971,6 +977,40 @@ class IndexCtrl extends Pagina {
 				    die("");
 				}
 				// Firmaslog FIN
+				
+				// TODO: Tarea 77 - Agregar controlador de enrutamiento para Firmascomentarios
+				// firmascomentarios INI
+				if ($_POST["ajax"] == md5(self::API_FirmascomentariosHelperGet)) {
+				    try {
+				        $ok = OperacionesCtrl::firmascomentarios_Helper_Obtener( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ($_POST["ajax"] == md5(self::API_FirmascomentariosHelperAdd)) {
+				    try {
+				        $ok = OperacionesCtrl::firmascomentarios_Helper_Agregar( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ($_POST["ajax"] == md5(self::API_FirmascomentariosHelperDel)) {
+				    try {
+				        $ok = OperacionesCtrl::firmascomentarios_Helper_Eliminar( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// firmascomentarios FIN
 				
 				// ApiBox INI
 				if ($_POST["ajax"] == md5(self::API_ApiboxGet)) {

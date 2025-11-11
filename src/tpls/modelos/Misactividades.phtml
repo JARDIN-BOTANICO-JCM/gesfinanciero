@@ -309,7 +309,12 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		_html.push( '					</div>' );
 		_html.push( '				</li>' );
 		_html.push( '				<li class="list-group-item p-0 mt-1">' );
-		_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetesrequ_id="' + dt['id'] + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+		if( dt['tipodoc'] == TIPODOCS_PACKS || dt['tipodoc'] == TIPODOCS_ATTACHED ){
+			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetesrequ_id="' + dt['id'] + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+		}
+		else if( dt['tipodoc'] == TIPODOCS_SIGNS ){
+			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetes_id="' + idMod + '" data-url="' + _urlpdf + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+		}
 		_html.push( '				</li>' );
 		_html.push( '			</ul>' );
 		
@@ -333,48 +338,67 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		pieHtml.push('</div>');
         cuerpo.after( pieHtml.join('') );
         
-        if( dt['tipodoc'] == TIPODOCS_PACKS ){
-        	indexCom = 0;
-            const cfgGetCom = {
-            	'data' : dt,
-            	'fn' : function( oDt ){
-            		const dtcomms = oDt;
-                    for ( const key in dtcomms ) {
-                        if ( Object.hasOwnProperty.call( dtcomms, key ) ) {
-                            const _el = dtcomms[ key ];
-                            
-                            const comdivcont_item = "comdivcont_item_" + indexCom;
-                            const itemHtml = _this.comentarios_tpl({
-                    			'id' : comdivcont_item,
-                    			'firma' : ("" + _el['firma']).replace("==", "").replace("=",""),
-                    			'creador' : _el['usuarios'],
-                    			'texto' : _el['valor'],
-                    			'fecha' : _el['fecha'],
-                    			'idreg' : _el['id'],
-                    			'paquetesreqcomentariosestados_id' : _el['paquetesreqcomentariosestados_id']
-                    		});
-                            
-                            jQuery('#comdivcont_listcom').append( itemHtml );
-                            indexCom++;
-                        }
-                    }
-                    
-                    jQuery('[data-toggle="tooltip"]').tooltip();
-            	}
-            };
-            _this.comentarios_Obtener( cfgGetCom );
+        if( dt['tipodoc'] == TIPODOCS_PACKS || dt['tipodoc'] == TIPODOCS_ATTACHED ){
+        	
         }
+        indexCom = 0;
+        const cfgGetCom = {
+        	'data' : dt,
+        	'fn' : function( oDt ){
+        		const dtcomms = oDt;
+                for ( const key in dtcomms ) {
+                    if ( Object.hasOwnProperty.call( dtcomms, key ) ) {
+                        const _el = dtcomms[ key ];
+                        
+                        let _tpl_estados_id = 1;
+                        if( typeof( o ) == "object" && Object.hasOwnProperty.call( _el, 'paquetesreqcomentariosestados_id' ) ){
+                        	_tpl_estados_id = _el['paquetesreqcomentariosestados_id'];
+                        }
+                        else if( typeof( o ) == "object" && Object.hasOwnProperty.call( _el, 'firmascomentariosestados_id' ) ){
+                        	_tpl_estados_id = _el['firmascomentariosestados_id'];
+                        }
+                        
+                        const comdivcont_item = "comdivcont_item_" + indexCom;
+                        const itemHtml = _this.comentarios_tpl({
+                			'id' : comdivcont_item,
+                			'firma' : ("" + _el['firma']).replace("==", "").replace("=",""),
+                			'creador' : _el['usuarios'],
+                			'texto' : _el['valor'],
+                			'fecha' : _el['fecha'],
+                			'idreg' : _el['id'],
+                			'estados_id' : _tpl_estados_id,
+                			'tipodoc' : dt['tipodoc']
+                		});
+                        
+                        jQuery('#comdivcont_listcom').append( itemHtml );
+                        indexCom++;
+                    }
+                }
+                
+                jQuery('[data-toggle="tooltip"]').tooltip();
+        	}
+        };
+        _this.comentarios_Obtener( cfgGetCom );
 
         jQuery( objmdlErr ).modal('show');
 	};
 
 <?php // TODO: Tarea 51 - Controlar en el front la carga de los comentarios desde el servidor ?>
 	_this.comentarios_Obtener = function( o ){
-		const dt = o['data'];
-		
+		const dt = o['data'];		
+		let api = '';
+
+<?php // TODO: Tarea 82 - feat: controlar el tipo de data que se recibe segun el tipo de documento ?>
+		if( dt['tipodoc'] == TIPODOCS_PACKS || dt['tipodoc'] == TIPODOCS_ATTACHED ){
+			api = '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperGet ); ?>';
+		}
+		else if( dt['tipodoc'] == TIPODOCS_SIGNS ){
+			api = '<?php echo md5( IndexCtrl::API_FirmascomentariosHelperGet ); ?>';
+		}
 		dt['idmod'] = idMod;
+		
 		const form_data = new FormData();
-        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperGet ); ?>');
+        form_data.append('ajax', api );
         form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
 		__TransportarData(
 			form_data,
@@ -397,16 +421,22 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	_this.comentarios_Agregar = function( o ){
 		const data = o['data'];
 		
+<?php // TODO: Tarea 81 - feat: controlar el tipo de data que viaja al servidor segun el tipo de documento ?>
 		let api = '';
-		if( data['tipodoc'] == TIPODOCS_PACKS ){
+		let dt = {};
+		if( data['tipodoc'] == TIPODOCS_PACKS || data['tipodoc'] == TIPODOCS_ATTACHED ){
 			api = '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperAdd ); ?>';
+			dt = { "valor" : data['valor'] , "paquetesrequ_id" : data['paquetesrequ_id'] };
+		}
+		else if( data['tipodoc'] == TIPODOCS_SIGNS ){
+			api = '<?php echo md5( IndexCtrl::API_FirmascomentariosHelperAdd ); ?>';
+			dt = { "valor" : data['valor'] , "paquetes_id" : data['paquetes_id'], "url" : data['url'] };
 		}
 		
 		if( api === '' ){
 			alert('Api no implementada');
 		}
 		else{
-			const dt = { "valor" : data['valor'] , "paquetesrequ_id" : data['paquetesrequ_id'] };
     		const form_data = new FormData();
             form_data.append( 'ajax', api);
             form_data.append( 'data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
@@ -472,9 +502,14 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 
             }
             else{
+<?php // TODO: Tarea 80 - feat: compatibilidad agregando comentarios para documentos adjuntos o firmados ?>
+            	let payload = { 'valor' : cleantxt , 'paquetesrequ_id' : dt['paquetesrequ_id'], 'tipodoc' : dt['tipodoc'] };
+            	if( dt['tipodoc'] == TIPODOCS_SIGNS ){
+            		payload = { 'valor' : cleantxt , 'url' : dt['url'], 'paquetes_id' : dt['paquetes_id'], 'tipodoc' : dt['tipodoc'] };
+            	}
             	
                 const cfgAgregar = {
-        			'data' : { 'valor' : cleantxt , 'paquetesrequ_id' : dt['paquetesrequ_id'], 'tipodoc' : dt['tipodoc'] },
+        			'data' : payload,
         			'fn' : function( oR ){
         				const result = oR['result'];
         				
@@ -493,7 +528,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 			'texto' : cleantxt,
                 			'fecha' : fnow,
                 			'idreg' : result['idreg'],
-                			'paquetesreqcomentariosestados_id' : 1
+                			'estados_id' : 1,
+                			'tipodoc' : dt['tipodoc']
                 		});
                 		
                 		const oHtml = jQuery( _html );
@@ -536,7 +572,12 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const _texto = o['texto'];
 		const _fecha = o['fecha'];
 		const _idreg = o['idreg'];
-		const _paquetesreqcomentariosestados_id = o['paquetesreqcomentariosestados_id'];
+		
+<?php // TODO: Tarea 79 - feat: compatibilidad con estados de comentarios de docpaquetes y firmas ?>
+		let _estados_id = 1;
+		if( typeof( o ) == "object" && Object.hasOwnProperty.call( o, 'estados_id' ) ){
+			_estados_id = o['estados_id'];
+		}
 		
 		const _html = [];
         _html.push('<div id="' + _id + '" data-idreg="' + _idreg + '" data-firma="' + _firma + '" class="list-group-item " aria-current="true"> ');
@@ -545,8 +586,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		_html.push('	<small class="d-flex w-100 justify-content-between text-muted"> ');
 		_html.push('		<small>' + _fecha + '</small> ');
 		_html.push('		<div> ');
-		_html.push('			<a href="#" style="font-size: 0.8em;" data-target="#' + _id + '" data-idreg="' + _idreg + '" onclick="reqs.comentarios_Eliminar_Click( this );" ><i class="fas fa-trash"></i></a> ');
-		_html.push('			<span data-toggle="tooltip" data-placement="top" title="' + _icons[ _paquetesreqcomentariosestados_id ]['nombre'] + '">' + _icons[ _paquetesreqcomentariosestados_id ]['ico'] + '</span> ');
+		_html.push('			<a href="#" style="font-size: 0.8em;" data-tipodoc="' + o['tipodoc'] + '" data-target="#' + _id + '" data-idreg="' + _idreg + '" onclick="reqs.comentarios_Eliminar_Click( this );" ><i class="fas fa-trash"></i></a> ');
+		_html.push('			<span data-toggle="tooltip" data-placement="top" title="' + _icons[ _estados_id ]['nombre'] + '">' + _icons[ _estados_id ]['ico'] + '</span> ');
 		_html.push('		</div> ');
 		_html.push('	</small> ');
 		_html.push('</div>');
@@ -558,26 +599,41 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	_this.comentarios_Eliminar = function( o ){
 		const data = o['data'];
 		
-		const dt = { "id" : data['idreg'] };
-		const form_data = new FormData();
-        form_data.append( 'ajax', '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperDel ); ?>' );
-        form_data.append( 'data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
-        
-		__TransportarData(
-			form_data,
-			function( oR ) {
-				const fn = o['fn'];
-				fn( oR );
-			},
-			function ( err ) {
-                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
-                const alerta = jQuery(objmdlErr + ' div.alert');
-                alerta.attr('class','alert alert-danger');
-                alerta.html( err.responseText );
-
-                jQuery( objmdlErr ).modal('show');
-			}
-		);
+<?php // TODO: Tarea 78 - fixed: Agregar el API ID en los datos POST ?>
+		let api = '';
+		if( o['tipodoc'] == TIPODOCS_PACKS || o['tipodoc'] == TIPODOCS_ATTACHED ){
+			api = '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperDel ); ?>';
+		}
+		else if( o['tipodoc'] == TIPODOCS_SIGNS ){
+			api = '<?php echo md5( IndexCtrl::API_FirmascomentariosHelperDel ); ?>';
+		}
+		
+		if( api === '' ){
+			alert('Api no implementada');
+		}
+		else{
+			const dt = { "id" : data['idreg'] };
+    		const form_data = new FormData();
+            form_data.append( 'ajax', api );
+            form_data.append( 'data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+            
+    		__TransportarData(
+    			form_data,
+    			function( oR ) {
+    				const fn = o['fn'];
+    				fn( oR );
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    			}
+    		);
+		}
+		
 	};
 <?php // TODO: Tarea 47 - Controlar en el front eliminar comentarios  ?>
 	_this.comentarios_Eliminar_Click = function( o ){
@@ -586,6 +642,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
     		const dt = _o.data();
     		
     		const cfgDel = {
+<?php // TODO: Tarea 77 - fixed: Agregar el API ID ?>
+    			'tipodoc' : dt['tipodoc'],
     			'data' : dt,
     			'fn' :  function( oR ){
     				const target = jQuery( dt['target'] );
