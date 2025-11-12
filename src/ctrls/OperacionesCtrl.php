@@ -8365,7 +8365,7 @@ EOD;
 	    
 	    $data = base64_decode( $d[ 'data' ] );
 	    $json = json_decode( $data, true );
-	    
+	    //die( print_r( $json, true ) );
 	    $pdfid = ltrim( strtolower( $json['url'] ) , "/");
 	    $pdfid = '%' . str_replace( "_fir.pdf", ".pdf", $pdfid );
 	    
@@ -8376,7 +8376,7 @@ EOD;
 	        http_response_code( $e->getCode() );
 	        return self::retorno( [], $e->getCode(), 'firmascomentarios_Helper_Agregar - firmaslog_Obtener: ' . $e->getMessage() ) ;
 	    }
-	    
+	    //die( 'firQry: ' . print_r( $firQry, true ) );
 	    $qryPkcom = [];
 	    if ( count( $firQry ) > 0 ) {
 	        $firmasreg = $firQry[ 0 ];
@@ -8422,6 +8422,11 @@ EOD;
 	    if( isset( $d['id'] ) ){
 	        $wh[] = "fircom.`id` = ?";
 	        $pr[] = $d['id'];
+	    }
+	    // TODO: Tarea 84 - fixed: agregar el filtro firmas_id para controlar comentarios de archivos firmados
+	    if( isset( $d['w_firmas_id'] ) ){
+	        $wh[] = "fircom.`firmas_id` = ?";
+	        $pr[] = $d['w_firmas_id'];
 	    }
 	    if( isset( $d['w_paquetes_id'] ) ){
 	        $wh[] = "fircom.`paquetes_id` = ?";
@@ -10218,6 +10223,15 @@ EOD;
 	        if( $json['fin'] ) {
 	            $modCfg = [];
 	            $modCfg['paquetesestados_id'] = 4;
+	            $modCfg['id'] = $idMod;
+	            $modCfg['usuariosmod'] = $usuariosmod;
+	            $modCfg['fechamodificado'] = date("Y-m-d H:i:s");
+	        }
+	    }
+	    elseif ( isset( $json['rechazar'] ) ) {
+	        if( $json['rechazar'] ) {
+	            $modCfg = [];
+	            $modCfg['paquetesestados_id'] = 5;
 	            $modCfg['id'] = $idMod;
 	            $modCfg['usuariosmod'] = $usuariosmod;
 	            $modCfg['fechamodificado'] = date("Y-m-d H:i:s");
