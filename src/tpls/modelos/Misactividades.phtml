@@ -11,11 +11,18 @@ try {
     throw $e;
 }
 
+// TODO: Tarea 83 - agregar el campo estado del flujo 
+$l_paquetesestados_id = array();
+try {
+    $l_paquetesestados_id = OperacionesCtrl::paquetesestados_Obtener( [] );
+} catch (Exception $e) {
+    throw $e;
+}
+
 $paraRevisar = [];
 foreach ($l_flujositems as $kFluI ) {
     $paraRevisar[] = $kFluI['id'];
 }
-
 ?>
 <div id="db-wrapper" class="">
     <!-- navbar vertical -->
@@ -100,6 +107,7 @@ foreach ($l_flujositems as $kFluI ) {
 let idMod = null;
 
 const d_paraRevisar = <?php echo json_encode( $paraRevisar ); ?>;
+const d_paquetesestados_id = <?php echo json_encode( $l_paquetesestados_id ); ?>;
 
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
@@ -193,7 +201,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
     			}
     			
     		} else {
-    			alert("Debes guardar o descartar antes de continuar");
+    			alert("Debe guardar o descartar antes de continuar");
     		}
     	});
     
@@ -338,9 +346,6 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		pieHtml.push('</div>');
         cuerpo.after( pieHtml.join('') );
         
-        if( dt['tipodoc'] == TIPODOCS_PACKS || dt['tipodoc'] == TIPODOCS_ATTACHED ){
-        	
-        }
         indexCom = 0;
         const cfgGetCom = {
         	'data' : dt,
@@ -724,6 +729,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		</div>');
 		html.push('		<div class="">');
 		html.push('			<button style="display: none;" id="btnContinuar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
+		html.push('			<button id="btnDevolver" class="btn btn-outline-danger" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Devolver esta solicitud" data-nid="' + nextid + '" data-idMod="' + idMod + '" data-rechazar="true" >Devolver solicitud</button>');
 		html.push('			<button style="display: none;" id="btnFinalizar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Finalizar solicitud" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
 		html.push('		</div>');
 		html.push('	</div>');
@@ -1054,7 +1060,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 url: './index.php',
                 data : function(d){
                 	d.ajax = '<?php echo md5( IndexCtrl::API_PaquetesGetAjax ); ?>';
-                	d.columns[ 6 ]['search']['value'] = 2;
+                	d.columns[ 6 ]['search']['value'] = [ 2, 5 ];
                 	if( d_paraRevisar.length > 0 ){
                 		d.columns[ 4 ]['search']['value'] = d_paraRevisar;
                 	}
@@ -1085,7 +1091,37 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 { 'title' : 'Creado', data: 'fecha' },
                 { 'title' : 'Proceso', data: 'flujositems_id', visible : false  },
                 { 'title' : 'Usuario', data: 'empleados' },
-                { 'title' : 'Estado', data: 'paquetesestados_id', visible : false },
+                { 
+                	'title' : 'Estado', 
+            		data: 'paquetesestados_id', 
+            		render : function(data, type, row){
+            			let rtxt = "";
+            			for (const key in d_paquetesestados_id) {
+                    	    if (Object.hasOwnProperty.call( d_paquetesestados_id, key ) ) {
+                    	        const _el = d_paquetesestados_id[key];
+                    	        
+                    	        if( _el['id'] == data ){
+                    	        	let bgcolor = 'bg-secondary';
+                    	        	if( data == 1 ){
+                    	        		bgcolor = 'bg-primary';
+                    	        	}
+                    	        	else if( data == 2 ){
+                    	        		bgcolor = 'bg-warning text-dark';
+                    	        	}
+                    	        	else if( data == 7 ){
+                    	        		bgcolor = 'bg-success text-dark';
+                    	        	}
+                    	        	else if( data == 5 ){
+                    	        		bgcolor = 'bg-danger text-light';
+                    	        	}
+                    	        	rtxt = '<span class="badge ' + bgcolor + '">' + _el['nombre'] + '</span>';
+                    	        }
+                    	        
+                	        }
+            	        }
+            	        return rtxt;
+            		}
+        		},
                 { 'title' : 'Plantilla', data: 'flujos_id', visible : false  },
                 { data: 'empleados_id', visible : false },
                 {
