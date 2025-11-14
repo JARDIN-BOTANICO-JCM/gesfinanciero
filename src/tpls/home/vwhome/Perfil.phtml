@@ -274,6 +274,15 @@ try {
 var modid = null;
 var cProf = null;
 
+/**
+ * Actualiza la contraseña del usuario.
+ *
+ * Valida el formulario 'frmValPassCls', muestra un modal de carga,
+ * envía los datos por AJAX a la API de contraseñas y muestra un modal
+ * indicando éxito o error. Oculta el loader tras el tiempo configurado.
+ *
+ * @return void
+ */
 const actualizarpass = function(){
 	ut.validarFrm('frmValPassCls', function ( r ) {
 		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
@@ -309,6 +318,15 @@ const actualizarpass = function(){
 	});
 };
 
+/**
+ * Rellena la vista de perfil con los datos de cProf.
+ *
+ * Itera sobre los registros de cProf, actualiza el nombre completo, correo,
+ * campos del formulario (nombres, apellidos, documento, dirección, tipoacudiente),
+ * reemplaza el avatar si existe y establece valores ocultos (.myid, .oldemail, .mykey, .mytipo).
+ *
+ * Usa variables globales cProf y pDt. No retorna valor.
+ */
 const fillPerf = function(){
 	const rDt = cProf;
 	for (const k in rDt ) {
@@ -341,6 +359,13 @@ const fillPerf = function(){
 	}
 };
 
+/**
+ * Solicita los datos del perfil del usuario desde home.navMiPerfil,
+ * guarda la respuesta en la variable global cProf y actualiza la interfaz
+ * llamando a fillPerf().
+ *
+ * @return void
+ */
 const miperfil = function(){
 	home.navMiPerfil(function( rDt ){
 		cProf = rDt;
@@ -348,6 +373,12 @@ const miperfil = function(){
 	});
 };
 
+/**
+ * Actualiza el perfil: valida el formulario 'frmvalcls', envía los datos vía AJAX y muestra modales
+ * de carga y notificaciones de éxito o error.
+ *
+ * @returns {void}
+ */
 const actualizar = function(){
 	ut.validarFrm('frmvalcls', function ( r ) {
 		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
@@ -383,6 +414,14 @@ const actualizar = function(){
 	});
 };
 
+/**
+ * nuevoMail
+ *
+ * Valida el formulario de actualización de correo, muestra un modal de carga,
+ * transmite los datos por AJAX (incluye token y idhash) y presenta un modal con
+ * el resultado (éxito o error). Depende de ut.validarFrm, mngModal,
+ * __TransportarData, jQuery y la variable global modid.
+ */
 const nuevoMail = function(){
 	ut.validarFrm('frmUpMailvalcls', function ( r ) {
 		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
@@ -420,6 +459,12 @@ const nuevoMail = function(){
 	});
 };
 
+/**
+ * addNewMail
+ *
+ * Valida el formulario 'frmUpMailvalcls', establece el callback para crear un nuevo correo,
+ * actualiza la vista y rellena los datos del perfil.
+ */
 const addNewMail = function(){
 	ut.validarFrm('frmUpMailvalcls', function ( r ) {
         validadorGlob.fn = function( o ){
@@ -430,6 +475,14 @@ const addNewMail = function(){
 	});
 };
 
+/**
+ * Cambia el elemento activo en la navegación.
+ *
+ * Elimina la clase 'active' de los elementos .nav-item hermanos y añade 'active'
+ * al elemento <li> padre del elemento proporcionado.
+ *
+ * @param {HTMLElement|jQuery} o Elemento dentro del item que se desea activar.
+ */
 const cambiarActivo = function( o ){
     var padre = jQuery( o ).parent().parent();
     var _li = jQuery( o ).parent();

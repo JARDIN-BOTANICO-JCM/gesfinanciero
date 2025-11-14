@@ -38,6 +38,14 @@ class Menubar {
         // constructor
     }
     
+    /**
+     * Construye y añade las entradas del menú según el usuario en sesión.
+     *
+     * Genera grupos y entidades (Dashboard, Entidad, Actividades, Sistema, etc.)
+     * y ajusta su visibilidad y URL en función del perfil del usuario.
+     *
+     * @return void
+     */
     public function menu1(){
         
         $usu = null;
@@ -241,12 +249,29 @@ class Menubar {
 
 	}
 
+    /**
+     * Agrega un MenubarEntity a la colección de menús usando el código del grupo como clave.
+     *
+     * @param MenubarEntity $mb Entidad de menú a agregar.
+     * @return void
+     */
     private function agregar( MenubarEntity $mb ){
         $id = $mb->getGrupo()->getCodigo();
         $this->menuCollection[ $id ]['grp'] = $mb->getGrupo();
         $this->menuCollection[ $id ]['o'][] = $mb ;
     }
 
+    /**
+     * Genera el HTML del menú lateral a partir de $this->menuCollection.
+     *
+     * Marca como activo/expandido el elemento que coincide con $pageid (o el primero si $pageid es null),
+     * actualiza $this->breadCrum cuando encuentra la página activa y respeta la visibilidad de cada item.
+     * Permite estilos adicionales mediante $d['navitemTop'].
+     *
+     * @param string|null $pageid Identificador de la página activa (se compara con getUrlPageId()).
+     * @param array $d Opciones opcionales (por ejemplo 'navitemTop' para estilo en el enlace principal).
+     * @return string HTML del menú (listas y colapsables).
+     */
     private function listarMenu( $pageid, $d = array() ){
         $col = $this->menuCollection;
         $html = array();
@@ -330,6 +355,14 @@ class Menubar {
         return $this;
     }
 
+
+    /**
+     * Dibuja la barra de menú del sistema.
+     *
+     * Método estático que genera y muestra el menú según permisos del usuario y configuración.
+     *
+     * @return void
+     */
     public static function DibujarMenu( ){
         $m = new Menubar( );
         $m->menu1( );
@@ -403,6 +436,11 @@ class Menubar {
     const HOME_SISTEMA_PREFERENCIAS = 302;
     const HOME_SISTEMA_COMUNICACIONESALL = 303;
     
+    /**
+     * Construye y registra los grupos y entradas del menú (Dashboard, Actividades, Sistema).
+     *
+     * @return void
+     */
     public function menu2(){
         
         $meG = new MenubarGrupo('dashboard','Dashboard','<i class="nav-icon fe fe-home me-2"></i>');
@@ -437,6 +475,13 @@ class Menubar {
         
     }
     
+    /**
+     * Dibuja el menú de la página de inicio.
+     *
+     * Método estático que genera y muestra la barra de menú principal para Home.
+     *
+     * @return void
+     */
     public static function DibujarMenuHome( ){
         $m = new Menubar( );
         $m->menu2( );

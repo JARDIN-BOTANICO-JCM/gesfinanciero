@@ -157,6 +157,10 @@ if ( isset( $_SESSION['usu'] ) ) {
     </div>
     
     <script type="application/javascript" >
+    /**
+     * Inicializa el editor de texto enriquecido CKEditor en el contenedor especificado.
+     * @param {Object} ckeCfg Configuración para CKEditor, incluyendo el ID del contenedor.
+     */
     const initSample = function( ckeCfg ) {
     
     	var wysiwygareaAvailable = isWysiwygareaAvailable(),
@@ -187,6 +191,12 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
 
     <script type="text/javascript">
+    /**
+     * Verifica y procesa los archivos seleccionados para subir, asegurando que no excedan un tamaño máximo.
+     * @param {Object} o Elemento input de tipo file.
+     * @param {number} mb Tamaño máximo permitido en megabytes.
+     * @param {Function} fn Función callback para procesar cada archivo válido.
+     */       
     const chkUploadFiles = function(o, mb, fn){
     	const errPreSrv = [];
     	jQuery.each( jQuery( o )[0].files, function(i, file) {
@@ -219,12 +229,27 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
     
     <script type="application/javascript">
+    /**
+     * Cambia la clave manualmente para un usuario dado.
+     * @param {Object} o Elemento o contexto desde donde se invoca la función.
+     * @param {string} api Identificador de la API para la operación.
+     */
     const nuevoPass = function( o ){
     	nwPass(o, '<?php echo md5( IndexCtrl::API_UsuariosClaveAsignadaAdmin ); ?>' );
     };
+    /**
+     * Cambia la clave manualmente para un usuario dado.
+     * @param {Object} o Elemento o contexto desde donde se invoca la función.
+     * @param {string} api Identificador de la API para la operación.
+     */
     const nuevoAluPass = function( o ){
     	nwPass(o, '<?php echo md5( IndexCtrl::API_EmpleadosClaveAsignadaAdmin); ?>' );
     }
+    /**
+     * Genera una nueva clave para un usuario o alumno y la envía por correo.
+     * @param {Object} o Elemento o contexto desde donde se invoca la función.
+     * @param {string} api Identificador de la API para la operación.
+     */
 	const nwPass = function( o, api ){
 		const _o = jQuery( o );
     	if ( confirm( "\xBFDesea generar una nueva clave y enviarla por correo?" ) ){
@@ -263,13 +288,29 @@ if ( isset( $_SESSION['usu'] ) ) {
 
     	}
 	};
-     
+    /**
+     * Cambia la clave manualmente para un usuario dado.
+     * @param {Object} o Elemento o contexto desde donde se invoca la función.
+     * @param {string} api Identificador de la API para la operación.
+     */ 
     const nuevoPassManual = function( o ){
     	passManual( o , '<?php echo md5( IndexCtrl::API_UsuariosClaveAsignadaAdminManual ); ?>' );
     };
+    
+    /**
+     * Cambia la clave manualmente para un alumno dado.
+     * @param {Object} o Elemento o contexto desde donde se invoca la función.
+     * @param {string} api Identificador de la API para la operación.
+     */
     const nuevoAluPassManual = function( o ){
     	passManual( o , '<?php echo md5( IndexCtrl::API_EmpleadosClaveAsignadaAdminManual ); ?>' );
     };
+    
+    /**
+     * Cambia la clave manualmente para un usuario dado.
+     * @param {Object} o Elemento o contexto desde donde se invoca la función.
+     * @param {string} api Identificador de la API para la operación.
+     */
     const passManual = function( o, api ){
     	const _o = jQuery( o );
     	const val1 = confirm("\xBFDesea cambiar la clave de este usuario?");
@@ -326,6 +367,9 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
 
     <script type="application/javascript">
+    /**
+     * Cierra la sesi&oacute;n del usuario actual.
+     */
     const cerrarSesion = function(){
         if( confirm('\xBFDesea cerrar su sesi\xF3n?') ){
             location.href = './index.php?logout=true';
@@ -334,9 +378,20 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
 
     <script type="text/javascript">
+    /**
+     * Rellena una cadena a la izquierda con un caracter hasta alcanzar una longitud determinada.
+     * @param {string} string Cadena original.
+     * @param {string} pad Carácter de relleno.
+     * @param {number} length Longitud deseada.
+     * @returns {string} Cadena rellenada.
+     */
     const str_pad_left = function(string,pad,length) {
         return (new Array(length+1).join(pad)+string).slice(-length);
     };
+    /**
+     * Calcula y muestra el salario formateado en pesos.
+     * @param {Object} o Elemento input cuyo valor se va a formatear.
+     */
     const calcSalario = function( o ){
     	const _o = jQuery( o );
     	const dt = _o.data();
@@ -348,6 +403,9 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
     
     <script type="application/javascript">
+    /**
+     * Verifica la sesi&oacute;n del usuario y muestra un modal si ha expirado.
+     */
     var aAsPostf = function(e, o){
         e.stopPropagation();
         e.preventDefault();
@@ -359,6 +417,10 @@ if ( isset( $_SESSION['usu'] ) ) {
         ut.crearFormulario( urlO["url"], urlO["params"] );
     };
 
+    /**
+     * Marca un marcador como leído.
+     * @param {Object} d Elemento del marcador.
+     */
     const mkL = function( d ){
     	const el = jQuery( d );
     	const hashid = el.data('hashid');
@@ -373,7 +435,9 @@ if ( isset( $_SESSION['usu'] ) ) {
     		JSON.stringify( params )
     	);
     };
-
+    /**
+     * Verifica la sesi&oacute;n del usuario y muestra un modal si ha expirado.
+     */
     jQuery(document).ready(function(){
         <?php if ( Seguridad::isLogin() ) : ?>
         <?php   if( OperacionesCtrl::$AUTO_LOG_OUT ) : ?>
@@ -390,6 +454,12 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
 
     <script type="application/javascript">
+   
+    /**
+     * Validador global de la plantilla.
+     *
+     * Agrupa reglas y comprobaciones reutilizables para validar datos usados en la vista.
+     */
     const ValidadorGlob = function(){
         var _this = this;
 
@@ -727,11 +797,20 @@ if ( isset( $_SESSION['usu'] ) ) {
         }
         
     };
+    
     const validadorGlob = new ValidadorGlob();
     </script>
 
 	<script src="/temas/js/MemoriaManager.js?f=<?php echo date('YmdHis');?>"></script>
     <script type="application/javascript">
+    
+    /**
+     * Controlador del índice.
+     *
+     * Inicializa y gestiona la lógica y eventos del módulo índice.
+     *
+     * @returns {void}
+     */
     const IndiceCtrl = function(){
     	const _this = this;
     	const mmanager = new MemoriaManager();
@@ -915,6 +994,13 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
     
     <script type="application/javascript">
+
+    /**
+     * Cuenta la cantidad de apariciones de letras en la entrada.
+     *
+     * @param {string|Object} o Cadena o valor a procesar; si es un objeto se consideran sus valores.
+     * @returns {Object} Mapa donde cada clave es una letra y el valor es el conteo de apariciones.
+     */
     const glbConteoDeLetras = function( o ){
     	const _o = jQuery( o );
     	const dt = _o.data();
@@ -931,6 +1017,14 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
     
     <script type="application/javascript">
+
+    /**
+     * Ordena las clases/elementos del pie de página.
+     *
+     * Método breve que aplica el criterio de ordenamiento correspondiente.
+     *
+     * @return void
+     */
     const OrdenarCls = function(){
     	const _this = this;
     	
@@ -998,6 +1092,11 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
     
     <script type="application/javascript">
+    /**
+     * Gestor de firmas digitales.
+     *
+     * Proporciona métodos para generar y previsualizar documentos firmados digitalmente.
+     */
     const SignDocs = function(){
     	const _this = this;
     	
@@ -1097,6 +1196,12 @@ if ( isset( $_SESSION['usu'] ) ) {
         };
     };
     
+    /**
+     * Ejecuta una operación segura sobre el objeto proporcionado.
+     *
+     * @param {Object} o - Objeto de entrada a procesar.
+     * @returns {*} Resultado de la operación o null si ocurre un error.
+     */
     const safeOperation = function( o ){
     	const _o = jQuery( o );
     	const dt = _o.data();
@@ -1114,6 +1219,11 @@ if ( isset( $_SESSION['usu'] ) ) {
     	});
     };
     
+    /**
+     * Comprueba el estado de la sesión del usuario.
+     *
+     * Redirige o muestra un aviso si la sesión expiró; de lo contrario mantiene la sesión activa.
+     */
     const checkSession = function () {
         fetch('index.php?ajaxl=<?php echo md5(IndexCtrl::API_SESSION_ACTIVA) ?>')
             .then(response => response.json())
@@ -1125,6 +1235,12 @@ if ( isset( $_SESSION['usu'] ) ) {
             .catch(error => console.error('Error:', error));
     };
     
+    /**
+     * Genera y devuelve el HTML del componente de login rápido.
+     *
+     * @param object o Opciones para personalizar el comportamiento y apariencia del login.
+     * @return string HTML generado para el formulario de inicio de sesión rápido.
+     */
     const htmlQuickLogin = function( o ){
     	const _o = jQuery( o['obj'] );
     	const dt = _o.data();
@@ -1183,6 +1299,13 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
 
     <script type="application/javascript">
+
+    /**
+     * Maneja el clic para evaluar un carnet.
+     *
+     * @param {Object} o Parámetros o evento relacionado con la evaluación.
+     * @returns {void}
+     */
     const evaluarCarnet_Click = function( o ){
     	const _o = jQuery( o );
     	const dt = _o.data();
@@ -1211,6 +1334,13 @@ if ( isset( $_SESSION['usu'] ) ) {
     </script>
     
 <script type="application/javascript">
+
+/**
+ * Cierra todos los modales visibles en la página.
+ *
+ * Recorre los elementos con la clase .modal.show, obtiene la instancia de Bootstrap
+ * asociada y la oculta si existe.
+ */
 const closeAllModal = function(){
     jQuery('.modal.show').each(function() {
         const modal = bootstrap.Modal.getInstance(this);
@@ -1219,6 +1349,13 @@ const closeAllModal = function(){
 };
 </script>
 <script type="application/javascript">
+
+/**
+ * Añade un agarre al elemento utilizando los datos proporcionados.
+ *
+ * @param {Object} d Datos del agarre (posición, identificador u otros).
+ * @returns {void}
+ */
 const agregarAgarre = function( d ){
 	if (window.drake && window.drake.destroy) {
 		window.drake.destroy();

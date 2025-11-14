@@ -1,6 +1,15 @@
 <?php
 class Utiles{
     
+    /**
+     * Sube múltiples archivos desde $_FILES al directorio indicado.
+     *
+     * @param string $carpetadestino Ruta destino donde se guardarán los archivos.
+     * @param array  $tipos          Array de tipos MIME permitidos. Si $tipos[0] == "*" permite todos.
+     * @param string $nombrecampo    Nombre del campo en $_FILES (por defecto 'campo').
+     * @param bool   $nmTmp          Si true genera nombres temporales únicos (md5(uniqid())) conservando la extensión.
+     * @return array                 Array con rutas de los archivos guardados o false por cada archivo que falló.
+     */
     public static function SubirArchivos( $carpetadestino, $tipos , $nombrecampo = 'campo', $nmTmp = false){
         $nombreFl = $nombrecampo;
         $target_path = $carpetadestino;
@@ -31,6 +40,13 @@ class Utiles{
         return $arrSalida;
     }
     
+    /**
+     * Descomprime un archivo GZIP (.gz) y guarda el contenido en el mismo directorio
+     * con el nombre del archivo sin la extensión .gz.
+     *
+     * @param string $file Ruta completa del archivo .gz a descomprimir.
+     * @return string Ruta del archivo descomprimido generado.
+     */
     public static function DescomprimirArchivos( $file ){
         
         $flFinal = pathinfo($file);
@@ -48,6 +64,17 @@ class Utiles{
         return $archivo;
     }
     
+    /**
+     * Incluye archivos .php de un directorio o devuelve la lista de nombres encontrados.
+     *
+     * Escanea el directorio indicado, filtra archivos PHP (no directorios ni el propio archivo),
+     * y realiza include_once de cada uno salvo que $recibirLista sea true, en cuyo caso sólo devuelve la lista.
+     *
+     * @param string $dir         Ruta del directorio a procesar.
+     * @param bool   $recibirLista Si true no incluye los archivos y devuelve la lista (por defecto false).
+     * @param bool   $conextension Si true los nombres devueltos incluyen la extensión (por defecto true).
+     * @return array Lista de nombres de archivo encontrados (con o sin extensión según $conextension).
+     */
     public static function IncluirArchivos( $dir, $recibirLista = false, $conextension = true ){
         $dh  = opendir($dir);
         $este = __FILE__;
@@ -68,16 +95,40 @@ class Utiles{
         return $files;
     }
     
+    /**
+     * Comprueba si una cadena termina con otro sufijo.
+     *
+     * Devuelve true si $needle está vacío o si $haystack finaliza exactamente con $needle (búsqueda sensible a mayúsculas).
+     *
+     * @param string $haystack Cadena donde se busca el sufijo.
+     * @param string $needle   Sufijo a comprobar.
+     * @return bool True si $haystack termina con $needle, false en caso contrario.
+     */
     public static function TerminaEn( $haystack, $needle ){
         $tieneForaneo = ( $needle === "" || (($temp = strlen($haystack) - strlen($needle)) >= 0 && strpos($haystack, $needle, $temp) !== FALSE));
         return $tieneForaneo;
     }
     
+    /**
+     * Comprueba si una cadena comienza con otra.
+     *
+     * @param string $haystack Cadena en la que se busca.
+     * @param string $needle   Subcadena que se espera al inicio de $haystack.
+     * @return bool True si $haystack comienza exactamente con $needle (sensible a mayúsculas), false en caso contrario.
+     */
     public static function ComienzaEn( $haystack, $needle ){
         $tieneForaneo = ( substr($haystack, 0, strlen($needle)) === $needle );
         return $tieneForaneo;
     }
     
+    /**
+     * Obtiene la URL base del sitio (protocolo + host + directorio).
+     *
+     * Construye la URL a partir del host y el directorio actual, detectando
+     * HTTPS cuando procede y asegurando que la URL resultante termine en "/".
+     *
+     * @return string URL base terminada en "/"
+     */
     public static function getBaseUrl(){
         $currentPath = $_SERVER['PHP_SELF'];
         $pathInfo = pathinfo($currentPath);
@@ -90,6 +141,14 @@ class Utiles{
         return $urlTmp . (self::TerminaEn($urlTmp, "/") ? "" : "/");
     }
     
+    /**
+     * Genera una barra de paginación en HTML con controles de anterior, siguiente y entrada de página.
+     * Toma en cuenta $_POST['paginaV'] para calcular la página actual y añade campos ocultos pageid y jsmenuid.
+     *
+     * @param string|int $pi Identificador de la página/modelo que se incluirá en el campo hidden "pageid".
+     * @param string|int $jsmi Identificador del menú JavaScript que se incluirá en el campo hidden "jsmenuid".
+     * @return string HTML de la barra de paginación.
+     */
     public static function BarraPaginacion($pi, $jsmi){
         $pvIni = (isset($_POST["paginaV"]) ? $_POST["paginaV"] : "0");
         $html  = "	<table class=\"barraNavTablas\"> \n";
@@ -128,12 +187,24 @@ class Utiles{
         return $html;
     }
     
+    /**
+     * Determina si el cliente es un dispositivo móvil comprobando $_SERVER['HTTP_USER_AGENT'.
+     *
+     * Usa expresiones regulares para detectar una amplia gama de agentes móviles.
+     *
+     * @return bool True si se detecta un móvil, False en caso contrario.
+     */
     public static function isMobile() {
         $useragent=$_SERVER['HTTP_USER_AGENT'];
         $mb = (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i',substr($useragent,0,4)));
         return $mb;
     }
     
+    /**
+     * Devuelve un arreglo con los comparadores válidos para construir filtros o consultas.
+     *
+     * @return array<string,string> Mapa de comparadores (clave => representación).
+     */
     public static function obtenerComparadores(){
         $arr = array("=" =>"=",
             ">" => "&gt;",
@@ -191,6 +262,17 @@ class Utiles{
                                 
     }
     
+    /**
+     * Convierte un objeto a un array asociativo usando sus métodos getter (prefijo "get").
+     * Las claves son el nombre del getter sin el prefijo "get" en minúsculas.
+     * Si $encodcharset es true, convierte cada valor desde $acharset hacia $decharset.
+     *
+     * @param object $vl           Objeto a convertir.
+     * @param bool   $encodcharset Indica si se debe convertir la codificación de caracteres.
+     * @param string $decharset    Codificación destino (por defecto "UTF-8").
+     * @param string $acharset     Codificación origen (por defecto "ISO-8859-1").
+     * @return array               Array asociativo resultante.
+     */
     public static function objToArray($vl, $encodcharset = false, $decharset = "UTF-8", $acharset = "ISO-8859-1"){
         $obt = "get";
         $metad = get_class_methods( $vl );
@@ -210,6 +292,12 @@ class Utiles{
         return $tmpArr;
     }
     
+    /**
+     * Elimina recursivamente un directorio y todo su contenido.
+     *
+     * @param string $dirname Ruta del directorio a eliminar.
+     * @return bool Devuelve true si la eliminación fue exitosa, false en caso de error.
+     */
     public static function delete_directory($dirname) {
         if (is_dir($dirname))
             $dir_handle = opendir($dirname);
@@ -228,6 +316,14 @@ class Utiles{
                 return true;
     }
     
+    /**
+     * Limpia una cadena: reemplaza espacios por guiones, normaliza caracteres acentuados
+     * (á, é, í, ó, ú, ñ, ç, etc.) a sus equivalentes sin acento y elimina los caracteres
+     * que no sean letras, números o guiones.
+     *
+     * @param string $string Cadena de entrada a normalizar.
+     * @return string Cadena limpia y apta para URLs o identificadores.
+     */
     public static function CleanSpecialChars($string) {
         $cadena = str_replace(' ', '-', utf8_decode( $string ) ); // Replaces all spaces with hyphens.
         
@@ -325,6 +421,17 @@ class Utiles{
         
     }
 
+    /**
+     * Convierte una cadena a la codificación UTF-8 (o a la especificada).
+     *
+     * Detecta la codificación de entrada y realiza la conversión a la
+     * codificación objetivo utilizando mb_detect_encoding e iconv,
+     * omitiendo caracteres no convertibles.
+     *
+     * @param string $text Texto a convertir.
+     * @param string $coding Codificación destino (por defecto "UTF-8").
+     * @return string Texto convertido a la codificación indicada.
+     */
     public static function ConvertToUTF8($text, $coding = "UTF-8"){
         
         $encoding = mb_detect_encoding($text, mb_detect_order(), false);
@@ -341,6 +448,20 @@ class Utiles{
         return $out;
     }
     
+    /**
+     * Convierte un fichero CSV a un array asociativo (similar a JSON).
+     *
+     * Lee el CSV indicado por $csv, utiliza la primera fila como cabeceras,
+     * convierte los valores a UTF-8 y devuelve un array de filas como arrays asociativos.
+     * $sepa indica el separador de campos. Si se pasan $idenc y $vl, devuelve
+     * inmediatamente la fila que coincida con ese valor en la columna indicada.
+     *
+     * @param string $csv  Ruta al fichero CSV
+     * @param string $sepa Separador de campos (por defecto ';')
+     * @param string $idenc Nombre de columna para filtrar (opcional)
+     * @param string $vl   Valor a buscar en la columna $idenc (opcional)
+     * @return array Array de filas asociativas, o array con la fila coincidente
+     */
     public static function Csv2Json( $csv, $sepa = ';', $idenc = '', $vl = '' ) {
         $json = array();
         $heads = array();
@@ -385,6 +506,11 @@ class Utiles{
         return $json;
     }
     
+    /**
+     * Genera un UUID versión 4 (aleatorio).
+     *
+     * @return string UUID en formato 8-4-4-4-12 (hexadecimal con guiones)
+     */
     public static function create_uuid() {
         return sprintf( '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
             // 32 bits for "time_low"
@@ -407,6 +533,13 @@ class Utiles{
             );
     }
     
+    /**
+     * Convierte un tamaño en bytes a una representación legible (B, KB, MB, GB, TB).
+     *
+     * @param int|float $bytes     Tamaño en bytes (se normaliza a >= 0).
+     * @param int       $precision Cantidad de decimales a mostrar (por defecto 2).
+     * @return string              Cadena formateada con unidad apropiada.
+     */
     public static function formatBytes($bytes, $precision = 2) {
         $units = array('B', 'KB', 'MB', 'GB', 'TB');
         
@@ -421,6 +554,13 @@ class Utiles{
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
     
+    /**
+     * Enmascara un correo electrónico: conserva el primer y último carácter de la parte local,
+     * sustituye el resto por '****' y mantiene el dominio intacto.
+     *
+     * @param string $d Correo electrónico a enmascarar.
+     * @return string Correo enmascarado (p. ej. j****o@dominio.com).
+     */
     public static function maskEmail( $d ){
         $p = explode("@", $d);
         $name = $p[ 0 ];
@@ -430,6 +570,14 @@ class Utiles{
         return $mskS . $mskM . $mskE . "@" . $p[1];
     }
     
+    /**
+     * Convierte un color hexadecimal a un arreglo RGB.
+     *
+     * Acepta cadenas con 3 o 6 dígitos hexadecimales, con o sin '#' inicial.
+     *
+     * @param string $colorHex Color en formato hexadecimal (p. ej. '#ff0000' o 'f00').
+     * @return int[]|false Arreglo [r, g, b] con valores 0-255, o false si el formato no es válido.
+     */
     public static function hexToRgb( $colorHex ) {
         $colorHex = str_replace('#', '', $colorHex);
         
@@ -448,6 +596,13 @@ class Utiles{
         return array($r, $g, $b);
     }
     
+    /**
+     * Convierte una imagen PNG a JPG rellenando la transparencia con fondo blanco.
+     *
+     * @param string $archivoOrigen    Ruta del archivo PNG de origen.
+     * @param string $archivoDestino   Ruta donde se guardará el JPG resultante.
+     * @return string|false            Devuelve la ruta del JPG creado o false si ocurre un error.
+     */
     public static function pngTojpg($archivoOrigen, $archivoDestino) {
         $imagen = imagecreatefrompng($archivoOrigen);
         
@@ -471,11 +626,24 @@ class Utiles{
         }
     }
     
+    /**
+     * Escapa comillas simples, comillas dobles y barras invertidas para su uso en consultas SQL.
+     *
+     * @param string $d Cadena a preparar/escapar.
+     * @return string Cadena escapada lista para insertar en una consulta SQL.
+     */
     public static function prepararTxtSQL ( $d ){
         $txtes = str_replace(array("'", "\\", "\""), array("\\'", "\\\\", "\\\""),  $d );
         return $txtes;
     }
     
+    /**
+     * Obtiene el sistema operativo detectado a partir del encabezado User-Agent.
+     *
+     * Retorna 'win', 'mac', 'unix' u 'otro' según el agente; devuelve false si no está disponible $_SERVER['HTTP_USER_AGENT'].
+     *
+     * @return string|false 'win'|'mac'|'unix'|'otro' o false si no hay User-Agent
+     */
     public static function obtenerSistemaOperativo(){
         if ( isset( $_SERVER['HTTP_USER_AGENT'] ) ) {
             $agenteUsuario = $_SERVER['HTTP_USER_AGENT'];
@@ -495,6 +663,14 @@ class Utiles{
         }
     }
     
+    /**
+     * Devuelve el valor de la directiva `post_max_size` en megabytes.
+     *
+     * Lee la configuración de PHP (post_max_size), interpreta la unidad (K, M, G)
+     * y la convierte a MB.
+     *
+     * @return float Tamaño máximo permitido para POST en megabytes.
+     */
     public static function getPostMaxSizeMB() {
         $postMaxSize = ini_get('post_max_size');
         $unit = strtoupper(substr($postMaxSize, -1)); // Extrae la última letra (M, G, K)

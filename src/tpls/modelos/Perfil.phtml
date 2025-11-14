@@ -380,6 +380,12 @@ if ( strlen( trim($data['foto']) ) > 0) {
 <script type="application/javascript">
 
 <?php if( $genapi ) : ?>
+
+/**
+ * Genera un nuevo API token y actualiza el estado/visualización correspondiente.
+ *
+ * Breve: crea un token seguro, lo asigna al usuario y refresca la interfaz.
+ */
 const nuevoApiToken = function(){
 	const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
     const objmdl = mngModal.dibujar( opc );
@@ -414,6 +420,15 @@ const nuevoApiToken = function(){
 		}
 	);
 };
+
+/**
+ * Valida el token del formulario enviándolo a la API.
+ *
+ * Realiza la petición al servidor y procesa la respuesta para determinar
+ * si el token es válido o ha expirado, manejando errores y notificaciones.
+ *
+ * @returns {Promise<boolean>} Promesa que resuelve en true si el token es válido, false en caso contrario.
+ */
 const apiValidaTkForm = function(){
 	ut.validarFrm('frmApiBoxChkTkvalcls', function ( r ) {
 		const opc = { 
@@ -431,6 +446,11 @@ const apiValidaTkForm = function(){
 };
 <?php endif;?>
 
+/**
+ * Añade un nuevo campo de correo al formulario y configura sus validaciones y eventos.
+ *
+ * @return void
+ */
 const nuevoMail = function(){
 	ut.validarFrm('frmUpMailvalcls', function ( r ) {
 		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
@@ -468,6 +488,13 @@ const nuevoMail = function(){
 	});
 };
 
+/**
+ * Añade un nuevo campo de correo al formulario de perfil.
+ *
+ * Inserta el elemento HTML correspondiente, enlaza los eventos necesarios y actualiza el estado del formulario.
+ *
+ * @returns {void}
+ */
 const addNewMail = function(){
 	ut.validarFrm('frmUpMailvalcls', function ( r ) {
 		const opc = { 
@@ -484,6 +511,9 @@ const addNewMail = function(){
 	});
 };
 
+/**
+ * Actualiza el perfil: valida los datos, envía los cambios al servidor y maneja la respuesta.
+ */
 const actualizar = function(){
 	ut.validarFrm('frmvalcls', function ( r ) {
 		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
@@ -526,6 +556,14 @@ const actualizar = function(){
 	});
 };
 
+/**
+ * Actualiza la contraseña del perfil de usuario.
+ *
+ * Realiza validaciones locales y envía la solicitud al servidor para cambiar la contraseña,
+ * mostrando mensajes de éxito o error según la respuesta.
+ *
+ * @returns void
+ */
 const actualizarpass = function(){
 	ut.validarFrm('frmValPassCls', function ( r ) {
 		const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
@@ -568,6 +606,13 @@ const actualizarpass = function(){
 };
 
 
+/**
+ * Actualiza el archivo .p12 del perfil.
+ *
+ * Realiza la validación, subida y reemplazo del certificado .p12 asociado al perfil.
+ *
+ * @return void
+ */
 const actualizarp12 = function(){
 	const opc = { 'id' : 'ajaxldr', 'size' : 'modal-sm' };
     const objmdl = mngModal.dibujar( opc );
@@ -600,6 +645,12 @@ const actualizarp12 = function(){
 	);
 };
 
+/**
+ * Alterna el estado "activo" del elemento u objeto recibido.
+ *
+ * @param {Object|HTMLElement} o Elemento u objeto cuyo estado "activo" se debe cambiar.
+ * @return {void}
+ */
 const cambiarActivo = function( o ){
     var padre = jQuery( o ).parent().parent();
     var _li = jQuery( o ).parent();

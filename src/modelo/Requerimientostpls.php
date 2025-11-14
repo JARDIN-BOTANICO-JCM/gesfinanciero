@@ -14,6 +14,7 @@ class Requerimientostpls extends Clsdatos {
     private $fechamod = '1900-01-01 00:00:00';
     
     /**
+     * Obtiene el usuario que modificó el requisito del template.
      * @return string
      */
     public function getUsuariosmod()
@@ -22,6 +23,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de modificación del requisito del template.
      * @return string
      */
     public function getFechamod()
@@ -30,6 +32,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Establece el usuario que modificó el requisito del template.
      * @param string $usuariosmod
      */
     public function setUsuariosmod($usuariosmod)
@@ -38,6 +41,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de modificación del requisito del template.
      * @param string $fechamod
      */
     public function setFechamod($fechamod)
@@ -46,6 +50,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Obtiene el usuario que creó el requisito del template.
      * @return string
      */
     public function getUsuarios()
@@ -54,6 +59,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de creación del requisito del template.
      * @return string
      */
     public function getFecha()
@@ -62,6 +68,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Obtiene el estado del requisito del template.
      * @return number
      */
     public function getRequerimientostplsestados_id()
@@ -70,6 +77,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Establece el usuario que creó el requisito del template.
      * @param string $usuarios
      */
     public function setUsuarios($usuarios)
@@ -78,6 +86,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de creación del requisito del template.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -86,6 +95,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Establece el estado del requisito del template.
      * @param number $requerimientostplsestados_id
      */
     public function setRequerimientostplsestados_id($requerimientostplsestados_id)
@@ -94,6 +104,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del requisito del template.
      * @return number
      */
     public function getId()
@@ -102,6 +113,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre del requisito del template.
      * @return string
      */
     public function getNombre()
@@ -110,6 +122,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del requisito del template.
      * @param number $id
      */
     public function setId($id)
@@ -118,6 +131,7 @@ class Requerimientostpls extends Clsdatos {
     }
 
     /**
+     * Establece el nombre del requisito del template.
      * @param string $nombre
      */
     public function setNombre($nombre)

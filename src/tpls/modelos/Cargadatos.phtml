@@ -227,6 +227,13 @@ try {
 </div>
 
 <script type="application/javascript">
+
+	/**
+	 * Helper para procesar/gestión de archivos.
+	 *
+	 * @param mixed $o Datos o configuración de entrada para el procesamiento de archivos.
+	 * @return mixed Resultado del procesamiento (estructura de archivos, estado o null).
+	 */
 	const archivosHelper = function (o) {
 		const _o = jQuery(o);
 		const sel = _o.find('option:selected');
@@ -241,12 +248,31 @@ try {
 		cargadatos_fls.prop('accept', dt['tiposaceptados']);
 	};
 
+	/**
+	 * Comprueba el/los archivo(s) seleccionados frente al tamaño máximo (obtenido desde PHP)
+	 * y ejecuta un callback con el/los archivo(s) si la validación pasa.
+	 *
+	 * @param  HTMLElement|Event  o  Elemento o evento que contiene el input de tipo file.
+	 * @return void
+	 */
 	const chkArchivo = function (o) {
 		chkUploadFiles(o, <?php echo Utiles::getPostMaxSizeMB(); ?>, function (fl) {
 			console.log(fl);
 		});
 	};
 
+	/**
+	 * actualizar()
+	 *
+	 * Valida el formulario 'frmvalcls', muestra un modal de carga, construye un FormData
+	 * (incluyendo archivos) y envía los datos por AJAX al endpoint definido por
+	 * IndexCtrl::API_Cargadatos_Upload. Muestra un modal de éxito o error según la respuesta.
+	 *
+	 * Requisitos: el formulario debe tener la clase 'frmvalcls' y todos los campos deben
+	 * tener id y name iguales.
+	 *
+	 * @return void
+	 */
 	const actualizar = function () {
 		<?php
 		/*
@@ -310,7 +336,14 @@ try {
 		});
 	};
 
-	// vnavarro: Tarea 4 
+	/**
+	 * cargarBogdata()
+	 *
+	 * Muestra un modal de carga, envía una petición AJAX para consultar datos de BOGDATA,
+	 * renderiza la tabla con los datos recibidos y muestra un modal de éxito o error según la respuesta.
+	 *
+	 * @return void
+	 */
 	const cargarBogdata = function () {
 		const cargando = mngModal.dibujar({ id: 'ajaxldr', size: 'modal-sm' });
 		jQuery(cargando).modal('show');
@@ -353,6 +386,19 @@ try {
 		);
 	};
 
+
+	/**
+	 * renderTablaBogdata(selector, data)
+	 *
+	 * Renderiza en el elemento indicado una tabla HTML con los registros de BOGDATA.
+	 *
+	 * @param {string} selector Selector jQuery del contenedor donde se insertará la tabla.
+	 * @param {Array<Object>} data  Arreglo de objetos con los registros a mostrar.
+	 *
+	 * Breve:
+	 * - Muestra un mensaje si no hay datos.
+	 * - Construye filas con campos editables (meses, días, fecha) y un input file para el acta.
+	 */
 	const renderTablaBogdata = function (selector, data) {
 		let html = '';
 		if (!data || !Array.isArray(data) || data.length === 0) {
@@ -431,6 +477,15 @@ try {
 		jQuery(selector).html(html);
 	};
 
+	/**
+	 * Recopila los datos de las filas de la tabla (por defecto '.tabla-bogdata' o la
+	 * indicada por el selector) y devuelve un array de objetos con las propiedades:
+	 * tipodoc_id, documento, contrato, meses, dias, fechainicio y fileactaini.
+	 * Convierte meses/dias a enteros (o null) y omite filas que no tengan meses ni días válidos.
+	 *
+	 * @param {string} [selector] Selector opcional para limitar la búsqueda de la tabla.
+	 * @returns {Array<Object>} Array de filas procesadas.
+	 */
 	const collectBogdataRows = function (selector) {
 		const rows = [];
 		const $root = selector ? jQuery(selector) : jQuery('.tabla-bogdata');
@@ -468,6 +523,14 @@ try {
 		return rows;
 	}
 
+	/**
+	 * Guarda los datos de empleado obtenidos de la tabla '.tabla-bogdata'.
+	 *
+	 * Valida que existan filas con meses o días; si no las hay muestra un modal de advertencia.
+	 * Si hay datos, construye y envía el payload para actualizar el empleado.
+	 *
+	 * @returns {void}
+	 */
 	const guardarEmpleadoDesdeTabla = function () {
 		const rows = collectBogdataRows('.tabla-bogdata');
 		
@@ -483,6 +546,16 @@ try {
 		enviarEmpleadoPayload(rows, 'Actualización desde tabla');
 	};
 
+	/**
+	 * Guardar empleado.
+	 *
+	 * Valida el formulario 'frmcontCls', muestra un modal de carga y consulta BOGDATA
+	 * para verificar si el documento existe. Si no existe, muestra una alerta de
+	 * advertencia; si existe, envía el payload mediante enviarEmpleadoPayload.
+	 * Maneja errores mostrando un modal de error.
+	 *
+	 * @return {void}
+	 */
 	const guardarEmpleado = function () {
 		ut.validarFrm('frmcontCls', function (r) {
 			const cargando = mngModal.dibujar({ id: 'ajaxldr', size: 'modal-sm' });
@@ -531,6 +604,13 @@ try {
 		});
 	};
 
+	/**
+	 * Envía los datos de un empleado al servidor mostrando un modal de carga y un modal con el resultado.
+	 *
+	 * @param {Object} payload Datos del empleado a enviar (se codifican y envían por FormData).
+	 * @param {string} [titulo='Datos de Empleado'] Título para el modal de respuesta.
+	 * @returns {void}
+	 */
 	const enviarEmpleadoPayload = function (payload, titulo = 'Datos de Empleado') {
 		const opc = { id: 'ajaxldr' };
 		const objmdl = mngModal.dibujar(opc);
@@ -564,6 +644,12 @@ try {
 
 	const limpiarPreCarga = function () {
 		const frm = document.getElementById('frmcont');
+	/**
+	 * Verifica que $frm exista y sea truthy; si no, sale inmediatamente del método.
+	 *
+	 * @param mixed $frm Estructura o referencia al formulario a procesar.
+	 * @return void
+	 */
     if (!frm) return;
 
     // Resetea a valores por defecto del HTML

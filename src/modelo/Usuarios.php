@@ -39,6 +39,7 @@ class Usuarios extends Clsdatos {
 	private $contratofin = "1900-01-01 00:00:00";
 	
     /**
+     * Obtiene el identificador del usuario.
      * @return number
      */
     public function getId()
@@ -47,6 +48,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del tipo de documento.
      * @return number
      */
     public function getTipodoc_id()
@@ -55,6 +57,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el número de documento del usuario.
      * @return string
      */
     public function getDocumento()
@@ -63,6 +66,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del lugar de expedición de la cédula.
      * @return number
      */
     public function getLugarescedula_id()
@@ -71,6 +75,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene los nombres del usuario.
      * @return string
      */
     public function getNombres()
@@ -79,6 +84,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene los apellidos del usuario.
      * @return string
      */
     public function getApellidos()
@@ -87,6 +93,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el correo electrónico del usuario.
      * @return string
      */
     public function getMail()
@@ -95,6 +102,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de nacimiento del usuario.
      * @return string
      */
     public function getNacimiento()
@@ -103,6 +111,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del género del usuario.
      * @return number
      */
     public function getGeneros_id()
@@ -111,6 +120,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del lugar del usuario.
      * @return number
      */
     public function getLugares_id()
@@ -119,6 +129,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el grupo sanguíneo del usuario.
      * @return string
      */
     public function getGruposanguineo()
@@ -127,6 +138,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el código del usuario.
      * @return string
      */
     public function getCodigo()
@@ -135,6 +147,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre de usuario.
      * @return string
      */
     public function getUsuario()
@@ -143,6 +156,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la clave del usuario.
      * @return string
      */
     public function getClave()
@@ -151,6 +165,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la foto del usuario.
      * @return string
      */
     public function getFoto()
@@ -159,6 +174,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la dirección del usuario.
      * @return string
      */
     public function getDireccion()
@@ -167,6 +183,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el barrio del usuario.
      * @return string
      */
     public function getBarrio()
@@ -175,6 +192,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del lugar local del usuario.
      * @return number
      */
     public function getLoc_lugares_id()
@@ -183,6 +201,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del cargo del usuario.
      * @return number
      */
     public function getCargos_id()
@@ -191,6 +210,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del título del usuario.
      * @return number
      */
     public function getTitulos_id()
@@ -199,6 +219,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de creación del usuario.
      * @return string
      */
     public function getCreado()
@@ -207,6 +228,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del perfil del usuario.
      * @return number
      */
     public function getPerfil_id()
@@ -215,6 +237,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del usuario.
      * @return number
      */
     public function getEstado_id()
@@ -223,6 +246,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la EPS del usuario.
      * @return string
      */
     public function getEps()
@@ -231,6 +255,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la ARS del usuario.
      * @return string
      */
     public function getArs()
@@ -239,6 +264,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el oficio del usuario.
      * @return string
      */
     public function getOficio()
@@ -247,6 +273,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene el salario mensual del usuario.
      * @return number
      */
     public function getSalariomes()
@@ -255,6 +282,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de inicio del contrato del usuario.
      * @return string
      */
     public function getContratoini()
@@ -263,6 +291,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de fin del contrato del usuario.
      * @return string
      */
     public function getContratofin()
@@ -271,6 +300,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del usuario.
      * @param number $id
      */
     public function setId($id)
@@ -279,6 +309,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del tipo de documento.
      * @param number $tipodoc_id
      */
     public function setTipodoc_id($tipodoc_id)
@@ -287,6 +318,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el número de documento.
      * @param string $documento
      */
     public function setDocumento($documento)
@@ -295,6 +327,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del lugar de cédula.
      * @param number $lugarescedula_id
      */
     public function setLugarescedula_id($lugarescedula_id)
@@ -303,6 +336,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece los nombres del usuario.
      * @param string $nombres
      */
     public function setNombres($nombres)
@@ -311,6 +345,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece los apellidos del usuario.
      * @param string $apellidos
      */
     public function setApellidos($apellidos)
@@ -319,6 +354,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el correo electrónico del usuario.
      * @param string $mail
      */
     public function setMail($mail)
@@ -327,6 +363,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de nacimiento del usuario.
      * @param string $nacimiento
      */
     public function setNacimiento($nacimiento)
@@ -335,6 +372,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del género del usuario.
      * @param number $generos_id
      */
     public function setGeneros_id($generos_id)
@@ -343,6 +381,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del lugar del usuario.
      * @param number $lugares_id
      */
     public function setLugares_id($lugares_id)
@@ -351,6 +390,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el grupo sanguíneo del usuario.
      * @param string $gruposanguineo
      */
     public function setGruposanguineo($gruposanguineo)
@@ -359,6 +399,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el código del usuario.
      * @param string $codigo
      */
     public function setCodigo($codigo)
@@ -367,6 +408,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el nombre de usuario.
      * @param string $usuario
      */
     public function setUsuario($usuario)
@@ -375,6 +417,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la clave del usuario.
      * @param string $clave
      */
     public function setClave($clave)
@@ -383,6 +426,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la foto del usuario.
      * @param string $foto
      */
     public function setFoto($foto)
@@ -391,6 +435,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la dirección del usuario.
      * @param string $direccion
      */
     public function setDireccion($direccion)
@@ -399,6 +444,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el barrio del usuario.
      * @param string $barrio
      */
     public function setBarrio($barrio)
@@ -407,6 +453,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del lugar local del usuario.
      * @param number $loc_lugares_id
      */
     public function setLoc_lugares_id($loc_lugares_id)
@@ -415,6 +462,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del cargo del usuario.
      * @param number $cargos_id
      */
     public function setCargos_id($cargos_id)
@@ -423,6 +471,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del título del usuario.
      * @param number $titulos_id
      */
     public function setTitulos_id($titulos_id)
@@ -431,6 +480,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de creación del usuario.
      * @param string $creado
      */
     public function setCreado($creado)
@@ -439,6 +489,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del perfil del usuario.
      * @param number $perfil_id
      */
     public function setPerfil_id($perfil_id)
@@ -447,6 +498,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del usuario.
      * @param number $estado_id
      */
     public function setEstado_id($estado_id)
@@ -455,6 +507,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la EPS del usuario.
      * @param string $eps
      */
     public function setEps($eps)
@@ -463,6 +516,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la ARS del usuario.
      * @param string $ars
      */
     public function setArs($ars)
@@ -471,6 +525,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el oficio del usuario.
      * @param string $oficio
      */
     public function setOficio($oficio)
@@ -479,6 +534,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece el salario mensual del usuario.
      * @param number $salariomes
      */
     public function setSalariomes($salariomes)
@@ -487,6 +543,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de inicio del contrato del usuario.
      * @param string $contratoini
      */
     public function setContratoini($contratoini)
@@ -495,6 +552,7 @@ class Usuarios extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de fin del contrato del usuario.
      * @param string $contratofin
      */
     public function setContratofin($contratofin)

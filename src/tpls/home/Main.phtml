@@ -63,6 +63,13 @@ if ( isset( $inst[0] ) ) {
 </div>
 
 <script type="text/javascript">
+
+/**
+ * Comprueba si una imagen existe en la URL proporcionada.
+ *
+ * @param string $url URL de la imagen a comprobar.
+ * @param callable $callback Función que se llama con el resultado: callback(exists: boolean).
+ */
 const checkIfImageExists = function (url, callback) {
 	const img = new Image();
 	img.src = url;

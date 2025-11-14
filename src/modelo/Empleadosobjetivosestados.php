@@ -10,6 +10,7 @@ class Empleadosobjetivosestados extends Clsdatos {
     private $nombre = "";
     
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -18,6 +19,7 @@ class Empleadosobjetivosestados extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre.
      * @return string
      */
     public function getNombre()
@@ -26,6 +28,7 @@ class Empleadosobjetivosestados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -34,6 +37,7 @@ class Empleadosobjetivosestados extends Clsdatos {
     }
 
     /**
+     * Establece el nombre.
      * @param string $nombre
      */
     public function setNombre($nombre)

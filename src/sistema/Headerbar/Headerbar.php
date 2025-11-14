@@ -3,6 +3,16 @@ namespace src\sistema\Headerbar;
 
 class Headerbar{
 
+    /**
+     * Dibuja el header (barra superior) de la aplicación.
+     *
+     * Obtiene información de la institución, logo y datos del usuario (desde sesión),
+     * determina el avatar si existe en el repositorio y renderiza el HTML del
+     * header con notificaciones y menú de usuario. No recibe parámetros y escribe
+     * la salida directamente.
+     *
+     * @return void
+     */
     public static function DibujarHeader( ){
 
         $inst = \OperacionesCtrl::institucion_Obtener();
@@ -221,6 +231,13 @@ class Headerbar{
 
     }
     
+    /**
+     * Dibuja la barra de encabezado de la página principal.
+     *
+     * Método estático que renderiza el HTML/CSS necesario para el header del home.
+     *
+     * @return void
+     */
     public static function DibujarHeaderHome(){
         $inst = \OperacionesCtrl::institucion_Obtener();
         $instD = array();

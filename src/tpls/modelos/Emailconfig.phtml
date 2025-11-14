@@ -217,6 +217,15 @@ $ver_contconfigtfservices = ( $_CFG_SMTP_TFSERVICE ? '' : 'display: none;' );
 
 <script type="application/javascript">
 var passMod = false;
+
+/**
+ * Maneja la acción de guardado.
+ *
+ * Valida los datos del formulario, envía la petición para persistirlos
+ * y muestra retroalimentación (éxito/errores) al usuario.
+ *
+ * @returns {void}
+ */
 const save_Handler = function(){
     const objs = [];
     objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_AUTHSMTP; ?>'});
@@ -252,6 +261,12 @@ const save_Handler = function(){
     setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
     
 };
+
+/**
+ * Guarda la configuración del formulario de correo.
+ *
+ * @param {Object} o Opciones y datos del formulario utilizados para validar y enviar la configuración.
+ */
 var btnSaveCfgFrm = function( o ){
 
     var _o = jQuery( o );
@@ -292,6 +307,11 @@ var btnSaveCfgFrm = function( o ){
     
 };
 
+/**
+ * Configura y enlaza el botón de "TF Services".
+ *
+ * @param {Object} o Parámetros y callbacks necesarios para la configuración.
+ */
 const btnCfgTFServices = function( o ){
 	const fn = function( obj ){
 		const csmtp = jQuery("#contconfigsmtp");
@@ -312,6 +332,12 @@ const btnCfgTFServices = function( o ){
 	btnFirmCfgFrm(o, fn);
 };
 
+/**
+ * Configura y maneja la acción del botón de firma.
+ *
+ * @param {Object} o   Objeto con opciones o datos necesarios.
+ * @param {Function} fn Callback a ejecutar al completar la operación.
+ */
 const btnFirmCfgFrm = function( o, fn ){
     const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
     const objmdl = mngModal.dibujar( opc );

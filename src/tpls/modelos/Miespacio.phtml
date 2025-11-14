@@ -80,6 +80,14 @@ $_CFG_ALMACENAMIENTO_TAMANO = intval( isset( $cfg[ OperacionesCtrl::CFG_ALMACENA
 </div>
 
 <script type="application/javascript">
+
+/**
+ * Verifica y muestra el estado actual del usuario.
+ *
+ * Realiza la consulta necesaria para obtener el estado y actualiza la interfaz.
+ *
+ * @returns {void}
+ */
 const verMiEstadoActual = function( ){
 	jQuery('#preloader').html( validadorGlob.ajaxspinner() );
 	
@@ -149,6 +157,12 @@ const verMiEstadoActual = function( ){
 
 };
 
+/**
+ * Convierte un tamaño en bytes a megabytes (MB).
+ *
+ * @param int|float $size Tamaño en bytes.
+ * @return float Tamaño convertido a megabytes.
+ */
 const convertToMB = function (size) {
 	const match = size.match(/^(\d+(\.\d+)?)\s*(MB|GB|KB)?$/i);
 

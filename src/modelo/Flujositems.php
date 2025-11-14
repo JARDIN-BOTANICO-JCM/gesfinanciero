@@ -17,6 +17,7 @@ class Flujositems extends Clsdatos {
     private $usuarios_id = 0;
     
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -25,6 +26,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del usuario.
      * @return number
      */
     public function getUsuarios_id()
@@ -33,6 +35,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del usuario.
      * @param number $usuarios_id
      */
     public function setUsuarios_id($usuarios_id)
@@ -41,6 +44,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre.
      * @return string
      */
     public function getNombre()
@@ -49,6 +53,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el correo.
      * @return string
      */
     public function getCorreo()
@@ -57,6 +62,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el teléfono.
      * @return string
      */
     public function getTel()
@@ -65,6 +71,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene los requerimientos.
      * @return number
      */
     public function getRequerimientos()
@@ -73,6 +80,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el orden.
      * @return number
      */
     public function getOrden()
@@ -81,6 +89,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del ítem del flujo.
      * @return number
      */
     public function getFlujositemestados_id()
@@ -89,6 +98,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del rol del flujo.
      * @return number
      */
     public function getFlujosroles_id()
@@ -97,6 +107,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del flujo.
      * @return number
      */
     public function getFlujos_id()
@@ -105,6 +116,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -113,6 +125,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el nombre.
      * @param string $nombre
      */
     public function setNombre($nombre)
@@ -121,6 +134,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el correo.
      * @param string $correo
      */
     public function setCorreo($correo)
@@ -129,6 +143,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el teléfono.
      * @param string $tel
      */
     public function setTel($tel)
@@ -137,6 +152,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece los requerimientos.
      * @param number $requerimientos
      */
     public function setRequerimientos($requerimientos)
@@ -145,6 +161,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el orden.
      * @param number $orden
      */
     public function setOrden($orden)
@@ -153,6 +170,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del ítem del flujo.
      * @param number $flujositemestados_id
      */
     public function setFlujositemestados_id($flujositemestados_id)
@@ -161,6 +179,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del rol del flujo.
      * @param number $flujosroles_id
      */
     public function setFlujosroles_id($flujosroles_id)
@@ -169,6 +188,7 @@ class Flujositems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del flujo.
      * @param number $flujos_id
      */
     public function setFlujos_id($flujos_id)

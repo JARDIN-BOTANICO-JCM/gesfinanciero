@@ -3,7 +3,27 @@ use src\libs\Apibox\ApiboxLib;
 use src\libs\MagicPages\MagicPagesLib;
 
 class OperacionesCtrl {
+	/**
+	 * SET SQL_BIG_SELECTS=1 — permite ejecutar SELECTs grandes en la sesión MySQL.
+	 *
+	 * Nota: afecta solo la sesión actual y requiere permisos; preferible optimizar consultas.
+	 *
+	 * @var string
+	 */
 	const SQL_BIG_SELECTS = 'SET SQL_BIG_SELECTS=1';
+	/**
+	 * Mapa (inglés => español) de nombres de los días.
+	 *
+	 * Uso: proporcionar una traducción rápida cuando se generan textos, etiquetas o plantillas.
+	 * - Las claves son los nombres de los días en inglés, en minúsculas (ej. "monday").
+	 * - Los valores son la representación en español (ej. "lunes"), normalmente en minúsculas.
+	 * - Pueden incluir entidades HTML si se van a insertar directamente en contenido HTML.
+	 *
+	 * Ejemplo:
+	 *   self::$GBL_DIAS['monday'] === 'lunes'
+	 *
+	 * @var array<string,string>
+	 */
 	public static $GBL_DIAS = array(
         "monday" => "Lunes",
         "tuesday" => "Martes",
@@ -14,6 +34,19 @@ class OperacionesCtrl {
         "sunday" => "Domingo"
     );
     
+	/**
+	 * Mapa (inglés => español) de nombres de meses.
+	 *
+	 * Uso: proporcionar una traducción rápida cuando se generan textos, etiquetas o plantillas.
+	 * - Las claves son los nombres de los meses en inglés, en minúsculas (ej. "march").
+	 * - Los valores son la representación en español (ej. "marzo"), normalmente en minúsculas.
+	 * - Pueden incluir entidades HTML si se van a insertar directamente en contenido HTML.
+	 *
+	 * Ejemplo:
+	 *   self::$GBL_MESES['march'] === 'marzo'
+	 *
+	 * @var array<string,string>
+	 */
 	public static $GBL_MESES = array(
         "january" => "enero",
 		"february" => "febrero",
@@ -28,7 +61,16 @@ class OperacionesCtrl {
 		"november" => "noviembre",
 		"december" => "diciembre"
     );
-	
+	/**
+	 * Lista de Administradoras de Riesgos Laborales (ARL) de Colombia
+	 * 
+	 * Catálogo de ARL para formularios y dropdowns. Incluye estructura estándar
+	 * con valor, etiqueta y campo de selección.
+	 * 
+	 * Estructura: ["vl" => valor, "lbl" => etiqueta, "sel" => selección]
+	 * 
+	 * @var array<int, array<string, string>> Array de ARL disponibles
+	 */
 	public static $GBL_ARL_LIST = array(
 	    array("vl" => "Sin ARS", "lbl" => "Sin ARS","sel" => ''),
 	    array("vl" => "Colsanitas", "lbl" => "Colsanitas","sel" => ''),
@@ -42,7 +84,16 @@ class OperacionesCtrl {
 	    array("vl" => "Solsalud", "lbl" => "Solsalud","sel" => ''),
 	    array("vl" => "Sura", "lbl" => "Sura","sel" => '')
 	);
-	
+	/**
+	 * Lista de Entidades Promotoras de Salud (EPS) de Colombia
+	 * 
+	 * Catálogo de EPS para formularios y dropdowns. Incluye estructura estándar
+	 * con valor, etiqueta y campo de selección.
+	 * 
+	 * Estructura: ["vl" => valor, "lbl" => etiqueta, "sel" => selección]
+	 * 
+	 * @var array<int, array<string, string>> Array de EPS disponibles
+	 */
 	public static $GBL_EPS_LIST = array(
 	    array("vl" => "Sin EPS", "lbl" => "Sin EPS","sel" => ''),
 	    array("vl" => "Alianza Salud (Colmedica)", "lbl" => "Alianza Salud (Colmedica)","sel" => ''),
@@ -85,7 +136,21 @@ class OperacionesCtrl {
 	);
 	
 	public static $AUTO_LOG_OUT = true;
-	
+	/**
+	 * Procesa contenido HTML con componentes personalizados en formato de etiquetas
+	 * 
+	 * Analiza y procesa etiquetas personalizadas con formato [tipo atributo=valor] 
+	 * dentro de contenido HTML, convirtiéndolas en arrays de atributos o llamando
+	 * a la función de creación de componentes según el modo especificado.
+	 * 
+	 * @param array $d Parámetros de configuración:
+	 *                 - 'html' (string): Contenido HTML a procesar
+	 *                 - 'solohtml' (bool): Si es true, solo extrae atributos sin crear componentes
+	 * 
+	 * @return array|string Retorna array de atributos si solohtml=true, 
+	 *                      o string HTML procesado con componentes creados
+	 * 
+	 */
 	public static function componenteHTML($d) {
 	    $limpio = preg_replace_callback('/\[([^\]]+)\]/', function ($matches) {
 	        $contenidoLimpio = str_replace('&nbsp;', ' ', $matches[1]);
@@ -140,7 +205,14 @@ class OperacionesCtrl {
 	            return self::editarPlantillas_CrearComponente($atributos);
 	        }, $limpio);
 	}
-	
+	/**
+	 * Etiquetas descriptivas para plantillas de email
+	 * 
+	 * Mapea identificadores de variables con sus descripciones en español
+	 * para uso en plantillas de correo electrónico y documentos.
+	 * 
+	 * @var array<string, string> Etiquetas para variables de email
+	 */
 	const LABELS_EMAIL_DESCR = [
 	    'corto' => 'URL Config',
 	    'b' => 'URL Base',
@@ -157,6 +229,25 @@ class OperacionesCtrl {
 	    'now_time' => 'La hora actual',
 	    'now_datetime' => 'Fecha y hora actual'
 	];
+	/**
+	 * Obtiene etiquetas para plantillas de email con datos del sistema y personalizados
+	 * 
+	 * Genera un array con variables del sistema (URLs, fechas, logos) y permite
+	 * agregar variables personalizadas para uso en plantillas de correo electrónico.
+	 * 
+	 * @param array $d Array opcional de variables personalizadas para agregar al template
+	 *                 Las claves del array se convertirán en variables disponibles
+	 * 
+	 * @return array Array asociativo con variables disponibles:
+	 *               - 'corto': URL base configurada
+	 *               - 'b': URL base completa del sitio
+	 *               - 'u': URL de home.php
+	 *               - 'i': URL de index.php  
+	 *               - 'f': Timestamp único (YmdHis)
+	 *               - 'logo64': Logo corporativo en base64
+	 *               - 'now_*': Variables de fecha y hora actual
+	 *               - Variables personalizadas del parámetro $d
+	 */
     public static function ObtenerEtiquetasEmail( $d = array() ){
         date_default_timezone_set('America/Bogota');
         $parsedUrl = parse_url( Utiles::getBaseUrl() );
@@ -196,11 +287,40 @@ class OperacionesCtrl {
         }
         return $tpl;
     }
-    
+    /**
+	 * Obtiene la ruta base del directorio de plantillas de email
+	 * 
+	 * Construye la ruta absoluta hacia el directorio donde se almacenan
+	 * las plantillas HTML de correo electrónico del sistema.
+	 * 
+	 * @return string Ruta absoluta al directorio de plantillas de email
+	 */
     public static function GET_BASE_MAIL(){
         return dirname(dirname( __FILE__ )) . DIRECTORY_SEPARATOR . 'sistema' . DIRECTORY_SEPARATOR . "email";
     }
-    
+    /**
+	 * Envía un correo electrónico personalizado usando SMTP local o servicio externo
+	 * 
+	 * Determina automáticamente el método de envío basado en la configuración corporativa.
+	 * Si el servicio externo está deshabilitado, usa la clase Correo local. Si está
+	 * habilitado, utiliza un API externo para el envío de correos.
+	 * 
+	 * @param array $d Parámetros del correo electrónico:
+	 *                 - 'para' (string): Dirección de correo del destinatario
+	 *                 - 'titulo' (string): Asunto del correo electrónico  
+	 *                 - 'mensaje' (string): Contenido HTML del mensaje
+	 *                 - 'desde' (string): Dirección de correo del remitente
+	 *                 - 'rotulo' (string): Etiqueta o nombre del remitente
+	 *                 - 'adjunto' (string, opcional): Ruta del archivo adjunto (solo SMTP local)
+	 *                 - 'adjuntofull' (string, opcional): Ruta completa del adjunto (servicio externo)
+	 * 
+	 * @return array Respuesta del envío de correo con información del resultado
+	 * 
+	 * @throws Exception Con código ERR_COD_ENVIO_MAIL_FALLIDO si falla el envío local
+	 * @throws Exception Con código ERR_COD_USUARIO_O_CLAVE_INVALIDA si el servicio externo retorna error
+	 * @throws Exception Si hay errores en la comunicación con el API externo
+	 * 
+	 */
 	public static function enviarCustomEmail( $d ){
 	    
 	    $cfg = self::LeerConfigCorp();
@@ -290,8 +410,26 @@ class OperacionesCtrl {
 		return $rSend;
 	    
 	}
-	
-	
+	/**
+	 * Envía una notificación por correo electrónico usando plantillas HTML personalizadas
+	 * 
+	 * Procesa una plantilla de correo HTML aplicando reemplazos de variables dinámicas
+	 * y envía la notificación utilizando el sistema de correo configurado. Permite
+	 * personalizar completamente el contenido, destinatario y configuración del correo.
+	 * 
+	 * @param array $d Configuración de la notificación:
+	 *                 - 'tpl' (string): Nombre del archivo de plantilla HTML (ej: "bienvenida.html")
+	 *                 - 'campos' (array): Variables para reemplazar en la plantilla usando sintaxis {$variable}
+	 *                 - 'para' (string): Dirección de correo del destinatario
+	 *                 - 'titulo' (string, opcional): Asunto personalizado del correo
+	 *                 - 'desde' (string, opcional): Dirección de correo del remitente
+	 *                 - 'rotulo' (string, opcional): Etiqueta descriptiva del remitente
+	 * 
+	 * @return array Resultado del envío de correo con información del estado
+	 * 
+	 * @throws Exception Con código ERR_COD_CORREO_FAIL si falla el envío del correo
+	 * 
+	 */
 	private static function enviar_Notificacion ( $d ){
 	    
 	    $tpl = $d['tpl'];
@@ -340,7 +478,30 @@ class OperacionesCtrl {
 	    
 	    return $rsend;
 	}
-	
+	/**
+	 * Autentica usuarios del sistema mediante datos codificados en Base64
+	 * 
+	 * Este método procesa credenciales de usuario codificadas en Base64 y realiza
+	 * autenticación según el tipo de sesión especificado. Soporta dos modos:
+	 * autenticación directa sin sesión o autenticación administrativa con sesión.
+	 * 
+	 * @param array $d Parámetros de autenticación:
+	 *                 - 'params' (string): Datos JSON codificados en Base64 que contienen:
+	 *                   - 'qlgn_sesion' (bool, opcional): Indica si usar autenticación con sesión
+	 *                   - 'qlgn_usuario' (string): Nombre de usuario o email
+	 *                   - 'qlgn_clave' (string): Contraseña del usuario
+	 *                   - 'u' (string): Usuario para autenticación administrativa
+	 *                   - 'c' (string): Clave para autenticación administrativa
+	 * 
+	 * @return array|bool Retorna:
+	 *                    - Array con datos del usuario si autenticación sin sesión es exitosa
+	 *                    - true si autenticación administrativa es exitosa
+	 *                    - false en caso de fallo
+	 * 
+	 * @throws Exception Con código ERR_COD_USUARIO_O_CLAVE_INVALIDA si las credenciales son inválidas
+	 * @throws Exception Si hay errores en el proceso de autenticación
+	 * 
+	 */
 	public static function AutenticaUsuarioSisAjaxB64( $d ){
 	    $p = base64_decode( $d['params'] );
 	    $js = json_decode( $p, true );
@@ -371,6 +532,31 @@ class OperacionesCtrl {
 	    
 	    return false;
 	}
+	/**
+	 * Autentica usuarios del sistema mediante credenciales directas o hash MD5
+	 * 
+	 * Realiza autenticación de usuarios soportando dos métodos: autenticación directa
+	 * usando usuario/email y contraseña, o autenticación mediante hash MD5 de credenciales
+	 * concatenadas. Valida las credenciales contra la base de datos y retorna los datos
+	 * del usuario autenticado excluyendo información sensible.
+	 * 
+	 * @param array $d Parámetros de autenticación:
+	 *                 - 'u' (string): Usuario, email o hash MD5 según el método
+	 *                 - 'c' (string, opcional): Contraseña del usuario (requerida si no es MD5)
+	 * 
+	 * @param bool $md5Met Indica el método de autenticación a usar:
+	 *                     - true: Usa hash MD5 de usuario+contraseña concatenados
+	 *                     - false: Usa autenticación directa con usuario/email y contraseña (por defecto)
+	 * 
+	 * @return array Datos del usuario autenticado (excluye el campo 'clave' por seguridad):
+	 *               - Todos los campos de la tabla 'usuarios' excepto 'clave'
+	 *               - Información completa del perfil, estado, ubicación, etc.
+	 * 
+	 * @throws Exception Con código ERR_COD_MSJ_ERR_COMUN si hay múltiples usuarios duplicados
+	 * @throws Exception Con código ERR_COD_USUARIO_O_CLAVE_INVALIDA si las credenciales son incorrectas
+	 * @throws Exception Si hay errores en la consulta a la base de datos
+	 * 
+	 */
 	public static function AutenticaUsuarioSisAjax( $d, $md5Met = false ){
 	    $u = $d["u"];
 	    $c = isset($d["c"]) ? $d["c"] : "";
@@ -415,6 +601,23 @@ class OperacionesCtrl {
 	 * 
 	 * @param unknown <b>clave</b> Clave para crear la llave
 	 */
+
+	/**
+	 * Genera un par de llaves criptográficas RSA (pública y privada)
+	 * 
+	 * Crea un nuevo par de llaves RSA utilizando OpenSSL con configuración específica
+	 * para el sistema de autenticación. La llave privada se protege con una frase de paso
+	 * basada en el email del usuario y timestamp, mientras que la llave pública se extrae
+	 * para uso en verificación de firmas digitales.
+	 * 
+	 * @param array $d Parámetros para la generación de llaves:
+	 *                 - 'mail' (string): Dirección de correo electrónico del usuario para crear la frase de paso
+	 * 
+	 * @return array Array con el par de llaves generadas:
+	 *               - 'pub' (string): Llave pública en formato PEM
+	 *               - 'pri' (string): Llave privada en formato PEM protegida con frase de paso
+	 *               - 'fecha' (string): Timestamp de creación en formato Y-m-d H:i:s
+	 */
 	private static function GenerarLlavePublica( $d ){
 	    date_default_timezone_set('America/Bogota');
         $config = array(
@@ -444,8 +647,29 @@ class OperacionesCtrl {
 	 * @param <b>String u</b>  Usuario o correo inscrito en el sistema
 	 * @param <b>String c</b>  Clave de usuario
 	 * @return <b>object</b>   Id nuevo token
-	 * @exception  <b>400</b>  Error Interno
-	 *             <b>401</b>  Se requiere perfil autorizado
+	 */
+
+	/**
+	 * Genera un token de API RSA para usuarios autorizados del sistema
+	 * 
+	 * Crea o actualiza un token de autenticación basado en llaves RSA para usuarios
+	 * con perfiles autorizados. Valida las credenciales del usuario y gestiona la
+	 * creación, actualización o recuperación de tokens según la disponibilidad y
+	 * configuración del usuario.
+	 * 
+	 * @param array $d Parámetros de configuración del token:
+	 *                 - 'u' (string): Usuario, email o hash MD5 según el método de autenticación
+	 *                 - 'c' (string, opcional): Contraseña del usuario (requerida si no es MD5)
+	 *                 - 'md5' (bool, opcional): Indica si usar autenticación MD5 (por defecto false)
+	 *                 - 'forcenew' (bool, opcional): Fuerza la generación de un nuevo token
+	 * 
+	 * @return string|array Retorna:
+	 *                     - String con la llave pública existente si no se fuerza renovación
+	 *                     - Array con datos del token actualizado/creado si se genera nuevo
+	 * 
+	 * @throws Exception Con código 401 si las credenciales son inválidas o el usuario no está autorizado
+	 * @throws Exception Con código 400 si hay errores en la obtención de tokens existentes
+	 * @throws Exception Con código 500 si hay errores internos o el usuario está inhabilitado
 	 */
 	public static function GenerarToken ( $d ){
 	    date_default_timezone_set('America/Bogota');
@@ -561,7 +785,22 @@ class OperacionesCtrl {
 	        
 	    }
 	}
-	
+	/**
+	 * Compara y valida un token RSA proporcionado contra los tokens almacenados
+	 * 
+	 * Verifica la autenticidad de una llave pública RSA comparándola con los tokens
+	 * almacenados en el sistema. Este método es utilizado para validar tokens de
+	 * autenticación sin requerir autenticación previa del usuario.
+	 * 
+	 * @param array $d Parámetros de comparación del token:
+	 *                 - 'pkey' (string): Llave pública RSA en formato PEM que se desea validar
+	 * 
+	 * @return mixed Resultado de la comparación desde ApiboxLib::Comparar():
+	 *               - Datos de validación si el token es válido
+	 *               - Información del token encontrado en caso de coincidencia
+	 * 
+	 * @throws Exception Con código 401 si hay errores en la validación o el token no es válido
+	 */
 	public static function CompararToken ( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    include_once dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "libs" . DIRECTORY_SEPARATOR . "Apibox" . DIRECTORY_SEPARATOR . "ApiboxLib.php";
@@ -577,7 +816,26 @@ class OperacionesCtrl {
 	    
 	    
 	}
-	
+	/**
+	 * Obtiene tokens de autenticación RSA almacenados para un usuario específico
+	 * 
+	 * Recupera los tokens de autenticación RSA (llaves públicas y/o privadas) asociados
+	 * a un usuario desde el sistema de almacenamiento ApiboxLib. Este método es utilizado
+	 * internamente para validar tokens existentes y obtener llaves para operaciones
+	 * criptográficas.
+	 * 
+	 * @param array $d Parámetros para la obtención del token:
+	 *                 - 'id' (int): ID del usuario para el cual obtener el token
+	 *                 - 'privada' (bool, opcional): Si es true, incluye la llave privada en la respuesta
+	 * 
+	 * @return array Array con los datos del token obtenidos desde ApiboxLib::Obtener():
+	 *               - Información completa del token incluyendo llaves públicas
+	 *               - Si 'privada' es true, también incluye la llave privada
+	 *               - Metadatos como fecha de creación, estado, etc.
+	 * 
+	 * @throws Exception Con código 401 si hay errores en la comunicación con ApiboxLib
+	 * @throws Exception Con código ERR_COD_RESPUESTA_SQL_VACIA si no se encuentra ningún token para el usuario
+	 */
 	private static function ObtenerToken ( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    include_once dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR . "src" . DIRECTORY_SEPARATOR . "libs" . DIRECTORY_SEPARATOR . "Apibox" . DIRECTORY_SEPARATOR . "ApiboxLib.php";
@@ -605,6 +863,29 @@ class OperacionesCtrl {
 	// Llave FIN
 	
 	// Mascaras URL INI
+	/**
+	 * Crea una URL enmascarada para acceder de forma segura a archivos almacenados en el servidor
+	 * 
+	 * Este método resuelve IDs MD5 enmascarados para localizar archivos específicos en directorios
+	 * protegidos y los sirve directamente al cliente con las cabeceras HTTP apropiadas. Utiliza
+	 * un sistema de máscaras para ocultar la estructura real de directorios y proporciona acceso
+	 * controlado a documentos PDF y otros archivos.
+	 * 
+	 * @param array $d Parámetros de configuración:
+	 *                 - 'id' (string): Hash MD5 que identifica de forma única el directorio del archivo
+	 *                 - 'doc' (string): Nombre del archivo a servir
+	 *                 - 'anyo' (string, condicional): Año requerido para MASK_FLD_REPO_PROCESOS
+	 * 
+	 * @param string $msk Tipo de máscara que define la ubicación base:
+	 *                    - IndexCtrl::MASK_FLD_REPO_ANEXOS: Para archivos en "repo/anexos"
+	 *                    - IndexCtrl::MASK_FLD_REPO_PROCESOS: Para archivos en "repo/proc/{año}"
+	 * 
+	 * @return void Este método no retorna valor, sirve el archivo directamente al navegador
+	 * 
+	 * @throws Exception Si el directorio base no existe o no es accesible
+	 * @throws Exception Si no se encuentra un directorio que coincida con el hash MD5 proporcionado
+	 * @throws Exception Si el archivo especificado no existe en el directorio resuelto
+	 */
 	public static function crearUrlMask( $d, $msk ){
 	    $carpetas = array(
 	        IndexCtrl::MASK_FLD_REPO_ANEXOS => "repo/anexos",
@@ -647,7 +928,27 @@ class OperacionesCtrl {
 	// Mascaras URL FIN
 	
 	// APIS v2 Fin
-	
+	/**
+	 * Recupera acceso de usuario mediante correo electrónico enviando un código de activación temporal
+	 * 
+	 * Este método permite a los usuarios recuperar el acceso a su cuenta cuando han olvidado
+	 * sus credenciales. Genera un código temporal único y lo envía por correo electrónico
+	 * para que puedan restablecer su contraseña. Incluye validaciones de seguridad y
+	 * manejo de intentos múltiples para evitar colisiones en la generación de códigos.
+	 * 
+	 * @param array $d Parámetros de recuperación de acceso:
+	 *                 - 'emailactivar' (string): Dirección de correo electrónico del usuario
+	 *                 - 'gnrtk' (bool, opcional): Si es true, busca en tabla 'userselecto' en lugar de 'usuarios'
+	 * 
+	 * @return array Array con resultado de la operación:
+	 *               - 'ok' (string): Hash MD5 del ID del usuario si la operación fue exitosa
+	 * 
+	 * @throws Exception Si el correo electrónico no tiene formato válido
+	 * @throws Exception Si el campo emailactivar está vacío o no está presente
+	 * @throws Exception Si la cuenta de usuario no existe en el sistema
+	 * @throws Exception Si hay errores al eliminar códigos temporales anteriores
+	 * @throws Exception Si hay errores en el envío del correo electrónico
+	 */
 	public static function RecuperarByEmailAjax( $d ){
 	    if( isset( $d["emailactivar"] ) ){
 	        $ea = $d["emailactivar"];
@@ -732,7 +1033,32 @@ class OperacionesCtrl {
 	        throw new Exception("Campo de Correo o tel sin diligenciar.");
 	    }
 	}
-	
+	/**
+	 * Asigna una nueva contraseña al usuario utilizando un código de activación temporal
+	 * 
+	 * Este método completa el proceso de recuperación de contraseña permitiendo al usuario
+	 * establecer una nueva clave mediante un código temporal previamente enviado por correo.
+	 * Valida la vigencia del código, evita reutilización y actualiza la contraseña de forma segura.
+	 * 
+	 * @param array $d Parámetros para asignación de nueva contraseña:
+	 *                 - 'codActiva' (string): Código temporal de 6 caracteres enviado por email
+	 *                 - 'key' (string): Hash MD5 del ID del usuario obtenido del proceso de recuperación  
+	 *                 - 'c' (string): Nueva contraseña que será establecida para el usuario
+	 * 
+	 * @return array Array con resultado de la operación:
+	 *               - 'ok' (bool): true si la contraseña fue actualizada exitosamente
+	 * 
+	 * @throws Exception Si el campo 'codActiva' no está presente en los parámetros
+	 * @throws Exception Si el campo 'key' no está presente o está vacío
+	 * @throws Exception Si el campo 'c' (nueva contraseña) no está presente o está vacío
+	 * @throws Exception Si el código de activación está vacío o no tiene contenido
+	 * @throws Exception Si el código de activación no existe en el sistema
+	 * @throws Exception Si el código ya fue utilizado anteriormente (campo activo > 0)
+	 * @throws Exception Si el código expiró (más de 10 minutos desde su creación)
+	 * @throws Exception Si hay error al actualizar el estado de activación del código
+	 * @throws Exception Si el usuario asociado al código no existe en el sistema
+	 * @throws Exception Si no es posible actualizar la contraseña en la base de datos
+	 */
 	public static function RecuAsignarClaveAjax( $d ){
 	    if( isset( $d["codActiva"] ) ){
 	        if (!isset($d["key"])) throw new Exception("Sin datos del usuario.");
@@ -800,29 +1126,160 @@ class OperacionesCtrl {
 	}
 	
 	// PDF Config
+	/**
+     * Configuración de página PDF
+     * 
+     * Almacena la configuración de formato de página para la generación de documentos PDF.
+     * Incluye parámetros como orientación, márgenes, tamaño de página y configuraciones
+     * de encabezado y pie de página.
+     * 
+     * @var string
+     */
 	const CFG_PDF_PAGECONFIG = 'cfgpdfpageconfig';
 	
 	// Config SMTP
+	/**
+     * Configuración de autenticación SMTP
+     * 
+     * Indica si el servidor SMTP requiere autenticación para el envío de correos.
+     * 
+     * @var string
+     * @values 'true'|'false' Se almacena como string booleano
+     */
 	const CFG_SMTP_AUTHSMTP = 'cfgsmtpauthsmpt'; // Spmt authen
+	/**
+     * Puerto del servidor SMTP
+     * 
+     * Define el puerto de conexión al servidor SMTP para el envío de correos electrónicos.
+     * 
+     * @var string
+     * @values Puertos comunes: '25', '587' (TLS), '465' (SSL), '2525'
+     */
 	const CFG_SMTP_PORT = 'cfgsmtpportnum'; // Port number
+	/**
+     * Servidor host SMTP
+     * 
+     * Dirección del servidor SMTP utilizado para el envío de correos electrónicos.
+     * 
+     * @var string
+     */
 	const CFG_SMTP_HOST = 'cfgsmtphost'; // host
+	/**
+     * Usuario SMTP
+     * 
+     * Nombre de usuario o dirección de correo utilizada para autenticarse
+     * en el servidor SMTP.
+     * 
+     * @var string
+     */
 	const CFG_SMTP_USER = 'cfgsmtpuser'; // usuario
+	/**
+     * Contraseña SMTP
+     * 
+     * Contraseña asociada al usuario SMTP para la autenticación en el servidor.
+     * Se almacena de forma segura y se recomienda usar tokens de aplicación
+     * cuando sea posible.
+     * 
+     * @var string
+     * @security Se debe almacenar de forma segura, preferiblemente encriptada
+     */
 	const CFG_SMTP_PASS = 'cfgsmtppass'; // password
+	/**
+     * Tipo de seguridad SMTP
+     * 
+     * Define el protocolo de seguridad utilizado para la conexión SMTP.
+     * 
+     * @var string
+     * @values 'ssl'|'tls'|'none'
+     */
 	const CFG_SMTP_SECURE = 'cfgsmtpsecure'; // secure
+	 /**
+     * Habilitación de servicio externo de correo
+     * 
+     * Determina si se debe utilizar un servicio externo para el envío de correos
+     * en lugar del SMTP local. Cuando está habilitado, se utilizan las configuraciones
+     * de servicio externo (URL, token, cliente).
+     * 
+     * @var string
+     * @values 'true'|'false' Se almacena como string booleano
+     */
 	const CFG_SMTP_TFSERVICE = 'cfgsmtptfservice'; // tipo de
+	/**
+     * URL del servicio externo de correo
+     * 
+     * URL base del API del servicio externo utilizado para el envío de correos
+     * cuando CFG_SMTP_TFSERVICE está habilitado.
+     * 
+     * @var string
+     */
 	const CFG_SMTP_TFSERVICEURL = 'cfgsmtptfserviceurl'; // tf service url
+	/**
+     * Token de API del servicio externo
+     * 
+     * Token de autenticación para acceder al API del servicio externo de correo.
+     * Se almacena en formato base64 para mayor seguridad.
+     * 
+     * @var string
+     * @security Se almacena en base64, se decodifica antes del uso
+     */
 	const CFG_SMTP_TFSAPITOKEN = 'cfgsmtptfsapitoken'; // tfs api token
+	 /**
+     * ID del cliente en el servicio externo
+     * 
+     * Identificador único del cliente en el servicio externo de correo.
+     * Se utiliza para identificar la instancia específica del sistema
+     * en el servicio externo.
+     * 
+     * @var string
+     */
 	const CFG_SMTP_TFSCLIID = 'cfgsmtptfscliid';   // Id del cliente en el servicio TFServices
 	
 	// Espacio almacenamiento
+	/**
+     * Configuración de tamaño de almacenamiento
+     * 
+     * Define límites y configuraciones relacionadas con el espacio de almacenamiento
+     * disponible para el sistema, incluyendo límites de archivos y directorios.
+     * 
+     * @var string
+     */
 	const CFG_ALMACENAMIENTO_TAMANO = 'cfgalmacenamientotamano';
 	
 	// Deducciones precargadas
 	const CFG_DEDUCCIONES_DATA = 'cfgdeduccionesdata';
 	
 	// Configuracion para requerimientos
+	/**
+     * Configuración para mezcla de requerimientos
+     * 
+     * Almacena la configuración JSON que define qué plantillas de documentos
+     * se deben activar y mezclar para diferentes flujos de trabajo.
+     * Se utiliza en el proceso de generación automática de documentos.
+     * 
+     * @var string
+     * @format JSON codificado que mapea flujos con sus plantillas activas
+     */
 	const CFG_REQUERIMIENTOS_MEZCLA = 'cfgrequerimientosmezcla';
-	
+	/**
+	 * Escribe o actualiza una configuración corporativa en el sistema
+	 * 
+	 * Este método proporciona una interfaz simplificada para gestionar configuraciones
+	 * corporativas del sistema. Actúa como un wrapper del método ModificaConfigCorp,
+	 * manejando tanto la creación de nuevas configuraciones como la actualización
+	 * de configuraciones existentes de forma transparente.
+	 * 
+	 * @param array $d Parámetros de configuración:
+	 *                 - 'id' (string): Identificador único de la configuración a escribir/actualizar
+	 *                 - 'vl' (mixed): Valor que será almacenado para la configuración especificada
+	 *                 - 'ufull' (string): Nombre completo del usuario que realiza la operación
+	 * 
+	 * @return array Array con el resultado de la operación:
+	 *               - 'ok' (array): Resultado de la operación ModificaConfigCorp que incluye:
+	 *                 - 'ok' (bool): true si la operación fue exitosa
+	 *                 - 'cfg' (string): ID de la configuración procesada
+	 * 
+	 * @throws Exception Si el método ModificaConfigCorp falla, propagando el error con prefijo descriptivo
+	 */
 	public static function EscribirConfig( $d ) {
 	    $r = $d[ 'id' ];
 	    $v = $d[ 'vl' ];
@@ -836,7 +1293,22 @@ class OperacionesCtrl {
 	    
 	    return array( "ok" => $mo );
 	}
-	
+	/**
+	 * Lee todas las configuraciones corporativas del sistema
+	 * 
+	 * Este método recupera todas las configuraciones almacenadas en la tabla 'adminconfig'
+	 * y las organiza en un array asociativo indexado por el nombre de cada configuración,
+	 * facilitando el acceso directo a cualquier configuración específica.
+	 * 
+	 * @return array Array asociativo con las configuraciones corporativas donde:
+	 *               - Las claves son los nombres de las configuraciones (campo 'nombre')
+	 *               - Los valores son arrays completos con todos los campos de cada configuración:
+	 *                 - 'id' (int): ID único de la configuración
+	 *                 - 'nombre' (string): Nombre identificador de la configuración
+	 *                 - 'val' (string): Valor almacenado para la configuración
+	 *                 - 'usuario_full' (string): Nombre completo del usuario que modificó la configuración
+	 *                 - 'fecha' (string): Fecha y hora de la última modificación (Y-m-d H:i:s)
+	 */
 	public static function LeerConfigCorp(){
 	    $tb = "adminconfig";
 	    $ver = "*";
@@ -850,7 +1322,27 @@ class OperacionesCtrl {
 	    
 	    return $_n;
 	}
-	
+	/**
+	 * Modifica o crea una configuración corporativa en la base de datos
+	 * 
+	 * Este método es el núcleo interno para la gestión de configuraciones corporativas.
+	 * Determina automáticamente si debe actualizar una configuración existente o crear
+	 * una nueva entrada, manejando la persistencia de datos de configuración del sistema
+	 * de forma transparente y segura.
+	 * 
+	 * @param string $llave Identificador único de la configuración a modificar o crear
+	 * @param mixed $valor Valor que será almacenado para la configuración especificada
+	 * @param string $ufull Nombre completo del usuario que realiza la operación de modificación
+	 * 
+	 * @return array Array con el resultado de la operación:
+	 *               - 'ok' (bool): true si la operación fue exitosa, false en caso contrario
+	 *               - 'cfg' (string): Identificador de la configuración procesada (llave)
+	 * 
+	 * @throws Exception Si ocurre un error durante la actualización de configuración existente,
+	 *                   con prefijo "ModificaConfigCorp (mod): "
+	 * @throws Exception Si ocurre un error durante la creación de nueva configuración,
+	 *                   con prefijo "ModificaConfigCorp (add): "
+	 */
 	private static function ModificaConfigCorp( $llave, $valor, $ufull ){
 	    date_default_timezone_set('America/Bogota');
 	    $fecha = date("Y-m-d H:i:s");
@@ -888,7 +1380,22 @@ class OperacionesCtrl {
 	    
 	    return array( "ok" => false, "cfg" => $llave );
 	}
-	
+	/**
+	 * Obtiene y organiza archivos de fuentes TTF de forma recursiva desde un directorio base
+	 * 
+	 * Este método escanea recursivamente un directorio y sus subdirectorios para localizar
+	 * archivos de fuentes TrueType (.ttf), organizándolos en un array estructurado según
+	 * su tipo de fuente (normal, bold, italic, etc.) y ubicación relativa al directorio fonts.
+	 * 
+	 * @param array $d Parámetros de configuración:
+	 *                 - 'ruta' (string): Ruta absoluta del directorio base donde buscar fuentes TTF
+	 * 
+	 * @return array Array multidimensional organizado jerárquicamente:
+	 *               - Las claves representan nombres de directorios o tipos de fuente
+	 *               - Los valores pueden ser:
+	 *                 - Array: Para subdirectorios (resultado de llamada recursiva)
+	 *                 - String: Ruta relativa de archivo TTF para fuentes específicas
+	 */
 	public static function fuentes_Obtener( $d ){
 	    $res = array();
 	    $pathbase = $d['ruta'];
@@ -922,6 +1429,26 @@ class OperacionesCtrl {
 	// config basics fin
 	
 	// Codigoactiva INI
+	/**
+	 * Genera y envía un código de activación único por correo electrónico
+	 * 
+	 * Este método crea códigos de activación de 6 dígitos para verificación de usuarios,
+	 * con mecanismo de retry automático para evitar colisiones. Soporta tanto códigos
+	 * manuales como generación automática, y envía el código por email usando plantillas HTML.
+	 * 
+	 * @param array $d Parámetros de configuración del código:
+	 *                 - 'id' (int): ID del usuario para el cual generar el código (OBLIGATORIO)
+	 *                 - 'email' (string): Dirección de correo electrónico del destinatario (OBLIGATORIO)
+	 *                 - 'cdm' (string, opcional): Código manual específico a usar en lugar de generar automáticamente
+	 * 
+	 * @return array Respuesta de la operación:
+	 *               - En caso exitoso: Resultado del envío de email desde enviarCustomEmail()
+	 *               - En caso de error: Array con clave 'err' y mensaje descriptivo
+	 * 
+	 * @throws Exception Si el parámetro 'id' no está presente o está vacío
+	 * @throws Exception Con código 500 si no se puede crear el código después de 20 intentos
+	 * @throws Exception Con código ERR_COD_ENVIO_MAIL_FALLIDO si falla el envío del correo
+	 */
 	public static function codigoactiva_Add( $d ){
 	    if( !isset( $d["id"] ) ) throw new Exception("El id es obligatorio");
 	    
@@ -991,6 +1518,30 @@ class OperacionesCtrl {
 	    
 	    return array("ok" => $_d);
 	}
+	/**
+	 * Genera y envía códigos de activación para acudientes basado en datos de empleados codificados
+	 * 
+	 * Este método actúa como un helper especializado que procesa datos codificados en Base64
+	 * para generar códigos de activación dirigidos a acudientes asociados con empleados específicos.
+	 * Incluye validación de relaciones empleado-acudiente y recuperación de documentos de firmas
+	 * relacionados antes de proceder con la generación del código.
+	 * 
+	 * @param array $d Parámetros de configuración:
+	 *                 - 'data' (string): Datos JSON codificados en Base64 que contienen:
+	 *                   - 'Empleado' (string): Documento de identificación del empleado
+	 *                 - Parámetros adicionales requeridos por Empleadoacudiente_ObtenerPorDocumentoAcudiente_Helper
+	 * 
+	 * @return array|bool Respuesta de la operación:
+	 *                    - En caso exitoso: Array con claves:
+	 *                      - 'dt' (array): Datos completos del acudiente encontrado
+	 *                      - 'res' (string): Resultado en minúsculas del código generado
+	 *                      - 'docs' (array): Documentos de firmas asociados al empleado-acudiente
+	 *                    - En caso de falla: false
+	 * 
+	 * @throws Exception Si falla la obtención de datos empleado-acudiente con prefijo descriptivo
+	 * @throws Exception Si falla la consulta de logs de firmas con prefijo descriptivo
+	 * @throws Exception Si falla la generación del código de activación con prefijo descriptivo
+	 */
 	public static function codigoactivaHelperJson64_Add( $d ){ 
 	    self::authRequOff();
 	    
@@ -1034,6 +1585,25 @@ class OperacionesCtrl {
 	    
 	    return false;
 	}
+	/**
+	 * Genera y almacena un código de activación único en la base de datos
+	 * 
+	 * Este método helper gestiona la creación de códigos de activación únicos para usuarios,
+	 * eliminando códigos previos asociados al usuario y al código específico antes de crear
+	 * uno nuevo. Garantiza la unicidad tanto por usuario como por código generado.
+	 * 
+	 * @param array $d Parámetros requeridos para la generación del código:
+	 *                 - 'id' (int): ID del usuario para el cual se genera el código (OBLIGATORIO)
+	 *                 - 'cd' (string): Código de activación a almacenar (OBLIGATORIO)
+	 * 
+	 * @return int Retorna el ID del nuevo registro insertado en caso de éxito, o -1 si no se pudo insertar
+	 * 
+	 * @throws Exception Si el parámetro 'id' no está presente o está vacío
+	 * @throws Exception Si el parámetro 'cd' no está presente o está vacío
+	 * @throws Exception Con código 500 si falla la eliminación de códigos previos por usuario
+	 * @throws Exception Con código 500 si falla la eliminación de códigos previos por nombre
+	 * @throws Exception Con código 500 si falla la inserción del nuevo código
+	 */
 	public static function codigoactivaHelper_Add( $d ){
 	    if( !isset( $d["id"] ) ) throw new Exception("El id es obligatorio");
 	    if( !isset( $d["cd"] ) ) throw new Exception("El cod es obligatorio");
@@ -1071,7 +1641,28 @@ class OperacionesCtrl {
 	    }
 	    return -1;
 	}
-
+	/**
+	 * Valida un código de activación temporal verificando su vigencia y estado de uso
+	 * 
+	 * Este método verifica la validez de un código de activación de 6 dígitos, validando
+	 * que el código exista, no haya sido utilizado previamente y esté dentro del tiempo
+	 * límite de 10 minutos desde su creación. Se utiliza principalmente en procesos
+	 * de verificación de usuarios por correo electrónico.
+	 * 
+	 * @param array $d Parámetros de validación del código:
+	 *                 - 'codActiva' (string): Código de activación de 6 dígitos a validar (OBLIGATORIO)
+	 *                 - 'key' (string): Hash MD5 del ID del usuario para verificar la propiedad del código (OBLIGATORIO)
+	 * 
+	 * @return array Array con confirmación de validez:
+	 *               - 'ok' (bool): true si el código es válido y puede ser utilizado
+	 * 
+	 * @throws Exception Con código 500 si el campo 'codActiva' no está presente
+	 * @throws Exception Si el campo 'key' no está presente o está vacío
+	 * @throws Exception Con código 500 si el código de activación está vacío o sin contenido
+	 * @throws Exception Con código 500 si el código no existe en el sistema o no pertenece al usuario
+	 * @throws Exception Con código 500 si el código ya fue utilizado anteriormente (campo activo > 0)
+	 * @throws Exception Con código 500 si el código expiró (más de 10 minutos desde su creación)
+	 */
 	public static function codigoactiva_Get( $d ){ 
 	    date_default_timezone_set('America/Bogota');
 	    if( isset( $d["codActiva"] ) ){
@@ -1117,7 +1708,21 @@ class OperacionesCtrl {
 	        throw new Exception("Campo codActiva inexistente");
 	    }
 	}
-	
+	/**
+	 * Limpia y elimina todos los códigos de activación del sistema de forma segura
+	 * 
+	 * Este método proporciona una interfaz simplificada para eliminar masivamente todos
+	 * los códigos de activación almacenados en el sistema. Actúa como un wrapper del
+	 * método codigoactiva_Eliminar con parámetros preconfigurados para operaciones
+	 * de limpieza global, manejando automáticamente errores y códigos de respuesta HTTP.
+	 * 
+	 * @return int Número de registros eliminados de la tabla codigoactiva
+	 * 
+	 * @throws Exception Con código de error específico si falla la operación de eliminación:
+	 *                   - ERR_COD_SESION_INACTIVA si la sesión del usuario no está activa
+	 *                   - ERR_COD_ELIMINACION_SQL si hay problemas con la consulta SQL
+	 *                   - Códigos específicos propagados desde codigoactiva_Eliminar()
+	 */
 	public static function codigoactiva_Eliminar_limpiar() {
 	    try {
 	        return self::codigoactiva_Eliminar( array( 'clean' => true) );
@@ -1126,7 +1731,23 @@ class OperacionesCtrl {
 	        throw new \Exception( "[" . $e->getCode() . "]inasistencias_Eliminar_limpiar: " . $e->getMessage() );
 	    }
 	}
-	
+	/**
+	 * Elimina códigos de activación específicos o realiza limpieza masiva según los parámetros
+	 * 
+	 * Este método proporciona funcionalidad de eliminación para códigos de activación almacenados
+	 * en la tabla codigoactiva. Puede eliminar registros específicos por ID o realizar una
+	 * limpieza masiva de todos los códigos dependiendo de los parámetros proporcionados.
+	 * Requiere autenticación previa y maneja errores con códigos HTTP específicos.
+	 * 
+	 * @param array $d Parámetros de configuración para la eliminación:
+	 *                 - 'id' (int, opcional): ID específico del código de activación a eliminar
+	 *                 - 'clean' (bool, opcional): Si es true, elimina todos los códigos (id > 0)
+	 * 
+	 * @return int Número de registros eliminados de la tabla codigoactiva
+	 * 
+	 * @throws Exception Con código ERR_COD_SESION_INACTIVA si la sesión del usuario no está activa
+	 * @throws Exception Con código ERR_COD_ELIMINACION_SQL si hay problemas con la consulta de eliminación
+	 */
 	public static function codigoactiva_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -1156,7 +1777,26 @@ class OperacionesCtrl {
 	    }
 	}
 	// Codigoactiva FIN
-
+	/**
+	 * Sube un archivo al servidor validando su formato y manejando errores de carga
+	 * 
+	 * Este método privado gestiona la carga segura de archivos al servidor, validando
+	 * extensiones permitidas, creando directorios si es necesario y manejando errores
+	 * comunes de subida. Soporta múltiples formatos de archivo incluyendo imágenes,
+	 * documentos, hojas de cálculo y fuentes.
+	 * 
+	 * @param string $nm Nombre base que se asignará al archivo (sin extensión)
+	 * @param string $pth Ruta del directorio de destino donde se guardará el archivo
+	 * @param string $nombrecampo Nombre del campo del formulario que contiene el archivo (por defecto 'file')
+	 * 
+	 * @return string Nombre final del archivo guardado (nombre + extensión original)
+	 * 
+	 * @throws Exception Si el índice del archivo no existe en $_FILES
+	 * @throws Exception Si hay errores en la carga del archivo (tamaño, etc.)
+	 * @throws Exception Si la extensión del archivo no está en la lista de permitidos
+	 * @throws Exception Si no se puede crear el archivo en el destino especificado
+	 * @throws Exception Si el archivo temporal no existe
+	 */
 	private static function SubirArchivo($nm, $pth, $nombrecampo = 'file'){
 	    $defname = "";
 	    if( !isset( $_FILES[ $nombrecampo ] ) ){
@@ -1203,7 +1843,25 @@ class OperacionesCtrl {
 	    }
 	    return $defname;
 	}
-	
+	/**
+	 * Registra una notificación en el log del sistema
+	 * 
+	 * Este método crea un registro de notificación que documenta eventos relacionados
+	 * con flujos de trabajo, incluyendo información sobre el destinatario, estado,
+	 * usuario responsable y marca temporal. Actualmente está deshabilitado mediante
+	 * comentarios, pero mantiene la estructura para futuras implementaciones.
+	 * 
+	 * @param array $d Parámetros de configuración de la notificación:
+	 *                 - 'destino' (string): Identificador del destinatario de la notificación
+	 *                 - 'estado' (array): Estado de la operación con clave 'ok' que contiene el mensaje
+	 *                 - 'idm' (int): ID del flujo de trabajo asociado (flujos_id)
+	 * 
+	 * @return int|null Retorna el ID del registro creado si el método estuviera activo,
+	 *                  actualmente retorna null debido a que está comentado
+	 * 
+	 * @throws Exception Si ocurre un error durante la inserción en la base de datos
+	 *                   (solo cuando el código está activo)
+	 */
 	public static function LogNotify_Add( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    if ( !isset( $_SESSION["usu"] ) ) session_start();
@@ -1235,7 +1893,25 @@ class OperacionesCtrl {
 	    return $r;
 	    */
 	}
-	
+	/**
+	 * Obtiene registros de notificaciones del log del sistema
+	 * 
+	 * Este método recupera las notificaciones almacenadas en la tabla lognotify
+	 * filtradas por el ID del flujo de trabajo. Ofrece dos modos de consulta:
+	 * individual (registro por registro) o agrupado (con conteo de intentos por destinatario).
+	 * 
+	 * @param array $d Parámetros de configuración de la consulta:
+	 *                 - 'flujos_id' (int): ID del flujo de trabajo para filtrar las notificaciones (OBLIGATORIO)
+	 *                 - 'grupo' (bool, opcional): Si es true, agrupa los resultados por destinatario
+	 *                   y cuenta los intentos de notificación
+	 * 
+	 * @return array Array de registros de notificaciones que incluye:
+	 *               - Modo individual: id, destino, estado, usuario, fecha, flujos_id
+	 *               - Modo agrupado: los mismos campos más 'intentos' (número de notificaciones por destinatario)
+	 *               - Los resultados agrupados se ordenan por fecha descendente
+	 * 
+	 * @throws Exception Si hay errores en la consulta a la base de datos (propagados desde Singleton::_readInfo)
+	 */
 	public static function LogNotify_Get( $d ){
 	    $flujos_id = $d['flujos_id'];
 	    $grp = false;
@@ -1258,7 +1934,23 @@ class OperacionesCtrl {
 	    
 	    return $r;
 	}
-		
+	/**
+	 * Establece o actualiza el contenido de una plantilla de correo electrónico
+	 * 
+	 * Este método permite crear o actualizar el contenido HTML de plantillas de correo electrónico
+	 * almacenadas en el sistema de archivos. Las plantillas se guardan en formato HTML y se utilizan
+	 * para el envío de correos personalizados desde la aplicación.
+	 * 
+	 * @param array $d Parámetros de configuración de la plantilla:
+	 *                 - 'tplid' (string): Nombre identificador de la plantilla (sin extensión .html) (OBLIGATORIO)
+	 *                 - 'tplv' (string): Contenido HTML de la plantilla a guardar (OBLIGATORIO)
+	 * 
+	 * @return bool Retorna true si la plantilla fue guardada exitosamente
+	 * 
+	 * @throws Exception Si el parámetro 'tplid' no está presente o está vacío
+	 * @throws Exception Si el parámetro 'tplv' no está presente o está vacío
+	 * @throws Exception Con código ERR_COD_PLANTILLA_NO_SALVADA si el archivo de plantilla no existe
+	 */	
 	public static function EstablecerPlantillasEmail( $d ) {
 	    if( !isset( $d["tplid"] ) ) throw new Exception("El Id de la plantilla es obligatoria");
 	    if( !isset( $d["tplv"] ) ) throw new Exception("El Valor de la plantilla es obligatoria");
@@ -1278,7 +1970,36 @@ class OperacionesCtrl {
 	    }
 	    
 	}
-	
+	/**
+	 * Realiza llamadas HTTP a APIs externas utilizando cURL
+	 * 
+	 * Este método proporciona una interfaz unificada para realizar peticiones HTTP
+	 * a servicios web externos. Soporta múltiples métodos HTTP (GET, POST, PUT) y
+	 * permite configuración personalizada de opciones cURL. Maneja automáticamente
+	 * la codificación de datos y el manejo básico de errores.
+	 * 
+	 * @param string $method Método HTTP a utilizar para la petición:
+	 *                       - "POST": Envía datos en el cuerpo de la petición
+	 *                       - "PUT": Configura petición PUT
+	 *                       - Cualquier otro valor: Realiza petición GET con parámetros en URL
+	 * 
+	 * @param string $url URL de destino para la petición HTTP
+	 * 
+	 * @param mixed $data Datos a enviar con la petición:
+	 *                    - Para POST: Si es array se codifica como JSON, si es string se envía tal como está
+	 *                    - Para otros métodos: Se convierte a query string y se agrega a la URL
+	 *                    - false: No se envían datos (por defecto)
+	 * 
+	 * @param array $opt Array asociativo con opciones adicionales de cURL:
+	 *                   - Las claves deben ser constantes CURLOPT_* válidas
+	 *                   - Los valores corresponden a los valores de configuración
+	 *                   - Ejemplo: [CURLOPT_TIMEOUT => 30, CURLOPT_HTTPHEADER => ['Content-Type: application/json']]
+	 * 
+	 * @return string Respuesta del servidor como string. El contenido depende del servicio consultado
+	 * 
+	 * @throws Exception Si ocurre un error durante la ejecución de cURL, se lanza una excepción
+	 *                   con el mensaje de error específico retornado por curl_error()
+	 */
 	public static function CallAPI($method, $url, $data = false, $opt = array()) {
 	    $curl = curl_init();
 	    
@@ -1325,7 +2046,29 @@ class OperacionesCtrl {
 	    curl_close($curl);
 	    return $result;
 	}
-	
+	/**
+	 * Redimensiona una imagen manteniendo la relación de aspecto y la guarda en la misma ruta
+	 * 
+	 * Esta función toma una imagen existente en el sistema de archivos y la redimensiona
+	 * según las dimensiones especificadas. Mantiene automáticamente la proporción de aspecto
+	 * si solo se proporciona una dimensión (ancho o alto). La imagen redimensionada
+	 * sobrescribe el archivo original.
+	 * 
+	 * Formatos soportados:
+	 * - JPEG (.jpg, .jpeg)
+	 * - PNG (.png) - preserva transparencia
+	 * - GIF (.gif)
+	 * 
+	 * @param string $filePath   Ruta completa del archivo de imagen a redimensionar
+	 * @param int|null $newWidth Nuevo ancho en píxeles. Si es null, se calcula automáticamente
+	 *                           basado en la relación de aspecto y el alto especificado
+	 * @param int|null $newHeight Nuevo alto en píxeles. Si es null, se calcula automáticamente  
+	 *                            basado en la relación de aspecto y el ancho especificado
+	 * 
+	 * @return void No retorna valor. La imagen redimensionada sobrescribe el archivo original
+	 * 
+	 * @throws Exception Si la función imagecreatetruecolor no está disponible en el sistema
+	 */
 	public static function redimensionImg2($filePath, $newWidth, $newHeight) {
 	    if (!function_exists("imagecreatetruecolor")) {
 	        throw new Exception('imagecreatetruecolor does not exist');
@@ -1389,7 +2132,39 @@ class OperacionesCtrl {
 	    imagedestroy($image);
 	    imagedestroy($newImage);
 	}
-	
+	/**
+	 * Procesa imágenes codificadas en base64 desde contenido HTML y las convierte en archivos físicos
+	 * 
+	 * Este método extrae imágenes embebidas en formato base64 desde etiquetas <img> en contenido HTML,
+	 * las decodifica, las guarda como archivos físicos en el directorio especificado y las redimensiona
+	 * automáticamente si exceden el ancho máximo permitido. Es útil para procesar contenido de editores
+	 * WYSIWYG que incluyen imágenes en formato base64.
+	 * 
+	 * Formatos de imagen soportados:
+	 * - JPEG (.jpg, .jpeg)
+	 * - PNG (.png)
+	 * - GIF (.gif)
+	 * - WEBP (.webp)
+	 * - BMP (.bmp)
+	 * - Y otros formatos reconocidos por las funciones de PHP para imágenes
+	 * 
+	 * @param string $html Contenido HTML que contiene etiquetas <img> con src en formato data:image/formato;base64,datos
+	 * @param string $outputDir Directorio de destino donde se guardarán las imágenes procesadas
+	 * @param int $maxwidth Ancho máximo permitido en píxeles antes de redimensionar (por defecto: 800px)
+	 * @param int|null $newWidth Nuevo ancho en píxeles para redimensionamiento. Si es null, se calcula automáticamente
+	 *                           manteniendo la proporción de aspecto basado en $maxwidth
+	 * @param int|null $newHeight Nuevo alto en píxeles para redimensionamiento. Si es null, se calcula automáticamente
+	 *                            manteniendo la proporción de aspecto
+	 * 
+	 * @return array Array de imágenes procesadas. Cada elemento contiene:
+	 *               - 'original' (string): Etiqueta <img> original completa encontrada en el HTML
+	 *               - 'new_path' (string): Ruta completa del archivo de imagen guardado en el servidor
+	 * 
+	 * @throws Exception Si no se puede crear el directorio de salida
+	 * @throws Exception Si falla la decodificación base64 de alguna imagen
+	 * @throws Exception Si no se puede escribir el archivo de imagen en el directorio destino
+	 * @throws Exception Si falla el proceso de redimensionamiento de imagen
+	 */
 	public static function processBase64Images($html, $outputDir, $maxwidth = 800, $newWidth = null, $newHeight = null) {
 	    if (!is_dir($outputDir)) {
 	        mkdir($outputDir, 0777, true);
@@ -1426,6 +2201,18 @@ class OperacionesCtrl {
 	    return $images;
 	}
 	
+	/**
+	 * Reemplaza en un HTML las imágenes embebidas (por ejemplo data URIs o fragmentos originales) por etiquetas <img>
+	 * que apunten a archivos ya procesados en disco.
+	 *
+	 * @param string $html HTML original que puede contener las imágenes en Base64 o etiquetas/fragmentos que se desean reemplazar.
+	 * @param array $processedImages Array de elementos que describen las imágenes procesadas. Cada elemento esperado es un array asociativo con al menos:
+	 *                               - 'original'  (string): el fragmento tal cual aparece en $html y que debe ser reemplazado (p. ej. la data URI o la etiqueta <img> original).
+	 *                               - 'new_path'  (string): la ruta en disco (o relativa) donde se guardó la imagen procesada.
+	 * @param string $dirimg Ruta pública (relativa o absoluta) que se debe usar como prefijo en el atributo src de la nueva etiqueta <img>.
+	 *
+	 * @return string HTML con los fragmentos especificados reemplazados por nuevas etiquetas <img src="..."/>.
+	 */
 	public static function replaceBase64ImagesInHtml($html, $processedImages, $dirimg ) {
 	    foreach ($processedImages as $image) {
 	        $partes = pathinfo( $image['new_path'] ) ;
@@ -1435,6 +2222,16 @@ class OperacionesCtrl {
 	    return $html;
 	}
 	
+	/**
+	 * Elimina recursivamente los archivos encontrados por un patrón o ruta.
+	 *
+	 * Recorre los resultados de glob($d) y borra los ficheros con unlink().
+	 * Si encuentra subdirectorios, intenta descender recursivamente.
+	 * Nota: no elimina directorios vacíos, solo ficheros.
+	 *
+	 * @param string $d Ruta o patrón compatible con glob() a procesar.
+	 * @return bool True si todos los ficheros se eliminaron correctamente, false en caso de error.
+	 */
 	public static function EliminarRecursivo( $d ){
 	    foreach(glob( $d ) as $file){
 	        if(is_dir($file))
@@ -1454,6 +2251,19 @@ class OperacionesCtrl {
 	    return true;
 	}
 	
+	/**
+	 * Elimina archivos de caché en función del endpoint indicado.
+	 *
+	 * Espera un arreglo $d con la clave 'ep' que debe ser uno de los identificadores
+	 * de endpoint definidos en la clase (por ejemplo self::FLD_INFO_FTP_LBL o
+	 * self::FLD_INFO_GLR_LBL). Según el valor elimina recursivamente:
+	 *  - FLD_INFO_FTP_LBL: archivos en "galeria/prev/*"
+	 *  - FLD_INFO_GLR_LBL: archivos "*.zip" en "galeria"
+	 *
+	 * @param array $d Arreglo con la clave obligatoria 'ep' (string).
+	 * @return array|false Devuelve ['ok' => true] si la eliminación fue exitosa, o false en caso contrario.
+	 * @throws Exception Si no se proporciona 'ep' o si la opción de endpoint no existe.
+	 */
 	public static function CacheEliminarArchivos( $d ){
 	    if( !isset( $d["ep"] ) ) throw new Exception("El Endpoint es obligatorio");
 	    
@@ -1485,6 +2295,18 @@ class OperacionesCtrl {
 	    
 	}
 	
+	/**
+	 * Calcula el tamaño total y la cantidad de archivos en un directorio.
+	 *
+	 * Si $ext está vacío se recorre el directorio de forma recursiva.
+	 * Si se proporciona una extensión, solo se evalúan archivos del primer nivel con esa extensión (comparación insensible a mayúsculas).
+	 *
+	 * @param string $d   Ruta al directorio.
+	 * @param string $ext Extensión de los archivos a contar (sin punto), opcional. Valor vacío = sin filtro.
+	 * @return array      Array asociativo con claves:
+	 *                    - "tamano"   => int Tamaño total en bytes.
+	 *                    - "cantidad" => int Número de archivos contabilizados.
+	 */
 	public static function GetDirectorySize( $d, $ext = "" ){
 	    $bytestotal = 0;
 	    $flstotal = 0;
@@ -1515,6 +2337,21 @@ class OperacionesCtrl {
 	const FLD_INFO_FTP_LBL = "ftp";
 	const FLD_INFO_GLR_LBL = "glr";
 	const FLD_INFO_REPO = "repo";
+	/**
+	 * Obtiene el tamaño formateado y la cantidad de archivos de una carpeta según el endpoint recibido.
+	 *
+	 * Espera $d con la clave 'ep' que indica qué carpeta consultar:
+	 * - self::FLD_INFO_FTP_LBL  => galeria/prev
+	 * - self::FLD_INFO_GLR_LBL  => galeria (busca .zip)
+	 * - self::FLD_INFO_REPO     => repo
+	 *
+	 * Llama a GetDirectorySize() para calcular tamaño y cantidad, formatea el tamaño con Utiles::formatBytes()
+	 * y devuelve un arreglo con los datos listos para respuesta.
+	 *
+	 * @param array $d Arreglo de parámetros. Requiere 'ep' (string) indicando el endpoint.
+	 * @return array Devuelve ["ok" => ["tamano" => string, "cantidad" => string]].
+	 * @throws Exception Si no se proporciona 'ep'.
+	 */
 	public static function ObtenerTamanosCarpetas( $d ){
 	    if( !isset( $d["ep"] ) ) throw new Exception("El Endpoint es obligatorio");
 	    
@@ -1539,6 +2376,20 @@ class OperacionesCtrl {
 	}
 	
 	const SUPERUSR_ACC_FULL = "full";
+	/**
+	 * Determina si un usuario tiene privilegios de superusuario o acceso específico.
+	 *
+	 * Lee la configuración global (GLB_SUPER_PODER), decodifica su valor JSON y busca
+	 * una entrada cuyo "id" coincida con el identificador del usuario ($usu->getId()).
+	 * - Si la entrada tiene "ac" igual a SUPERUSR_ACC_FULL retorna true (acceso total).
+	 * - Si se solicita un código de acción ($ac > 0) busca en la lista separada por comas
+	 *   de "ac" de la entrada y retorna true si encuentra coincidencia.
+	 * - En cualquier otro caso retorna false.
+	 *
+	 * @param object $usu Objeto usuario que debe implementar getId() para obtener su identificador.
+	 * @param int    $ac  Código de acción opcional a verificar (por defecto 0).
+	 * @return bool       True si el usuario tiene el permiso solicitado, false en caso contrario.
+	 */
 	public static function ObtenerSuperUsuario( $usu, $ac = 0 ){
 	    $_gbl_super = self::LeerConfigCorp();
 	    if( isset( $_gbl_super[ self::GLB_SUPER_PODER ] ) ) {
@@ -1569,10 +2420,29 @@ class OperacionesCtrl {
 	}
 
 	private static $AUTH_ACTIVE = true;
+	/**
+	 * Desactiva el requisito de autenticación global.
+	 *
+	 * Establece la bandera estática AUTH_ACTIVE en false para deshabilitar
+	 * las comprobaciones de autenticación en componentes que la consulten.
+	 *
+	 * @return void
+	 */
 	public static function authRequOff(){
 	    self::$AUTH_ACTIVE = false;
 	}
 	// Servicios Globales INI
+	/**
+	 * Verifica la autenticación y devuelve el usuario almacenado en sesión.
+	 *
+	 * - Si AUTH_ACTIVE está activado, inicia la sesión si no existe.
+	 * - Recupera $_SESSION['usu'] y lo devuelve.
+	 * - Si no hay usuario en sesión y la autenticación está activa, lanza una excepción
+	 *   indicando que la sesión expiró.
+	 *
+	 * @return mixed|null Objeto usuario recuperado de la sesión o null si no hay autenticación activa.
+	 * @throws \Exception Si la autenticación está activa pero no se encuentra un usuario válido en sesión.
+	 */
 	public static function authRequ(){
 	    $usu = null;
 	    if( self::$AUTH_ACTIVE ){
@@ -1591,6 +2461,22 @@ class OperacionesCtrl {
 		return $usu;
 	}
 
+	/**
+	 * Obtiene una lista de lugares con su departamento y país asociados.
+	 *
+	 * Parámetros aceptados en $d:
+	 *  - departamento_id (int) Opcional: filtra por id de departamento.
+	 *  - searchtext (string) Opcional: busca en nombre de lugar, departamento o país.
+	 *  - ord (int) Opcional: índice/columna para ordenar (se convierte a entero).
+	 *  - limite (int) Opcional: límite de registros a devolver (se convierte a entero).
+	 *
+	 * Realiza LEFT JOIN con las tablas departamento y paises y devuelve los campos:
+	 *  id, nombre, departamento_id, departamento, paises.
+	 *
+	 * @param array $d Parámetros de filtro/orden/limite.
+	 * @return array Arreglo con los registros obtenidos de la consulta.
+	 * @throws \Exception Si ocurre un error en la lectura de datos (se devuelve HTTP 500).
+	 */
 	public static function lugares_Obtener( $d ){
 		
 		$vr = "lug.id, lug.nombre, lug.departamento_id, dep.nombre as departamento, pai.nombre as paises ";
@@ -1629,12 +2515,35 @@ class OperacionesCtrl {
 		return $r;
 	}
 	
+	/**
+	 * Obtiene los tamaños de las carpetas del repositorio y devuelve el indicador de resultado.
+	 *
+	 * Llama a ObtenerTamanosCarpetas usando la constante FLD_INFO_REPO y retorna el valor
+	 * del índice 'ok' del arreglo devuelto.
+	 *
+	 * @param mixed $d Datos de entrada opcionales (no se usan en la implementación actual).
+	 * @return mixed Valor del campo 'ok' del resultado (generalmente booleano indicando éxito).
+	 */
 	public static function sistema_Tamano_Get( $d ) {
 	    $data = self::ObtenerTamanosCarpetas( array( 'ep' => self::FLD_INFO_REPO ) );
 	    
 	    return $data['ok'];
 	}
 	
+	/**
+	 * Recupera información de usuario para el proceso de recuperación de contraseña.
+	 *
+	 * Decodifica $d['data'] (base64 -> JSON) y extrae la clave 'email'. Desactiva la
+	 * verificación de autenticación, busca usuarios por email y, si encuentra alguna
+	 * coincidencia, genera la página correspondiente mediante MagicPagesLib->Crear($d).
+	 *
+	 * @param array $d Datos de entrada. Debe contener 'data' como string base64 de un JSON con la clave 'email'.
+	 *                 Ejemplo del JSON decodificado: ['email' => 'usuario@dominio.com'].
+	 * @return array Lista de usuarios que coinciden con el email (array vacío si no hay coincidencias).
+	 * @throws Exception Relanza cualquier excepción producida por usuarios_Obtener y, antes de relanzar,
+	 *                   establece el código HTTP IndexCtrl::ERR_COD_MSJ_ERR_COMUN.
+	 * @side-effect Llama a self::authRequOff() y, si hay resultados, invoca MagicPagesLib->Crear($d).
+	 */
 	public static function sistema_recuperarClave_Get( $d ) {
 	    $data = base64_decode( $d['data'] );
 	    $oD = json_decode( $data , true );
@@ -1659,10 +2568,32 @@ class OperacionesCtrl {
 	// Servicios Globales FIN
 	
 	// Anyolectivo INI
+	/**
+	 * Obtiene el año lectivo.
+	 *
+	 * Devuelve el primer registro del listado de años lectivos (se solicita con límite 1).
+	 *
+	 * @static
+	 * @return mixed Primer año lectivo encontrado, o false/null en caso de error.
+	 */
 	public static function anyolectivo_Obtener ( ){
 	    $r = self::anyolectivo_Listado_Obtener( array( 'limite' => 1 ) );
 	    return $r;
 	}
+	/**
+	 * Obtiene un listado de anyolectivo desde la base de datos aplicando filtros.
+	 *
+	 * @param array $d Parámetros opcionales:
+	 *                 - int    'id'     : filtra por id exacto.
+	 *                 - int    'difid'  : excluye ese id (sobrescribe 'id' si ambos existen).
+	 *                 - mixed  'orden'  : si está presente modifica la cláusula de orden/limitado
+	 *                                      (en la implementación actual aplica un LIMIT con 'limite').
+	 *                 - int    'limite' : número máximo de registros a devolver.
+	 *
+	 * @return array Resultado devuelto por Singleton::_readInfoChar (registros o estructura de datos).
+	 *
+	 * @throws \Exception Si ocurre un error al leer la información; además se envía código HTTP 500.
+	 */
 	public static function anyolectivo_Listado_Obtener ( $d ){
 	    $vr = "id, nombre ";
 	    $tb = "anyolectivo ";
@@ -1697,6 +2628,25 @@ class OperacionesCtrl {
 	    return $r;
 	}
 	
+	/**
+	 * Añade un nuevo año lectivo.
+	 *
+	 * Requiere sesión/autenticación previa (self::authRequ()). Crea una instancia
+	 * de Anyolectivo, asigna el nombre proporcionado en $d['nombre'] y guarda los datos.
+	 *
+	 * Parámetros esperados en $d:
+	 *  - 'nombre' (string): Nombre del año lectivo a crear.
+	 *
+	 * Efectos secundarios:
+	 *  - Si la sesión no es válida lanza una excepción y establece el código HTTP
+	 *    IndexCtrl::ERR_COD_SESION_INACTIVA.
+	 *  - Si ocurre un error al guardar establece HTTP 500 y lanza la excepción con el error.
+	 *  - Si el guardado no devuelve ID válido establece HTTP 503 y lanza excepción.
+	 *
+	 * @param array $d Datos de entrada con la clave 'nombre'.
+	 * @return int ID del nuevo año lectivo creado (>0).
+	 * @throws \Exception En caso de sesión inactiva, error de guardado o respuesta no implementada.
+	 */
 	public static function anyolectivo_Add ( $d ){
 	    try {
 	        self::authRequ();
@@ -1727,6 +2677,25 @@ class OperacionesCtrl {
 	// Anyolectivo FIN
 	
 	// Institucion INI
+	/**
+	 * Obtiene la información de la institución registrada.
+	 *
+	 * Realiza la autenticación requerida y consulta la base de datos para
+	 * devolver un único registro de la tabla `institucion` junto con datos
+	 * relacionados (lugar, departamento, país y nombre completo del usuario).
+	 *
+	 * Campos devueltos (ejemplo): id, nombre, direccion, telefono, dane,
+	 * licencia, nit, resolucion, lugares_id, departamento_id, paises_id,
+	 * anyolectivo_id, usuarios_id, fullname.
+	 *
+	 * Comportamiento:
+	 * - Si la autenticación falla, se envía el código HTTP IndexCtrl::ERR_COD_SESION_INACTIVA
+	 *   y se lanza una excepción.
+	 * - Si la consulta retorna un error, se envía el código HTTP 500 y se lanza una excepción.
+	 *
+	 * @return array Resultado de la consulta con los campos de la institución.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la consulta.
+	 */
 	public static function institucion_Obtener( )
 	{
 		try {
@@ -1757,6 +2726,29 @@ class OperacionesCtrl {
 
 		return $r;
 	}
+	/**
+	 * Agrega una institución y reemplaza las existentes.
+	 *
+	 * Autentica al usuario, obtiene el año lectivo actual, crea y guarda una nueva
+	 * entidad Institucion con los datos proporcionados. Antes de insertar, elimina
+	 * todos los registros existentes en la tabla 'institucion'.
+	 *
+	 * @param array $d Datos de la institución. Claves esperadas:
+	 *                 - 'nombre' (string) Nombre de la institución.
+	 *                 - 'direccion' (string) Dirección.
+	 *                 - 'telefono' (string) Teléfono.
+	 *                 - 'dane' (string) Código DANE.
+	 *                 - 'licencia' (string|null) Licencia (opcional).
+	 *                 - 'nit' (string) NIT.
+	 *                 - 'resolucion' (string) Resolución.
+	 *                 - 'lugares_id' (int) ID del lugar.
+	 *                 - 'director' (int) ID del usuario director (usuarios_id).
+	 *                 (El campo anyolectivo_id se obtiene internamente.)
+	 *
+	 * @return array Devuelve los datos recibidos ($d) si la operación fue exitosa.
+	 * @throws \Exception Si la autenticación falla, si ocurre un error al eliminar
+	 *                    registros o al guardar la nueva institución.
+	 */
 	public static function institucion_Agregar( $d ){
 		$usu = null;
 		try {
@@ -1813,6 +2805,16 @@ class OperacionesCtrl {
 		}
 	}
 
+	/**
+	 * Sube el logotipo de la institución.
+	 *
+	 * Verifica la sesión (fija código HTTP y lanza excepción si está inactiva)
+	 * y sube el archivo 'logo_inst' al directorio de imágenes del tema.
+	 *
+	 * @param mixed $d Datos adicionales (no utilizados directamente).
+	 * @return mixed Resultado devuelto por SubirArchivo (información de la subida).
+	 * @throws \Exception Si la autenticación falla o ocurre un error durante la subida.
+	 */
 	public static function institucion_AgregarLogo( $d ){
 		try {
 			self::authRequ();
@@ -1830,6 +2832,23 @@ class OperacionesCtrl {
 		}
 	}
 	
+	/**
+	 * Actualiza los datos de una institución.
+	 *
+	 * Espera un array asociativo $d con los campos a modificar y el/los filtros.
+	 *
+	 * Campos válidos para asignar en $d:
+	 *  - nombre, direccion, telefono, dane, licencia, nit, resolucion, lugares_id, anyolectivo_id, usuarios_id
+	 *
+	 * Filtros aceptados (obligatorio al menos uno):
+	 *  - id, wanyolectivo_id
+	 *
+	 * @param array $d Datos a actualizar y criterios de filtro.
+	 * @return mixed Resultado devuelto por Singleton::_safeUpdate.
+	 * @throws \Exception Si la sesión no está activa, no se indican valores a asignar,
+	 *                    falta el filtro obligatorio o ocurre un error en la actualización.
+	 *                    Se establecen códigos HTTP según el tipo de error.
+	 */
 	public static function institucion_Modificar( $d ) {
 	    try {
 	        self::authRequ();
@@ -1920,6 +2939,15 @@ class OperacionesCtrl {
 	
 	const USUARIOS_FORM_ANEXO_ID = "formFile";
 	
+	/**
+	 * Agrega un usuario con los datos mínimos necesarios.
+	 * Llama a mnguserAdd_Helper y devuelve su resultado.
+	 *
+	 * @param array|object $d      Datos mínimos del usuario (campos esperados por el helper).
+	 * @param int|string   $perfil Identificador o nombre del perfil a asignar.
+	 * @return mixed Resultado devuelto por mnguserAdd_Helper (por ejemplo ID del usuario o false).
+	 * @throws Exception Re-lanza cualquier excepción con contexto adicional en caso de error.
+	 */
 	public static function usuarios_Helper_AgregarMini( $d, $perfil ){
 	    $r = null;
 	    try {
@@ -1930,6 +2958,27 @@ class OperacionesCtrl {
 	    return $r;
 	}
 	
+	/**
+	 * mnguserAdd_Helper
+	 *
+	 * Prepara y crea/modifica un usuario o empleado según el perfil indicado.
+	 * - Normaliza valores y aplica valores por defecto desde $d.
+	 * - Para empleados: agrega o modifica registro, crea certificado .p12, añade teléfono,
+	 *   obligaciones, detalles de contrato y sube anexos.
+	 * - Para usuarios administrativos/proveedores/ruta: agrega usuario, añade teléfono y
+	 *   envía clave por correo cuando corresponde.
+	 *
+	 * @param array $d      Datos recibidos desde el formulario/entrada (documento, nombres, mail, tel, etc.)
+	 * @param int   $perfil Identificador del perfil de usuario (empleado, administrador, supervisor, proveedor, ruta, ...)
+	 *
+	 * @return array|null   Información del usuario/empleado creado o modificado (ej. ['id'=>..., 'tmppws'=>...]) o null
+	 *
+	 * @throws \Exception   Lanza excepciones en errores de persistencia, subida de archivos, creación de certificados o envío de correo.
+	 *
+	 * Notas:
+	 * - Produce efectos secundarios: inserciones en BD, envío de emails, creación de archivos en disco y generación de certificados.
+	 * - Espera que funciones auxiliares (empleados_Agregar, usuarios_Agregar, telefonos..., firmaspro_Helper_MkCert_p12, etc.) manejen su propia validación y errores.
+	 */
 	public static function mnguserAdd_Helper( $d, $perfil ){
 	    // Modificar por ref
 		 
@@ -2196,6 +3245,28 @@ class OperacionesCtrl {
 		return $idUsr;
 	}
 	
+	/**
+	 * Prepara y normaliza datos de un usuario antes de su creación.
+	 *
+	 * Comportamiento:
+	 * - Para USUARIOS_PERFIL_EMPLEADOS:
+	 *   - Normaliza nombres y apellidos (quita caracteres especiales y pasa a minúsculas).
+	 *   - Construye un identificador por defecto a partir de nombre.apellido y número de documento.
+	 *   - Si no existe, fija mail a "<identificador>@empty.com".
+	 *   - Si no existe, fija código al número de documento.
+	 *   - Si no existe, fija usuario como "tipodoc_id + documento".
+	 * - Para USUARIOS_PERFIL_FINANCIERO, USUARIOS_PERFIL_PROVEEDOR o USUARIOS_PERFIL_RUTA:
+	 *   - Fija código y usuario al número de documento.
+	 *   - Establece generos_id = 1.
+	 *
+	 * Notas:
+	 * - Modifica el array $d por referencia.
+	 * - Usa Utiles::CleanSpecialChars para limpiar nombres y preg_replace para extraer dígitos del documento.
+	 *
+	 * @param array  &$d     Array asociativo con los datos del usuario (se modifica por referencia).
+	 * @param int    $perfil Constante de perfil (USUARIOS_PERFIL_EMPLEADOS, USUARIOS_PERFIL_FINANCIERO, USUARIOS_PERFIL_PROVEEDOR, USUARIOS_PERFIL_RUTA).
+	 * @return void
+	 */
 	public static function mnguserAdd_Prepare( &$d, $perfil ){
 	    if ( $perfil == self::USUARIOS_PERFIL_EMPLEADOS ) {
 	        
@@ -2233,6 +3304,41 @@ class OperacionesCtrl {
 	// Control usuarios FIN
 
 	// Empleados INI 
+	/**
+	 * Agrega un nuevo empleado.
+	 *
+	 * Valida la sesión, normaliza valores por defecto y guarda un registro
+	 * de empleado usando la entidad Empleados. Devuelve el id del nuevo registro.
+	 *
+	 * Parámetros:
+	 *  - array $d: arreglo asociativo con campos del empleado. Campos comunes:
+	 *      - documento (string)              requerido
+	 *      - nombres (string)                requerido
+	 *      - mail (string)                   requerido
+	 *      - tipodoc_id (int)                opcional, por defecto 1
+	 *      - lugarescedula_id (int|string)   opcional, por defecto "927"
+	 *      - apellidos (string)              opcional
+	 *      - nacimiento (datetime)           opcional, por defecto "1900-01-01 00:00:00"
+	 *      - generos_id (int)                opcional, por defecto 1
+	 *      - lugares_id (int|string)         opcional, por defecto "927"
+	 *      - gruposanguineo (string)         opcional
+	 *      - codigo (string)                 opcional, por defecto documento
+	 *      - usuario (string)                opcional, por defecto documento
+	 *      - clave (string)                  opcional, por defecto generado; se guarda como MD5
+	 *      - direccion, barrio (string)      opcionales
+	 *      - loc_lugares_id (int|string)     opcional, por defecto "927"
+	 *      - cargos_id, titulos_id (int)     opcionales, por defecto 1
+	 *      - perfil_id (int)                 opcional, por defecto 4
+	 *      - estado_id (int)                 opcional, por defecto 1
+	 *      - eps, ars, oficio, salariomes, contratoini, contratofin, dependencias_id (opcionales)
+	 *
+	 * Retorno:
+	 *  - array { 'id' => int } en caso de éxito.
+	 *
+	 * Errores / códigos HTTP:
+	 *  - Lanza excepción y puede establecer códigos HTTP: sesión inactiva (IndexCtrl::ERR_COD_SESION_INACTIVA),
+	 *    500 en errores de guardado, 503 si la respuesta no está implementada.
+	 */
 	public static function empleados_Agregar( $d ){
 		date_default_timezone_set('America/Bogota');
 		try {
@@ -2326,6 +3432,27 @@ class OperacionesCtrl {
 		}
 	}
 	
+	
+	/**
+	 * Modifica un empleado y, si aplica, actualiza su detalle de contrato.
+	 *
+	 * Delegado a empleados_Modificar($d) para la modificación principal. Si en $d se
+	 * proporcionan campos relacionados al contrato (empleadosdetallescontrato_meses,
+	 * empleadosdetallescontrato_dias, fechainicio, fileactaini), construye un arreglo
+	 * de detalle con los datos necesarios (incluyendo documento, tipodoc_id y empleados_id)
+	 * y lo envía a empleadosdetallescontrato_Helper_Agregar codificado en base64 como JSON.
+	 *
+	 * @param array $d Datos del empleado. Debe contener 'id' para asociar el detalle.
+	 *                 Opcionalmente puede incluir:
+	 *                 - empleadosdetallescontrato_meses (int)
+	 *                 - empleadosdetallescontrato_dias  (int)
+	 *                 - fechainicio                     (string|null)
+	 *                 - fileactaini                     (string|null)
+	 *                 - documento, tipodoc_id           (para el detalle de contrato)
+	 * @return mixed|null Retorna null por defecto; preserva el comportamiento original.
+	 * @throws Exception Re-lanza excepciones de empleados_Modificar y envuelve errores
+	 *                   ocurridos al procesar/guardar el detalle del contrato.
+	 */
 	public static function empleados_Helper_Modificar( $d ){
 	    $r = null;
 	    try {
@@ -2371,6 +3498,33 @@ class OperacionesCtrl {
 	    
 	    return $r;
 	}
+	/**
+	 * Modifica los datos de un empleado en la tabla "empleados".
+	 *
+	 * Realiza autenticación de sesión, construye dinámicamente los campos a actualizar
+	 * a partir del array de entrada $d y ejecuta la actualización mediante
+	 * Singleton::_safeUpdate. Requiere el campo 'id' en $d para aplicar el WHERE;
+	 * si no se indica filtro lanza excepción. Si se proporciona 'tel' y no está vacío,
+	 * actualiza también el teléfono llamando a telefonosempleado_Modificar.
+	 *
+	 * Claves aceptadas en $d (opcionalmente): 
+	 *  - id (int)                 : identificador del empleado (requerido para actualizar)
+	 *  - tipodoc_id, documento, lugarescedula_id
+	 *  - nombres, apellidos, mail, nacimiento (por defecto '1900-01-01 00:00:00')
+	 *  - generos_id, lugares_id, gruposanguineo, codigo, usuario
+	 *  - direccion, barrio, loc_lugares_id, dependencias_id, nuevo_estado_id
+	 *  - tel                      : si existe y no está vacío, se actualiza el teléfono
+	 *
+	 * Efectos secundarios:
+	 *  - Ajusta códigos de respuesta HTTP en errores (p. ej. ERR_COD_SESION_INACTIVA,
+	 *    ERR_COD_ACTUALIZACION_SQL o 500 en fallos de actualización).
+	 *
+	 * @param array $d Datos a modificar (ver claves aceptadas arriba).
+	 * @return mixed Retorno de Singleton::_safeUpdate (por ejemplo número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa, falta el filtro 'id' para actualizar,
+	 *                    o ocurre cualquier error durante la actualización o la modificación
+	 *                    del teléfono.
+	 */
 	public static function empleados_Modificar( $d ){
 		try {
 			self::authRequ();
@@ -2478,6 +3632,16 @@ class OperacionesCtrl {
 
 		return $cu;
 	}
+	/**
+	 * Modifica la contraseña de un empleado.
+	 *
+	 * Valida sesión y actualiza el campo `clave` en la tabla `empleados` usando md5($clave).
+	 *
+	 * @param array $d Parámetros: ['clave' => string, 'id' => int (opcional), 'idhash' => string (opcional)]
+	 * @return array Datos del empleado actualizado (documento, tipodoc) o array vacío.
+	 * @throws \Exception En caso de sesión inválida, falta de filtro o error en la actualización.
+	 * @note md5 no es seguro para contraseñas en producción; usar bcrypt/argon2.
+	 */
 	private static function empleados_ModificarClave( $d ){ 
 	    try {
 	        self::authRequ();
@@ -2542,6 +3706,13 @@ class OperacionesCtrl {
 	    return $alum;
 	}
 	
+	/**
+	 * Genera y asigna una nueva clave temporal a un empleado; opcionalmente crea certificado P12 y notifica por email.
+	 *
+	 * @param array $d Parámetros: 'id' (int, obligatorio), 'notificar' (int|'1' por defecto), 'setclave' (string, opcional).
+	 * @return bool True si la operación (cambio de clave, P12 y notificación opcional) finaliza correctamente.
+	 * @throws \Exception Si la sesión es inválida, no hay permisos, el usuario no existe o falla la actualización/certificado/envío.
+	 */
 	public static function empleados_NuevaClaveAjax( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -2641,6 +3812,15 @@ class OperacionesCtrl {
 	}
 	
 	// HomeCtrl -- Cambio de clave
+	/**
+	 * Actualiza la clave de un alumno/empleado a partir de datos codificados en base64.
+	 *
+	 * @param array $d Array que debe contener 'params' (JSON en Base64) con las claves:
+	 *                 - idhash: identificador del registro
+	 *                 - text:  nueva contraseña (clave)
+	 * @return mixed Resultado devuelto por empleados_ModificarClave.
+	 * @throws Exception Si ocurre un error al procesar los datos o al modificar la clave.
+	 */
 	public static function home_AlumnoPass_Add ( $d ){
 	    $dtB64Dec = base64_decode( $d['params'] );
 	    $dt = json_decode( $dtB64Dec , true );
@@ -2660,6 +3840,16 @@ class OperacionesCtrl {
 	    return $r;
 	}
 	
+	/**
+	 * Intenta obtener empleados según los parámetros proporcionados.
+	 *
+	 * Primero llama a empleados_Obtener($d); si el resultado no es mayor a 1,
+	 * establece $d['conmatridata'] = false y vuelve a intentar la obtención.
+	 *
+	 * @param array $d Parámetros de búsqueda.
+	 * @return array Lista de empleados (puede ser vacía).
+	 * @throws Exception Si falla la llamada a empleados_Obtener.
+	 */
 	public static function empleados_Home_Helper_Obtener( $d ){
 	    self::authRequOff();
 	    
@@ -2682,6 +3872,13 @@ class OperacionesCtrl {
 	    return $r;
 	}
 	
+	/**
+	 * Marca un empleado como eliminado estableciendo estado_id = 3.
+	 *
+	 * @param array $d Datos de entrada; debe contener la clave 'id' del empleado.
+	 * @return bool True si la operación se completó correctamente.
+	 * @throws \Exception Si la sesión no está activa o si falla la actualización en la base de datos.
+	 */
 	public static function empleados_Eliminar( $d ){	    
 		try {
 			self::authRequ();
@@ -2704,6 +3901,13 @@ class OperacionesCtrl {
 		return true;
 	}
 	
+	/**
+	 * Activa un empleado estableciendo su estado a 1.
+	 *
+	 * @param array $d Datos de entrada; debe incluir ['id' => int] con el identificador del empleado.
+	 * @return bool True si la operación fue exitosa.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error al actualizar la base de datos.
+	 */
 	public static function empleados_Activar( $d ){
 	    try {
 	        self::authRequ();
@@ -2724,10 +3928,25 @@ class OperacionesCtrl {
 	    
 	    return true;
 	}
+	/**
+	 * Helper que obtiene datos de empleados delegando en empleados_Obtener.
+	 *
+	 * @param mixed $d Parámetros o filtros para la obtención de empleados.
+	 * @return mixed Resultado devuelto por empleados_Obtener.
+	 */
 	public static function empleados_Helper_Obtener( $d ){
 	    $est_tmp = self::empleados_Obtener( $d );
 	    return $est_tmp;
 	}
+	/**
+	 * Obtiene todos los empleados combinando datos de matrículas, contacto y año lectivo.
+	 *
+	 * @param array $d Parámetros opcionales para filtrar (por ejemplo 'filtrar').
+	 * @return array Array asociativo de empleados con datos adicionales:
+	 *               curso, nivel educativo, jornada, nombres/apellidos separados,
+	 *               contacto favorito y otro (con documento, dirección, mail, tipo),
+	 *               y nombre del año lectivo.
+	 */
 	public static function empleados_Helper_ObtenerTodo( $d ){
 	    
 	    $est_tmp = self::empleados_Obtener( $d );
@@ -2817,6 +4036,28 @@ class OperacionesCtrl {
 	    //die( 'def: ' . print_r( $def ) );
 	    return $def;
 	}
+	/**
+	 * Obtiene uno o varios empleados según filtros y opciones de consulta.
+	 *
+	 * Realiza una consulta con múltiples JOINs (incluye empleadosdetallescontrato)
+	 * y devuelve un array con los datos de los empleados.
+	 *
+	 * Parámetros de entrada (array $d, todos opcionales):
+	 *  - id: int                            -- filtrar por id exacto.
+	 *  - w_id_md5: string                   -- filtrar por md5(id).
+	 *  - w_documento: string                -- filtrar por documento.
+	 *  - w_tipodoc_id: int                  -- filtrar por tipo de documento.
+	 *  - w_clave: string                    -- clave en claro (se compara como MD5).
+	 *  - ordendesc / ordenasc: string       -- columna para ordenar (desc/asc).
+	 *  - limite: int                        -- límite de filas a devolver.
+	 *
+	 * Requiere autenticación (authRequ). En caso de error lanza excepción y
+	 * puede ajustar el código de respuesta HTTP.
+	 *
+	 * @param array $d Filtros y opciones para la consulta.
+	 * @return array Lista de filas asociativas con los datos de empleados.
+	 * @throws \Exception Si la autenticación falla o hay error en la consulta.
+	 */
 	public static function empleados_Obtener( $d ){
 		try {
 			self::authRequ();
@@ -2922,6 +4163,20 @@ class OperacionesCtrl {
 		
 		return $r;
 	}
+	/**
+	 * Genera y devuelve el contenido CSV de empleados según filtros.
+	 *
+	 * Obtiene empleados mediante empleados_Obtener() aplicando las opciones recibidas,
+	 * formatea los registros como CSV (separador ';', campos entre comillas) y convierte
+	 * el juego de caracteres según el sistema operativo.
+	 *
+	 * Opciones esperadas en $d:
+	 *  - 'activos' (boolean|string): si true filtra por estado_id = "1".
+	 *  - 'conid'   (boolean|string): se pasa como flag a empleados_Obtener.
+	 *
+	 * @param array $d Opciones de filtrado.
+	 * @return string Contenido CSV listo para descarga.
+	 */
 	public static function empleados_Download_Obtener( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -2974,11 +4229,34 @@ class OperacionesCtrl {
 	    
 	    return implode( $_nlinea, $csv );
 	}
+	/**
+	 * Obtiene la lista de empleados para respuesta AJAX (DataTable).
+	 *
+	 * Establece la zona horaria a America/Bogota y devuelve los datos
+	 * codificados para su uso en un DataTable vía AJAX.
+	 *
+	 * @return mixed Datos formateados para DataTable.
+	 */
 	public static function empleados_ObtenerAjax(){
 		date_default_timezone_set('America/Bogota');
 		return Singleton::_dataTable( array( 'tb' => 'empleados', 'codifica_a' => IndexCtrl::CHARS_TO, 'codifica_desde' => IndexCtrl::CHARS_FR ) );
 	}
 	
+	/**
+	 * Obtiene los archivos anexos de un empleado (uso AJAX).
+	 *
+	 * Busca en la carpeta de anexos del empleado según el código 'dc', filtra
+	 * extensiones (.crt/.key) y aplica reglas para PDFs/PNG con prefijo "sig_"
+	 * respetando la bandera 'vertodospdf'. Si existe mapeo de etiquetas en la
+	 * configuración, usa esa etiqueta; si no, usa el nombre de archivo.
+	 *
+	 * @param array $d Parámetros esperados:
+	 *                 - 'dc' (string)    : código/directorio del empleado (requerido)
+	 *                 - 'empleados' (array, opcional) : datos de matrículas/empleados
+	 *                 - 'id' (mixed, opcional)        : id del empleado
+	 *                 - 'vertodospdf' (bool, opcional): controlar visibilidad de PDFs firmados
+	 * @return array Lista de archivos con elementos ['lbl' => etiqueta, 'fl' => nombre de archivo]
+	 */
 	public static function empleados_ObtenerFilesAjax( $d ){
 	    $cfg = self::LeerConfigCorp();
 	    $_CFG_MATRICULA_ANEXLS = isset( $cfg[ self::CFG_MATRICULA_ANEXLS ]) ? $cfg[ self::CFG_MATRICULA_ANEXLS ]["val"] : "[]";
@@ -3069,6 +4347,29 @@ class OperacionesCtrl {
 	    return $r;
 	}
 	
+	/**
+	 * Empleados Home Helper - Añadir usuario desde archivos de carga.
+	 *
+	 * Procesa la petición contenida en $d['data'] (JSON en Base64) para buscar
+	 * datos del empleado en los ficheros de carga del año lectivo actual
+	 * (busca archivos 'bogdata' y 'obligaciones'), crea el usuario si no existe,
+	 * genera el certificado .p12 y envía la notificación por correo con la clave.
+	 *
+	 * Parámetros esperados en el JSON decodificado:
+	 *  - reg_tipodoc_id : id del tipo de documento (usa TIPODOC_DOS_LETRAS)
+	 *  - reg_documento  : número de documento del usuario
+	 *  - reg_mail       : correo electrónico destinatario
+	 *
+	 * Efectos secundarios:
+	 *  - Añade un usuario mediante mnguserAdd_Helper.
+	 *  - Crea un certificado .p12 con firmaspro_Helper_MkCert_p12.
+	 *  - Envía correo de notificación con la clave temporal.
+	 *
+	 * @param array $d Datos de entrada (contiene 'data' con JSON en Base64).
+	 * @return array Retorno estandarizado mediante self::retorno (éxito o error).
+	 * @throws Exception Si faltan archivos, el usuario ya existe o fallan los procesos
+	 *                   de creación/firmado; lanza excepciones con códigos de IndexCtrl.
+	 */
 	public static function empleados_Home_Helper_Add ( $d ){
 	    set_time_limit(300); 
 	    include_once ( dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'phpspreadsheet_1_23_0' . DIRECTORY_SEPARATOR . 'PhpSpreadSheet.php');
@@ -3185,6 +4486,20 @@ class OperacionesCtrl {
 	}
 	
 	
+	/**
+	 * Procesa el archivo de carga de empleados.
+	 *
+	 * Busca en el repositorio del año lectivo actual el fichero asociado a
+	 * la carga indicada en $d['w_nombre'] y devuelve los encabezados (si se solicita)
+	 * o los registros filtrados según $d['buscarpor'].
+	 *
+	 * @param array $d Parámetros:
+	 *                 - string  'w_nombre'         (obligatorio) Nombre de la carga.
+	 *                 - bool    'soloencabezados' (opcional)  Si true devuelve solo encabezados.
+	 *                 - mixed   'buscarpor'        (opcional)  Condiciones de búsqueda/filtrado.
+	 * @return array Resultado (encabezados o registros).
+	 * @throws Exception Si no existe la carga, la carpeta del año lectivo o hay errores al leer el archivo.
+	 */
 	public static function empleados_Procesar_Archivos( $d ){
 	    ini_set('memory_limit', '-1'); 
 	    self::authRequOff();
@@ -3238,6 +4553,16 @@ class OperacionesCtrl {
 	// Empleados FIN
 	
 	// empleadosobjetivos INI
+	/**
+	 * Obtiene objetivos de empleados según filtros y opciones proporcionadas.
+	 *
+	 * Parámetros en el array $d (opcionales): id, w_empleados_id_md5, w_empleados_id,
+	 * ordendesc, ordenasc, limite.
+	 *
+	 * @param array $d Filtros y opciones para la consulta.
+	 * @return array Resultado de la consulta con los campos de empleadosobjetivos y datos relacionados.
+	 * @throws \Exception Si ocurre un error al ejecutar la consulta.
+	 */
 	public static function empleadosobjetivos_Obtener( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -3298,6 +4623,17 @@ class OperacionesCtrl {
 	    
 	    return $r;
 	}
+	/**
+	 * Agrega un nuevo objetivo de un empleado.
+	 *
+	 * Crea un objeto Empleadosobjetivos a partir del arreglo de datos provisto,
+	 * lo guarda y retorna el ID generado. En caso de error o de ausencia de ID
+	 * válido lanza una excepción y ajusta el código HTTP correspondiente.
+	 *
+	 * @param array $d Array con los datos del objetivo (descripcion, empleados_id, empleadosobjetivosestados_id, vigencia).
+	 * @return int ID del objetivo creado.
+	 * @throws \Exception Si ocurre un error al guardar o no se obtiene un ID válido.
+	 */
 	public static function empleadosobjetivos_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -3333,6 +4669,17 @@ class OperacionesCtrl {
 	// empleadosobjetivos FIN
 	
 	// empleadosobjetivoslog INI
+	/**
+	 * Obtiene registros del log de objetivos de empleados aplicando filtros opcionales.
+	 *
+	 * Parámetros esperados en $d (opcionales): id, w_empleados_id, w_empleados_id_md5,
+	 * w_empleadosobjetivos_id, w_requerimientostplsitems_id, w_paquetesrequ_id,
+	 * w_paquetes_id, ordendesc, ordenasc, limite.
+	 *
+	 * @param array $d Filtros y opciones de orden/limit para la consulta.
+	 * @return array Resultado de la consulta (filas) o estructura de error.
+	 * @throws \Exception Si ocurre un error al ejecutar la consulta.
+	 */
 	public static function empleadosobjetivoslog_Obtener( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -3414,6 +4761,13 @@ class OperacionesCtrl {
 	    
 	    return $r;
 	}
+	/**
+	 * Agrega un registro en la bitácora de objetivos de un empleado.
+	 *
+	 * @param array $d Array con los campos opcionales/obligatorios del registro (descripcion, archivos, archivosges, empleados, empleadosobjetivos_id, feedback, usuariofeedback, fechafeedback, requerimientostplsitems_id, paquetesrequ_id).
+	 * @return int ID del registro creado.
+	 * @throws \Exception Si ocurre un error al guardar el registro o no se retorna un ID válido (se establecen códigos HTTP según el tipo de error).
+	 */
 	public static function empleadosobjetivoslog_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -3465,6 +4819,20 @@ class OperacionesCtrl {
 	    }
 	    
 	}
+	/**
+	 * Modifica registros en la tabla empleadosobjetivoslog según los datos y filtros recibidos.
+	 *
+	 * Acepta en $d los campos opcionales para actualizar:
+	 * - descripcion, archivos, archivosges, feedback (guardado en 'requerido'),
+	 *   usuariofeedback (al indicar este campo también se establece 'fechafeedback' con la fecha actual).
+	 * Y los filtros obligatorios para identificar filas a actualizar:
+	 * - id o w_empleadosobjetivos_id (al menos uno debe estar presente).
+	 *
+	 * @param array $d Datos para la actualización y filtros (ver descripción).
+	 * @return int Número de filas afectadas por la actualización.
+	 * @throws Exception Si no se proporciona ningún filtro (IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO).
+	 * @throws Exception Si ocurre un error en la actualización SQL (IndexCtrl::ERR_COD_ACTUALIZACION_SQL).
+	 */
 	public static function empleadosobjetivoslog_Modificar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -3522,6 +4890,15 @@ class OperacionesCtrl {
 	    
 	    return $cu;
 	}
+	/**
+	 * Agrega o actualiza un registro en empleadosobjetivoslog.
+	 *
+	 * Si existe un registro con los mismos empleadosobjetivos_id y requerimientostplsitems_id lo actualiza
+	 * (incluyendo 'archivos' si se proporcionan), en caso contrario crea uno nuevo.
+	 *
+	 * @param array $d Datos del registro. Claves esperadas: 'empleadosobjetivos_id', 'requerimientostplsitems_id', 'descripcion' y opcional 'archivos'.
+	 * @return array Retorno estándar con el resultado de la operación (contiene 'result').
+	 */
 	public static function empleadosobjetivoslog_Helper_Agregar( $d ){
 	    $regQry = [
 	        'w_empleadosobjetivos_id' => $d['empleadosobjetivos_id'],
@@ -3551,6 +4928,15 @@ class OperacionesCtrl {
 	    
 	    return self::retorno(['result' => $r], 0, "");
 	}
+	/**
+	 * Maneja la subida de archivos para objetivos de empleados.
+	 * Elimina el archivo existente con el mismo campo antes de guardar el nuevo.
+	 *
+	 * @param array $d Datos del proceso. Debe contener:
+	 *                 - 'id'        Identificador del campo de archivo.
+	 *                 - 'documento' Nombre/carpeta del usuario donde guardar.
+	 * @return string Ruta (relativa) del archivo subido o cadena vacía si no se realizó ninguna subida.
+	 */
 	public static function empleadosobjetivoslog_Helper_Archivos( $d ){
 	    $anyo = OperacionesCtrl::anyolectivo_Obtener();
 	    $c_anyo = $anyo[ 0 ]['id'];
@@ -3603,6 +4989,13 @@ class OperacionesCtrl {
 	    "14" => "NUIP",
 	    "15" => "PTP"
 	];
+	/**
+	 * Obtiene uno o varios tipos de documento desde la tabla "tipodoc".
+	 *
+	 * @param array $d Parámetros opcionales (puede contener 'id' para filtrar por identificador).
+	 * @return array Arreglo con los registros obtenidos.
+	 * @throws \Exception Si ocurre un error en la consulta; además se envía código HTTP 500.
+	 */
 	public static function tipodoc_Obtener( $d ){
 		$vr  = "id, nombre ";
 		$tb  = "tipodoc ";
@@ -3623,6 +5016,13 @@ class OperacionesCtrl {
 	}
 	// Tipodoc FIN
 	// Generos INI
+	/**
+	 * Obtiene los géneros desde la tabla `generos`.
+	 *
+	 * @param array $d Parámetros opcionales. Puede incluir 'id' (int) para filtrar por identificador.
+	 * @return array Arreglo con las filas obtenidas o con la clave 'err_info' en caso de error.
+	 * @throws \Exception Si ocurre un error al leer la información (establece HTTP 500).
+	 */
 	public static function generos_Obtener( $d ){
 		$vr  = "id, nombre ";
 		$tb  = "generos ";
@@ -3643,6 +5043,13 @@ class OperacionesCtrl {
 	}
 	// Generos FIN
 	// Cargos INI
+	/**
+	 * Obtiene registros de la tabla "cargos".
+	 *
+	 * @param array $d Parámetros de búsqueda. Puede incluir 'id' (int) para filtrar por ID.
+	 * @return array Array con los resultados de la consulta.
+	 * @throws \Exception Si ocurre un error al leer la información; se establece HTTP 500.
+	 */
 	public static function cargos_Obtener( $d ){
 
 		$vr  = "id, nombre ";
@@ -3664,6 +5071,16 @@ class OperacionesCtrl {
 	}
 	// Cargos FIN
 	// Titulos INI
+	/**
+	 * Obtiene registros de la tabla "titulos".
+	 *
+	 * Si se pasa $d['id'] realiza un filtro por ese id; devuelve el resultado
+	 * de la lectura o lanza una excepción si ocurre un error (se envía HTTP 500).
+	 *
+	 * @param array $d Parámetros opcionales (p.ej. ['id' => int]).
+	 * @return array Resultado de la consulta.
+	 * @throws \Exception En caso de error en la lectura de datos.
+	 */
 	public static function titulos_Obtener( $d ){
 		$vr  = "id, nombre ";
 		$tb  = "titulos ";
@@ -3684,6 +5101,16 @@ class OperacionesCtrl {
 	}
 	// Titulos FIN
 	// Estados INI
+	/**
+	 * Obtiene uno o varios registros de la tabla `estado`.
+	 *
+	 * Si se proporciona $d['id'] filtra por ese ID. En caso de error lanza una
+	 * excepción y establece el código HTTP 500.
+	 *
+	 * @param array $d Parámetros de consulta (opcional: 'id')
+	 * @return array Resultado de la consulta
+	 * @throws \Exception Si ocurre un error al leer la información
+	 */
 	public static function estado_Obtener( $d ){
 		$vr  = "id, nombre ";
 		$tb  = "estado ";
@@ -3704,6 +5131,18 @@ class OperacionesCtrl {
 	}
 	// Estados FIN
 	// Perfil INI
+	/**
+	 * Obtiene registros de la tabla "perfilusuarios" aplicando filtros recibidos.
+	 *
+	 * @param array $d Parámetros opcionales:
+	 *                 - 'id' (int): filtrar por id específico.
+	 *                 - 'desdeadmin' (bool): si true, limita a varios perfiles administrativos.
+	 *                 - 'perfil_id' (int): si es USUARIOS_PERFIL_SUPER_USUARIO añade el id 1.
+	 *
+	 * @return array Resultado de la consulta (filas de perfiles).
+	 *
+	 * @throws \Exception Lanza excepción y responde con HTTP 500 si ocurre un error en la consulta.
+	 */
 	public static function perfil_Obtener( $d ){
 	    $vr  = "id, nombre ";
 	    $tb  = "perfilusuarios ";
@@ -3740,6 +5179,20 @@ class OperacionesCtrl {
 	}
 	// Perfil FIN
 	// Telefonos Empleado INI 
+	/**
+	 * Agrega un teléfono para un empleado.
+	 *
+	 * Espera un array $d con las claves:
+	 *  - 'tipotele_id' (int) tipo de teléfono
+	 *  - 'valor' (string) número/valor del teléfono
+	 *  - 'empleado_id' (int) id del empleado
+	 *
+	 * Autentica la sesión, crea y guarda el registro Telefonosempleado.
+	 *
+	 * @param array $d Datos del teléfono (tipotele_id, valor, empleado_id)
+	 * @return array Devuelve ['id' => int] con el id creado
+	 * @throws \Exception Si la sesión no está activa, ocurre un error al guardar (HTTP 500) o la respuesta no está implementada (HTTP 503)
+	 */
 	public static function telefonosempleado_Agregar( $d ){
 		try {
 			self::authRequ();
@@ -3771,6 +5224,21 @@ class OperacionesCtrl {
 			throw new \Exception( 'Respuesta no implementada' );
 		}
 	}
+	/**
+	 * Modifica un teléfono de empleado.
+	 *
+	 * - Si no se indica 'by_tipotele_id' realiza un UPDATE directo sobre telefonosempleado.
+	 * - Si se indica 'by_tipotele_id' elimina la entrada por tipo y agrega una nueva con el mismo valor.
+	 * Comprueba autenticación y lanza excepciones en errores (también ajusta códigos HTTP).
+	 *
+	 * @param array $d Datos de entrada. Claves esperadas:
+	 *                 - 'id' (int) Identificador del empleado/registro.
+	 *                 - 'tipotele_id' (int) Tipo de teléfono (cuando aplica).
+	 *                 - 'valor' (string) Valor/número del teléfono.
+	 *                 - 'by_tipotele_id' (int|null) Opcional; si está, se fuerza el reemplazo por tipo.
+	 * @return mixed Devuelve true si se reemplazó correctamente; o el resultado de Singleton::_safeUpdate en caso de update.
+	 * @throws \Exception En errores de autenticación o de base de datos.
+	 */
 	public static function telefonosempleado_Modificar( $d ){
 		try {
 			self::authRequ();
@@ -3830,6 +5298,20 @@ class OperacionesCtrl {
 			throw new \Exception( 'telefonosempleado_Agregar: ' . $th->getMessage() );
 		}
 	}
+	/**
+	 * Elimina registros de la tabla "telefonosempleado" según filtros.
+	 *
+	 * Requiere sesión autenticada. Debe proporcionarse al menos uno de los
+	 * filtros en $d: 'by_tipotele_id', 'by_empleado_id' o 'id'. Si no se indica
+	 * filtro lanza una excepción y establece el código HTTP correspondiente.
+	 *
+	 * @param array $d Array asociativo con filtros posibles:
+	 *                 - 'by_tipotele_id' (int)  Filtro por tipo de teléfono (nota: usado también en la condición de empleado).
+	 *                 - 'by_empleado_id' (int)  Filtro por id de empleado.
+	 *                 - 'id' (int)              Filtro por id del registro.
+	 * @return mixed Resultado devuelto por Singleton::_classicDelete (puede ser número de filas afectadas o similar).
+	 * @throws \Exception Si la sesión no está activa, no se indica filtro o ocurre un error en la eliminación.
+	 */
 	public static function telefonosempleado_Eliminar( $d ){
 		try {
 			self::authRequ();
@@ -3865,6 +5347,15 @@ class OperacionesCtrl {
 			throw new \Exception( 'telefonosempleado_Eliminar: ' . $th->getMessage() );
 		}
 	}
+	/**
+	 * Obtiene registros de telefonosempleado según filtros.
+	 *
+	 * Parámetros ($d) aceptados (opcionales):
+	 * - 'id'              : int. Si no existe 'by_empleado_id', filtra por telest.id. Si existe 'by_empleado_id', se usa como empleado_id.
+	 * - 'by_empleado_id'  : int. Si está presente, se filtra por telest.tipotele_id junto con telest.empleado_id (= 'id').
+	 *
+	 * Retorna un array con los resultados de la consulta. Lanza Exception si la sesión no está activa o si ocurre un error en la consulta (se establecen los códigos HTTP correspondientes).
+	 */
 	public static function telefonosempleado_Obtener( $d ){
 		try {
 			self::authRequ();
@@ -3904,6 +5395,21 @@ class OperacionesCtrl {
 	// Telefonos Empleado FIN
 
 	// Telefonos usuarios INI 
+	/**
+	 * Agrega un teléfono asociado a un usuario.
+	 *
+	 * Espera un array $d con las claves:
+	 *  - 'tipotele_id' (int)  Tipo de teléfono.
+	 *  - 'valor'       (string) Valor del teléfono.
+	 *  - 'usuarios_id' (int)  ID del usuario.
+	 *
+	 * Verifica la sesión antes de insertar; en caso de error lanza \Exception
+	 * y puede establecer códigos HTTP (sesión inactiva, 500, 503).
+	 *
+	 * @param array $d Datos del teléfono a agregar.
+	 * @return array ['id' => int] ID del registro creado.
+	 * @throws \Exception Si falla la autenticación o el guardado.
+	 */
 	public static function telefonosusuarios_Agregar( $d ){
 		try {
 			self::authRequ();
@@ -3935,6 +5441,17 @@ class OperacionesCtrl {
 			throw new \Exception( 'Respuesta no implementada' );
 		}
 	}
+	/**
+	 * Modifica un teléfono asociado a un usuario.
+	 *
+	 * Comportamiento:
+	 * - Si no se pasa 'by_tipotele_id' actualiza tipotele_id y valor por id.
+	 * - Si se pasa 'by_tipotele_id' elimina el registro por tipo y crea uno nuevo con el valor dado.
+	 *
+	 * @param array $d Datos de entrada: 'id', 'tipotele_id', 'valor' y opcional 'by_tipotele_id'.
+	 * @return mixed True en operaciones explícitas o el resultado de Singleton::_safeUpdate.
+	 * @throws \Exception Si la sesión no está activa o si ocurren errores en las operaciones SQL (se ajustan códigos HTTP).
+	 */
 	public static function telefonosusuarios_Modificar( $d ){
 		try {
 			self::authRequ();
@@ -3994,6 +5511,17 @@ class OperacionesCtrl {
 			throw new \Exception( 'telefonosusuarios_Modificar - _safeUpdate: ' . $th->getMessage() );
 		}
 	}
+	/**
+	 * Elimina registros de la tabla "telefonosusuarios".
+	 *
+	 * Por defecto elimina por 'id'. Si se pasa 'by_tipotele_id' elimina los
+	 * teléfonos del usuario (id pasado en 'id') del tipo especificado.
+	 *
+	 * @param array $d Parámetros: 'id' (int, obligatorio), 'by_tipotele_id' (int, opcional).
+	 * @return mixed Resultado de Singleton::_classicDelete().
+	 * @throws \Exception Si la sesión no está activa o ocurre un error en la eliminación.
+	 * Nota: Ajusta códigos HTTP (sesión inactiva / error del servidor).
+	 */
 	public static function telefonosusuarios_Eliminar( $d ){
 		try {
 			self::authRequ();
@@ -4017,6 +5545,18 @@ class OperacionesCtrl {
 			throw new \Exception( 'telefonosusuarios_Eliminar: ' . $th->getMessage() );
 		}
 	}
+	/**
+	 * Obtiene registros de teléfonos de usuarios aplicando filtros.
+	 *
+	 * Autentica la sesión y realiza la consulta sobre la tabla telefonosusuarios
+	 * (incluye joins a tipotele y usuarios). Acepta filtros en $d:
+	 *  - 'id'               => filtra por telest.id
+	 *  - 'by_usuarios_id'   => filtra por telest.tipotele_id junto con 'id' (usuarios_id)
+	 *
+	 * @param array $d Filtros de búsqueda.
+	 * @return array Resultado de la consulta (o estructura de error).
+	 * @throws \Exception Si falla la autenticación o la consulta. En caso de sesión inválida se envía el código HTTP IndexCtrl::ERR_COD_SESION_INACTIVA; en errores de consulta se envía HTTP 500.
+	 */
 	public static function telefonosusuarios_Obtener( $d ){
 		try {
 			self::authRequ();
@@ -4055,6 +5595,19 @@ class OperacionesCtrl {
 	// Usuarios INI 
 	
 	// Cargadatos.phtml INI
+	/**
+	 * Sube archivos asociados a una carga de datos.
+	 *
+	 * Decodifica el JSON base64 en $d['data'], valida la sesión del usuario,
+	 * crea las carpetas necesarias bajo repositorios/recursos/cargadatos/<anyo>,
+	 * mueve los archivos de $_FILES al destino y registra la acción en usabilidad.
+	 *
+	 * @param array $d Datos de entrada. Debe incluir 'data' (JSON base64) con las claves:
+	 *                 - 'cargadatos_src_0' (id de la configuración de carga)
+	 *                 - 'cargadatos_anyo_0' (año/identificador de carpeta destino)
+	 * @return array Retorno con el formato interno (true y código 0 en caso de éxito).
+	 * @throws \Exception Si la sesión no es válida, si faltan carpetas o si hay errores al subir archivos.
+	 */
 	public static function usuarios_CargaDatos_Upload ( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    $usu = NULL;
@@ -4116,6 +5669,15 @@ class OperacionesCtrl {
 	    
 	    return self::retorno( true, 0, '' );
 	}
+	/**
+	 * Obtiene registros de la tabla 'cargadatos' aplicando filtros, orden y límite.
+	 *
+	 * Verifica la sesión antes de ejecutar la consulta.
+	 *
+	 * @param array $d Parámetros opcionales: 'id', 'w_nombre', 'ordendesc', 'ordenasc', 'limite'.
+	 * @return array Resultado de la consulta (o información de error).
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la consulta (usa códigos de IndexCtrl).
+	 */
 	public static function cargadatos_Obtener( $d ) {
 	    try {
 	        self::authRequ();
@@ -4173,6 +5735,17 @@ class OperacionesCtrl {
 	}
 	// Cargadatos.phtml FIN
 	
+	/**
+	 * Agrega un nuevo usuario al sistema.
+	 *
+	 * Verifica la sesión, crea y llena un objeto Usuarios con los datos recibidos,
+	 * genera una contraseña temporal, guarda el registro y devuelve el id y la clave temporal.
+	 * Establece códigos HTTP y lanza excepciones en caso de error.
+	 *
+	 * @param array $d Datos del usuario (campos esperados: tipodoc_id, documento, lugarescedula_id, nombres, apellidos, mail, nacimiento, generos_id, lugares_id, gruposanguineo, codigo, usuario, direccion, barrio, loc_lugares_id, cargos_id, titulos_id, perfil_id, oficio, salariomes, contratoini, contratofin)
+	 * @return array ['id' => int, 'tmppws' => string] Id del nuevo usuario y contraseña temporal
+	 * @throws \Exception Si la sesión no está activa o ocurre error al guardar el usuario
+	 */
 	public static function usuarios_Agregar( $d ){
 		date_default_timezone_set('America/Bogota');
 		try {
@@ -4254,6 +5827,18 @@ class OperacionesCtrl {
 		}
 	}
 	
+	/**
+	 * Maneja la creación o modificación de un usuario y sus materias asociadas.
+	 *
+	 * Según el valor de $tipom realiza la modificación existente o llama al helper
+	 * de agregado para crear un nuevo usuario. Extrae de $d los campos temporales
+	 * "cursmats_*" para construir las relaciones materias↔cursos y delega su guardado.
+	 *
+	 * @param array $d Arreglo con datos del usuario y campos temporales de materias/cursos.
+	 * @param mixed $tipom Constante que indica la operación (p. ej. USUARIOS_HELPER_MODIFICAR o USUARIOS_HELPER_AGREGAR).
+	 * @return array|null Datos del usuario creado/actualizado o null si no aplica.
+	 * @throws Exception Si ocurre un error en la modificación/creación del usuario o al agregar las materias.
+	 */
 	public static function usuarios_Helper_Modificar( $d, $tipom ){
 	    $r = null;
 	    
@@ -4313,6 +5898,17 @@ class OperacionesCtrl {
 	    return $r;
 	}
 	
+	/**
+	 * Modifica los datos de un usuario existente.
+	 *
+	 * Recibe un arreglo asociativo $d con campos opcionales a actualizar (debe contener 'id').
+	 * Autentica la sesión; realiza el UPDATE en la tabla usuarios y, si se proporciona 'tel',
+	 * delega la modificación al método de teléfonos de usuario.
+	 *
+	 * @param array $d Datos del usuario a modificar (clave 'id' obligatoria; otras claves opcionales como nombres, apellidos, mail, usuario, contratoini, contratofin, tel, etc.).
+	 * @return mixed Resultado de la operación de actualización (retornado por Singleton::_safeUpdate).
+	 * @throws \Exception Si la sesión no está activa, no hay campos para modificar o ocurre un error en la actualización.
+	 */
 	public static function usuarios_Modificar( $d ){
 		try {
 			self::authRequ();
@@ -4390,6 +5986,14 @@ class OperacionesCtrl {
 
 		return $cu;
 	}
+	/**
+	 * Elimina lógicamente un usuario (soft delete) estableciendo estado_id = 3.
+	 * Requiere sesión válida; realiza la actualización en la tabla "usuarios" mediante Singleton::_safeUpdate.
+	 *
+	 * @param array $d Arreglo con la clave 'id' (identificador del usuario).
+	 * @return mixed Resultado devuelto por Singleton::_safeUpdate.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la actualización (se establecen códigos HTTP apropiados).
+	 */
 	public static function usuarios_Eliminar( $d ){
 		try {
 			self::authRequ();
@@ -4410,6 +6014,15 @@ class OperacionesCtrl {
 		    throw new \Exception( $th->getMessage() );
 		}
 	}
+	/**
+	 * Obtiene usuarios según los criterios en $d. Si se encuentran usuarios,
+	 * para cada uno añade la clave 'matcur' con las materias/cursos asociados
+	 * al usuario identificado por $d['id'].
+	 *
+	 * @param array $d Arreglo de parámetros de búsqueda. Se espera al menos 'id'.
+	 * @return array|null Lista de usuarios (cada uno con 'matcur' => array de materias) o null si no hay resultados.
+	 * @throws Exception Si ocurre un error en las llamadas internas a la capa de datos.
+	 */
 	public static function usuarios_Helper_Obtener( $d ){
 	    $r = null;
 	    try {
@@ -4433,6 +6046,23 @@ class OperacionesCtrl {
 	    
 	    return $r;
 	}
+	/**
+	 * Obtiene usuarios desde la base de datos aplicando distintos filtros.
+	 *
+	 * Parámetros de $d (opciones):
+	 *  - id (int): obtiene un usuario por id.
+	 *  - perfil_id (array): filtra por uno o más ids de perfil.
+	 *  - w_email (string): filtra por email (LIKE).
+	 *  - porids (array): lista de ids para obtener varios usuarios.
+	 *  - multicampo (string): búsqueda en nombres, apellidos o documento.
+	 *  - searchtext (string): búsqueda en nombres/apellidos (afecta JOIN).
+	 *  - limite (int): limita el número de resultados.
+	 *  - tokenid (bool): si es true incluye un token md5(usuario+clave).
+	 *
+	 * @param array $d Opciones de filtrado.
+	 * @return array Resultado con los registros o un arreglo con 'err_info' en caso de error.
+	 * @throws \Exception Si la sesión no está activa o ocurre un error en la consulta (se establece el código HTTP correspondiente).
+	 */
 	public static function usuarios_Obtener( $d ){
 		try {
 			self::authRequ();
@@ -4530,11 +6160,35 @@ class OperacionesCtrl {
 
 		return $r2;
 	}
+	/**
+	 * Obtiene los datos de usuarios formateados para uso por DataTables vía AJAX.
+	 *
+	 * Ajusta la zona horaria a America/Bogota y delega la recuperación/serialización
+	 * de los registros al helper Singleton::_dataTable.
+	 *
+	 * @return array Datos estructurados para DataTables.
+	 */
 	public static function usuarios_ObtenerAjax(){
 		date_default_timezone_set('America/Bogota');
 		return Singleton::_dataTable( array( 'tb' => 'usuarios', 'codifica_a' => IndexCtrl::CHARS_TO, 'codifica_desde' => IndexCtrl::CHARS_FR ) );
 	}
 	
+	/**
+	 * Genera y asigna una nueva clave temporal a un usuario (vía AJAX).
+	 *
+	 * - Valida que el solicitante tenga permisos según $perfil.
+	 * - Busca el usuario por $d['id'] y genera una clave nueva (o usa $d['setclave']).
+	 * - Actualiza la clave en la base de datos (almacenada como MD5).
+	 * - Opcionalmente notifica al usuario por correo si $d['notificar'] está activado.
+	 *
+	 * @param array $d Datos de entrada. Claves esperadas:
+	 *                 'id' (int) - identificador del usuario,
+	 *                 'notificar' (string|int, opcional) - '1' para notificar por correo,
+	 *                 'setclave' (string, opcional) - clave a establecer manualmente.
+	 * @param int $perfil Perfil del solicitante (constantes de la clase).
+	 * @return bool True si la operación finaliza correctamente.
+	 * @throws Exception Si el usuario no existe, falla la actualización, el envío de correo o no hay privilegios.
+	 */
 	public static function usuarios_NuevaClaveAjax( $d, $perfil ){
 	    date_default_timezone_set('America/Bogota');
 	    if ( $perfil == self::USUARIOS_PERFIL_ADMINISTRADOR || $perfil == self::USUARIOS_PERFIL_SUPERVISOR || $perfil == self::USUARIOS_PERFIL_PROVEEDOR ) {
@@ -4617,6 +6271,17 @@ class OperacionesCtrl {
 	// Usuarios FIN
 	
 	// Nueva clave de usuarios INI
+	/**
+	 * Cambia la clave de un usuario verificando la clave actual.
+	 *
+	 * @param array $d Array con los datos necesarios:
+	 *                 - 'c' (string) clave actual,
+	 *                 - 'n' (string) nueva clave,
+	 *                 - 'u' (int) id de usuario,
+	 *                 - 'tp' (string) tabla a usar.
+	 * @return array Devuelve ['ok' => true] si la clave se actualiza correctamente.
+	 * @throws Exception Si la clave actual no coincide o ocurre un error al actualizar.
+	 */
 	private static function NuevaClave( $d ){
 	    $c = $d["c"];
 	    $n = $d["n"];
@@ -4642,6 +6307,20 @@ class OperacionesCtrl {
 	        throw new Exception("La clave actual no coincide.");
 	    }
 	}
+	/**
+	 * Cambia la clave del usuario autenticado.
+	 *
+	 * Recibe un array $d con las claves:
+	 *  - 'currentpassword': contraseña actual
+	 *  - 'newpassword': nueva contraseña
+	 *  - 'confirmpassword': confirmación de la nueva contraseña
+	 *
+	 * Valida la sesión, comprueba que la nueva y la confirmación coincidan y delega la actualización a NuevaClave().
+	 *
+	 * @param array $d Datos de entrada (currentpassword, newpassword, confirmpassword)
+	 * @return mixed Resultado devuelto por NuevaClave()
+	 * @throws \Exception Si la sesión está inactiva, las contraseñas no coinciden o ocurre un error interno (se establecen códigos HTTP apropiados)
+	 */
 	public static function cambioClave_Add( $d ){
 		$usu = null;
 		try {
@@ -4678,6 +6357,21 @@ class OperacionesCtrl {
 		}
 
 	}
+	/**
+	 * Procesa un cambio de clave solicitado desde Home.
+	 *
+	 * Decodifica $d['key'] (base64 JSON) para obtener los campos requeridos:
+	 * tipo, currentpassword, newpassword, confirmpassword e id. Determina la
+	 * tabla según el tipo (acudientes o empleados), valida que la nueva clave
+	 * coincida con la confirmación y delega la actualización a self::NuevaClave().
+	 *
+	 * @param array $d Array con la clave 'key' (base64 JSON) que contiene:
+	 *                 'tipo', 'currentpassword', 'newpassword',
+	 *                 'confirmpassword' y 'id'.
+	 * @return mixed Resultado devuelto por self::NuevaClave().
+	 * @throws \Exception Si newpassword y confirmpassword no coinciden (HTTP 406)
+	 *                    o si ocurre un error al ejecutar NuevaClave() (HTTP 500).
+	 */
 	public static function cambioClave_Home_Add( $d ){
 	    self::authRequOff();
 	    
@@ -4716,6 +6410,12 @@ class OperacionesCtrl {
 	// Nueva clave de usuarios FIN
 	
 	// Apibox INI
+	/**
+	 * Genera y devuelve un token nuevo para el usuario indicado.
+	 *
+	 * @param array $d Arreglo con datos de entrada. Debe incluir 'id' del usuario.
+	 * @return string|null Token generado (MD5) o null si no se pudo obtener el usuario.
+	 */
 	public static function apibox_Agregar( $d ){
 	    $uDt = null;
 	    $u = self::usuarios_Obtener( array( 'id' => $d['id'], 'tokenid' => true ) ) ;
@@ -4727,6 +6427,12 @@ class OperacionesCtrl {
 	    
 	    return $tk;
 	}
+	/**
+	 * Obtiene y devuelve el resultado de la operación apibox_Agregar aplicada a los datos dados.
+	 *
+	 * @param mixed $d Datos de entrada para la operación.
+	 * @return mixed Resultado devuelto por apibox_Agregar.
+	 */
 	public static function apibox_Obtener( $d ){
 	    $r = self::apibox_Agregar( $d );
 	    
@@ -5375,6 +7081,15 @@ class OperacionesCtrl {
 	// Deducciones (virtual) INI
 	
 	// Usabilidad INI
+	/**
+	 * Agrega una entrada de usabilidad construida desde el array $d.
+	 *
+	 * Extrae 'refid', 'vl' y 'usr' de $d, normaliza 'refid' y delega en Usabilidad_agregar().
+	 * Cualquier excepción se captura y se registra en el log de errores.
+	 *
+	 * @param array $d Datos de entrada con claves 'refid', 'vl' y 'usr'.
+	 * @return void
+	 */
 	public static function Usabilidad_Helper_Agregar( $d ){
 	    $_olg = array(
 	        "refid" => "" . trim($d['refid']),
@@ -5387,6 +7102,21 @@ class OperacionesCtrl {
 	        error_log( "Usabilidad_Helper_Agregar - Usabilidad_agregar: " . $e->getMessage() );
 	    }
 	}
+	/**
+	 * Agrega un registro de usabilidad a partir de los datos proporcionados.
+	 *
+	 * Parámetros esperados en $d:
+	 *  - 'refid' (string): nombre de la referencia de usabilidad (obligatorio).
+	 *  - 'vl'    (mixed) : valor a almacenar (obligatorio).
+	 *  - 'usr'   (string): usuario que realiza la acción (obligatorio).
+	 *
+	 * Busca el id de la referencia por nombre, crea el objeto Usabilidad (incluye URL e IP)
+	 * y lo guarda en la base de datos.
+	 *
+	 * @param array $d Datos de entrada.
+	 * @throws Exception Si faltan parámetros o ocurre un error en búsqueda/guardado.
+	 * @return array ['ok' => int] Id del registro creado.
+	 */
 	public static function Usabilidad_agregar( $d ) {
 	    if( !isset( $d["refid"] ) ) throw new Exception("Usabilidad_agregar: El id de usabiliudad es obligatorio");
 	    if( !isset( $d["vl"] ) ) throw new Exception("Usabilidad_agregar: El valor es obligatorio");
@@ -5431,6 +7161,17 @@ class OperacionesCtrl {
 	// Usabilidad FIN
 
 	// Subir Foto Perfil
+	/**
+	 * Sube y registra la foto de perfil de un usuario.
+	 *
+	 * Realiza la autenticación, recibe los identificadores en $d['perfil_id'] y $d['id'],
+	 * genera un nombre único, guarda el archivo en repo/avatar y actualiza la columna
+	 * `foto` en la tabla correspondiente según el perfil (usuarios, empleados o acudientes).
+	 *
+	 * @param array $d Array con las claves 'perfil_id' (int) y 'id' (int).
+	 * @return string Nombre del archivo subido.
+	 * @throws \Exception Si la sesión no está activa, la subida falla o la actualización en la BD falla.
+	 */
 	public static function SubirFotoPerfil( $d ){
 		try {
 			self::authRequ();
@@ -5478,6 +7219,15 @@ class OperacionesCtrl {
 		return $nwfl;
 	}
 	
+	/**
+	 * Obtiene la ruta relativa del logotipo de la institución.
+	 *
+	 * Busca ficheros con extensiones jpg|jpeg|png|apng en temas/img/logo_inst.* y
+	 * selecciona el más reciente según su fecha de modificación. Si no hay ninguno,
+	 * devuelve la imagen por defecto.
+	 *
+	 * @return string Ruta relativa al logotipo (ej. '/temas/img/logo_inst.png' o '/temas/img/logo_no_institu_v2.png').
+	 */
 	public static function obtener_LogoCompany(){
 	    $extPo = array('jpg','jpeg','png', 'apng');
 	    $logoinst_path = dirname(dirname(dirname(__FILE__)));
@@ -5501,6 +7251,15 @@ class OperacionesCtrl {
 	    return $logoinst;
 	}
 	
+	/**
+	 * Registra una visita web en el sistema de usabilidad.
+	 *
+	 * Obtiene el referer (por defecto "directo") y el QUERY_STRING (por defecto "visita"),
+	 * arma un registro y llama a Usabilidad_agregar(), capturando posibles excepciones.
+	 *
+	 * @param mixed $d Datos adicionales (no utilizados actualmente).
+	 * @return void
+	 */
 	public static function registrarVisita_Agregar( $d ) {
 	    $ref = "directo";
 	    if ( isset( $_SERVER['HTTP_REFERER'] ) ) {
@@ -5526,6 +7285,16 @@ class OperacionesCtrl {
 	
 	// EditorPlantillas INI
 	//Templates.phtml
+	/**
+	 * Obtiene la lista de plantillas de correo disponibles en el directorio sistema/email.
+	 *
+	 * Recorre los archivos del directorio y devuelve un arreglo de elementos con:
+	 *  - 'lbl': nombre legible del archivo (Title Case, UTF-8)
+	 *  - 'fl' : nombre de archivo original
+	 *
+	 * @param mixed $d Parámetro no utilizado actualmente.
+	 * @return array Lista de plantillas encontradas; cada elemento es un arreglo asociativo ['lbl' => string, 'fl' => string].
+	 */
 	public static function editarPlantillas_Obtener( $d ) {
 	    $fld_base = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "sistema" . DIRECTORY_SEPARATOR . "email" . DIRECTORY_SEPARATOR;
 	    
@@ -5547,6 +7316,17 @@ class OperacionesCtrl {
 	    return $r;
 	}
 	
+	/**
+	 * Lee y devuelve el contenido HTML de una plantilla de correo.
+	 *
+	 * Espera un array $d con la clave 'fl' que contiene el nombre del archivo
+	 * de plantilla (sin la extensión .html). Construye la ruta dentro de
+	 * "sistema/email" y devuelve el contenido del archivo si existe,
+	 * o una cadena vacía en caso de no encontrarse.
+	 *
+	 * @param array $d Arreglo con la clave 'fl' => nombre de la plantilla (sin .html).
+	 * @return string Contenido HTML de la plantilla o cadena vacía si no existe.
+	 */
 	public static function editarPlantillas_Documento( $d ) {
 	    $fld_base = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "sistema" . DIRECTORY_SEPARATOR . "email" . DIRECTORY_SEPARATOR;
 	    
@@ -5560,6 +7340,16 @@ class OperacionesCtrl {
 	    return $html;
 	}
 	
+	/**
+	 * Agrega una plantilla de correo: decodifica la plantilla en base64
+	 * y la guarda delegando en EstablecerPlantillasEmail.
+	 *
+	 * @param array $d Array con las claves:
+	 *                 - 'tpl' (string) Plantilla codificada en base64.
+	 *                 - 'fl'  (mixed)  Identificador de la plantilla.
+	 * @return mixed Resultado devuelto por EstablecerPlantillasEmail.
+	 * @throws Exception Si ocurre un error al procesar o guardar la plantilla.
+	 */
 	public static function editarPlantillas_Agregar( $d ) {
 	    $tpl = base64_decode( $d['tpl'] );
 	    $fl = $d['fl'];
@@ -5578,6 +7368,16 @@ class OperacionesCtrl {
 	    array( "id" => "mix", "nombre" => "Documento para generar" )
 	);
 	
+	/**
+	 * Crea y guarda una nueva plantilla a partir de datos codificados.
+	 *
+	 * Decodifica el contenido base64/JSON recibido en $d['data'], normaliza el
+	 * nombre de plantilla y genera un archivo .html en el directorio de email.
+	 *
+	 * @param array $d Arreglo que debe contener 'data' (base64 de un JSON con 'tpl_nombre' y 'tpl_tipo').
+	 * @return string|false Ruta completa del archivo creado si se guarda correctamente, o false en caso contrario.
+	 * @throws Exception Si ya existe un archivo con ese nombre (se establece el código HTTP IndexCtrl::ERR_COD_PLANTILLA_NO_SALVADA).
+	 */
 	public static function editarPlantillas_Nuevo( $d ) {
 	    $dt = base64_decode( $d['data'] );
 	    $js = json_decode( $dt, true );
@@ -5617,6 +7417,16 @@ class OperacionesCtrl {
 	    
 	}
 	
+	/**
+	 * Elimina una plantilla de correo del sistema.
+	 *
+	 * Espera $d['data'] que contiene un JSON codificado en base64 con la clave 'template' (nombre sin extensión).
+	 * Borra el archivo "sistema/email/{template}.html".
+	 *
+	 * @param array $d Datos de entrada (base64 -> JSON con 'template').
+	 * @return bool True si el archivo se eliminó correctamente.
+	 * @throws Exception Si el archivo no existe o no se pudo eliminar (se establece http_response_code(IndexCtrl::ERR_COD_MSJ_ERR_COMUN)).
+	 */
 	public static function editarPlantillas_Eliminar( $d ) {
 	    $dt = base64_decode( $d['data'] );
 	    $js = json_decode( $dt, true );
@@ -5644,6 +7454,17 @@ class OperacionesCtrl {
 	}
 	
 	const EDITAR_PLANTILLAS_CFG_NAME = "config.json";
+	/**
+	 * Edita/añade una entrada en el archivo de configuración JSON de plantillas para la edición.
+	 *
+	 * Toma los datos provistos en $d (espera claves como 'bs', 'empleados', 'tipodoc_id' y 'cursos'),
+	 * genera un hash, registra metadatos (creador, fecha, año, etc.) y guarda/actualiza el config.json
+	 * correspondiente en el sistema de archivos.
+	 *
+	 * @param array $d Datos de entrada con las claves necesarias para crear la entrada de plantilla.
+	 * @return array Devuelve un array con la clave "url" apuntando al archivo config.json relativo.
+	 * @throws \Exception Si la autenticación del usuario falla.
+	 */
 	public static function editarPlantillas_Mezclar_JS_Agregar( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -5699,6 +7520,17 @@ class OperacionesCtrl {
 	    return $arrDef;
 	}
 	
+	/**
+	 * Procesa y agrega mezclas de plantillas para los empleados indicados.
+	 *
+	 * Decodifica los datos en $d['data'] (base64 + JSON), obtiene los empleados
+	 * por IDs, llama a firmaspro_Obtener para cada documento único y agrega
+	 * la mezcla de plantillas correspondiente.
+	 *
+	 * @param array $d Datos de entrada (debe incluir 'data' codificada en base64 y parámetros opcionales).
+	 * @return array Resultado actual de la mezcla (llama a editarPlantillas_Mezclar_Obtener).
+	 * @throws Exception Si no se proporcionan IDs válidos o ocurre un error en firmaspro_Obtener.
+	 */
 	public static function editarPlantillas_Mezclar_Agregar( $d ) {
 	    $dt = base64_decode( $d['data'] );
 	    $js = json_decode( $dt, true );
@@ -5749,6 +7581,16 @@ class OperacionesCtrl {
 	    return self::editarPlantillas_Mezclar_Obtener($d);
 	}
 	
+	/**
+	 * Obtener lista de variables disponibles para plantillas (clave y etiqueta).
+	 *
+	 * Genera un arreglo de variables en formato ['clave' => '{$...}', 'label' => '...']
+	 * combinando datos de empleados y variables de plantilla, aplicando prefijos según
+	 * el origen.
+	 *
+	 * @param array $d Parámetros de entrada (opcional / reservado).
+	 * @return array Lista de variables con clave y label.
+	 */
 	public static function editarPlantillas_JBB_Variables_Helper_Obtener( $d ){
 	    $params = [ 'soloencabezados' => true ];
 	    
@@ -5793,6 +7635,17 @@ class OperacionesCtrl {
 	    return $res;
 	}
 	
+	/**
+	 * Obtener variables para plantillas JBB.
+	 *
+	 * Construye y devuelve un array de variables (bind) para uso en plantillas/plantillas de correo:
+	 * incluye datos del año lectivo, etiquetas de correo, datos de empleado (prefijados),
+	 * valores de paquetes requeridos (formularios, fechas, booleanos, campos) y parámetros extraídos
+	 * de los archivos de cargadatos del repositorio.
+	 *
+	 * @param array $d Parámetros opcionales de entrada (ej. 'soloencabezados', 'empleado', 'paquetesrequ', ...)
+	 * @return array Array asociativo de variables listo para reemplazo en plantillas.
+	 */
 	public static function editarPlantillas_JBB_Variables_Obtener( $d ){
 	    $anyo = OperacionesCtrl::anyolectivo_Obtener();
 	    $c_anyo = $anyo[ 0 ];
@@ -5928,6 +7781,17 @@ class OperacionesCtrl {
 	    return $bind;
 	}
 	
+	/**
+	 * Genera los parámetros necesarios para una plantilla a partir de la estructura de datos proporcionada.
+	 *
+	 * Recibe un array $d con las claves 'archivo', 'campos' y 'valores'. Busca en 'campos' la entrada
+	 * cuyo 'nombre' coincide con 'archivo', decodifica su 'llaveindice' (JSON) y construye un array
+	 * de pares ['campo' => ..., 'valor' => ...]. Si la llave es 'tipodoc_id' convierte el valor usando
+	 * la constante TIPODOC_DOS_LETRAS.
+	 *
+	 * @param array $d Estructura con 'archivo' (string), 'campos' (array) y 'valores' (array asociativo)
+	 * @return array Lista de parámetros para la plantilla, cada elemento con 'campo' y 'valor'
+	 */
 	private static function editarPlantillas_Entregar_Parametros( $d ){
 	    $archivo = $d['archivo'];
 	    $campos = $d['campos'];
@@ -5953,6 +7817,20 @@ class OperacionesCtrl {
 	    return $res;
 	}
 	
+	/**
+	 * Crear mezclas de plantillas JBB y generar PDFs firmables.
+	 *
+	 * Genera PDFs mezclando las plantillas configuradas para los flujos incluidos en
+	 * $d['documentos']. Obtiene las variables necesarias, invoca firmaspro_Obtener para
+	 * producir cada PDF y, si procede, crea el registro de firma mediante firmas_Helper_Agregar.
+	 *
+	 * @param array $d Estructura de entrada que debe incluir:
+	 *                 - 'documentos' (array): lista de flujos con claves 'flujos_id', 'mesaplica', 'id'.
+	 *                 - 'obligaciones' (opcional): datos adicionales que se incorporan a las variables.
+	 * @return array Array de resultados por plantilla generada; cada elemento contiene el resultado
+	 *               devuelto por firmaspro_Obtener y, cuando se creó, información de 'firmas_id'.
+	 * @throws Exception Relanza excepciones de firmaspro_Obtener con contexto si la generación falla.
+	 */
 	public static function editarPlantillas_JBB_Mezclar_Crear( $d ){
 	    $cfg = OperacionesCtrl::LeerConfigCorp();
 	    $_CFG_REQUERIMIENTOS_MEZCLA = json_decode( (isset( $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]) ? $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]["val"] : '[]' ), true );
@@ -6033,6 +7911,15 @@ class OperacionesCtrl {
 	    return $rDt;
 	}
 	
+	/**
+	 * Obtiene la configuración de mezcla de plantillas para el año lectivo actual.
+	 *
+	 * Lee el fichero de configuración en repo/certificados/{id_año} y devuelve
+	 * su contenido JSON codificado en base64; si no existe, devuelve la base64 de "[]".
+	 *
+	 * @param mixed $d Parámetro no usado.
+	 * @return string JSON de configuración codificado en base64.
+	 */
 	public static function editarPlantillas_Mezclar_Obtener( $d ) {
 	    $anyo = OperacionesCtrl::anyolectivo_Obtener();
 	    $c_anyo = $anyo[ 0 ];
@@ -6049,6 +7936,24 @@ class OperacionesCtrl {
 	    return $js_b64;
 	}
 	
+	/**
+	 * editarPlantillas_Mezclar_Enviar
+	 *
+	 * Envía por correo plantillas mezcladas a empleados indicados en los datos recibidos.
+	 * Espera $d con:
+	 *  - 'data': string base64 que contiene JSON con elementos { tipodoc_id, documento, url, hash }
+	 *  - 'atodos' (opcional): bool; si true envía a todos los contactos encontrados, si false solo al favorito.
+	 *
+	 * Autentica al usuario, obtiene los empleados correspondientes, reemplaza etiquetas en la plantilla HTML
+	 * y envía los correos; registra la comunicación si el envío fue exitoso.
+	 *
+	 * Retorna un arreglo por entrada con las claves: 'res' (array de empleados), 'error' (bool), 'msj' (mensaje), 'hash', 'url'.
+	 *
+	 * Puede lanzar excepciones si la sesión está inactiva, falla el envío de correo o el registro de comunicaciones.
+	 *
+	 * @param array $d Datos de entrada (ver descripción).
+	 * @return array Resultado por destinatario con estado y mensajes de error si los hubiere.
+	 */
 	public static function editarPlantillas_Mezclar_Enviar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -6187,6 +8092,21 @@ class OperacionesCtrl {
 	    'mesesletras' => 'mesesletras'
 	];
 
+	/**
+	 * Genera y retorna HTML para un componente de plantilla según los parámetros recibidos.
+	 *
+	 * Depende de $d['type'] para determinar el tipo de componente (anexosqr, anexosimg, fecha,
+	 * fechacontratocompleto, valorpordia, nofactura, formulario, moneda, flujofinanciero, campofirma,
+	 * obligaciones, mesesletras, fechaxls, etc.). Los parámetros esperados en $d varían según el tipo:
+	 * por ejemplo 'valor', 'mes', 'fechainibogdata', 'fechafinalbogdata', 'esexcel', 'valortotal',
+	 * 'mesaplica', 'meses', 'dias', 'data', 'dc', 'cols', entre otros.
+	 *
+	 * Nota: Puede generar imágenes en base64, tablas HTML y usar conversiones de fechas desde Excel.
+	 *
+	 * @param array $d Parámetros del componente (clave 'type' requerida; otras claves dependen del tipo).
+	 * @return string HTML generado para insertar en la plantilla.
+	 * @throws Exception Si ocurre un error en conversiones de fecha desde Excel u otras operaciones.
+	 */
 	public static function editarPlantillas_CrearComponente( $d ){
 	    include_once ( dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'phpspreadsheet_1_23_0' . DIRECTORY_SEPARATOR . '/vendor/autoload.php' );
 	    
@@ -6667,6 +8587,19 @@ class OperacionesCtrl {
 	    //return json_encode( $d , JSON_UNESCAPED_SLASHES);
 	    return implode("", $html);
 	}
+
+	/**
+	 * Formatea un valor numérico como moneda según opciones recibidas.
+	 *
+	 * Parámetros en el array $d:
+	 * - 'valor' (int|float): valor a formatear.
+	 * - 'decimalseparado' (string, opcional): separador decimal (por defecto ',').
+	 * - 'centenseperador' (string, opcional): separador de miles (por defecto '.').
+	 * - 'decimales' (int, opcional): número de decimales (por defecto 0).
+	 *
+	 * @param array $d Datos y opciones de formateo.
+	 * @return string Valor formateado.
+	 */
 	private static function editarPlantillas_Moneda( $d ) {
 	    $valor = $d['valor'];
 	    $decimalseparado = ",";
@@ -6686,6 +8619,18 @@ class OperacionesCtrl {
 	    
 	    return $def;
 	}
+	/**
+	 * Calcula el pago mensual prorrateado de un contrato para un mes específico.
+	 *
+	 * Espera un array $d con claves: valorContrato, fechaInicio (YYYY-MM-DD),
+	 * mesCobro (YYYY-MM), meses, dias. Opcionales: descuentos (bool), raw (bool), debug (bool).
+	 *
+	 * Devuelve un array con:
+	 * - 'completo' (bool): true si el mes se considera completo (30 días).
+	 * - 'dias' (int): días trabajados en el mes de cobro.
+	 * - 'pago' (mixed): pago (formateado o numérico si raw=true).
+	 * - 'letras' (string): monto en letras.
+	 */
 	private static function editarPlantillas_CalcularPagoMensual( $d ) {
 	    $valorContrato = $d['valorContrato'];
 	    $inicioContrato = $d['fechaInicio'];
@@ -6740,6 +8685,20 @@ class OperacionesCtrl {
 	        'letras' => $formatter->toWords($pagoround, 0)
 	    ];
 	}
+	/**
+	 * Determina la fecha a devolver según si el mes de inicio coincide.
+	 *
+	 * Si el mes de 'mesaplica' coincide con el mes extraído de 'fechainibogdata'
+	 * (valor Excel convertido con PhpSpreadsheet) devuelve la fecha de inicio
+	 * de Bogotá formateada; en caso contrario devuelve 'mesaplica' formateada.
+	 *
+	 * @param array $d Array con claves:
+	 *                 - 'mesaplica' (string): fecha aplicada (ej. "YYYY-MM-DD").
+	 *                 - 'fechainibogdata' (mixed): valor de fecha Excel convertible por PhpSpreadsheet.
+	 *                 - 'formato' (string|null): formato de salida (por defecto "Y-m-d").
+	 * @return string Fecha resultante formateada según 'formato'.
+	 * @throws Exception Si falla la conversión desde la fecha Excel.
+	 */
 	private static function editarPlantillas_Componente_EsMesDeInicio( $d ) {
 	    $mesaplica = date("Y-m-d", strtotime( $d['mesaplica'] ) );
 	    $mesaplicam = date("m", strtotime( $mesaplica ) );
@@ -6762,6 +8721,16 @@ class OperacionesCtrl {
 	    
 	    return $def;
 	}
+	/**
+	 * Determina si un rango de fechas corresponde a un mes completo y devuelve el número de días.
+	 *
+	 * Comprueba que fechaInicio y fechaFin pertenezcan al mismo mes, que fechaInicio sea el día 01
+	 * y que fechaFin sea el último día de ese mes. Devuelve un array con 'completo' (bool) y 'dias' (int).
+	 *
+	 * @param string $fechaInicio Fecha inicial (cadena compatible con DateTime).
+	 * @param string $fechaFin    Fecha final (cadena compatible con DateTime).
+	 * @return array{completo: bool, dias: int} Resultado indicando si es mes completo y la cantidad de días.
+	 */
 	private static function editarPlantillas_Componente_EsMesCompleto($fechaInicio, $fechaFin) {
 	    $inicio = new DateTime($fechaInicio);
 	    $fin = new DateTime($fechaFin);
@@ -6783,6 +8752,31 @@ class OperacionesCtrl {
 	    
 	    return $resultado;
 	}
+	/**
+	 * Calcula los aportes de seguridad social para un trabajador independiente.
+	 *
+	 * Recibe un array $d con datos de salario y porcentajes opcionales, y devuelve
+	 * los aportes desglosados (IBC, salud, pensión, ARL, CCF, solidaridad) y el total.
+	 *
+	 * Parámetros esperados en $d (resumen):
+	 *  - 'salario' (float)                       : salario mensual.
+	 *  - 'clasearl' (int, opcional)              : clase ARL (1-5) para la tarifa.
+	 *  - 'porcentajesalud' (float, opcional)     : porcentaje de salud (por defecto 0.125).
+	 *  - 'porcentajepension' (float, opcional)   : porcentaje de pensión (por defecto 0.16).
+	 *  - 'porcentajeccf' (float, opcional)       : porcentaje de caja de compensación.
+	 *  - 'porcentajesolidaridadbase' (float, opt.): porcentaje de solidaridad aplicado si IBC > 4 SMMLV.
+	 *
+	 * @param array $d Datos de entrada con salario y porcentajes.
+	 * @return array {
+	 *   @type float 'ibc'         Ingreso base de cotización (redondeado).
+	 *   @type float 'salud'       Aporte a salud.
+	 *   @type float 'pension'     Aporte a pensión.
+	 *   @type float 'arl'         Aporte a ARL.
+	 *   @type float 'ccf'         Aporte a caja de compensación.
+	 *   @type float 'solidaridad' Aporte de solidaridad (si aplica).
+	 *   @type float 'total'       Suma total de aportes.
+	 * }
+	 */
 	private static function editarPlantillas_CalcularAportesIndependiente( $d ) {
 	    
 	        $salario = $d["salario"];
@@ -6853,6 +8847,19 @@ class OperacionesCtrl {
 	const FIRMASPRO_TXT_PREV = "Documento de previsualizaci&oacute;n";
 	const FIRMASPRO_TXT_PEND = "Documento pendiente por firmar";
 	const FIRMASPRO_TXT_FIRM = "Documento Firmado Exitosamente";
+
+	/**
+	 * Obtiene y prepara la información necesaria para firmar o revisar un documento.
+	 *
+	 * Decodifica el payload base64/json en $d['data'], valida el procedimiento
+	 * (firma o revisión), recupera el acudiente asociado, genera el certificado
+	 * cuando corresponde, registra el evento de firma y retorna los datos del PDF
+	 * preparado (p. ej. URL y ruta en base64).
+	 *
+	 * @param array $d Array que debe incluir la clave 'data' (cadena base64 con JSON).
+	 * @return array Datos del PDF preparado (por ejemplo ['url' => string, 'bs' => string]).
+	 * @throws Exception Si faltan datos, el acudiente no existe o ocurre un error en los pasos internos.
+	 */
 	public static function firmaspro_Helper_Obtener( $d ){
 	    self::authRequOff();
 	    $data = base64_decode( $d[ 'data' ] );
@@ -6975,6 +8982,19 @@ class OperacionesCtrl {
 	const FIRMASPRO_CARPETAS = array(
 	    'proceso' => 'proc'
 	);
+
+	/**
+	 * Firma un documento PDF de forma incremental usando el certificado P12 del usuario.
+	 *
+	 * Realiza:
+	 * - Decodifica parámetros base64 (datos del documento y usuario).
+	 * - Obtiene datos del usuario (contratista o admin) y su certificado P12 en el repositorio.
+	 * - Localiza el campo de firma en el PDF, genera un QR, y aplica la firma incremental creando un archivo con sufijo "_fir".
+	 * - Registra/actualiza el log de firmas y devuelve la ruta del PDF firmado.
+	 *
+	 * @param array $d Parámetros codificados: 'data' (JSON con keys: tipousuario, fldcampo, fldtipo, documento, [razon]) y 'u' (JSON con id del usuario).
+	 * @return array Estructura devuelta por self::retorno. En éxito incluye ['bs' => ruta_del_pdf_firmado]; en error devuelve código y mensaje (ej. certificado no encontrado, usuario ya firmó, o error de firma).
+	 */
 	public static function firmaspro_Helper_FirmarDoc( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    self::authRequOff();
@@ -7148,6 +9168,19 @@ class OperacionesCtrl {
 	const FIRMASPRO_EVENTO_REVISION = "1";
 	const FIRMASPRO_EVENTO_FIRMAR = "2";
 	const FIRMASPRO_EVENTO_ANULAR = "3";
+
+	/**
+	 * Maneja el evento de revisión de firmas (FIRMASPRO_EVENTO_REVISION).
+	 * Decodifica los datos de entrada, verifica/crea un registro de log de revisión
+	 * si corresponde y devuelve la URL del PDF (o la versión firmada *_fir si existe).
+	 *
+	 * @param array $d Array con datos codificados en base64:
+	 *                 - 'data': JSON con campos fldtipo, anyo, ide, pdf, evento
+	 *                 - 'u': JSON con información de usuario (id, fullname, jslgn, ...)
+	 * @return array Respuesta mediante self::retorno() con ['url' => string] en éxito,
+	 *               o código de error y mensaje si falla (p. ej. falta de firmas_id).
+	 * @sideeffects Puede insertar registros en firmaslog, leer el archivo PDF y calcular su hash.
+	 */
 	public static function firmaspro_Helper_EventsObtener( $d ){
 	    include_once dirname(dirname(__FILE__)) . "/libs/setasign/SetAsign_Manage.php";
 	    $sam = new SetAsign_Manage();
@@ -7232,6 +9265,17 @@ class OperacionesCtrl {
 	    }
 	}
 	
+	/**
+	 * Genera un código QR usando phpqrcode y opcionalmente lo convierte a JPG.
+	 *
+	 * Parámetros en $d:
+	 *  - 'qr'   => (string) ruta de salida del PNG
+	 *  - 'data' => (string) contenido para el QR
+	 *  - 'jpg'  => (bool, opcional) si es true intenta convertir y devolver JPG
+	 *
+	 * @param array $d Configuración para la generación del QR.
+	 * @return string|null Ruta al archivo generado (JPG si se pudo crear, sino PNG). Null si no se generó.
+	 */
 	private static function firmaspro_MkQR( $d ){
 	    include_once ( dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'phpqrcode' . DIRECTORY_SEPARATOR . 'qrlib.php');
 	    $qrP = $d['qr'];
@@ -7260,6 +9304,18 @@ class OperacionesCtrl {
 	
 	const FIRMAS_CERT_MODO_DOCENTE = "docente";
 	const FIRMAS_CERT_MODO_MIX = "certificados";
+
+	/**
+	 * Crea un certificado X.509 autofirmado y su clave privada para un usuario o estudiante.
+	 *
+	 * Genera una CSR y un certificado autofirmado, guarda el .crt y la clave privada .key
+	 * en el subdirectorio correspondiente bajo repo/{anexos|usuarios}/{<documento>} según el modo,
+	 * y devuelve las rutas completas a ambos archivos.
+	 *
+	 * @param array $d Datos del sujeto (por ejemplo: 'fullname', 'mail', 'est_documento', 'documento', 'modo')
+	 * @return array Asociativo con las rutas: ['crt' => string Ruta al certificado, 'key' => string Ruta a la clave privada]
+	 * @throws Exception Si no se pudo crear el certificado; también establece un código HTTP de error.
+	 */
 	private static function firmaspro_MkCert( $d ){
 	    $acu = $d;
 	    $fld_anexos = "anexos";
@@ -7318,6 +9374,18 @@ class OperacionesCtrl {
 	    
 	    return array( 'crt' => $crtFl, 'key' => $keyFl );
 	}
+
+	/**
+	 * Genera un certificado PKCS#12 (.p12) autofirmado con los datos proporcionados y lo guarda en disco.
+	 *
+	 * @param array $d Array con las claves:
+	 *                 - 'nombre' (string)  Nombre común para el certificado.
+	 *                 - 'correo' (string)  Dirección de correo asociada.
+	 *                 - 'clave' (string)   Contraseña para proteger el .p12.
+	 *                 - 'archivop12' (string) Ruta de salida donde se escribirá el archivo .p12.
+	 * @return string Ruta del archivo .p12 generado.
+	 * @throws RuntimeException Si falla la generación del certificado o la escritura del archivo.
+	 */
 	private static function firmaspro_MkCert_p12 ( $d ) {
 	    $nombre = $d['nombre'];
 	    $email = $d['correo'];
@@ -7355,6 +9423,17 @@ class OperacionesCtrl {
 	const FIRMASPRO_TIPOUSUARIO_ADMIN = 'admin';
 	const FIRMASPRO_TIPOUSUARIO_CONTRATISTA = 'contra';
 	const FIRMASPRO_NOMBRE_P12 = 'mep12.p12';
+
+	/**
+	 * Crea (si hace falta) los directorios del repositorio de usuarios y genera un
+	 * certificado PKCS#12 llamando a firmaspro_MkCert_p12. La contraseña del .p12
+	 * se calcula como MD5 de tipousuario+documento+tipodoc_id+usuario_id+clave.
+	 *
+	 * @param array $d Datos esperados: 'tipousuario', 'tipodoc_id', 'documento',
+	 *                 'usuario_id', 'clave', 'nombres', 'apellidos', 'mail'.
+	 * @return mixed Resultado devuelto por firmaspro_MkCert_p12 (ruta/objeto del .p12).
+	 * @throws Exception Si no se pueden crear los directorios necesarios.
+	 */
 	public static function firmaspro_Helper_MkCert_p12( $d ) {
 	    $bs = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . "usuarios";
 	    
@@ -7393,6 +9472,16 @@ class OperacionesCtrl {
 	    return $p12;
 	}
 	
+	/**
+	 * Crea un certificado P12 para el usuario autenticado (rol administrador).
+	 *
+	 * Establece la zona horaria, valida la sesión del usuario, construye la configuración
+	 * con los datos del usuario autenticado y delega la generación del P12 al helper de FirmasPro.
+	 *
+	 * @param mixed $d Parámetros adicionales (no utilizados directamente).
+	 * @return array Respuesta formateada mediante self::retorno con 'result' en caso de éxito.
+	 * @throws \Exception Si la sesión no es válida o falla la creación del certificado.
+	 */
 	public static function firmaspro_Helper_Admin_MkCert_p12( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -7422,6 +9511,19 @@ class OperacionesCtrl {
 	    return self::retorno([ 'result' => $r ], 0, 'Certificado creado correctamente');
 	}
 	
+	/**
+	 * Genera un PDF a partir de una plantilla HTML, aplica reemplazos, agrega una sección de firma (visual y/o firma digital)
+	 * y guarda el archivo en el repositorio.
+	 *
+	 * - Soporta modos de plantilla (docente, mix), reemplazos (bind), vista previa (temp) y firmado (firmar).
+	 * - Si se solicita firmado digital, utiliza los ficheros de certificado/clave proporcionados en $d['cer'].
+	 * - Llena $dt con metadatos del proceso (campos de reemplazo y número de páginas).
+	 *
+	 * @param array $d Parámetros de entrada (base64 con plantilla y opciones: modo, bind, temp, firmar, flogid, cer, helperfilename, etc.).
+	 * @param array &$dt Salida por referencia con datos del documento generado (p. ej. 'paginas' y los campos de reemplazo).
+	 * @return array Devuelve arreglo con 'url' => URL pública al PDF generado y 'bs' => ruta relativa en el repositorio.
+	 * @throws Exception Si falta la plantilla, el certificado o ocurre un error en la generación/guardado.
+	 */
 	public static function firmaspro_Obtener( $d, &$dt ) {
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -7744,6 +9846,12 @@ class OperacionesCtrl {
 	    return array( 'url' => Utiles::getBaseUrl() . $salidacarpeta . $salida , 'bs' => $salidacarpeta . $salida );
 	}
 	
+	/**
+	 * Genera el HTML de la vista previa de una firma digital.
+	 *
+	 * @param array $d Datos de la firma. Claves usadas: 'fecha', 'fullname', 'documento', 'tipodoc', 'mail', 'ip', 'estado' y opcional 'qr' (con clave 'bs').
+	 * @return string HTML de la tarjeta/plantilla de firma lista para incrustar en el documento.
+	 */
 	private static function firmaspro_TplFirma( $d ){
 	    $fechayhora = $d['fecha'];
 	    $acuname = ucwords( $d['fullname'] );
@@ -7760,6 +9868,7 @@ class OperacionesCtrl {
 	        
 	        $qr = '<img src="' . $img . '" height="100" hspace="0" vspace="3" />';
 	    }
+		
 	    /*
 	    $prevsign =<<<EOD
 <table border="1" style="border:solid 1px #000000; width:500px;">
@@ -7815,6 +9924,15 @@ EOD;
 	    return $prevsign;
 	}
 	
+	/**
+	 * Obtiene una vista previa de firmas.
+	 *
+	 * Marca $d['temp'] = true y delega en firmaspro_Obtener, relanzando excepciones con contexto.
+	 *
+	 * @param array $d Datos de entrada.
+	 * @return mixed Resultado devuelto por firmaspro_Obtener.
+	 * @throws Exception Si ocurre un error al obtener las firmas.
+	 */
 	public static function firmaspro_Preview_Obtener( $d ) {
 	    $d['temp'] = true;
 	    
@@ -7825,12 +9943,35 @@ EOD;
 	    }
 	}
 	
+	/**
+	 * Obtiene los formatos de página disponibles de TCPDF.
+	 *
+	 * Carga la configuración de TCPDF necesaria y devuelve la lista estática
+	 * de formatos de página definidos por TCPDF.
+	 *
+	 * @param mixed $d Parámetro no utilizado (reservado por compatibilidad).
+	 * @return array Lista asociativa de formatos de página disponibles en TCPDF.
+	 */
 	public static function firmaspro_PageFormats_Obtener( $d ){
 	    $basetcpdf = dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . 'libs/TCPDF-main/acapp/' ;
 	    require_once( $basetcpdf . 'tcpdf_include_acapp.php' );
 	    
 	    return TCPDF_STATIC::$page_formats;
 	}
+
+	/**
+	 * Agrega o actualiza la configuración de página para un archivo PDF.
+	 *
+	 * Decodifica $d['data'] (base64 -> JSON), busca la entrada por fileid en la configuración
+	 * corporativa y la reemplaza si existe; si no, la añade y persiste la configuración.
+	 *
+	 * @param array $d Array con los datos necesarios:
+	 *                 - 'data'  (string): contenido base64 que contiene el JSON con al menos 'fileid'.
+	 *                 - 'id'    (mixed) : identificador para la operación de persistencia.
+	 *                 - 'ufull' (mixed) : información de usuario/contexto usada al escribir config.
+	 * @return bool True si la operación fue exitosa.
+	 * @throws Exception Si ocurre un error al escribir o modificar la configuración.
+	 */
 	public static function firmaspro_Config_Page_Agregar( $d ){
 	    $data = base64_decode( $d[ 'data' ] );
 	    $json = json_decode( $data, true );
@@ -7868,6 +10009,16 @@ EOD;
 	    
 	    return true;
 	}
+
+	/**
+	 * Obtiene la configuración de página para un archivo específico desde la configuración corporativa.
+	 *
+	 * Busca en la configuración (almacenada como JSON en base64) la entrada correspondiente a $d['fileid']
+	 * y devuelve su configuración si existe.
+	 *
+	 * @param array $d Array con al menos la clave 'fileid' que identifica el archivo.
+	 * @return array Configuración de la página para el fileid; array vacío si no se encuentra.
+	 */
 	public static function firmaspro_Config_Page_Obtener( $d ){
 	    $cfg = self::LeerConfigCorp();
 	    $_CFG_PDF_PAGECONFIG = isset( $cfg[ OperacionesCtrl::CFG_PDF_PAGECONFIG ]) ? $cfg[ OperacionesCtrl::CFG_PDF_PAGECONFIG ]["val"] : base64_encode( '[]' );
@@ -7880,6 +10031,18 @@ EOD;
 	    
 	    return array();
 	}
+
+	/**
+	 * Muestra la vista de revisión de firmas según un código recibido.
+	 *
+	 * - Desactiva temporalmente la comprobación de autenticación.
+	 * - Si se proporciona $d[0], lo usa como identificador (MD5) para obtener el registro de firma.
+	 * - Incluye las plantillas 'Revisar.phtml' y 'Pie.phtml' y emite el cierre del HTML.
+	 *
+	 * @param array $d Parámetros de entrada; se espera opcionalmente en $d[0] el código (MD5) de la firma.
+	 * @throws Exception Si falla la obtención del registro de firmas (envuelto con mensaje contextual).
+	 * @return void
+	 */
 	public static function firmaspro_Revisar( $d ){
 	    self::authRequOff();
 	    
@@ -7905,6 +10068,19 @@ EOD;
 	// Firmas INI
 	const FIRMAS_PROC_REV = "firmasrev";
 	const FIRMAS_PROC_FIR = "firmasfir";
+
+	/**
+	 * Agrega o actualiza un registro de firma y su entrada de log.
+	 *
+	 * Si se recibe 'flogid' inserta una entrada en el log de firmas con datos del PDF
+	 * (ruta, hash, páginas, metadata). Si no, busca por 'pdfid', elimina el log previo
+	 * si existe y crea una nueva firma.
+	 *
+	 * @param array $d Arreglo con datos necesarios (p. ej. pdf, pdfid, flogid opcional,
+	 *                firmasestados_id, paginas, perfilusuarios_id, nombrefull, tipodoc, documento).
+	 * @return int ID de la firma creada o 0 si no se creó.
+	 * @throws Exception Si falla la inserción en el log o la creación de la firma.
+	 */
 	public static function firmas_Helper_Agregar ( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -7956,6 +10132,14 @@ EOD;
 	    
 	    return $fid;
 	}
+
+	/**
+	 * Agrega una firma usando los datos proporcionados.
+	 *
+	 * @param array $d Datos de la firma (pdfid, perfilusuarios_id, firmante_id, nombrefull, documento, tipodoc, fecha, mail).
+	 * @return int ID de la firma creada.
+	 * @throws \Exception Si ocurre un error al guardar o faltan datos obligatorios.
+	 */
 	public static function firmas_Agregar ( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -8001,6 +10185,13 @@ EOD;
 	        throw new \Exception( 'firmas_Agregar: Respuesta no implementada' );
 	    }
 	}
+
+	/**
+	 * Obtiene las firmas delegando en firmaslog_Obtener y propaga cualquier excepción.
+	 *
+	 * @param mixed $d Datos necesarios para la obtención de firmas.
+	 * @throws Exception Si ocurre un error en firmaslog_Obtener.
+	 */
 	public static function firmas_Obtener( $d ) {
 	    try {
 	        self::firmaslog_Obtener($d);
@@ -8008,6 +10199,15 @@ EOD;
 	        throw new Exception( 'firmas_Obtener - firmaslog_Obtener: ' . $e->getMessage() );
 	    }
 	}
+	/**
+	 * Elimina registros de firmas según los filtros proporcionados.
+	 *
+	 * Requiere autenticación previa. Si no se proporcionan filtros, lanza una excepción.
+	 *
+	 * @param array $d Filtros para la eliminación (p. ej., 'id').
+	 * @return mixed Resultado de la operación de eliminación.
+	 * @throws \Exception Si la sesión está inactiva, faltan filtros o ocurre un error SQL.
+	 */
 	public static function firmas_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -8110,6 +10310,13 @@ EOD;
 	    
 	    return $r;
 	}
+	/**
+	 * Agrega un registro al log de firmas.
+	 *
+	 * @param array $d Datos del log de firma (fecha, firmas_id, firmasestados_id, ip, pdfurl, paginas, pdfhash, pdfruta, perfilusuarios_id, nombrefull, tipodoc, documento).
+	 * @return int ID del registro de log creado.
+	 * @throws \Exception Si ocurre un error al guardar o faltan datos obligatorios.
+	 */
 	public static function firmaslog_Agregar ( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -8165,6 +10372,17 @@ EOD;
 	        throw new \Exception( 'firmaslog_Agregar: Respuesta no implementada' );
 	    }
 	}
+
+	/**
+	 * Elimina una firma (registro y archivo PDF asociado).
+	 *
+	 * Usa los datos en $d (pdfid, id opcional y firmas_id) para borrar la entrada en
+	 * firmaslog si existe, eliminar la firma principal y el archivo físico '_fir'.
+	 *
+	 * @param array $d Datos de entrada: 'pdfid' (string), 'id' (opcional), 'firmas_id' (int|string).
+	 * @return bool True si la eliminación de la firma principal fue exitosa, false en caso contrario.
+	 * @throws Exception Si ocurre un error al eliminar el registro en firmaslog.
+	 */
 	public static function firmaslog_Helper_Eliminar ( $d ) {
 	    self::authRequOff();
 	    
@@ -8196,6 +10414,20 @@ EOD;
 	    
 	    return $limpio;
 	}
+
+	/**
+	 * Elimina registros de la tabla "firmaslog" según filtros.
+	 *
+	 * Requiere sesión activa; acepta en $d los filtros:
+	 *   - 'id' => elimina por id
+	 *   - 'w_firmas_id' => elimina por firmas_id
+	 *
+	 * Si no se proporciona ningún filtro lanza excepción y establece código HTTP de error.
+	 *
+	 * @param array $d Filtros de eliminación.
+	 * @return mixed Resultado de Singleton::_classicDelete.
+	 * @throws \Exception En caso de sesión inválida o fallo en la eliminación (códigos HTTP definidos en IndexCtrl).
+	 */
 	public static function firmaslog_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -8593,6 +10825,17 @@ EOD;
 	// Firmascomentarios FIN
 	
 	// Paquetereqtipos INI
+	
+
+	/**
+	 * Obtiene registros de la tabla 'paquetereqtipos'.
+	 *
+	 * Valida la sesión, prepara la consulta y delega en Singleton::_readEstado.
+	 *
+	 * @param array $d Parámetros de consulta (por ejemplo filtros o paginación).
+	 * @return array Resultado de la lectura (datos o información de error).
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la lectura; además se establecen códigos HTTP relevantes.
+	 */
 	public static function paquetereqtipos_Obtener( $d ){
 	    try {
 	        self::authRequ();
@@ -8610,9 +10853,28 @@ EOD;
 	    
 	    return $r;
 	}
+	
 	// Paquetereqtipos FIN
 	
 	// requerimientostpls INI
+
+	/**
+	 * Modifica un registro en la tabla requerimientostpls según el filtro indicado.
+	 *
+	 * @param array $d Datos de entrada:
+	 *   - id (int)               : Identificador del registro a actualizar (requerido).
+	 *   - nombre (string)        : Nuevo nombre (opcional).
+	 *   - requerimientostplsestados_id (int) : Nuevo estado (opcional).
+	 *
+	 * @return mixed Resultado devuelto por Singleton::_safeUpdate (p. ej. número de filas afectadas).
+	 *
+	 * @throws \Exception Si la sesión no es válida (se establece HTTP IndexCtrl::ERR_COD_SESION_INACTIVA),
+	 *                    si falta el filtro id (HTTP IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO),
+	 *                    o si ocurre un error en la actualización SQL (HTTP IndexCtrl::ERR_COD_ACTUALIZACION_SQL).
+	 *
+	 * Notas:
+	 * - Añade/actualiza los campos usuariosmod y fechamod (zona horaria America/Bogota) antes de la actualización.
+	 */
 	public static function requerimientostpls_Modificar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -8659,6 +10921,21 @@ EOD;
 	    
 	    return $cu;
 	}
+
+	/**
+	 * Mezcla y guarda las plantillas de requerimientos en la configuración.
+	 *
+	 * Toma un array de elementos ($d) con las claves 'id', 'vl', 'activo' y 'ufull',
+	 * construye la estructura JSON para el último id procesado y actualiza la
+	 * entrada correspondiente en la configuración corporativa.
+	 *
+	 * @param array $d Array de requerimientos. Cada elemento debe contener:
+	 *                 - 'id'    : identificador del conjunto
+	 *                 - 'vl'    : valor/plantilla a almacenar
+	 *                 - 'activo': booleano o 0/1 indicando estado
+	 *                 - 'ufull' : identificador del usuario que realiza la actualización
+	 * @return void
+	 */
 	private static function requerimientostpls_Mezclar( $d ){
 	    $cfg = OperacionesCtrl::LeerConfigCorp();
 	    $_CFG_REQUERIMIENTOS_MEZCLA = json_decode( (isset( $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]) ? $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]["val"] : '[]' ), true );
@@ -8677,6 +10954,17 @@ EOD;
 	    
 	    self::EscribirConfig( ['id' => OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA, 'vl' => json_encode( $_CFG_REQUERIMIENTOS_MEZCLA ), 'ufull' => $ufull ] );
 	}
+
+	/**
+	 * Agrega o actualiza una plantilla de requerimientos y sus ítems a partir de un payload.
+	 *
+	 * Procesa $d['data'] (base64 con JSON), crea o modifica la plantilla (requerimientostpls)
+	 * y sus entradas (requerimientostplsitems). Registra fecha y usuario autenticado.
+	 *
+	 * @param array $d Arreglo que debe contener 'data' (cadena base64 con JSON).
+	 * @return array Datos decodificados del JSON recibido.
+	 * @throws \Exception Si la sesión está inactiva o ocurre un error al agregar/modificar registros.
+	 */
 	public static function requerimientostpls_Helper_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -8749,10 +11037,31 @@ EOD;
 	    
 	    return $json;
 	}
+
+	/**
+	 * Obtiene y devuelve los datos de la tabla "requerimientostpls" para respuestas AJAX/DataTables.
+	 *
+	 * Establece la zona horaria a America/Bogota y delega la construcción del array de salida
+	 * a Singleton::_dataTable, usando las constantes de codificación de IndexCtrl.
+	 *
+	 * @param array $d Parámetros de la petición (p. ej. filtros, paginación).
+	 * @return array Datos formateados para la respuesta AJAX (estructura compatible con DataTables).
+	 */
 	public static function requerimientostpls_Obtener_Ajax( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    return Singleton::_dataTable( array( 'tb' => 'requerimientostpls', 'codifica_a' => IndexCtrl::CHARS_TO, 'codifica_desde' => IndexCtrl::CHARS_FR ) );
 	}
+
+	/**
+	 * Crea un nuevo Requerimientostpls a partir de los datos recibidos.
+	 *
+	 * Asigna campos desde $d (nombre, usuarios, fecha, requerimientostplsestados_id), guarda el objeto
+	 * y retorna el ID generado. Lanza excepción y establece código HTTP si ocurre un error.
+	 *
+	 * @param array $d Datos de entrada
+	 * @return int ID del registro creado
+	 * @throws \Exception En caso de error al guardar o datos inválidos
+	 */
 	public static function requerimientostpls_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -8784,6 +11093,13 @@ EOD;
 	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
+	
+	/**
+	 * Elimina plantillas de requerimientos.
+	 *
+	 * @param mixed $d Datos necesarios para identificar y procesar la eliminación.
+	 * @return bool|array Resultado de la operación (true/false o arreglo con detalles).
+	 */
 	public static function requerimientostpls_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -8811,6 +11127,18 @@ EOD;
 	        throw new \Exception( 'requerimientostpls_Eliminar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
 	    }
 	}
+	
+	/**
+	 * Obtiene registros de "requerimientostpls" según filtros y opciones recibidas.
+	 *
+	 * Parámetros en $d (opcionales): id, ordendesc, ordenasc, limite.
+	 * Requiere autenticación; en caso de sesión inactiva o error de consulta lanza excepción
+	 * y establece el código HTTP correspondiente.
+	 *
+	 * @param array $d Parámetros de filtrado/orden/límite
+	 * @return array Resultado de la consulta o arreglo con 'err_info' en caso de fallo
+	 * @throws \Exception Si la sesión no está activa o hay error en la consulta
+	 */
 	public static function requerimientostpls_Obtener( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -8864,9 +11192,23 @@ EOD;
 	    
 	    return $r;
 	}
+	
 	// requerimientostpls FIN
 	
 	// requerimientostplsitems INI
+	/**
+	 * Elimina registros de la tabla "requerimientostplsitems" según filtros.
+	 *
+	 * Requiere sesión activa; acepta en $d los filtros:
+	 *   - 'id' => elimina por id
+	 *   - 'w_requerimientostpls_id' => elimina por requerimientostpls_id
+	 *
+	 * Si no se proporciona ningún filtro lanza excepción y establece código HTTP de error.
+	 *
+	 * @param array $d Filtros de eliminación.
+	 * @return mixed Resultado de Singleton::_classicDelete.
+	 * @throws \Exception En caso de sesión inválida o fallo en la eliminación (códigos HTTP definidos en IndexCtrl).
+	 */
 	public static function requerimientostplsitems_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -8898,6 +11240,16 @@ EOD;
 	        throw new \Exception( 'requerimientostplsitems_Eliminar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
 	    }
 	}
+	
+	/**
+	 * Modifica registros de la tabla "requerimientostplsitems" según filtros y datos recibidos.
+	 *
+	 * Requiere sesión activa; acepta en $d los campos a modificar y el filtro 'id'.
+	 *
+	 * @param array $d Datos y filtros para la modificación.
+	 * @return mixed Resultado de Singleton::_safeUpdate.
+	 * @throws \Exception En caso de sesión inválida o fallo en la actualización (códigos HTTP definidos en IndexCtrl).
+	 */
 	public static function requerimientostplsitems_Modificar( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -8952,6 +11304,16 @@ EOD;
 	    
 	    return $cu;
 	}
+	
+	/**
+	 * Agrega un nuevo registro a la tabla "requerimientostplsitems".
+	 *
+	 * Requiere sesión activa; acepta en $d los campos para el nuevo registro.
+	 *
+	 * @param array $d Datos para el nuevo registro.
+	 * @return int ID del nuevo registro.
+	 * @throws \Exception En caso de sesión inválida o fallo en la inserción (códigos HTTP definidos en IndexCtrl).
+	 */
 	public static function requerimientostplsitems_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -8989,12 +11351,29 @@ EOD;
 	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
-	
+
+	/**
+	 * Obtiene los elementos de requerimientostplsitems y los devuelve en un arreglo con la clave 'items'.
+	 *
+	 * @param mixed $d Parámetros de entrada para la obtención (p. ej. filtros).
+	 * @return array Arreglo con 'items' conteniendo los registros obtenidos.
+	 */
 	public static function requerimientostplsitems_Helper_Obtener ( $d ){
 	    $requerimientostplsitems = self::requerimientostplsitems_Obtener( $d );
 	    return ['items' => $requerimientostplsitems];
 	}
 	
+	/**
+	 * Obtiene registros de "requerimientostplsitems" aplicando joins, filtros y orden.
+	 *
+	 * Parámetros en $d (opcionales): id, w_requerimientostpls_id, ordendesc, ordenasc, limite.
+	 * Devuelve un array con los datos consultados o con 'err_info' si hubo error.
+	 * Lanza \Exception y ajusta el código HTTP si la sesión es inválida o falla la consulta.
+	 *
+	 * @param array $d Filtros y opciones para la consulta.
+	 * @return array Resultado de la consulta o información de error.
+	 * @throws \Exception En caso de sesión inactiva o error en la consulta.
+	 */
 	public static function requerimientostplsitems_Obtener ( $d ){
 	    try {
 	        self::authRequ();
@@ -9054,11 +11433,24 @@ EOD;
 	    
 	    return $r;
 	}
+	
 	// requerimientostplsitems FIN
 	
 	// flujos INI
 	const FLUJOS_ESTADO_DETENIDO = '0x001';
 	const FLUJOS_ESTADO_CORRIENDO = '0x002';
+	/**
+	 * Actualiza el estado de un flujo a partir de datos codificados en base64.
+	 *
+	 * Decodifica $d['data'] (JSON base64), determina el nuevo estado:
+	 * - si 'value' coincide con md5(self::FLUJOS_ESTADO_CORRIENDO) -> flujosestados_id = 2
+	 * - en caso contrario -> flujosestados_id = 1
+	 * Llama a self::flujos_Modificar() con el id y el nuevo flujosestados_id.
+	 *
+	 * @param array $d Array que debe contener la clave 'data' con JSON codificado en base64 (incluyendo 'id' y 'value').
+	 * @return array El arreglo JSON decodificado.
+	 * @throws Exception Si ocurre un error al actualizar, se establece el código HTTP correspondiente y se relanza la excepción.
+	 */
 	public static function flujos_Estados_Helper_Modificar( $d ){
 	    $data = base64_decode( $d['data'] );
 	    $json = json_decode($data, true) ;
@@ -9075,6 +11467,17 @@ EOD;
 	    }
 	    return $json;
 	}
+	/**
+	 * Modifica un registro en la tabla "flujos".
+	 *
+	 * Requiere autenticación. Actualiza los campos presentes en el array $d.
+	 *
+	 * @param array $d Datos para la actualización. Campos aceptados:
+	 *                 - id (obligatorio): filtro para la actualización
+	 *                 - descripcion, flujosestados_id, nombre, version (opcionales)
+	 * @return int Número de filas afectadas por la operación de actualización.
+	 * @throws \Exception Si la sesión no está activa o ocurre un error en la actualización SQL.
+	 */
 	public static function flujos_Modificar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -9123,10 +11526,31 @@ EOD;
 	    
 	    return $cu;
 	}
+	/**
+	 * Obtiene los registros de la tabla "flujos" para una respuesta AJAX (formato DataTable).
+	 *
+	 * Establece la zona horaria a America/Bogota y delega la obtención y codificación
+	 * de datos a Singleton::_dataTable usando las constantes de IndexCtrl.
+	 *
+	 * @param array|null $d Parámetros opcionales de la petición (filtros, paginación, etc.).
+	 * @return mixed Resultado formateado para DataTables o lo que retorne Singleton::_dataTable.
+	 */
 	public static function flujos_Obtener_Ajax( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    return Singleton::_dataTable( array( 'tb' => 'flujos', 'codifica_a' => IndexCtrl::CHARS_TO, 'codifica_desde' => IndexCtrl::CHARS_FR ) );
 	}
+	/**
+	 * Agrega o modifica un flujo y sus ítems a partir de un payload codificado en base64.
+	 *
+	 * - Verifica la sesión (authRequ) y lanza excepción si está inactiva.
+	 * - Decodifica $d['data'] (base64 -> JSON) y crea o actualiza el registro de flujo.
+	 * - Crea o actualiza los ítems del flujo según el JSON y mezcla requisitos de plantillas.
+	 * - Ajusta la zona horaria a America/Bogota.
+	 *
+	 * @param array $d Array que debe contener la clave 'data' con el JSON codificado en base64.
+	 * @return array Array asociativo resultante del JSON decodificado.
+	 * @throws \Exception Si la sesión es inválida o ocurren errores en las operaciones de modificación/creación.
+	 */
 	public static function flujos_Helper_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -9221,6 +11645,13 @@ EOD;
 	    
 	    return $json;
 	}
+	/**
+	 * Agrega un nuevo registro de flujo con los datos proporcionados.
+	 *
+	 * @param array $d Datos del flujo (descripcion, fecha, flujosestados_id, nombre, version).
+	 * @return int ID del flujo creado.
+	 * @throws \Exception Si la sesión no está activa o ocurre un error al guardar (se devuelven códigos HTTP apropiados).
+	 */
 	public static function flujos_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -9264,6 +11695,16 @@ EOD;
 	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
+	/**
+	 * Elimina registros de la tabla "flujos" según los filtros proporcionados.
+	 *
+	 * Requiere sesión activa; si no se indican filtros (p. ej. ['id' => ...]) o ocurre un error
+	 * se lanza una excepción y se establece el código HTTP correspondiente.
+	 *
+	 * @param array $d Parámetros de filtro (por ejemplo ['id' => 123]).
+	 * @return mixed Resultado devuelto por Singleton::_classicDelete.
+	 * @throws \Exception Si la sesión está inactiva, no se indican filtros o ocurre un error SQL.
+	 */
 	public static function flujos_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -9291,6 +11732,23 @@ EOD;
 	        throw new \Exception( 'flujos_Eliminar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
 	    }
 	}
+	
+	/**
+	 * Obtiene registros de la tabla "flujos" (con JOIN a flujosestados) aplicando filtros,
+	 * orden y límite opcionales. Requiere autenticación previa.
+	 *
+	 * Parámetros en $d (opcional):
+	 *  - int    'id'                      : filtrar por id de flujo.
+	 *  - int    'w_flujosestados_id'     : filtrar por id de estado.
+	 *  - string 'ordendesc'              : columna para ORDER BY ... DESC.
+	 *  - string 'ordenasc'               : columna para ORDER BY ... ASC.
+	 *  - int    'limite'                 : número máximo de filas a devolver.
+	 *
+	 * @param array $d Opciones de consulta y filtros.
+	 * @return array Resultado de la consulta (o arreglo con 'err_info' en caso de error).
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la consulta
+	 *                    (se usan los códigos definidos en IndexCtrl).
+	 */
 	public static function flujos_Obtener ( $d ){
 	    try {
 	        self::authRequ();
@@ -9346,9 +11804,23 @@ EOD;
 	    
 	    return $r;
 	}
+
 	// flujos FIN
 	
 	// flujositems INI
+	/**
+	 * Modifica un Flujositems existente.
+	 *
+	 * Actualiza los campos de un objeto Flujositems utilizando los datos recibidos en $d.
+	 * Valida la sesión, asigna los campos opcionales (correo, flujos_id, flujositemestados_id,
+	 * flujosroles_id, nombre, orden, requerimientos, tel, usuarios_id), actualiza el registro
+	 * identificado por el id proporcionado y devuelve el número de filas afectadas. En errores
+	 * establece el código HTTP correspondiente y lanza una excepción.
+	 *
+	 * @param array $d Datos del flujositem a modificar (id obligatorio, correo, flujos_id, flujositemestados_id, flujosroles_id, nombre, orden, requerimientos, tel, usuarios_id).
+	 * @return int Número de filas afectadas (>0).
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error al actualizar.
+	 */
 	public static function flujositems_Modificar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -9413,6 +11885,20 @@ EOD;
 	    
 	    return $cu;
 	}
+
+	/**
+	 * Agrega un nuevo Flujositems.
+	 *
+	 * Crea y persiste un objeto Flujositems utilizando los datos recibidos en $d.
+	 * Valida la sesión, asigna los campos opcionales (correo, flujos_id, flujositemestados_id,
+	 * flujosroles_id, nombre, orden, requerimientos, tel, usuarios_id), guarda el registro
+	 * y devuelve el id generado. En errores establece el código HTTP correspondiente y lanza
+	 * una excepción.
+	 *
+	 * @param array $d Datos del flujositem (correo, flujos_id, flujositemestados_id, flujosroles_id, nombre, orden, requerimientos, tel, usuarios_id).
+	 * @return int Id del registro creado (>0).
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error al guardar.
+	 */
 	public static function flujositems_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -9447,6 +11933,17 @@ EOD;
 	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
+
+	/**
+	 * Elimina un registro de la tabla "flujositems" según el identificador en $d['id'].
+	 *
+	 * Verifica la sesión antes de eliminar; si no se proporciona filtro o ocurre un error
+	 * establece el código HTTP correspondiente y lanza una excepción.
+	 *
+	 * @param array $d Datos de entrada (se espera la clave 'id').
+	 * @return mixed Resultado de la operación de eliminación.
+	 * @throws \Exception Si la sesión no es válida, faltan filtros o ocurre un error SQL.
+	 */
 	public static function flujositems_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -9476,6 +11973,15 @@ EOD;
 	}
 	
 	// Helper para obtener los documentos que se mezclan y se veran por todo el flujo
+
+	/**
+	 * Obtiene los flujos y los documentos configurados para un flujo específico.
+	 *
+	 * @param array $d Arreglo de entrada que debe contener 'w_flujos_id' (ID del flujo).
+	 * @return array Array con claves:
+	 *               - 'data' => array Datos del/los flujo(s) obtenidos.
+	 *               - 'documentos' => array Documentos requeridos para la mezcla (según configuración).
+	 */
 	public static function flujositems_Pricipal_Helper_Obtener( $d ){
 	    $cfg = OperacionesCtrl::LeerConfigCorp();
 	    $_CFG_REQUERIMIENTOS_MEZCLA = json_decode( (isset( $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]) ? $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]["val"] : '[]' ), true );
@@ -9488,6 +11994,26 @@ EOD;
 	    
 	    return [ 'data' => $rFlujos, 'documentos' => $docs ];
 	}
+
+	/**
+	 * Obtiene registros de la tabla `flujositems` aplicando filtros y orden.
+	 *
+	 * Parámetros aceptados en $d (opcionales):
+	 *  - 'id'               : filtrar por flui.id
+	 *  - 'w_flujos_id'      : filtrar por flui.flujos_id
+	 *  - 'w_usuarios_id'    : filtrar por flui.usuarios_id
+	 *  - 'ordendesc'        : campo para ordenar en forma descendente
+	 *  - 'ordenasc'         : campo para ordenar en forma ascendente
+	 *  - 'limite'           : máximo de filas a devolver (entero)
+	 *
+	 * Realiza la autenticación requerida, construye la consulta con los joins
+	 * necesarios y devuelve un array con las filas resultantes. En caso de fallo
+	 * ajusta el código HTTP y lanza una excepción con el código correspondiente.
+	 *
+	 * @param array $d Parámetros de filtrado, orden y límite.
+	 * @return array Filas resultantes de la consulta.
+	 * @throws \Exception Si la sesión no está activa o ocurre un error en la consulta.
+	 */
 	public static function flujositems_Obtener ( $d ){
 	    try {
 	        self::authRequ();
@@ -9557,6 +12083,18 @@ EOD;
 	    
 	    return $r;
 	}
+	
+	/**
+	 * Obtiene y prepara la información relacionada a un ítem de flujo.
+	 *
+	 * Decodifica parámetros y usuario, recupera datos del paquete, los ítems del flujo,
+	 * requisitos asociados (formularios y obligaciones), y los documentos relacionados.
+	 * Devuelve un arreglo con obligaciones, items, requisitos formateados, datos del paquete,
+	 * documentos y la información completa del flujo.
+	 *
+	 * @param array $d Parámetros entrantes (espera campos codificados en base64 como 'data' y 'u', y 'flujos_id').
+	 * @return array Resultado con claves: 'obli', 'items', 'requs', 'res', 'docs', 'flujoinfo'.
+	 */
 	public static function flujositems_Helper_Obtener ( $d ){
 	    //die( 'd: ' . print_r( $d, true ) );
 	    self::authRequOff();
@@ -9656,7 +12194,26 @@ EOD;
 	    
 	    return $arRes;
 	}
+<<<<<<< Updated upstream
 	
+=======
+	/**
+	 * Obtiene los datos necesarios para el revisor de un paquete de flujo.
+	 *
+	 * Decodifica el campo 'data' (base64 + JSON) que debe contener:
+	 *  - empleados_id
+	 *  - flujos_id
+	 *  - id (paquetes_id)
+	 *  - flujositems_id
+	 *
+	 * Valida la sesión, recupera el solicitante, los documentos firmados,
+	 * la lista de firmantes y la información del paquete.
+	 *
+	 * @param array $d Arreglo que incluye 'data' (string en base64 con JSON).
+	 * @return array Estructura con las claves: 'docs', 'firmantes', 'solicitante' y 'paquete'.
+	 * @throws \Exception Si la sesión no está activa o ocurre un error durante la obtención.
+	 */
+>>>>>>> Stashed changes
 	public static function flujositems_Helper_ObtenerRevisorData ( $d ){
 	    try {
 	        self::authRequ();
@@ -9749,6 +12306,7 @@ EOD;
 	    
 	    return self::retorno($result, 0, '');
 	}
+<<<<<<< Updated upstream
 	
 	public static function flujositems_Helper_EvaluarCriterio ( $d ){
 	    $cfg = self::LeerConfigCorp();
@@ -9840,6 +12398,24 @@ EOD;
 	    return [];
 	}
 	
+=======
+	/**
+	 * Obtiene los PDFs generados para los requisitos de mezcla de un paquete en un año lectivo.
+	 *
+	 * Construye las rutas/URLs de los archivos (incluyendo variante firmada si se solicita),
+	 * verifica su existencia y aporta los datos de firma asociados.
+	 *
+	 * @param array $d Parámetros de entrada:
+	 *   - 'documento' (string) Identificador del documento.
+	 *   - 'id' (int|string) Identificador del requerimiento en la configuración.
+	 *   - 'paquetes_id' (int|string) Identificador del paquete.
+	 *   - 'firmados' (bool, opcional) Si true busca la versión firmada del PDF.
+	 * @return array Lista de elementos encontrados. Cada elemento contiene:
+	 *   - 'bs' (string) Ruta relativa en el repositorio.
+	 *   - 'url' (string) URL completa al archivo.
+	 *   - 'firmas_id' (array) Datos de firma: 'firmas_id', 'firmasestados_id', 'firmaslog_id'.
+	 */
+>>>>>>> Stashed changes
 	public static function flujositems_Archivos_Helper_Obtener ( $d ){
 	    $cfg = OperacionesCtrl::LeerConfigCorp();
 	    $_CFG_REQUERIMIENTOS_MEZCLA = json_decode( (isset( $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]) ? $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]["val"] : '[]' ), true );
@@ -9899,6 +12475,12 @@ EOD;
 	    
 	    return $r;
 	}
+	/**
+	 * Elimina un elemento de flujos y actualiza los paquetes relacionados.
+	 *
+	 * @param array $d Array que contiene 'data' (string base64 de un JSON con la clave 'id').
+	 * @return bool True si la operación finalizó correctamente.
+	 */
 	public static function flujositems_Helper_Eliminar ( $d ){
 	    $data = base64_decode( $d[ 'data' ] );
 	    $json = json_decode( $data, true );
@@ -9914,6 +12496,17 @@ EOD;
 	// flujositems FIN
 	
 	// flujosroles INI
+	/**
+	 * Obtiene los registros de la tabla 'flujosroles'.
+	 *
+	 * Verifica la sesión via self::authRequ(), prepara el parámetro 'tabla' y
+	 * delega la lectura a Singleton::_readEstado().
+	 *
+	 * @param array $d Parámetros de consulta (se añade internamente 'tabla' => 'flujosroles').
+	 * @return array Resultado devuelto por Singleton::_readEstado().
+	 * @throws \Exception Si la sesión está inactiva (IndexCtrl::ERR_COD_SESION_INACTIVA)
+	 *                    o si ocurre un error en la lectura (IndexCtrl::ERR_COD_MSJ_ERR_COMUN).
+	 */
 	public static function flujosroles_Obtener( $d ){
 	    try {
 	        self::authRequ();
@@ -9934,6 +12527,15 @@ EOD;
 	// flujosroles FIN
 	
 	// flujositemestados INI
+	/**
+	 * Obtiene registros de la tabla 'flujositemestados'.
+	 *
+	 * Verifica la autenticación del usuario y delega la lectura a Singleton::_readEstado.
+	 *
+	 * @param array $d Parámetros de entrada para la consulta.
+	 * @return array Resultado devuelto por Singleton::_readEstado.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la consulta.
+	 */
 	public static function flujositemestados_Obtener( $d ){
 	    try {
 	        self::authRequ();
@@ -9954,6 +12556,16 @@ EOD;
 	// flujositemestados FIN
 	
 	// flujosestados INI
+	/**
+	 * Obtiene los registros de la tabla 'flujosestados'.
+	 *
+	 * Verifica la sesión del usuario, asigna la tabla y delega la lectura a Singleton::_readEstado.
+	 * En caso de error establece el código HTTP correspondiente y lanza una excepción.
+	 *
+	 * @param array $d Parámetros de entrada (filtros/consulta). Se asigna $d['tabla'] = 'flujosestados'.
+	 * @return array Resultado de la consulta (datos o información de error).
+	 * @throws \Exception Si la sesión está inactiva o ocurre un error en la lectura.
+	 */
 	public static function flujosestados_Obtener( $d ){
 	    try {
 	        self::authRequ();
@@ -9974,6 +12586,17 @@ EOD;
 	// flujosestados FIN
 	
 	// paquetesestados INI
+	
+	/**
+	 * Obtiene registros de la tabla 'paquetesestados'.
+	 *
+	 * Verifica la autenticación, delega la lectura a Singleton::_readEstado
+	 * y maneja códigos HTTP en caso de error.
+	 *
+	 * @param array $d Parámetros de consulta y opciones.
+	 * @return array Resultado de la operación.
+	 * @throws \Exception Si la sesión no está activa o si hay un error en la consulta.
+	 */
 	public static function paquetesestados_Obtener( $d ){
 	    try {
 	        self::authRequ();
@@ -9991,9 +12614,23 @@ EOD;
 	    
 	    return $r;
 	}
+
 	// paquetesestados FIN
 	
 	// paquetes INI
+	/**
+	 * Actualiza registros de la tabla "paquetes".
+	 *
+	 * Requiere autenticación; si no hay sesión activa lanza excepción y ajusta el código HTTP.
+	 * Recibe un array $d con los campos opcionales a modificar: nombre, usuariosmod, mesaplica,
+	 * fechamodificado, paquetesestados_id y flujositems_id. Debe incluir un filtro para la actualización:
+	 * 'id' o 'w_flujositems_id' (si falta, lanza excepción y ajusta el código HTTP).
+	 * Ejecuta la actualización mediante Singleton::_safeUpdate y devuelve su resultado.
+	 *
+	 * @param array $d Datos y filtros para la actualización.
+	 * @return mixed Resultado de Singleton::_safeUpdate (por ejemplo, número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa, falta el filtro o ocurre un error de actualización.
+	 */
 	public static function paquetes_Modificar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -10054,6 +12691,17 @@ EOD;
 	    
 	    return $cu;
 	}
+	/**
+	 * Obtiene paquetes vía AJAX usando el empleado indicado en la estructura de columnas.
+	 *
+	 * Deshabilita la autenticación, busca el empleado por el valor MD5 en
+	 * $d['columns'][2]['search']['value'][0], coloca el id encontrado en
+	 * $_POST['columns'][2]['search']['value'][0] y delega la obtención a paquetes_Obtener_Ajax().
+	 *
+	 * @param array $d Parámetros entrantes (se espera formato de Datatables en 'columns').
+	 * @return mixed Resultado retornado por paquetes_Obtener_Ajax().
+	 * @throws Exception Si ocurre un error al obtener empleados o en la operación delegada.
+	 */
 	public static function paquetes_Helper_Obtener_Ajax( $d ) {
 	    self::authRequOff();
 	    $r = [];
@@ -10068,10 +12716,26 @@ EOD;
 	    $tb = self::paquetes_Obtener_Ajax( [] );
 	    return $tb;
 	}
+	/**
+	 * Obtiene los registros de la tabla "paquetes" para respuesta AJAX tipo DataTable.
+	 * Ajusta la zona horaria a America/Bogota y delega la obtención/formateo a Singleton::_dataTable
+	 *
+	 * @param mixed $d Parámetros de entrada (por ejemplo filtros/paginación) recibidos vía AJAX.
+	 * @return mixed Datos formateados para DataTable / respuesta AJAX.
+	 */
 	public static function paquetes_Obtener_Ajax( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    return Singleton::_dataTable( array( 'tb' => 'paquetes', 'codifica_a' => IndexCtrl::CHARS_TO, 'codifica_desde' => IndexCtrl::CHARS_FR ) );
 	}
+	/**
+	 * Agrega un paquete usando el helper desde el contexto "Home".
+	 *
+	 * Desactiva la comprobación de autenticación, delega en paquetes_Helper_Agregar y propaga excepciones con contexto.
+	 *
+	 * @param mixed $d Datos del paquete a agregar.
+	 * @return mixed Resultado devuelto por paquetes_Helper_Agregar.
+	 * @throws Exception Si ocurre un error al agregar el paquete.
+	 */
 	public static function paquetes_Home_Helper_Agregar( $d ){
 	    self::authRequOff();
 	    try {
@@ -10080,6 +12744,30 @@ EOD;
 	        throw new Exception( 'paquetes_Home_Helper_Agregar - paquetes_Helper_Agregar:' . $e->getMessage(), $e->getCode() );
 	    }
 	}
+	/**
+	 * Agrega o actualiza un paquete (solicitud) para un flujo y mes específicos.
+	 *
+	 * Recibe en $d['data'] un JSON codificado en base64 con la información necesaria
+	 * (por ejemplo: flujos_id, mesaplica, empleados_id_cif, opcionalmente id y nombre).
+	 * Si se suministra "id" se intenta actualizar el paquete (solo si está en estado inicial),
+	 * de lo contrario crea uno nuevo. Verifica que no exista ya un paquete para el mismo
+	 * empleado, flujo y mes antes de crear.
+	 *
+	 * @param array $d Arreglo con clave 'data' => base64_encode(json_encode(...)).
+	 *               El JSON esperado contiene al menos:
+	 *                 - flujos_id (int)
+	 *                 - mesaplica (string, p.ej. "YYYY-MM")
+	 *                 - empleados_id_cif (string)
+	 *               Opcionales:
+	 *                 - id (int)      // para actualización
+	 *                 - nombre (string)
+	 *
+	 * @return bool Devuelve true en caso de éxito.
+	 *
+	 * @throws Exception Si falla la obtención o modificación de flujos, empleados, flujositems o paquetes,
+	 *                   o si ya existe un paquete para el mismo proceso/mes. Además ajusta el código HTTP
+	 *                   en casos de error (códigos definidos en IndexCtrl).
+	 */
 	public static function paquetes_Helper_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -10178,6 +12866,17 @@ EOD;
 	    return true;
 	}
 	
+	/**
+	 * Mueve el paquete al estado de revisión.
+	 *
+	 * Decodifica $d['data'] (base64 -> JSON) para obtener el identificador 'idMod',
+	 * aplica la autorización necesaria y actualiza el paquete estableciendo
+	 * paquetesestados_id = 2 mediante paquetes_Modificar. Si ocurre una excepción
+	 * se establece el código HTTP correspondiente y se retorna el error.
+	 *
+	 * @param array $d Arreglo de entrada; debe incluir 'data' (base64 con JSON que contiene 'idMod').
+	 * @return array Retorna el resultado a través de self::retorno (en éxito devuelve ['data' => true]).
+	 */
 	public static function paquetes_Helper_MoverRevisar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    self::authRequOff();
@@ -10201,6 +12900,18 @@ EOD;
 	    
 	    return self::retorno([ 'data' => true ], 0, '');
 	}
+	/**
+	 * Mueve o actualiza un paquete desde el entorno de administración.
+	 *
+	 * Decodifica $d['data'] (base64 JSON), valida la sesión y, según el contenido:
+	 * - si 'fin' es true: marca el paquete con estado 4;
+	 * - si hay 'nid': actualiza el flujo asociado.
+	 * Registra usuario y fecha de modificación y llama a paquetes_Modificar().
+	 *
+	 * @param array $d Array con clave 'data' (string base64 que contiene JSON con 'idmod' y opcionalmente 'fin' o 'nid').
+	 * @return array Resultado devuelto por self::retorno con los datos procesados.
+	 * @throws \Exception Si la sesión no está activa (se lanza excepción con el código de sesión inactiva).
+	 */
 	public static function paquetes_Helper_MoverAdmin( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -10256,6 +12967,13 @@ EOD;
 	    
 	    return self::retorno([ 'data' => $json ], 0, '');
 	}
+	/**
+	 * Agrega un nuevo paquete usando los datos proporcionados.
+	 *
+	 * @param array $d Datos del paquete (claves esperadas: 'nombre', 'empleados_id', 'empleados', 'mesaplica', 'fecha', 'flujositems_id', 'usuariosmod', 'fechamodificado', 'paquetesestados_id', 'flujos_id').
+	 * @return int ID del paquete creado (>0).
+	 * @throws \Exception Si ocurre un error al guardar o faltan datos obligatorios; además establece el código HTTP correspondiente.
+	 */
 	public static function paquetes_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -10305,6 +13023,14 @@ EOD;
 	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
+
+	/**
+	 * Elimina registros de la tabla "paquetes" según filtros proporcionados.
+	 *
+	 * @param array $d Parámetros de filtro: puede incluir 'id' o 'w_flujositems_id' (al menos uno es requerido).
+	 * @return mixed Resultado de la operación de borrado (devuelto por Singleton::_classicDelete).
+	 * @throws \Exception Si la sesión no está activa o ocurre un error durante la eliminación.
+	 */
 	public static function paquetes_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -10336,6 +13062,21 @@ EOD;
 	        throw new \Exception( 'flujos_Eliminar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
 	    }
 	}
+	/**
+	 * Obtiene registros de la tabla paquetes según filtros opcionales.
+	 *
+	 * @param array $d Parámetros opcionales:
+	 *                 - 'id'
+	 *                 - 'w_empleados_id_md5'
+	 *                 - 'w_empleados_id'
+	 *                 - 'w_mesaplica'
+	 *                 - 'w_flujos_id'
+	 *                 - 'ordendesc'|'ordenasc' (campo para ordenar)
+	 *                 - 'limite' (número máximo de filas)
+	 * @return array Arreglo de filas con los paquetes encontrados (vacío si no hay resultados).
+	 * @throws \Exception Si la sesión no está activa (IndexCtrl::ERR_COD_SESION_INACTIVA) o si ocurre un error en la consulta (IndexCtrl::ERR_COD_MSJ_ERR_COMUN).
+	 * @note Este método ajusta el código HTTP en respuestas de error.
+	 */
 	public static function paquetes_Obtener ( $d ){
 	    try {
 	        self::authRequ();
@@ -10417,7 +13158,14 @@ EOD;
 	// paquetes FIN
 	
 	// paquetesadminreg INI
-	// TODO: Tarea 11 - ERP
+	
+	/**
+	 * Agrega un registro de Paquetesadminreg usando los datos proporcionados.
+	 *
+	 * @param array $d Datos del registro. Campos esperados: 'paquetes_id', 'razon', 'valor', 'fecha', 'usuarios'.
+	 * @return int ID del registro insertado.
+	 * @throws \Exception Si ocurre un error al guardar (se envía código HTTP de error) o si la respuesta no es la esperada.
+	 */
 	public static function paquetesadminreg_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -10452,6 +13200,16 @@ EOD;
 	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
+	/**
+	 * Agrega un registro de auditoría para la creación de un tercero en paquetesadminreg.
+	 *
+	 * Decodifica $d['data'] (base64 + JSON), prepara los valores de auditoría,
+	 * valida/obtiene el usuario autenticado y persiste la entrada en la tabla de auditoría.
+	 *
+	 * @param array $d Arreglo que debe contener 'data' (cadena base64 con JSON que incluye paquetes_id, usuario y fecha).
+	 * @return bool Devuelve true si la operación se completó correctamente.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error al insertar el registro de auditoría.
+	 */
 	public static function paquetesadminreg_Helper_Agregar( $d ){ 
 		date_default_timezone_set('America/Bogota');
 
@@ -10490,6 +13248,24 @@ EOD;
 	    
 	}
 
+	/**
+	 * Modifica registros en la tabla "paquetesadminreg".
+	 *
+	 * Recibe un array $d con campos opcionales para actualizar y requiere
+	 * al menos un identificador para la cláusula WHERE ('id' o 'w_paquetes_id').
+	 *
+	 * Campos reconocidos en $d:
+	 *  - 'usuario'            => actualiza usuario_creado
+	 *  - 'fecha'              => actualiza fecha_creacion
+	 *  - 'valor'              => actualiza valor
+	 *  - 'usuariosmod'        => actualiza usuariosmod
+	 *  - 'fechamodificado'    => actualiza fechamodificado
+	 *  - 'id' o 'w_paquetes_id' => uno de estos es obligatorio para WHERE
+	 *
+	 * @param array $d Datos de entrada con los campos a actualizar y el identificador.
+	 * @return mixed Resultado de Singleton::_safeUpdate (p. ej. número de filas afectadas o false).
+	 * @throws \Exception Si la sesión no está activa, no hay campos válidos, no se indica id/paquetes_id, o ocurre un error en la actualización SQL.
+	 */
 	public static function paquetesadminreg_Modificar( $d ){ 
 		date_default_timezone_set('America/Bogota');
 		try {
@@ -10545,6 +13321,23 @@ EOD;
 	// paquetesadminreg FIN
 	
 	// paquetesrequ INI
+	/**
+	 * Obtiene registros de "paquetesrequ" junto con datos relacionados (reflista, estados, tipos,
+	 * paquetes y flujositems). Aplica filtros, orden y límite según el array de entrada.
+	 *
+	 * Parámetros ($d) soportados:
+	 * - 'id' (int): filtra por pkreq.id
+	 * - 'w_paquetes_id' (int): filtra por pkreq.paquetes_id
+	 * - 'ordendesc' (string): columna para ordenar en forma descendente
+	 * - 'ordenasc' (string): columna para ordenar en forma ascendente
+	 * - 'limite' (int): máximo de filas a devolver
+	 *
+	 * Retorna:
+	 * - array: conjunto de filas devuelto por la consulta.
+	 *
+	 * Excepciones:
+	 * - Lanza Exception en caso de error en la consulta (además establece el código HTTP de error).
+	 */
 	public static function paquetesrequ_Obtener( $d ){	    
 	    $r = new Singleton();
 	    $r::$lnk->query( self::SQL_BIG_SELECTS );
@@ -10608,6 +13401,16 @@ EOD;
 	}
 	
 	const PAQUETES_FLDS_NAME = [ 0 => "packs" ];
+
+	/**
+	 * Maneja la subida y almacenamiento de un archivo enviado en $_FILES.
+	 *
+	 * Crea las carpetas necesarias bajo repo/anexos/{anyo}/{usuario}/{carpeta}, llama a SubirArchivo()
+	 * para guardar el fichero y devuelve si se recibió archivo y su ruta relativa.
+	 *
+	 * @param array $d Datos de entrada: 'usr' (string) usuario, 'campo' (string) nombre del input file, 'carpeta' (mixed) clave de carpeta.
+	 * @return array ['isfile' => int (0|1), 'path' => string Ruta relativa al repositorio si existe archivo]
+	 */
 	private static function paquetesrequ_Helper_Files( $d ) {
 	    $anyo = OperacionesCtrl::anyolectivo_Obtener();
 	    $c_anyo = $anyo[ 0 ]['id'];
@@ -10645,6 +13448,20 @@ EOD;
 	    return $r;
 	}
 	
+	/**
+	 * Agrupa y formatea campos recibidos ($d) por cada item de plantilla de requerimiento.
+	 *
+	 * Recorre los pares campo=>valor, detecta entradas que comienzan con "field_*",
+	 * obtiene la descripción del ítem de plantilla correspondiente, maneja archivos
+	 * mediante el helper de archivos y construye una estructura agrupada por id de
+	 * item con los datos listos para mostrar (label, value, field, file).
+	 *
+	 * @param array $d Array asociativo con campos y valores (incluye labels ocultos "ocul{campo}").
+	 * @param mixed $usr Identificador/objeto de usuario usado por el helper de archivos.
+	 * @return array Estructura agrupada por requerimientostplsitems_id, cada entrada contiene:
+	 *               - 'ref': descripción del item
+	 *               - 'data': array de elementos con keys ['label','value','field','file'].
+	 */
 	private static function paquetesrequ_Helper_Forms( $d, $usr ){
 	    $forms = array();
 	    $requerimientostplsitems = array();
@@ -10682,6 +13499,17 @@ EOD;
 	    return $forms;
 	}
 	
+	/**
+	 * Agrega o actualiza los requerimientos de un paquete a partir de un payload codificado.
+	 *
+	 * Decodifica el campo 'data' (base64 -> JSON), valida el token, obtiene el empleado asociado
+	 * y crea/modifica entradas en paquetesrequ (campos, formularios, archivos y obligaciones).
+	 * Además genera los documentos correspondientes y devuelve el resultado.
+	 *
+	 * @param array $d Array con la clave 'data' (string base64 que contiene el JSON con token, paquetes_id, flujositems_id y campos del formulario).
+	 * @return array Respuesta formateada por self::retorno con información sobre la creación y los documentos generados.
+	 * @throws Exception Si falla la autenticación, la obtención de datos o la persistencia (por ejemplo al llamar a métodos auxiliares), o si no existe el empleado.
+	 */
 	public static function paquetesrequ_Helper_Agregar( $d ){
 	    self::authRequOff();
 	    
@@ -10947,6 +13775,15 @@ EOD;
 	    }
 	}
 	
+	/**
+	 * Inserta un nuevo registro de Paquetesrequ usando los datos proporcionados.
+	 *
+	 * @param array $d Datos del paquete (ref, valor, descripcion, paquetesreqestados_id, paquetereqtipos_id,
+	 *               paquetes_id, flujositems_id, usuariomodifica, perfilmodifica, etc.).
+	 * @return int ID del registro creado.
+	 * @throws \Exception Si ocurre un error al guardar o faltan campos obligatorios; también se
+	 *                    establece el código HTTP correspondiente antes de lanzar la excepción.
+	 */
 	public static function paquetesrequ_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -11000,6 +13837,25 @@ EOD;
 	        throw new \Exception( 'Respuesta no implementada' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
+	/**
+	 * Modifica registros en la tabla "paquetesrequ".
+	 *
+	 * Actualiza campos como ref, valor, descripcion, paquetesreqestados_id,
+	 * paquetereqtipos_id, paquetes_id y flujositems_id. Se añade automáticamente
+	 * el campo fechamod. Es obligatorio indicar un filtro de actualización
+	 * (id, w_flujositems_id o w_ref).
+	 *
+	 * @param array $d Datos y filtros para la actualización. Claves aceptadas:
+	 *                 - Filtros: id, w_flujositems_id, w_ref
+	 *                 - Campos a actualizar: ref, valor, descripcion,
+	 *                   paquetesreqestados_id, paquetereqtipos_id, paquetes_id,
+	 *                   flujositems_id
+	 *
+	 * @return mixed Resultado de la operación (por ejemplo, número de filas afectadas).
+	 *
+	 * @throws \Exception Si la sesión no está activa, si no se proporciona un filtro
+	 *                    para la actualización o si ocurre un error en la consulta SQL.
+	 */
 	public static function paquetesrequ_Modificar( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -11068,6 +13924,17 @@ EOD;
 	    
 	    return $cu;
 	}
+	/**
+	 * Elimina registros de la tabla "paquetesrequ" según filtros recibidos.
+	 *
+	 * Parámetros esperados en $d:
+	 *  - 'id'                      => elimina por id
+	 *  - 'w_flujositems_id'        => elimina por flujositems_id
+	 *
+	 * @param array $d Filtros para la eliminación.
+	 * @return mixed Resultado de Singleton::_classicDelete (p. ej. número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa (ERR_COD_SESION_INACTIVA) o si ocurre un error de eliminación (ERR_COD_ELIMINACION_SQL).
+	 */
 	public static function paquetesrequ_Eliminar( $d ) {
 	    try {
 	        self::authRequ();
@@ -11510,6 +14377,19 @@ EOD;
 	// apoyos FIN
 	
 	// reflista INI
+	/**
+	 * Obtiene registros de la tabla `reflista` con su JOIN a `paquetereqtipos` aplicando filtros y opciones.
+	 *
+	 * Parámetros opcionales en $d:
+	 *  - 'id'        => filtra por id relacionado.
+	 *  - 'ordendesc' => columna para ordenar en forma descendente.
+	 *  - 'ordenasc'  => columna para ordenar en forma ascendente.
+	 *  - 'limite'    => número máximo de filas a devolver.
+	 *
+	 * @param array $d Filtros y opciones de consulta.
+	 * @return array Resultado de la consulta.
+	 * @throws \Exception Lanzada si ocurre un error en la lectura (además se establece un código HTTP de error).
+	 */
 	public static function reflista_Obtener ( $d ){
 	    $r = new Singleton();
 	    $r::$lnk->query( self::SQL_BIG_SELECTS );
@@ -11558,18 +14438,19 @@ EOD;
 	// reflista FIN
 	
 	// empleadosdetallescontrato INI
-	public static function empleadosdetallescontrato_Helper_Agregar( $d ) {
-	/*
-	 * @vnavarro
-	 * TODO: tarea 8
-	 * Creamos controlador para agregar/modificar la tabla empleadosdetallescontrato
-	 * 1. crea una funcion statica y publica de nombre empleadosdetallescontrato_Helper_Agregar( $d )
-	 * 2. detecta si es una actualizacion o un nuevo registro
-	 * 3. agrega los datos a la base de datos con las funciones que creaste para agregar o modificar
-	 * 4. el retorno debe entrese con la funcion self::retorno
-	 * 
+	/**
+	 * Procesa y guarda o actualiza detalles de contrato de empleados.
+	 *
+	 * Decodifica un JSON en base64 pasado en $d['data'] (puede ser un objeto o un array de objetos),
+	 * normaliza tipo de documento, busca el empleado por documento y según exista o no
+	 * actualiza el detalle de contrato o crea uno nuevo. Maneja campos como meses, días,
+	 * fecha de inicio, archivo de acta inicial y contrato. Captura errores y devuelve
+	 * el resultado usando self::retorno.
+	 *
+	 * @param array $d Arreglo con la clave 'data' que contiene el JSON codificado en base64.
+	 * @return array Resultado con formato de self::retorno (estado, mensaje, datos, booleano).
 	 */
-
+	public static function empleadosdetallescontrato_Helper_Agregar( $d ) {
 	  	$data = base64_decode( $d['data'] );
 	    $json = json_decode( $data , true );
 
@@ -11622,7 +14503,17 @@ EOD;
 		
 	}
 	
-	// @Valeria Agregar las funciones de agregar (formularios_Agregar), obtener (formularios_Obtener), modificar (formularios_Modificar)
+	
+	/**
+	 * Agrega un detalle de contrato para un empleado.
+	 *
+	 * Valida la sesión del usuario, completa campos automáticos (fecha, usuario, año lectivo)
+	 * y persiste el registro usando los datos recibidos en el array $d.
+	 *
+	 * @param array $d Datos del detalle de contrato (p. ej. tipodoc_id, documento, empleados_id, contrato, meses, dias, fechainicio, fileactaini, fileactainivalorgestor)
+	 * @return int ID del registro insertado
+	 * @throws \Exception Si la sesión está inactiva o ocurre un error al guardar los datos
+	 */
 	public static function empleadosdetallescontrato_Agregar($d) {
 		date_default_timezone_set('America/Bogota');
 		
@@ -11696,6 +14587,18 @@ EOD;
 	    }
 	}
 
+	/**
+	 * Modifica un registro en la tabla empleadosdetallescontrato.
+	 *
+	 * Recibe un array asociativo con los campos a actualizar y los filtros para localizar el registro.
+	 * Campos aceptados: tipodoc_id, documento, empleados_id, contrato, meses, dias,
+	 * fileactaini, fechainicio, fileactainivalorgestor. El usuario y la fecha de modificación se
+	 * establecen automáticamente a partir de la sesión.
+	 *
+	 * @param array $d Datos y filtros. Debe incluir al menos 'id' o ambos 'w_tipodoc_id' y 'w_documento'.
+	 * @return int Cantidad de filas afectadas por la actualización.
+	 * @throws \Exception Si la sesión no está activa, falta el filtro de actualización o ocurre un error SQL.
+	 */
 	public static function empleadosdetallescontrato_Modificar($d) {
 		date_default_timezone_set('America/Bogota');
 		
@@ -11777,6 +14680,16 @@ EOD;
 	    return $cu;
 	}
 
+	/**
+	 * Obtiene registros de la tabla empleadosdetallescontrato con joins a empleados y tipodoc.
+	 *
+	 * Acepta filtros y opciones en el array $d (ej.: id, empleados_id, documento, ordendesc, ordenasc, limite).
+	 * Construye una consulta preparada según los filtros y devuelve las filas encontradas.
+	 *
+	 * @param array $d Filtros y opciones de orden/límite.
+	 * @return array Resultado de la consulta (array de filas asociativas).
+	 * @throws Exception Si ocurre un error al ejecutar la consulta.
+	 */
 	public static function empleadosdetallescontrato_Obtener($d) {
 		$r = new Singleton();
 		$r::$lnk->query( self::SQL_BIG_SELECTS );
@@ -11851,10 +14764,29 @@ EOD;
 	    'file' => 'Archivo'
 	);
 	
+	/**
+	 * Obtiene los registros de la tabla "formularios" para una petición AJAX de DataTable.
+	 * Ajusta la zona horaria a "America/Bogota" antes de recuperar los datos.
+	 *
+	 * @param mixed $d Parámetros de la petición (filtros, orden, paginación, etc.).
+	 * @return array Datos formateados para DataTable.
+	 */
 	public static function formularios_Obtener_Ajax( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    return Singleton::_dataTable( array( 'tb' => 'formularios', 'codifica_a' => IndexCtrl::CHARS_TO, 'codifica_desde' => IndexCtrl::CHARS_FR ) );
 	}
+	/**
+	 * Helper para crear o actualizar un formulario a partir de datos codificados.
+	 *
+	 * Decodifica $d['data'] (JSON en base64), completa campos obligatorios
+	 * (fecha, usuarios, estado, json) y:
+	 *  - si viene 'id' llama a formularios_Modificar para actualizar,
+	 *  - si no genera un nombre único y llama a formularios_Agregar para crear.
+	 *
+	 * @param array $d Array que debe contener 'data' con el JSON del formulario codificado en base64.
+	 * @return mixed Retorno de self::retorno() con el identificador del formulario creado/modificado.
+	 * @throws \Exception Si falla la autenticación o ocurren errores en las operaciones internas.
+	 */
 	public static function formularios_Helper_Agregar( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    $usu = null;
@@ -11905,6 +14837,14 @@ EOD;
 	    }
 	    return self::retorno($tpls_id, 0, '');
 	}
+	
+	/**
+	 * Agrega un nuevo registro a la tabla "formularios".
+	 *
+	 * @param array $d Datos para crear el nuevo formulario.
+	 * @return mixed Identificador del formulario creado.
+	 * @throws \Exception Si ocurre un error durante la creación.
+	 */
 	public static function formularios_Agregar( $d ) {
 	    date_default_timezone_set('America/Bogota');
 	    
@@ -11945,6 +14885,18 @@ EOD;
 	        throw new \Exception( 'formularios_Agregar: Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 	    }
 	}
+
+	/**
+	 * Modifica un registro en la tabla "formularios".
+	 *
+	 * Requiere sesión activa. Toma los campos permitidos desde el array $d
+	 * (nombre, titulo, descripcion, json, fecha, usuarios, formulariosestados_id)
+	 * y actualiza el registro filtrado por 'id'.
+	 *
+	 * @param array $d Datos con campos a actualizar y el filtro 'id'.
+	 * @return mixed Resultado de la operación de actualización.
+	 * @throws \Exception Si la sesión no está activa, falta el filtro 'id' o ocurre un error SQL.
+	 */
 	public static function formularios_Modificar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    try {
@@ -12002,6 +14954,20 @@ EOD;
 	    
 	    return $cu;
 	}
+	/**
+	 * Recupera registros de la tabla `formularios` aplicando filtros, orden y límite.
+	 *
+	 * Parámetros aceptados en $d (array):
+	 *  - 'id'         => (int|string) filtra por id o por nombre.
+	 *  - 'w_nombre'   => (string) filtra por nombre exacto.
+	 *  - 'ordendesc'  => (string) columna para ordenar en forma descendente.
+	 *  - 'ordenasc'   => (string) columna para ordenar en forma ascendente.
+	 *  - 'limite'     => (int) cantidad máxima de registros a devolver.
+	 *
+	 * @param array $d Opciones de filtrado, orden y límite.
+	 * @return array Resultados de la consulta.
+	 * @throws \Exception Si la consulta falla (también se envía un código HTTP de error).
+	 */
 	public static function formularios_Obtener ( $d ){
 	    $r = new Singleton();
 	    $r::$lnk->query( self::SQL_BIG_SELECTS );
@@ -12067,6 +15033,16 @@ EOD;
 	const TIPO_TBQRY_CONTACTO = "TIP_C_1";
 	
 	// login INI
+	/**
+	 * Verifica y retorna los datos de usuario decodificados desde una cadena base64/JSON.
+	 *
+	 * Decodifica $d (base64 → JSON), valida que exista la clave 'id'. Si no existe,
+	 * establece el código HTTP correspondiente y lanza una excepción indicando sesión inactiva.
+	 *
+	 * @param string $d Cadena base64 que contiene el JSON del usuario.
+	 * @return array Datos del usuario decodificados.
+	 * @throws \Exception Si la sesión está inactiva (falta 'id').
+	 */
 	public static function home_Is_Login_Get ( $d ){
 	    $usrb64 = base64_decode( $d );
 	    $usr = json_decode($usrb64, true );
@@ -12077,6 +15053,18 @@ EOD;
 	    return $usr;
 	}
 	
+	/**
+	 * Recupera opciones de correo (enmascaradas) para el proceso de login de un acudiente.
+	 *
+	 * Busca empleados relacionados, construye una lista de opciones de email (empleado o contacto),
+	 * y valida que existan contactos y dependientes activos. Lanza excepciones con códigos HTTP
+	 * específicos si ocurre un error, si el usuario existe pero no tiene datos de contacto,
+	 * si no se encuentra el usuario o si no hay dependientes activos.
+	 *
+	 * @param array $d Parámetros de entrada/contexto para la búsqueda.
+	 * @return array Lista de opciones de email enmascaradas con metadatos (id, mail, tipo, estado_id).
+	 * @throws Exception En caso de error al obtener empleados o de cualquiera de las condiciones de validación.
+	 */
 	public static function home_Login_Get( $d ) {
 	    self::authRequOff(); 
 	    
@@ -12143,6 +15131,17 @@ EOD;
 	    return array_values($defemail);
 	}
 	
+	/**
+	 * Genera y asigna una clave temporal a un empleado o contacto y la envía por correo.
+	 *
+	 * Obtiene el registro según los parámetros recibidos, crea una clave temporal,
+	 * actualiza la clave en la fuente de datos y envía un email con la clave al destinatario.
+	 * Establece códigos HTTP y lanza excepciones ante errores en la obtención, modificación o envío.
+	 *
+	 * @param array $d Datos de entrada (debe incluir 'tipo' y criterios para localizar al usuario).
+	 * @return mixed Resultado de enviarCustomEmail si el envío es exitoso; false si no se pudo asignar la clave.
+	 * @throws Exception En caso de fallos al obtener datos, modificar la clave o enviar el correo.
+	 */
 	public static function home_RecuToken_Get( $d ) {
 	    self::authRequOff();
 	    
@@ -12229,6 +15228,15 @@ EOD;
 	    return false;
 	    
 	}
+	/**
+	 * Inicia sesión y devuelve información básica de un empleado autenticado.
+	 * Admite suplantación mediante el campo 'loginas' (token privado) y valida
+	 * campos obligatorios antes de obtener los datos.
+	 *
+	 * @param array $d Parámetros de entrada. Claves esperadas: 'tipodoc_id', 'documento', 'clave'. Opcional: 'loginas' para suplantación.
+	 * @return array Arreglo con información del usuario (id, fullname, email, tipo, ramas, jslgn).
+	 * @throws \Exception Si la sesión es inválida, falta algún campo obligatorio, falla la verificación del token o las credenciales son incorrectas. Se establecen códigos HTTP apropiados.
+	 */
 	public static function home_Start_Get( $d ){ 
 	    $dMem = $d;
 	    $usu = null;
@@ -12354,6 +15362,23 @@ EOD;
 	    
 	    return $rDt;
 	}
+	/**
+	 * Genera y devuelve un token para "login as" cifrado y codificado en base64.
+	 *
+	 * Este método valida la sesión del usuario actual, obtiene los datos del empleado/acudiente
+	 * según los parámetros recibidos, construye un payload con {acudientes_id, empleados_id, tipo},
+	 * lo cifra usando la(s) llave(s) pública(s) asociadas al token del usuario autenticado y devuelve
+	 * el resultado en base64.
+	 *
+	 * @param array $d Arreglo con la clave 'params' que contiene un JSON con:
+	 *                 - tipo (int): 4 => id de empleado, 5 => id de contact/acudiente
+	 *                 - id   (mixed): identificador según el tipo
+	 *
+	 * @return string Token cifrado y codificado en base64. Cadena vacía si no hay resultados.
+	 *
+	 * @throws Exception Si la sesión no está activa, si falta el acudiente relacionado,
+	 *                   si ocurre un error al obtener empleados o al obtener/usar el token.
+	 */
 	public static function home_LoginAs_Get( $d ){
 	    $usu = null;
 	    try {
@@ -12420,6 +15445,17 @@ EOD;
 	    return $rDef;
 	}
 	
+	/**
+	 * Obtiene el perfil de un empleado a partir de una clave codificada.
+	 *
+	 * Espera en $d['key'] un string base64 que contiene un JSON con la clave 'id' (hash MD5).
+	 * Decodifica la clave, busca el empleado y retorna un array con los datos relevantes
+	 * (id, tipodoc_id, documento, nombres, apellidos, mail, direccion, idhash).
+	 *
+	 * @param array $d Parámetros de entrada; debe incluir 'key' (base64 de JSON con 'id').
+	 * @return array Lista de perfiles (cada elemento es un array asociativo con los campos del empleado).
+	 * @throws Exception Si ocurre un error al obtener los empleados o al procesar la clave.
+	 */
 	public static function home_Perfil_Get( $d ){
 	    self::authRequOff();
 	    

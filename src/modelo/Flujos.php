@@ -13,6 +13,7 @@ class Flujos extends Clsdatos {
     private $fecha = '1900-01-01 00:00:00';
     private $flujosestados_id = 1;
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -21,6 +22,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre.
      * @return string
      */
     public function getNombre()
@@ -29,6 +31,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Obtiene la descripción.
      * @return string
      */
     public function getDescripcion()
@@ -37,6 +40,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Obtiene los usuarios.
      * @return string
      */
     public function getUsuarios()
@@ -45,6 +49,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Obtiene la versión.
      * @return number
      */
     public function getVersion()
@@ -53,6 +58,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha.
      * @return string
      */
     public function getFecha()
@@ -61,6 +67,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del flujo.
      * @return number
      */
     public function getFlujosestados_id()
@@ -69,6 +76,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -77,6 +85,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Establece el nombre.
      * @param string $nombre
      */
     public function setNombre($nombre)
@@ -85,6 +94,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Establece la descripción.
      * @param string $descripcion
      */
     public function setDescripcion($descripcion)
@@ -93,6 +103,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Establece los usuarios.
      * @param string $usuarios
      */
     public function setUsuarios($usuarios)
@@ -101,6 +112,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Establece la versión.
      * @param number $version
      */
     public function setVersion($version)
@@ -109,6 +121,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Establece la fecha.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -117,6 +130,7 @@ class Flujos extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del flujo.
      * @param number $flujosestados_id
      */
     public function setFlujosestados_id($flujosestados_id)

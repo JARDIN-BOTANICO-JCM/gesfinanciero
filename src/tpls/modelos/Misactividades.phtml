@@ -109,6 +109,12 @@ let idMod = null;
 const d_paraRevisar = <?php echo json_encode( $paraRevisar ); ?>;
 const d_paquetesestados_id = <?php echo json_encode( $l_paquetesestados_id ); ?>;
 
+/**
+ * Inicializa y administra los requerimientos.
+ *
+ * @param mixed $dC Constructor de datos usado para inicializar y acceder a la información requerida.
+ * @return callable|null Closure que ejecuta la lógica de requerimientos o null si no aplica.
+ */
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
 	const tablaCont = dC['tableContainer'];
@@ -1193,6 +1199,13 @@ const Requerimientos = function( dC ){ // dC = data constructor
     };
 }
 
+/**
+ * Valida y procesa la selección de archivo(s) antes de subir.
+ * Llama a chkUploadFiles usando el tamaño máximo obtenido desde PHP y escribe en consola el resultado.
+ *
+ * @param {Event|HTMLElement} o Elemento input de tipo file o evento que contiene los archivos seleccionados.
+ * @return {void}
+ */
 const chkArchivo = function( o ){
 	chkUploadFiles( o, <?php echo Utiles::getPostMaxSizeMB() ; ?>, function( fl ){
 		console.log( fl );
@@ -1200,6 +1213,14 @@ const chkArchivo = function( o ){
 };
 
 let reqs = null;
+
+/**
+ * Obtiene y muestra la lista de procesos disponibles.
+ *
+ * Actualiza la interfaz con los procesos recuperados (puede realizar llamada AJAX).
+ *
+ * @returns {void}
+ */
 const listaProcesos = function(){
 	const dataConstruct = {
     	'tableContainer' : '#contTb'
@@ -1208,11 +1229,14 @@ const listaProcesos = function(){
 	reqs.dibujarDataTable();
 };
 
+<<<<<<< Updated upstream
 // obj deducciones
 let deducciones;
 
 // Control Global de modificaciones
 let controlgbl = null;
+=======
+>>>>>>> Stashed changes
 jQuery( document ).ready(function(){
 	listaProcesos();
 	

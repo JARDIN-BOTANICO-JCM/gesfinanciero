@@ -194,6 +194,12 @@ try {
 
 <script type="text/javascript">
 // New version
+/**
+ * Maneja el clic del botón "Iniciar Registro".
+ *
+ * @param {Object} d Datos o evento asociado al clic.
+ * @returns {void} No devuelve valor.
+ */
 const btnIniRegistro_click = function( d ){
 	const objmdlReg = mngModal.dibujar( { 'id' : 'frmRegistro', 'title' : 'Registro','btnCerrarX' : true, 'level' : 'l1', 'size': 'modal-lg' } );
     const pie = jQuery(objmdlReg + ' .modal-body');
@@ -208,6 +214,15 @@ const btnIniRegistro_click = function( d ){
 
     jQuery( objmdlReg ).modal('show');
 };
+
+/**
+ * Maneja el flujo de registro: inicializa/transforma los datos con home.iniciarb64,
+ * construye el FormData, envía la solicitud AJAX (__TransportarData) y muestra
+ * modales de éxito o error. También alterna estados de interfaz con accionesShowHide.
+ *
+ * @param mixed $d Datos de entrada que serán procesados por home.iniciarb64.
+ * @return void
+ */
 const registrar_click = function( d ){
 	home.iniciarb64(d, function( r ){
 		
@@ -248,6 +263,17 @@ const registrar_click = function( d ){
 };
 
 // Old version
+/**
+ * Inicia el flujo de login al hacer clic:
+ * - Solicita un token usando home.tknGet(d).
+ * - Construye un FormData incluyendo el campo 'ajax' (hash del endpoint) y los datos recibidos.
+ * - Envía la petición con __TransportarData.
+ * - Si tiene éxito, guarda la respuesta (JSON codificado en base64) en almacenamiento local y redirige a la página principal.
+ * - Si ocurre un error, muestra un modal con el mensaje de error.
+ *
+ * @param mixed $d Contexto o datos necesarios para obtener el token.
+ * @return void
+ */
 const btnIniLogin_click = function( d ){
 	home.tknGet(d, function( r ){
 		const form_data = new FormData();
@@ -283,6 +309,12 @@ const btnIniLogin_click = function( d ){
 	});
 };
 
+/**
+ * Genera HTML de una lista de opciones tipo radio a partir de una colección de emails.
+ *
+ * @param {Object|Array} d - Colección de elementos con las propiedades 'id', 'tipo' y 'mail'.
+ * @returns {string} Cadena HTML con cada email representado como un input radio y su label.
+ */
 const formatListaEmails = function( d ){
 	const html = [];
 	
@@ -304,6 +336,17 @@ const formatListaEmails = function( d ){
 	return html.join('');
 };
 
+/**
+ * Maneja el evento de clic para solicitar token/credenciales.
+ *
+ * Obtiene un token, arma FormData con la acción AJAX y los datos de la fila seleccionada (.flexRDDt),
+ * muestra una alerta de carga y oculta el botón de solicitud. Llama a __TransportarData y:
+ *  - en caso de éxito, muestra el botón de login y una alerta indicando que las credenciales fueron enviadas por correo;
+ *  - en caso de error, muestra un modal con el mensaje de error y vuelve a mostrar el botón de obtención.
+ *
+ * @param mixed $d Contexto o dato necesario para la obtención del token (home.tknGet).
+ * @return void
+ */
 const btnSolicitar_click = function( d ){
 	const recuAlerta = jQuery('#recuAlerta');
 	const btnRecuGetCode = jQuery('#btnRecuGetCode');
@@ -354,6 +397,12 @@ const btnSolicitar_click = function( d ){
 	});
 };
 
+/**
+ * Maneja el clic del botón de recuperación: arma y envía la petición AJAX con los datos
+ * de documento, muestra un modal con la lista de correos si es exitoso o un modal de error si falla.
+ *
+ * @param {Object} d Datos del evento o contexto proporcionado al manejador.
+ */
 const btnRecupera_click = function( d ){
 	home.recuperar( d , function(){
 		const form_data = new FormData();
@@ -387,6 +436,13 @@ const btnRecupera_click = function( d ){
 	});
 };
 
+/**
+ * Muestra el elemento indicado por "s" y oculta el de "h" usando animaciones rápidas.
+ *
+ * @param string|jQuery $s Selector o elemento jQuery a mostrar.
+ * @param string|jQuery $h Selector o elemento jQuery a ocultar.
+ * @return void
+ */
 const accionesShowHide = function( s, h ){
 	jQuery( h ).hide( 'fast' , function(){
 		jQuery( s ).show( 'fast', function(){} );
@@ -394,6 +450,17 @@ const accionesShowHide = function( s, h ){
 };
 
 <?php if ( isset( $_POST['las'] ) ) : ?>
+
+/**
+ * loginAs()
+ *
+ * Inicia sesión como otro usuario: borra datos locales, envía una petición AJAX
+ * con el identificador 'loginas' tomado de $_POST, guarda la respuesta codificada
+ * en el almacenamiento local y redirige a la página principal. Si ocurre un error,
+ * muestra un modal con el mensaje devuelto.
+ *
+ * @return void
+ */
 const loginAs = function(){
 	ut.DelDatosLocal('<?php echo $g_jsn; ?>');
 	const form_data = new FormData();

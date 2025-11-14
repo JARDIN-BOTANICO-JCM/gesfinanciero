@@ -95,12 +95,28 @@ $logoinst = OperacionesCtrl::obtener_LogoCompany();
 </div>
 
 <script type="text/javascript">
+
+/**
+ * Oculta el elemento 'h' y, al completar la animación, muestra el elemento 's' usando jQuery.
+ *
+ * @param {string|HTMLElement|jQuery} s Selector, nodo DOM o objeto jQuery del elemento a mostrar.
+ * @param {string|HTMLElement|jQuery} h Selector, nodo DOM o objeto jQuery del elemento a ocultar.
+ * @returns {void}
+ */
 const accionesShowHide = function( s, h ){
 	jQuery( h ).hide( 'fast' , function(){
 		jQuery( s ).show( 'fast', function(){} );
 	});
 };
 
+/**
+ * Recuperar clave del sistema.
+ *
+ * Valida el formulario 'frmRecuCls', construye y envía la petición AJAX (datos en base64)
+ * y maneja la respuesta: registra en consola en caso de éxito y muestra un modal de error si falla.
+ *
+ * @param {HTMLElement|jQuery} o Elemento disparador que contiene el atributo data-targetid con el selector del elemento destino.
+ */
 const recuperarClave = function( o ){
 	const _o = jQuery( o );
 	const _dt = _o.data();
@@ -135,6 +151,11 @@ const recuperarClave = function( o ){
 	});
 };
 
+/**
+ * Al cargar el DOM, comprueba si hay un mensaje de error (getMensaje).
+ * Si existe, construye dinámicamente el contenido de un modal de Bootstrap
+ * y lo muestra para informar del error de inicio de sesión.
+ */
 jQuery(document).ready(function() {
     <?php 
     $txt = $this->getMensaje();

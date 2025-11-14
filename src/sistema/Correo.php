@@ -26,63 +26,125 @@ class Correo {
     
     private $adjunto = "";
     
+    /**
+     * Establece el destinatario del correo.
+     * @param string $vl
+     */
     public function setPara($vl){
         $this->to = $vl;
     }
     
+    /**
+     * Establece el título del correo.
+     * @param string $vl
+     */
     public function setTitulo($vl){
         $this->subject = $vl;
     }
     
+    /**
+     * Establece el mensaje del correo.
+     * @param string $vl
+     */
     public function setMensaje($vl){
         $this->message = $vl;
     }
     
+    /**
+     * Establece si el correo es un calendario.
+     * @param bool $vl
+     */
     public function setEsCalendario($vl){
         $this->isCal = $vl;
     }
     
+    /**
+     * Establece la fecha de inicio del evento.
+     * @param string $vl
+     */
     public function setFechaInicio($vl){
         $this->start = $vl;
     }
     
+    /**
+     * Establece la fecha de fin del evento.
+     * @param string $vl
+     */
     public function setFechaFin($vl){
         $this->end = $vl;
     }
     
+    /**
+     * Establece el resumen del evento.
+     * @param string $vl
+     */
     public function setResumen($vl){
         $this->summary = $vl;
     }
     
+    /**
+     * Establece el lugar del evento.
+     * @param string $vl
+     */
     public function setLugar($vl){
         $this->location = $vl;
     }
     
+    /**
+     * Establece si el contenido del correo es HTML.
+     * @param bool $vl
+     */
     public function setEsHTML($vl){
         $this->esHTML = $vl;
     }
     
+    /**
+     * Convierte una marca de tiempo a formato calendario.
+     * @param int $timestamp
+     * @return string
+     */
     public function dateToCal($timestamp) {
         return date('Ymd\THis\Z', $timestamp);
     }
     
+    /**
+     * Establece el archivo adjunto del correo.
+     * @param string $d
+     */
     public function setAdjunto( $d ){
         $this->adjunto = $d;
     }
     
+    /**
+     * Establece la etiqueta del nombre del remitente.
+     * @param string $d
+     */
     public function setEtiquetaNombre( $d ){
         $this->etiquetaNombre = $d;
     }
     
+    /**
+     * Establece el correo electrónico del remitente.
+     * @param string $d
+     */
     public function setEmailRemitente( $d ){
         $this->emailRemitente = $d;
     }
     
+    /**
+     * Obtiene el código de respuesta HTTP para una URL dada.
+     * @param string $url
+     * @return string Código de respuesta HTTP
+     */
     private function get_http_response_code($url) {
         $headers = get_headers($url);
         return substr($headers[0], 9, 3);
     }
     
+    /**
+     * Envía el correo electrónico configurado.
+     * @return bool Indica si el envío fue exitoso.
+     */
     public function enviar()
     {
         include_once ( dirname(dirname( __FILE__ )) . DIRECTORY_SEPARATOR . "libs" . DIRECTORY_SEPARATOR . "PHPMailer-61" . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "autoload.php");

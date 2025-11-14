@@ -18,6 +18,7 @@ class Paquetes extends Clsdatos {
     private $flujos_id = 0;
     
     /**
+     * Obtiene el identificador del paquete.
      * @return number
      */
     public function getId()
@@ -26,6 +27,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre del paquete.
      * @return string
      */
     public function getNombre()
@@ -34,6 +36,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del empleado asociado al paquete.
      * @return number
      */
     public function getEmpleados_id()
@@ -42,6 +45,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre del empleado asociado al paquete.
      * @return string
      */
     public function getEmpleados()
@@ -50,6 +54,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el mes al que aplica el paquete.
      * @return string
      */
     public function getMesaplica()
@@ -58,6 +63,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha del paquete.
      * @return string
      */
     public function getFecha()
@@ -66,6 +72,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del ítem de flujo asociado al paquete.
      * @return number
      */
     public function getFlujositems_id()
@@ -74,6 +81,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del paquete.
      * @return number
      */
     public function getPaquetesestados_id()
@@ -82,6 +90,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el usuario que modificó el paquete.
      * @return string
      */
     public function getUsuariosmod()
@@ -90,6 +99,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de la última modificación del paquete.
      * @return string
      */
     public function getFechamodificado()
@@ -98,6 +108,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del flujo asociado al paquete.
      * @return number
      */
     public function getFlujos_id()
@@ -106,6 +117,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del paquete.
      * @param number $id
      */
     public function setId($id)
@@ -114,6 +126,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el nombre del paquete.
      * @param string $nombre
      */
     public function setNombre($nombre)
@@ -122,6 +135,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del empleado asociado al paquete.
      * @param number $empleados_id
      */
     public function setEmpleados_id($empleados_id)
@@ -130,6 +144,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el nombre del empleado asociado al paquete.
      * @param string $empleados
      */
     public function setEmpleados($empleados)
@@ -138,6 +153,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el mes al que aplica el paquete.
      * @param string $mesaplica
      */
     public function setMesaplica($mesaplica)
@@ -146,6 +162,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece la fecha del paquete.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -154,6 +171,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del ítem de flujo asociado al paquete.
      * @param number $flujositems_id
      */
     public function setFlujositems_id($flujositems_id)
@@ -162,6 +180,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del paquete.
      * @param number $paquetesestados_id
      */
     public function setPaquetesestados_id($paquetesestados_id)
@@ -170,6 +189,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el usuario que modificó el paquete.
      * @param string $usuariosmod
      */
     public function setUsuariosmod($usuariosmod)
@@ -178,6 +198,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de la última modificación del paquete.
      * @param string $fechamodificado
      */
     public function setFechamodificado($fechamodificado)
@@ -186,6 +207,7 @@ class Paquetes extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del flujo asociado al paquete.
      * @param number $flujos_id
      */
     public function setFlujos_id($flujos_id)

@@ -22,6 +22,7 @@ class Empleadosdetallescontrato extends Clsdatos {
 	private $fileactainivalorgestor = "";
 	
     /**
+     * Obtiene la fecha de inicio del contrato.
      * @return string
      */
     public function getFechainicio()
@@ -30,6 +31,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de inicio del contrato.
      * @param string $fechainicio
      */
     public function setFechainicio($fechainicio)
@@ -38,6 +40,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -46,6 +49,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del tipo de documento.
      * @return number
      */
     public function getTipodoc_id()
@@ -54,6 +58,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el número de documento.
      * @return string
      */
     public function getDocumento()
@@ -62,6 +67,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del empleado.
      * @return number
      */
     public function getEmpleados_id()
@@ -70,6 +76,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el contrato.
      * @return string
      */
     public function getContrato()
@@ -78,6 +85,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene los meses.
      * @return number
      */
     public function getMeses()
@@ -86,6 +94,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene los días.
      * @return number
      */
     public function getDias()
@@ -94,6 +103,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha.
      * @return string
      */
     public function getFecha()
@@ -102,6 +112,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el usuario.
      * @return string
      */
     public function getUsuario()
@@ -110,6 +121,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de modificación.
      * @return string
      */
     public function getFechamodifica()
@@ -118,6 +130,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del año lectivo.
      * @return number
      */
     public function getAnyolectivo_id()
@@ -126,6 +139,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el archivo del acta de inicio.
      * @return string
      */
     public function getFileactaini()
@@ -134,6 +148,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Obtiene el archivo del acta de inicio con valor gestor.
      * @return string
      */
     public function getFileactainivalorgestor()
@@ -142,6 +157,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -150,6 +166,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del tipo de documento.
      * @param number $tipodoc_id
      */
     public function setTipodoc_id($tipodoc_id)
@@ -158,6 +175,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el número de documento.
      * @param string $documento
      */
     public function setDocumento($documento)
@@ -166,6 +184,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del empleado.
      * @param number $empleados_id
      */
     public function setEmpleados_id($empleados_id)
@@ -174,6 +193,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el contrato.
      * @param string $contrato
      */
     public function setContrato($contrato)
@@ -182,6 +202,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece los meses.
      * @param number $meses
      */
     public function setMeses($meses)
@@ -190,6 +211,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece los días.
      * @param number $dias
      */
     public function setDias($dias)
@@ -198,6 +220,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * 
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -206,6 +229,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el usuario.
      * @param string $usuario
      */
     public function setUsuario($usuario)
@@ -214,6 +238,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de modificación.
      * @param string $fechamodifica
      */
     public function setFechamodifica($fechamodifica)
@@ -222,6 +247,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del año lectivo.
      * @param number $anyolectivo_id
      */
     public function setAnyolectivo_id($anyolectivo_id)
@@ -230,6 +256,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el archivo del acta de inicio.
      * @param string $fileactaini
      */
     public function setFileactaini($fileactaini)
@@ -238,6 +265,7 @@ class Empleadosdetallescontrato extends Clsdatos {
     }
 
     /**
+     * Establece el archivo del acta de inicio con valor gestor.
      * @param string $fileactainivalorgestor
      */
     public function setFileactainivalorgestor($fileactainivalorgestor)

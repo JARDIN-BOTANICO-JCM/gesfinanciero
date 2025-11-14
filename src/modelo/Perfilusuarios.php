@@ -14,15 +14,35 @@ class Perfilusuarios extends Clsdatos {
 	private $id = 0; 
 	private $nombre = ""; 
 
+	/**
+	 * Obtiene el identificador del perfil de usuario.
+	 *
+	 * @return int|null Identificador del perfil o null si no está establecido.
+	 */
 	public function getId (){ 
 		return $this->id;
 	} 
+	/**
+	 * Establece el identificador del perfil de usuario.
+	 *
+	 * @param int $vl Identificador del perfil.
+	 */
 	public function setId ( $vl ){ 
 		$this->id = $vl;
 	} 
+	/**
+	 * Obtiene el nombre del perfil de usuario.
+	 *
+	 * @return string Nombre del perfil.
+	 */
 	public function getNombre (){ 
 		return $this->nombre;
 	} 
+	/**
+	 * Establece el nombre del perfil de usuario.
+	 *
+	 * @param string $vl Nombre del perfil.
+	 */
 	public function setNombre ( $vl ){ 
 		$this->nombre = $vl;
 	} 
