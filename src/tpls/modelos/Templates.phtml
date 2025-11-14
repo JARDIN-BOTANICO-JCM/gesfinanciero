@@ -424,6 +424,13 @@ if ( sizeof( $inst ) > 0 ) {
 
 <script src="temas/js/ckeditor_4_21_0_full_easyimage/ckeditor.js"></script>
 <script type="application/javascript">
+
+/**
+ * Maneja el cambio de archivo de plantilla provocado por el elemento dado.
+ *
+ * @param mixed $el Elemento DOM o selector que originó el cambio.
+ * @return void
+ */
 const tplfile_change = function( el ){
     const opc = { 'id' : 'ajaxldr' };
     const objmdl = mngModal.dibujar( opc );
@@ -436,6 +443,11 @@ const tplfile_change = function( el ){
 	ut.crearFormulario('index.php?pageid=modelos/Templates.phtml', p );
 };
 
+/**
+ * Devuelve la plantilla HTML del modal para crear un nuevo formulario.
+ *
+ * @returns {string} Plantilla HTML para el modal de nuevo formulario.
+ */
 const modalFormularioNewTpl = function () {
     const opc = {
         'id' : 'frmNuevoTpl',
@@ -448,10 +460,21 @@ const modalFormularioNewTpl = function () {
     };
     return mngModal.dibujar( opc );
 }
+
+/**
+ * Muestra el formulario para crear una nueva plantilla y prepara los datos necesarios.
+ *
+ * @return void
+ */
 const mostrarFrmNewTpl = function(){
 	const _m = modalFormularioNewTpl();
 	jQuery( _m ).modal('show');
 };
+
+/**
+ * Actualiza datos y estado asociados a la plantilla.
+ * Sincroniza con el servidor y refresca la interfaz cuando sea necesario.
+ */
 const actualizar = function(){
     ut.validarFrm('frmNwTpCls', function ( r ) {
 	    const data = ut.b64EncodeUnicode ( JSON.stringify( r ) ) ;
@@ -481,6 +504,11 @@ const actualizar = function(){
     });
 };
 
+/**
+ * Actualiza la plantilla actual en la interfaz y persiste los cambios necesarios.
+ *
+ * @returns {void}
+ */
 const actualizarTemplate = function(){
     if( confirm('\xBFDesea guardar estos cambios?') ){
         const opc = { 'id' : 'ajaxldr' };
@@ -516,6 +544,13 @@ const actualizarTemplate = function(){
 	
 };
 
+/**
+ * Abre y controla el modal de formulario.
+ *
+ * Inicializa eventos, valida campos y gestiona el envío y cierre del modal.
+ *
+ * @return void
+ */
 const modalFormulario = function () {
     const opc = {
         'id' : 'frmNuevoRegistro',
@@ -529,6 +564,12 @@ const modalFormulario = function () {
     return mngModal.dibujar( opc );
 }
 
+/**
+ * Muestra la configuración en la interfaz basada en el objeto proporcionado.
+ *
+ * @param {Object} o - Objeto con las propiedades de configuración a mostrar.
+ * @returns {void}
+ */
 const mostrarConfig = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -565,6 +606,12 @@ const mostrarConfig = function( o ){
 	
 };
 
+/**
+ * Carga y aplica la configuración contenida en el objeto proporcionado.
+ *
+ * @param {Object} o Objeto con los datos de configuración a procesar.
+ * @returns {void}
+ */
 const cargaCfgData = function( o ){
 	const _o = ut.b64DecodeUnicode( o ) ;
 	
@@ -613,6 +660,14 @@ const cargaCfgData = function( o ){
 	
 };
         
+/**
+ * Genera la representación de la firma para previsualización.
+ *
+ * Método auxiliar que prepara y devuelve la firma en formato adecuado
+ * para mostrarla en una vista previa.
+ *
+ * @return string Cadena con la firma lista para mostrar (HTML o texto).
+ */
 const firmaPrev_Helper = function(){
 	const dt = { "flid" : jQuery('#tplfile').val() + '.html' };
 	
@@ -620,6 +675,12 @@ const firmaPrev_Helper = function(){
 	glosd.previa( dt );
 };
 
+/**
+ * Guarda la configuración del PDF.
+ *
+ * @param {Object} o - Objeto con las opciones de configuración a guardar.
+ * @returns {void} No devuelve valor.
+ */
 const pdfConfig_save = function( o ){
 	ut.validarFrm('frmvalcls', function ( r ) {
 	
@@ -662,6 +723,12 @@ const pdfConfig_save = function( o ){
 	});
 };
 
+/**
+ * Maneja el clic del botón "Eliminar".
+ *
+ * @param {Event|Object} o Objeto del evento o datos del elemento a eliminar.
+ * @returns {void}
+ */
 const btnEliminar_onClick = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();

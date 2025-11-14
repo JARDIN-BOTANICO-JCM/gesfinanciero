@@ -14,6 +14,7 @@ class MenubarGrupo {
 
     /**
      * Get the value of nombre
+     * @return string
      */ 
     public function getNombre()
     {
@@ -34,6 +35,7 @@ class MenubarGrupo {
 
     /**
      * Get the value of codigo
+     * @return string
      */ 
     public function getCodigo()
     {
@@ -54,6 +56,7 @@ class MenubarGrupo {
 
     /**
      * Get the value of icono
+     * @return string
      */ 
     public function getIcono()
     {

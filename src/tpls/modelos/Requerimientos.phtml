@@ -110,6 +110,12 @@ try {
 <script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
 <script type="application/javascript">
 let idMod = null;
+
+/**
+ * Abre y rellena el formulario modal con los datos proporcionados.
+ *
+ * @param {Object} d Datos para poblar el formulario modal.
+ */
 const modalFormulario = function ( d ) {
     var opc = {
             'id' : d['id'],
@@ -123,6 +129,14 @@ const modalFormulario = function ( d ) {
     return mngModal.dibujar( opc );
 };
 
+/**
+ * btnAgregarReg
+ *
+ * Gestiona la acción de agregar un registro: valida datos, envía la solicitud
+ * al servidor y actualiza la interfaz en caso de éxito.
+ *
+ * @returns {void}
+ */
 const btnAgregarReg = function(){
 	idMod = null;
 	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Agregar registro'} );
@@ -138,6 +152,12 @@ const btnAgregarReg = function(){
 	jQuery( _m ).modal('show');	
 };
 
+/**
+ * Rellena los campos del formulario u otros elementos con los valores del objeto proporcionado.
+ *
+ * @param {Object} o Objeto con pares clave-valor usados para asignar a los campos.
+ * @returns {void}
+ */
 const lsLlenarCampos = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -160,6 +180,13 @@ const lsLlenarCampos = function( o ){
 };
 
 let campos_i = 0;
+
+/**
+ * Añade campos dinámicos al formulario de requerimientos según las opciones indicadas.
+ *
+ * @param {Object} o Opciones para configurar los campos (tipo, cantidad y valores).
+ * @returns {void}
+ */
 const btnAddCampos = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -218,6 +245,12 @@ const btnAddCampos = function( o ){
 	return rId;
 };
 
+/**
+ * Genera un input según el tipo y las opciones provistas.
+ *
+ * @param {Object} o - Objeto de opciones (p.ej. type, name, value, attrs).
+ * @returns {string} HTML del input generado.
+ */
 const renderTipoInput = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -239,6 +272,12 @@ const renderTipoInput = function( o ){
 	
 };
 
+/**
+ * Elimina los campos relacionados al elemento/evento proporcionado.
+ *
+ * @param {Event|HTMLElement|Object} o Objeto o evento que identifica los campos a eliminar.
+ * @returns {void}
+ */
 const btnDelCampos = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -251,6 +290,12 @@ const btnDelCampos = function( o ){
 	
 };
 
+/**
+ * Maneja el evento de guardar.
+ *
+ * Valida y envía los datos del formulario para almacenar el requerimiento.
+ * @returns {void}
+ */
 const btnGuardar = function(){
 	ut.validarFrm('frmvalcls', function ( r ) {
 		closeAllModal();
@@ -285,6 +330,12 @@ const btnGuardar = function(){
 	});
 };
 
+/**
+ * Maneja la acción de modificar un registro desde el botón correspondiente.
+ *
+ * @param {Object} o - Objeto con los datos y opciones necesarias para la modificación.
+ * @returns {void}
+ */
 const btnModRegistro = function ( o ) {
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -352,6 +403,12 @@ const btnModRegistro = function ( o ) {
     jQuery( _m ).modal('show');
 };
 
+/**
+ * Inicializa el módulo Requerimientos con el constructor de datos proporcionado.
+ *
+ * @param object $dC Constructor de datos que suministra la información y utilidades necesarias.
+ * @return object Instancia del módulo Requerimientos con sus métodos y estado.
+ */
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
 	const tablaCont = dC['tableContainer'];
@@ -421,6 +478,12 @@ const dataConstruct = {
 };
 const reqs = new Requerimientos ( dataConstruct );
 
+/**
+ * Inicializa la lógica a ejecutar cuando el documento HTML está listo.
+ *
+ * Aquí se colocan las inicializaciones y los manejadores de eventos que
+ * deben ejecutarse una vez cargado el DOM, utilizando jQuery(document).ready.
+ */
 jQuery( document ).ready(function(){
 	reqs.dibujarDataTable();
 });

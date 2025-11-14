@@ -12,6 +12,7 @@ class Cargadatoslog extends Clsdatos {
 	private $cargadatos = "";
 	
     /**
+     * Obtiene el ID del registro de carga de datos.
      * @return number
      */
     public function getId()
@@ -20,6 +21,7 @@ class Cargadatoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene los usuarios asociados al registro de carga de datos.
      * @return string
      */
     public function getUsuarios()
@@ -28,6 +30,7 @@ class Cargadatoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha del registro de carga de datos.
      * @return string
      */
     public function getFecha()
@@ -36,6 +39,7 @@ class Cargadatoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene los datos de carga asociados al registro.
      * @return string
      */
     public function getCargadatos()
@@ -44,6 +48,7 @@ class Cargadatoslog extends Clsdatos {
     }
 
     /**
+     * Establece el ID del registro de carga de datos.
      * @param number $id
      */
     public function setId($id)
@@ -52,6 +57,7 @@ class Cargadatoslog extends Clsdatos {
     }
 
     /**
+     * Establece los usuarios asociados al registro de carga de datos.
      * @param string $usuarios
      */
     public function setUsuarios($usuarios)
@@ -60,6 +66,7 @@ class Cargadatoslog extends Clsdatos {
     }
 
     /**
+     *  Establece la fecha del registro de carga de datos.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -68,6 +75,7 @@ class Cargadatoslog extends Clsdatos {
     }
 
     /**
+     * Establece los datos de carga asociados al registro.
      * @param string $cargadatos
      */
     public function setCargadatos($cargadatos)

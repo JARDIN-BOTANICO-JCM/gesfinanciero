@@ -166,6 +166,17 @@ foreach( $extPo as $_i ){
 </div>
 
 <script type="application/javascript">
+
+/**
+ * Maneja el cambio del logo de la institución a partir de un input file.
+ *
+ * Muestra un modal de carga, valida la extensión (jpg/jpeg/png/apng),
+ * envía el archivo mediante FormData al endpoint AJAX y, en caso de éxito,
+ * actualiza la imagen con id "img-uploaded" y cierra el modal. En error muestra
+ * un modal con la respuesta del servidor.
+ *
+ * @param HTMLElement ipfl Elemento <input type="file"> que contiene el archivo seleccionado.
+ */
 const logoinst_change = function( ipfl ) {
 	const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
     const objmdl = mngModal.dibujar( opc );
@@ -206,10 +217,20 @@ const logoinst_change = function( ipfl ) {
 	}
 };
 
+/**
+ * Dispara un evento 'click' en el elemento con id "logoinst".
+ *
+ * Utiliza jQuery para simular un clic en '#logoinst'.
+ */
 const logoinst_click = function(){
 	jQuery('#logoinst').trigger('click');
 };
 
+/**
+ * Inicializa la lista de directores al cargar el documento.
+ * Construye la configuración necesaria (elemento, datos AJAX, item por defecto y campos)
+ * y llama a __AgregarDatosLista para poblar el selector.
+ */
 jQuery( document ).ready(function(){
 	var adlCfg = {
 		'elId' : '#director',
@@ -222,6 +243,14 @@ jQuery( document ).ready(function(){
 
 });
 
+/**
+ * Actualizar la configuración mediante envío AJAX.
+ *
+ * Valida el formulario 'frmvalcls', muestra un modal de carga,
+ * envía los datos al servidor y muestra mensajes de éxito o error.
+ *
+ * @return void
+ */
 const actualizar = function(){
 	ut.validarFrm('frmvalcls', function ( r ) {
 		const opc = { 'id' : 'ajaxldr' };

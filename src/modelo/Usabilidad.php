@@ -14,6 +14,7 @@ class Usabilidad extends Clsdatos {
     private $fecha = "1900-01-01 00:00:00";
     private $ip = "0.0.0.0";
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -22,6 +23,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador de referencia de usabilidad.
      * @return number
      */
     public function getUsabilidadref_id()
@@ -30,6 +32,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Obtiene el valor.
      * @return string
      */
     public function getValor()
@@ -38,6 +41,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Obtiene el usuario.
      * @return string
      */
     public function getUsuario()
@@ -46,6 +50,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Obtiene la URL de referencia.
      * @return string
      */
     public function getUrlref()
@@ -54,6 +59,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha.
      * @return string
      */
     public function getFecha()
@@ -64,6 +70,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Obtiene la IP.
      * @return string
      */
     public function getIp()
@@ -72,6 +79,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -80,6 +88,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Establece el identificador de referencia de usabilidad.
      * @param number $usabilidadref_id
      */
     public function setUsabilidadref_id($usabilidadref_id)
@@ -88,6 +97,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Establece el valor.
      * @param string $valor
      */
     public function setValor($valor)
@@ -96,6 +106,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Establece el usuario.
      * @param string $usuario
      */
     public function setUsuario($usuario)
@@ -104,6 +115,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Establece la URL de referencia.
      * @param string $urlref
      */
     public function setUrlref($urlref)
@@ -112,6 +124,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Establece la fecha.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -120,6 +133,7 @@ class Usabilidad extends Clsdatos {
     }
 
     /**
+     * Establece la IP.
      * @param string $ip
      */
     public function setIp($ip)

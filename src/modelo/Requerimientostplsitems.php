@@ -14,6 +14,7 @@ class Requerimientostplsitems extends Clsdatos {
     private $acepta = "";
     
     /**
+     * Obtiene el valor aceptado para el requisito del template.
      * @return string
      */
     public function getAcepta()
@@ -22,6 +23,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Establece el valor aceptado para el requisito del template.
      * @param string $acepta
      */
     public function setAcepta($acepta)
@@ -30,6 +32,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Obtiene si el requisito del template es requerido.
      * @return number
      */
     public function getRequerido()
@@ -38,6 +41,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Establece si el requisito del template es requerido.
      * @param number $requerido
      */
     public function setRequerido($requerido)
@@ -46,6 +50,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del tipo de requisito del paquete.
      * @return number
      */
     public function getPaquetereqtipos_id()
@@ -54,6 +59,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del tipo de requisito del paquete.
      * @param number $paquetereqtipos_id
      */
     public function setPaquetereqtipos_id($paquetereqtipos_id)
@@ -62,6 +68,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del requisito del template.
      * @return number
      */
     public function getId()
@@ -70,6 +77,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Obtiene la referencia del requisito del template.
      * @return string
      */
     public function getRef()
@@ -78,6 +86,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Obtiene la descripción del requisito del template.
      * @return string
      */
     public function getDescripcion()
@@ -86,6 +95,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del requisito del template.
      * @return number
      */
     public function getRequerimientostpls_id()
@@ -94,6 +104,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del requisito del template.
      * @param number $id
      */
     public function setId($id)
@@ -102,6 +113,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Establece la referencia del requisito del template.
      * @param string $ref
      */
     public function setRef($ref)
@@ -110,6 +122,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Establece la descripción del requisito del template.
      * @param string $descripcion
      */
     public function setDescripcion($descripcion)
@@ -118,6 +131,7 @@ class Requerimientostplsitems extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del requisito del template.
      * @param number $requerimientostpls_id
      */
     public function setRequerimientostpls_id($requerimientostpls_id)

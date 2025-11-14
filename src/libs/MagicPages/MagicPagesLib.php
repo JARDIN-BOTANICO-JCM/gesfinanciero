@@ -148,6 +148,13 @@ class MagicPagesLib {
         }
     }
     
+    /**
+     * Elimina un registro de la tabla "magicpages" usando el campo y el id indicados.
+     *
+     * @param array $d Matriz con 'id' (valor del identificador) y 'campo' (nombre del campo).
+     * @return bool True si la eliminación fue exitosa.
+     * @throws \Exception En caso de error durante la operación de borrado.
+     */
     private static function Eliminar ( $d ) {
         
         $id = $d['id'];
@@ -164,6 +171,13 @@ class MagicPagesLib {
         
     }
     
+    /**
+     * Elimina un registro por su identificador.
+     *
+     * @param array $d Arreglo con la clave 'id' (obligatoria).
+     * @return mixed Resultado de la operación Eliminar.
+     * @throws \Exception Si no se proporciona 'id' o ocurre un error en la eliminación.
+     */
     public static function EliminarPorId ( $d ){
         if ( !isset ( $d['id'] ) ) throw new \Exception( 'MagicPagesLib.EliminarPorId: El id es obligatorio.');  
         
@@ -174,6 +188,15 @@ class MagicPagesLib {
         }
     }
     
+    /**
+     * Elimina una entrada usando su código.
+     *
+     * Requiere que $d['id'] esté definido; invoca self::Eliminar con "campo" => 'codigo'.
+     *
+     * @param array $d Matriz que debe contener 'id' (código) a eliminar.
+     * @return mixed Resultado devuelto por self::Eliminar.
+     * @throws \Exception Si no se proporciona 'id' o si ocurre un error en la eliminación.
+     */
     public static function EliminarPorCodigo ( $d ){
         if ( !isset ( $d['id'] ) ) throw new \Exception( 'MagicPagesLib.EliminarPorCodigo: El id es obligatorio.');
         
@@ -184,6 +207,14 @@ class MagicPagesLib {
         }
     }
     
+    /**
+     * Elimina todos los registros de la tabla "magicpages".
+     *
+     * Realiza un borrado masivo mediante Singleton::_classicDelete.
+     *
+     * @return bool True si la operación se completa correctamente.
+     * @throws \Exception Si ocurre un error durante el proceso de eliminación.
+     */
     public static function EliminarTodo () {
         
         $tb = "magicpages ";
@@ -198,11 +229,23 @@ class MagicPagesLib {
         
     }
     
+    /**
+     * Carga la plantilla Magicpages.phtml para mostrar la vista.
+     *
+     * @param mixed $d Datos crudos a exponer en la plantilla.
+     * @return void No devuelve valor; incluye el archivo en el scope actual.
+     */
     public static function ObtenerVista( $d ) {
         $raw = $d;
         include_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . "Magicpages.phtml";
     }
     
+    /**
+     * Incluye y muestra la plantilla de vista de error.
+     *
+     * @param mixed $d Datos crudos de error que serán utilizados por la vista.
+     * @return void
+     */
     public static function ObtenerVistaError( $d ) {
         $raw = $d;
         include_once dirname( __FILE__ ) . DIRECTORY_SEPARATOR . "MagicpagesNoCode.phtml";

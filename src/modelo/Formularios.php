@@ -16,6 +16,7 @@ class Formularios extends Clsdatos {
 	private $formulariosestados_id = 0;
 	
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -24,6 +25,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre.
      * @return string
      */
     public function getNombre()
@@ -32,6 +34,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Obtiene el título.
      * @return string
      */
     public function getTitulo()
@@ -40,6 +43,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Obtiene la descripción.
      * @return string
      */
     public function getDescripcion()
@@ -48,6 +52,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Obtiene el JSON.
      * @return string
      */
     public function getJson()
@@ -56,6 +61,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha.
      * @return string
      */
     public function getFecha()
@@ -64,6 +70,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Obtiene los usuarios.
      * @return string
      */
     public function getUsuarios()
@@ -72,6 +79,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del formulario.
      * @return number
      */
     public function getFormulariosestados_id()
@@ -80,6 +88,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -88,6 +97,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece el nombre.
      * @param string $nombre
      */
     public function setNombre($nombre)
@@ -96,6 +106,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece el título.
      * @param string $titulo
      */
     public function setTitulo($titulo)
@@ -104,6 +115,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece la descripción.
      * @param string $descripcion
      */
     public function setDescripcion($descripcion)
@@ -112,6 +124,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece el JSON.
      * @param string $json
      */
     public function setJson($json)
@@ -120,6 +133,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece la fecha.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -128,6 +142,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece los usuarios.
      * @param string $usuarios
      */
     public function setUsuarios($usuarios)
@@ -136,6 +151,7 @@ class Formularios extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del formulario.
      * @param number $formulariosestados_id
      */
     public function setFormulariosestados_id($formulariosestados_id)

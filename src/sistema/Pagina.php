@@ -423,6 +423,15 @@ class Pagina {
 		return "";
 	}
 	
+	/**
+	 * Renderiza la plantilla correspondiente a la clase actual.
+	 *
+	 * Construye la ruta hacia el archivo .phtml dentro de la carpeta "tpls"
+	 * (considerando la propiedad $subfolders y removiendo "Ctrl" del nombre de clase)
+	 * y lo incluye si existe.
+	 *
+	 * @return void
+	 */
 	public function render(){
 		$url_base = dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . "tpls" . DIRECTORY_SEPARATOR;
 		$flTplFile = pathinfo( $url_base . get_class( $this ) . ".php" );

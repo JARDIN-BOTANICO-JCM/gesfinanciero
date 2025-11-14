@@ -126,6 +126,13 @@ use src\sistema\Headerbar\Headerbar;
 var fieldIdCounter = 0;
 var formulario = [];
 
+/**
+ * Añade dinámicamente un campo al contenedor especificado.
+ *
+ * @param {Element|jQuery|string} container Contenedor (elemento, selector o jQuery) donde se insertará el campo.
+ * @param {Object} data Objeto con la configuración del campo (tipo, nombre, valor y atributos opcionales).
+ * @return {void}
+ */
 function addField(container, data) {
     var id = 'field-' + fieldIdCounter;
     var field = jQuery('<div class="card p-3 mb-3 dragActivo" data-id="' + id + '"></div>');
@@ -191,6 +198,13 @@ function addField(container, data) {
     fieldIdCounter++;
 }
 
+/**
+ * Actualiza el tipo de campo en la interfaz según la opción seleccionada.
+ *
+ * @param {HTMLElement} selectEl Elemento <select> que determina el tipo a mostrar.
+ * @param {HTMLElement} container Contenedor DOM donde se renderiza/actualiza el campo.
+ * @param {Object} [data]       Datos opcionales para configurar el nuevo campo (valores, atributos, etc.).
+ */
 function updateFieldType(selectEl, container, data) {
     container.empty();
     var type = selectEl.val();
@@ -222,6 +236,12 @@ function updateFieldType(selectEl, container, data) {
     // datetime ya no tiene campo flatpickr
 }
 
+/**
+ * Serializa los campos de un formulario ubicado dentro del contenedor dado.
+ *
+ * @param {HTMLElement|string|jQuery} container Contenedor (elemento DOM, selector o jQuery) que contiene el formulario.
+ * @returns {Object} Objeto con pares nombre:valor representando los campos serializados.
+ */
 function serializeForm(container) {
   var result = [];
   container.children('.card').each(function () {
@@ -248,11 +268,26 @@ function serializeForm(container) {
   return result;
 }
 
+/**
+ * Guarda los datos del formulario en formato JSON.
+ *
+ * Serializa los campos del formulario y los almacena o envía
+ * según la lógica definida en la implementación.
+ *
+ * @return void
+ */
 function guardarJson() {
   formulario = serializeForm(jQuery('#form-container'));
   console.log("Formulario guardado:", formulario);
 }
 
+/**
+ * Carga datos desde un JSON en un contenedor del DOM.
+ *
+ * @param {Object|string} json    Objeto JSON o cadena con los datos a procesar.
+ * @param {HTMLElement|string} container  Elemento DOM o selector donde insertar/actualizar el contenido.
+ * @returns {void}
+ */
 function loadFromJson(json, container) {
   container.empty();
   for (var i = 0; i < json.length; i++) {
@@ -264,6 +299,13 @@ function loadFromJson(json, container) {
 <script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
 <script type="application/javascript">
 let idMod = null;
+
+/**
+ * Muestra y prepara el modal del formulario.
+ *
+ * @param {Object} d Datos o configuración para inicializar y poblar el formulario.
+ * @returns {void}
+ */
 const modalFormulario = function ( d ) {
     var opc = {
             'id' : d['id'],
@@ -277,6 +319,12 @@ const modalFormulario = function ( d ) {
     return mngModal.dibujar( opc );
 };
 
+/**
+ * Maneja la acción de agregar un nuevo registro desde el formulario:
+ * valida entradas, envía los datos al servidor y actualiza la interfaz.
+ *
+ * @returns {void}
+ */
 const btnAgregarReg = function(){
 	idMod = null;
 	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Agregar registro'} );
@@ -292,6 +340,12 @@ const btnAgregarReg = function(){
 	jQuery( _m ).modal('show');	
 };
 
+/**
+ * Maneja la acción de "guardar" del formulario.
+ * Realiza validaciones y envía los datos para su almacenamiento.
+ *
+ * @return void
+ */
 const btnGuardar = function(){
 	ut.validarFrm('frmvalcls', function ( r ) {
 		closeAllModal();
@@ -333,6 +387,12 @@ const btnGuardar = function(){
 	});
 };
 
+/**
+ * Maneja la acción del botón para modificar un registro.
+ *
+ * @param {Object} o - Objeto con datos u opciones del registro a modificar.
+ * @returns {void}
+ */
 const btnModRegistro = function ( o ) {
 	fieldIdCounter = 0;
 	const _o = jQuery( o );
@@ -385,6 +445,13 @@ const btnModRegistro = function ( o ) {
     jQuery( _m ).modal('show');
 };
 
+/**
+ * Requerimientos - Constructor del módulo.
+ *
+ * Inicializa el módulo de requerimientos con el constructor de datos proporcionado.
+ *
+ * @param mixed dC Constructor de datos (data constructor).
+ */
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
 	const tablaCont = dC['tableContainer'];
@@ -466,6 +533,10 @@ const dataConstruct = {
 };
 const reqs = new Requerimientos ( dataConstruct );
 
+/**
+ * Se ejecuta cuando el DOM está listo.
+ * Inicializa manejadores de eventos, plugins y cualquier configuración dependiente del DOM.
+ */
 jQuery( document ).ready(function(){
 	reqs.dibujarDataTable();
 });

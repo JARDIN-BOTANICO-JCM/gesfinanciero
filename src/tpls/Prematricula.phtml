@@ -268,6 +268,12 @@ try {
         <script type="application/javascript">
     	const activo = "list-group-item-info"; 
     	
+        /**
+         * Aplica la lógica de "deOrder" al argumento proporcionado.
+         *
+         * @param mixed $o Valor u objeto de entrada a procesar.
+         * @return mixed Resultado devuelto por la función deOrder.
+         */
         const deOrder = function( o ){
         	const _o = jQuery( o );
         	const fin = _o.data('fin');
@@ -283,6 +289,13 @@ try {
         		
         	});
         };
+        
+        /**
+         * Construye o actualiza la tabla de efectivos usando los datos u opciones proporcionadas.
+         *
+         * @param {Object} o Objeto con configuración y/o datos necesarios para generar la tabla.
+         * @returns {void} No devuelve valor; realiza cambios en el DOM o en la estructura interna.
+         */
         const tabEff = function( o ){
         	const _o = jQuery( o );
         	if( !_o.hasClass( activo ) ){
@@ -300,6 +313,13 @@ try {
         	}
         };
         
+        /**
+         * Recolecta datos desde un formulario y los entrega a un callback.
+         *
+         * @param {HTMLFormElement|Object} frm Elemento formulario o conjunto de datos a procesar.
+         * @param {Function} fn Callback que se ejecuta con los datos recolectados.
+         * @returns {void}
+         */
         const recolectar = function( frm, fn ){
         	var o = jQuery( frm );
       		jsonObj = [];
@@ -315,6 +335,12 @@ try {
       		
       		fn( tmpJson );
         };
+        
+        /**
+         * Actualiza la prematrícula: envía los cambios al servidor y refresca la interfaz según la respuesta.
+         *
+         * @return void
+         */
         const actualizar = function(){
             var fld = [];
             
@@ -380,6 +406,11 @@ try {
         	});
         };
         
+        /**
+         * Genera la plantilla HTML para el bloque de información del acudiente.
+         * @param {Object} d - Datos del acudiente (nombre, documento, teléfono, etc.).
+         * @returns {string} Cadena HTML con la plantilla renderizada.
+         */
         const tplAcudiente = function( d ){
         	const rHtml = [];
         	rHtml.push( '<div class="mb-3 col-md-12"> ');
@@ -398,6 +429,12 @@ try {
             return rHtml.join('');
         };
         
+        /**
+         * Genera el template HTML para un ítem de dependientes.
+         *
+         * @param {Object} _el Datos del dependiente.
+         * @returns {string} HTML del elemento dependiente.
+         */
         const tplItemDependientes = function( _el ){
         	const estid = _el['estudiantes_id'];
 	        let chkDt = "";
@@ -421,6 +458,12 @@ try {
         	return rHtml.join('');
         };
         
+        /**
+         * Verifica si existe una revisión en el objeto proporcionado.
+         *
+         * @param {*} o Objeto o valor a comprobar.
+         * @returns {boolean} True si la revisión existe; false en caso contrario.
+         */
         const revExists = function( o ){
         	const _o = jQuery( o );
         	const cls = _o.parent().parent().parent();
@@ -512,6 +555,12 @@ try {
         	});
         };
         
+        /**
+         * continuaData - Procesa los datos recibidos y continua el flujo de la prematrícula.
+         *
+         * @param {Object} o  Objeto con los datos a procesar (estado/formulario).
+         * @returns {void}    No retorna valor; actualiza la interfaz o el estado según 'o'.
+         */
         const continuaData = function( o ){
 			const _o = jQuery( o );
 			const dt = _o.data();
@@ -525,6 +574,12 @@ try {
 			}
         };
         
+        /**
+         * Abre y configura la ventana/modal para agregar un nuevo dependiente.
+         *
+         * @param {Object} o Objeto de opciones (datos iniciales, callbacks y configuraciones).
+         * @returns {void}
+         */
         const agregarNuevoDependienteWin = function( o ){
         	const _o = jQuery( o );
         	const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Nuevo dependiente','btnCerrarX' : true, 'center' : true, 'level' : 'err', 'size' : 'modal-lg' } );
@@ -577,6 +632,11 @@ try {
 			jQuery( objmdlErr ).modal('show');
         };
         
+        /**
+         * Agrega un nuevo dependiente al formulario/listado de prematrícula.
+         * @param {Object} o - Objeto con los datos del dependiente (nombre, parentesco, edad, etc.).
+         * @returns {void}
+         */
         const agregarNuevoDependiente = function( o ){
         	const _o = jQuery( o );
         	const dt = _o.data();
@@ -624,6 +684,11 @@ try {
         	});
         };
         
+        /**
+         * Inicializa la lógica de la plantilla de prematrícula cuando el DOM está listo.
+         *
+         * Registra controladores de eventos e inicializa los componentes de interfaz necesarios.
+         */
         jQuery( document ).ready(function(){
         	jQuery('.zaque-selectpck').selectpicker();
         });

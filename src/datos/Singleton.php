@@ -9,6 +9,18 @@ class Singleton {
 	
 	public static $lnk;
 	
+	/**
+	 * Constructor del singleton de conexión MySQL.
+	 *
+	 * Inicializa la conexión mysqli única (self::$lnk) si no existe y devuelve la instancia.
+	 * Si no se pasan parámetros, toma los valores por defecto desde Corporation.
+	 *
+	 * @param string $host Host de la base de datos (opcional).
+	 * @param string $db   Nombre de la base de datos (opcional).
+	 * @param string $uname Usuario de la base de datos (opcional).
+	 * @param string $pass Contraseña de la base de datos (opcional).
+	 * @return \mysqli|null Instancia de mysqli conectada o null en caso de fallo.
+	 */
 	function __construct($host='',$db='',$uname='',$pass=''){
 		if( !self::$lnk ){
 		    include_once dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR . "repo" . DIRECTORY_SEPARATOR . "corp" . DIRECTORY_SEPARATOR . "Corporation.php";
@@ -29,6 +41,14 @@ class Singleton {
 		}
 	}
 	
+	/**
+	 * Convierte un arreglo de objetos en una tabla de referencia asociativa.
+	 *
+	 * @param array  $arreglo     Arreglo de objetos.
+	 * @param string $campoId     Método a invocar en cada objeto para obtener la clave (por defecto "getId").
+	 * @param string $campoValor  Método a invocar en cada objeto para obtener el valor (por defecto "getNombre").
+	 * @return array Tabla asociativa con id => valor.
+	 */
 	public static function _arrayToTableReference($arreglo, $campoId = "getId", $campoValor = "getNombre"){
 		$tablaReferencia = array();
 		foreach ($arreglo as $key => $value) {
@@ -37,6 +57,16 @@ class Singleton {
 		return $tablaReferencia;
 	}
 	
+	/**
+	 * Obtiene los nombres de las columnas (metadatos) de la primera fila de una tabla.
+	 *
+	 * Ejecuta un SELECT * LIMIT 1 sobre la tabla indicada y devuelve un array
+	 * asociativo donde las claves y los valores son los nombres de los campos.
+	 * En caso de error retorna un array con la clave "err_info" y el mensaje de error.
+	 *
+	 * @param string $tb Nombre de la tabla.
+	 * @return array Array con los nombres de las columnas o ['err_info' => 'mensaje'] en caso de fallo.
+	 */
 	public static function _metaDatos( $tb ){
 		$s = new Singleton();
 		$stmt = null;
@@ -67,6 +97,22 @@ class Singleton {
 	const SQLTP_JSON           = 'decimal';
 	const SQLTP_TEXT           = 'text';
 	const SQLTP_VARCHAR        = 'varchar';
+
+	/**
+	 * Obtiene metadatos de las columnas de una tabla de la base de datos.
+	 *
+	 * Realiza un SELECT limitado a 1 fila sobre la tabla indicada (convertida a minúsculas)
+	 * y devuelve un arreglo asociativo por nombre de columna con información:
+	 *  - 'nombre' => nombre de la columna
+	 *  - 'tipoid' => identificador numérico del tipo MySQL
+	 *  - 'tipo'   => tipo mapeado a constantes internas (SQLTP_...)
+	 *  - 'largo'  => longitud del campo
+	 *
+	 * En caso de error devuelve un arreglo con la clave 'err_info' con el mensaje de error.
+	 *
+	 * @param string $tb Nombre de la tabla a inspeccionar.
+	 * @return array Arreglo asociativo de metadatos por columna o ['err_info' => string] en error.
+	 */
 	public static function _metaDatosPlus( $tb ){
 	    new Singleton();
 	    
@@ -206,6 +252,14 @@ class Singleton {
 	    
 	}
 	
+	/**
+	 * Elimina registros de la tabla indicada construyendo y ejecutando una sentencia DELETE.
+	 *
+	 * @param string $tb    Nombre de la tabla (se convierte a minúsculas).
+	 * @param string $extra Cláusulas adicionales para la consulta (por ejemplo WHERE).
+	 * @return bool         True si la eliminación fue exitosa.
+	 * @throws Exception    Si ocurre un error al ejecutar la consulta.
+	 */
 	public static function _classicDelete($tb, $extra){
 	    $s = new Singleton();
 	    $query = "DELETE FROM " . strtolower( $tb ) . " " . $extra;
@@ -222,6 +276,15 @@ class Singleton {
 	    }
 	}
 	
+	/**
+	 * Actualiza registros en la tabla indicada construyendo y ejecutando una consulta UPDATE.
+	 *
+	 * @param string $tb    Nombre de la tabla (se convierte a minúsculas).
+	 * @param string $set   Cláusula SET (ej. "campo='valor'").
+	 * @param string $extra Texto adicional para la consulta (ej. "WHERE id=1").
+	 * @return bool         Devuelve true si la actualización fue exitosa.
+	 * @throws Exception    Lanza excepción con el error de la conexión si falla la consulta.
+	 */
 	public static function _classicUpdate($tb, $set, $extra){
 	    $s = new Singleton();
 	    $query = "UPDATE " . strtolower( $tb ) . " set " . $set . " " . $extra;
@@ -239,6 +302,15 @@ class Singleton {
 	    return false;
 	}
 	
+	/**
+	 * Realiza un SELECT sobre la tabla indicada usando el Singleton y devuelve
+	 * todas las filas como un arreglo asociativo.
+	 *
+	 * @param string $tb    Nombre de la tabla.
+	 * @param string $ver   Columnas a seleccionar (por defecto "*").
+	 * @param string $extra Cláusulas SQL adicionales (WHERE, ORDER BY, etc.).
+	 * @return array        Arreglo de filas asociativas (vacío si no hay resultados).
+	 */
 	public static function _classicReadInfo($tb, $ver = "*", $extra = ""){
 	    $s = new Singleton();
 	    $query = "SELECT " . strtolower( $ver ) . " FROM " . strtolower( $tb ) . " " . $extra;
@@ -253,6 +325,17 @@ class Singleton {
 	    return $rows;
 	}
 	
+	/**
+	 * Inserta uno o varios registros mediante una consulta INSERT construida manualmente.
+	 *
+	 * Construye y ejecuta "INSERT INTO <tabla> <campos> <valores>" usando la conexión singleton.
+	 *
+	 * @param string $tb  Nombre de la tabla (se convierte a minúsculas).
+	 * @param string $vls Cadena con la cláusula VALUES o los valores a insertar.
+	 * @param string $fld Opcional. Lista de campos (ej. "(col1,col2)").
+	 * @return bool Devuelve true si la consulta se ejecutó correctamente.
+	 * @throws Exception Si ocurre un error en la ejecución, lanza la excepción con el mensaje de la conexión.
+	 */
 	public static function _classicInsertMultiQuery($tb, $vls, $fld = ""){
 	    $s = new Singleton();
 	    $query = "INSERT INTO " . strtolower( $tb ) . " " . $fld . " " . $vls;
@@ -269,6 +352,15 @@ class Singleton {
 	    }
 	}
 	
+	/**
+	 * Inserta una fila en la tabla indicada mediante una consulta INSERT construida.
+	 *
+	 * @param string $tb  Nombre de la tabla (se convierte a minúsculas).
+	 * @param string $vls Cadena con los valores para VALUES (ej. "(1,'texto')").
+	 * @param string $fld Campos opcionales a insertar (ej. "(id,nombre)").
+	 * @return bool Devuelve true si la inserción fue exitosa.
+	 * @throws Exception Si la consulta falla, se lanza la excepción con el error.
+	 */
     public static function _classicInsertUniqQuery($tb, $vls, $fld = ""){
         $s = new Singleton();
         $query = "INSERT INTO " . strtolower( $tb ) . " " . $fld . " VALUES " . $vls;
@@ -285,6 +377,16 @@ class Singleton {
         }
 	}
 	
+	/**
+	 * Genera archivos de modelo y vistas a partir de las tablas de la base de datos.
+	 *
+	 * Lee las tablas del esquema configurado, crea las carpetas temporales (tmpmodelo y tmpvistas)
+	 * y escribe para cada tabla una clase PHP (modelo) y su plantilla PHTML (formulario). 
+	 * Si $jsMenu es true, en lugar de escribir archivos imprime las líneas para agregar entradas al menú JS.
+	 *
+	 * @param bool $jsMenu Opcional. Si es true solo imprime las líneas de menú JS; por defecto false.
+	 * @return void
+	 */
 	public static function _modelos($jsMenu = false){
 		include_once dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR . "repo" . DIRECTORY_SEPARATOR . "corp" . DIRECTORY_SEPARATOR . "Corporation.php";
 		$_db = Corporation::DBNAME;
@@ -388,16 +490,39 @@ class Singleton {
 		
 	}
 	
+	/**
+	 * Escribe (sobrescribe) texto en un archivo.
+	 *
+	 * @param string $flwr Ruta del archivo a escribir.
+	 * @param string $txt  Texto a guardar en el archivo.
+	 * @return void
+	 */
 	public static function RwFile($flwr, $txt){
 		$decF = fopen($flwr, "w");
 		fwrite($decF, $txt);
 		fclose($decF);
 	}
 	
+	/**
+	 * Convierte la primera letra de una cadena a mayúscula.
+	 *
+	 * @param string $str Cadena de entrada.
+	 * @return string Cadena resultante con la primera letra en mayúscula (si está vacía, devuelve cadena vacía).
+	 */
 	public static function toCap( $str ){
 		return strtoupper( substr($str, 0, 1) ) . substr($str, 1, strlen( $str ));
 	}
 	
+	/**
+	 * Genera y devuelve la salida formateada para DataTables usando SSP::simple.
+	 *
+	 * Construye las columnas según la estructura de la tabla indicada en $data['tb'],
+	 * aplica formateadores para fechas y decimales, y permite parámetros de codificación
+	 * opcionales ('codifica_a', 'codifica_desde').
+	 *
+	 * @param array $data Array de configuración. Requiere 'tb' (nombre de la tabla). Opcionales: 'codifica_a', 'codifica_desde'.
+	 * @return array Estructura de datos preparada para DataTables (resultado de SSP::simple).
+	 */
 	public static function _dataTable( $data ){
 	    
 	    $table = $data['tb'];
@@ -466,6 +591,13 @@ class Singleton {
 	    return SSP::simple( $_POST, $sql_details, $table, $primaryKey, $columns, $codifica ) ;
 	}
 	
+	/**
+	 * Destructor.
+	 *
+	 * Cierra la conexión almacenada en self::$lnk si existe y dispone del método close().
+	 *
+	 * @return void
+	 */
 	function __destruct(){ 
 		if( !self::$lnk ){
 		    if( !is_null(self::$lnk) ){
@@ -476,6 +608,21 @@ class Singleton {
 		}
 	}
 	
+	/**
+	 * Lee estados desde la tabla indicada aplicando filtros, orden y límite.
+	 *
+	 * Recibe un array de opciones ($d) con claves comunes:
+	 * - 'tabla'   (string) Nombre de la tabla a consultar (obligatorio).
+	 * - 'id'      (int)    Filtrar por id.
+	 * - 'ordendesc' (int|string) Ordenar por columna/índice en DESC.
+	 * - 'ordenasc'  (int|string) Ordenar por columna/índice en ASC.
+	 * - 'limite'  (int)    Límite de filas a devolver.
+	 * - 'debug'   (bool)   Si es true imprime la consulta SQL y detiene la ejecución.
+	 *
+	 * @param array $d Parámetros de consulta.
+	 * @return mixed Resultado de la consulta (estructura devuelta por _safeRawQuery).
+	 * @throws \Exception Si la consulta devuelve información de error ('err_info').
+	 */
 	public static function _readEstado( $d ) {
 	    $tabla = $d['tabla'];
 	    $r = new Singleton();
@@ -536,6 +683,16 @@ class Singleton {
 	    return $r;
 	}
 	
+	/**
+	 * Actualiza registros de forma segura usando sentencias preparadas.
+	 *
+	 * @param string $table Nombre de la tabla a actualizar.
+	 * @param array  $data  Array asociativo (columna => valor) para el SET.
+	 * @param string $where Condición WHERE (sin la palabra "WHERE").
+	 * @param array  $params Valores adicionales a enlazar para la cláusula WHERE.
+	 * @return bool True si la actualización se realizó correctamente.
+	 * @throws Exception Si falla la preparación o ejecución de la consulta.
+	 */
 	public static function _safeUpdate($table, $data, $where, $params = []) {
 	    $s = new Singleton();
 	    $sets = [];
@@ -564,6 +721,17 @@ class Singleton {
 	    return true;
 	}
 	
+	/**
+	 * Elimina filas usando prepared statements de manera segura.
+	 *
+	 * Ejecuta "DELETE FROM `tabla` WHERE ..." y enlaza los parámetros como strings.
+	 *
+	 * @param string $table Nombre de la tabla (no incluir datos de usuario sin validar).
+	 * @param string $where Cláusula WHERE que debe contener marcadores "?" para los parámetros.
+	 * @param array  $params Valores a enlazar a los marcadores (se tratan como cadenas).
+	 * @return bool True si la eliminación se realiza correctamente.
+	 * @throws Exception Si falla la preparación o la ejecución de la consulta.
+	 */
 	public static function _safeDelete($table, $where, $params = []) {
 	    $s = new Singleton();
 	    $sql = "DELETE FROM `$table` WHERE $where";
@@ -580,6 +748,14 @@ class Singleton {
 	    return true;
 	}
 	
+	/**
+	 * Inserta de forma segura una fila en una tabla usando prepared statements.
+	 *
+	 * @param string $table Nombre de la tabla destino.
+	 * @param array  $data  Array asociativo con campo => valor a insertar.
+	 * @return bool True si la inserción se realizó correctamente.
+	 * @throws Exception Si falla la preparación o ejecución del statement.
+	 */
 	public static function _safeInsert($table, $data) {
 	    $s = new Singleton();
 	    $fields = array_keys($data);
@@ -598,6 +774,15 @@ class Singleton {
 	    return true;
 	}
 	
+	/**
+	 * Ejecuta una consulta SELECT de forma segura usando prepared statements.
+	 *
+	 * @param string $table  Nombre de la tabla (se encierra entre backticks).
+	 * @param string $fields Campos a seleccionar (por defecto '*').
+	 * @param string $where  Cláusula WHERE sin la palabra WHERE (opcional).
+	 * @param array  $params Valores a enlazar a la consulta; todos se tratan como strings.
+	 * @return array Array de filas asociativas en caso de éxito, o ['err_info' => string] con información de error.
+	 */
 	public static function _safeSelect($table, $fields = '*', $where = '', $params = []) {
 	    $s = new Singleton();
 	    $sql = "SELECT $fields FROM `$table`" . ($where ? " WHERE $where" : "");
@@ -619,6 +804,21 @@ class Singleton {
 	    return $rows;
 	}
 	
+	/**
+	 * Ejecuta una consulta preparada sobre la conexión estática self::$lnk.
+	 *
+	 * - Si $sql comienza con "SELECT" (insensible a mayúsculas) devuelve un array
+	 *   asociativo con todas las filas (fetch_all(MYSQLI_ASSOC)).
+	 * - Para otras sentencias devuelve true al completarse correctamente.
+	 * - Los parámetros en $params se enlazan como cadenas (tipo 's') en orden.
+	 * - Cierra el statement antes de devolver el resultado.
+	 *
+	 * @param string $sql   Consulta SQL a ejecutar.
+	 * @param array  $params  (Opcional) Valores a enlazar en la consulta.
+	 * @return array|bool    Array asociativo para SELECT, true para sentencias no SELECT.
+	 * @throws Exception     Si falla la preparación o la ejecución del statement.
+	 * @static
+	 */
 	public static function _safeRawQuery($sql, $params = []) {
 	    $s = new self();
 	    $stmt = self::$lnk->prepare($sql);

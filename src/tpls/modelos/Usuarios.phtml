@@ -561,6 +561,13 @@ jQuery(document).ready( function () {
 
 });
 
+/**
+ * Rellena la lista de lugares según el departamento seleccionado.
+ *
+ * @param int|string $departamento_id ID del departamento para filtrar los lugares.
+ * @param mixed $def Valor por defecto para la selección (opcional).
+ * @return void
+ */
 const llenarLugares = function ( departamento_id, def ) {
 	var adlCfg = {
 		'elId' : '#loc_lugares_id',
@@ -571,6 +578,15 @@ const llenarLugares = function ( departamento_id, def ) {
 	__AgregarDatosLista( adlCfg );
 };
 
+/**
+ * btnAddRegistro
+ *
+ * Añade un nuevo registro desde la interfaz: abre el formulario correspondiente,
+ * inicializa valores y gestiona validaciones y estado inicial.
+ *
+ * @function btnAddRegistro
+ * @returns {void}
+ */
 var btnAddRegistro = function ( ) {
     idMod = null;
     modalFormulario();
@@ -588,6 +604,12 @@ var btnAddRegistro = function ( ) {
     <?php endif; ?>
 };
 
+/**
+ * Abre y gestiona el formulario modal para crear o editar usuarios.
+ * Inicializa eventos, valida entradas y envía los datos al servidor.
+ *
+ * @returns {void}
+ */
 var modalFormulario = function () {
     var opc = {
             'id' : 'frmNuevoRegistro',
@@ -601,6 +623,13 @@ var modalFormulario = function () {
     return mngModal.dibujar( opc );
 }
 
+/**
+ * Maneja la acción del botón "Modificar registro".
+ * Recibe opciones o datos del registro y prepara la interfaz para editarlo.
+ *
+ * @param {Object} o Datos u opciones del registro a modificar.
+ * @returns {void}
+ */
 var btnModRegistro = function ( o ) {
     var _o = jQuery( o );
     idMod = _o.attr('data-id');
@@ -684,6 +713,13 @@ var btnModRegistro = function ( o ) {
     jQuery( _m ).modal('show');
 };
 
+/**
+ * Actualiza la información de usuarios.
+ *
+ * Realiza validaciones, envía la solicitud al servidor y maneja la respuesta y errores.
+ *
+ * @returns {Promise<void>} Promesa que se resuelve al completar la operación.
+ */
 const actualizar = function(){
     var fld = [];
     
@@ -738,6 +774,12 @@ const actualizar = function(){
 	});
 };
 
+/**
+ * Elimina un registro (por ejemplo, un usuario).
+ *
+ * @param {Object} o Objeto con los datos del registro a eliminar (p. ej. { id: number }).
+ * @returns {void}
+ */
 const eliminar = function( o ){
     if (confirm('Desea eliminar?')) {
         var _o = jQuery( o );

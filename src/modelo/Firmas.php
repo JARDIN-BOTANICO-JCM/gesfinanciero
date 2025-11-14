@@ -17,6 +17,7 @@ class Firmas extends Clsdatos {
 	private $mail = "";
 	
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -25,6 +26,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del PDF.
      * @return string
      */
     public function getPdfid()
@@ -33,6 +35,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del usuario del perfil.
      * @return number
      */
     public function getPerfilusuarios_id()
@@ -41,6 +44,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del firmante.
      * @return number
      */
     public function getFirmante_id()
@@ -49,6 +53,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre completo.
      * @return string
      */
     public function getNombrefull()
@@ -57,6 +62,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene el documento.
      * @return string
      */
     public function getDocumento()
@@ -65,6 +71,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene el tipo de documento.
      * @return string
      */
     public function getTipodoc()
@@ -73,6 +80,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha.
      * @return string
      */
     public function getFecha()
@@ -81,6 +89,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Obtiene el correo electrónico.
      * @return string
      */
     public function getMail()
@@ -89,6 +98,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -97,6 +107,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del PDF.
      * @param string $pdfid
      */
     public function setPdfid($pdfid)
@@ -105,6 +116,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del usuario del perfil.
      * @param number $perfilusuarios_id
      */
     public function setPerfilusuarios_id($perfilusuarios_id)
@@ -113,6 +125,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del firmante.
      * @param number $firmante_id
      */
     public function setFirmante_id($firmante_id)
@@ -121,6 +134,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el nombre completo.
      * @param string $nombrefull
      */
     public function setNombrefull($nombrefull)
@@ -129,6 +143,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el documento.
      * @param string $documento
      */
     public function setDocumento($documento)
@@ -137,6 +152,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el tipo de documento.
      * @param string $tipodoc
      */
     public function setTipodoc($tipodoc)
@@ -145,6 +161,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece la fecha.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -153,6 +170,7 @@ class Firmas extends Clsdatos {
     }
 
     /**
+     * Establece el correo electrónico.
      * @param string $mail
      */
     public function setMail($mail)

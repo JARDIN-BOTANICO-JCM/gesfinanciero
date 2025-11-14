@@ -21,6 +21,7 @@ class Paquetesrequ extends Clsdatos {
     private $perfilmodifica = '';
     
     /**
+     * Obtiene la fecha del requisito del paquete.
      * @return string
      */
     public function getFecha()
@@ -29,6 +30,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de modificación del requisito del paquete.
      * @return string
      */
     public function getFechamod()
@@ -37,6 +39,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el usuario que modificó el requisito del paquete.
      * @return string
      */
     public function getUsuariomodifica()
@@ -45,6 +48,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el perfil que modificó el requisito del paquete.
      * @return string
      */
     public function getPerfilmodifica()
@@ -53,6 +57,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece la fecha del requisito del paquete.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -61,6 +66,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de modificación del requisito del paquete.
      * @param string $fechamod
      */
     public function setFechamod($fechamod)
@@ -69,6 +75,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el usuario que modificó el requisito del paquete.
      * @param string $usuariomodifica
      */
     public function setUsuariomodifica($usuariomodifica)
@@ -77,6 +84,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el perfil que modificó el requisito del paquete.
      * @param string $perfilmodifica
      */
     public function setPerfilmodifica($perfilmodifica)
@@ -85,6 +93,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el valor del gestor documental asociado al requisito del paquete.
      * @return string
      */
     public function getValorgestor()
@@ -93,6 +102,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el valor del gestor documental asociado al requisito del paquete.
      * @param string $valorgestor
      */
     public function setValorgestor($valorgestor)
@@ -101,6 +111,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del requisito del paquete.
      * @return number
      */
     public function getId()
@@ -109,6 +120,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene la referencia del requisito del paquete.
      * @return string
      */
     public function getRef()
@@ -117,6 +129,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el valor del requisito del paquete.
      * @return string
      */
     public function getValor()
@@ -125,6 +138,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene la descripción del requisito del paquete.
      * @return string
      */
     public function getDescripcion()
@@ -133,6 +147,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del requisito del paquete.
      * @return number
      */
     public function getPaquetesreqestados_id()
@@ -141,6 +156,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del tipo del requisito del paquete.
      * @return number
      */
     public function getPaquetereqtipos_id()
@@ -149,6 +165,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del paquete asociado al requisito.
      * @return number
      */
     public function getPaquetes_id()
@@ -157,6 +174,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del ítem de flujo asociado al requisito del paquete.
      * @return number
      */
     public function getFlujositems_id()
@@ -165,6 +183,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del requisito del paquete.
      * @param number $id
      */
     public function setId($id)
@@ -173,6 +192,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece la referencia del requisito del paquete.
      * @param string $ref
      */
     public function setRef($ref)
@@ -181,6 +201,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el valor del requisito del paquete.
      * @param string $valor
      */
     public function setValor($valor)
@@ -189,6 +210,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece la descripción del requisito del paquete.
      * @param string $descripcion
      */
     public function setDescripcion($descripcion)
@@ -197,6 +219,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del requisito del paquete.
      * @param number $paquetesreqestados_id
      */
     public function setPaquetesreqestados_id($paquetesreqestados_id)
@@ -205,6 +228,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del tipo del requisito del paquete.
      * @param number $paquetereqtipos_id
      */
     public function setPaquetereqtipos_id($paquetereqtipos_id)
@@ -213,6 +237,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del paquete asociado al requisito.
      * @param number $paquetes_id
      */
     public function setPaquetes_id($paquetes_id)
@@ -221,6 +246,7 @@ class Paquetesrequ extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del ítem de flujo asociado al requisito del paquete.
      * @param number $flujositems_id
      */
     public function setFlujositems_id($flujositems_id)

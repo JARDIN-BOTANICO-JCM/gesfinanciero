@@ -182,6 +182,13 @@ try {
 <script type="application/javascript">
 let idMod = null;
 const d_flujosestados = <?php echo json_encode( $l_flujosestados_id ); ?> ;
+
+/**
+ * Inicializa y muestra el formulario modal usando los datos recibidos.
+ *
+ * @param {Object} d Objeto con los valores para poblar los campos del formulario.
+ * @returns {void} No retorna valor; despliega y prepara el modal en la interfaz.
+ */
 const modalFormulario = function ( d ) {
     var opc = {
             'id' : d['id'],
@@ -195,6 +202,12 @@ const modalFormulario = function ( d ) {
     return mngModal.dibujar( opc );
 };
 
+/**
+ * Agrega un nuevo registro.
+ *
+ * Valida los datos del formulario, realiza la petición al servidor
+ * para crear el registro y actualiza la interfaz según la respuesta.
+ */
 const btnAgregarReg = function(){
 	idMod = null;
 	const _m = modalFormulario( { id: 'frmNuevoRegistro', title : 'Agregar registro'} );
@@ -210,6 +223,10 @@ const btnAgregarReg = function(){
 	jQuery( _m ).modal('show');	
 };
 
+/**
+ * Muestra u oculta elementos externos según las opciones proporcionadas.
+ * @param {Object} o - Objeto con las opciones/estado para controlar la visualización.
+ */
 const mostrarExternos = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -225,6 +242,12 @@ const mostrarExternos = function( o ){
 	}
 };
 
+/**
+ * Llena los campos/elementos con los datos del objeto proporcionado.
+ *
+ * @param mixed $o Objeto o arreglo con los valores a insertar.
+ * @return void
+ */
 const llenarDatos = function( o ){
 	const _o = jQuery( o );
 	const _sel = _o.find('option:selected') ;
@@ -245,6 +268,13 @@ const llenarDatos = function( o ){
 };
 
 let campos_i = 0;
+
+/**
+ * Añade campos dinámicos al formulario según las opciones recibidas.
+ *
+ * @param {Object} o Opciones/configuración para la creación de los campos (contenedor, plantilla, valores, callbacks, etc.).
+ * @returns {void}
+ */
 const btnAddCampos = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -316,6 +346,11 @@ const btnAddCampos = function( o ){
 	return rId;
 };
 
+/**
+ * Reordena los flujos en la interfaz y guarda el nuevo orden en el servidor.
+ *
+ * @return void
+ */
 const nuevoOrden = function(){
 	let i = 0 ;
 	jQuery('.idOrden').each(function(i, o){
@@ -324,6 +359,12 @@ const nuevoOrden = function(){
 	});
 };
 
+/**
+ * Gestiona la eliminación de campos asociados al elemento proporcionado.
+ *
+ * @param mixed $o Elemento u objeto que dispara la acción (p. ej. botón o contexto).
+ * @return void
+ */
 const btnDelCampos = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -386,6 +427,11 @@ const btnDelCampos = function( o ){
 	
 };
 
+/**
+ * Maneja el guardado de datos: valida los campos, envía la información al servidor y muestra feedback al usuario.
+ *
+ * @returns {void}
+ */
 const btnGuardar = function(){
 	ut.validarFrm('frmvalcls', function ( r ) {
 		closeAllModal();
@@ -421,6 +467,13 @@ const btnGuardar = function(){
 	});
 };
 
+/**
+ * Maneja la acción del botón para modificar un registro.
+ * Prepara y valida el objeto de entrada y abre el formulario/modal con los datos para editar.
+ *
+ * @param {Object} o - Objeto con los datos del registro a modificar.
+ * @returns {void}
+ */
 const btnModRegistro = function ( o ) {
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -500,6 +553,14 @@ const btnModRegistro = function ( o ) {
     jQuery( _m ).modal('show');
 };
 
+/**
+ * Muestra un modal de carga, prepara y envía los datos del elemento indicado vía AJAX.
+ * Al completarse la petición recarga la tabla y cierra el modal; si ocurre un error muestra
+ * un modal con el mensaje recibido.
+ *
+ * @param {string} api Identificador/acción para la petición AJAX.
+ * @param {HTMLElement|jQuery} o Elemento origen que contiene los atributos data a enviar.
+ */
 const modRegistro = function( api, o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -530,14 +591,32 @@ const modRegistro = function( api, o ){
 	);
 };
 
+/**
+ * Alterna la pausa del registro de flujos.
+ *
+ * @param object $o Objeto de control que indica el estado o elemento a afectar.
+ * @return void
+ */
 const btnPauseRegistro = function( o ){
 	modRegistro( '<?php echo md5( IndexCtrl::API_FlujosHelperEstadoMod ); ?>', o );
 };
 
+/**
+ * Ejecuta la acción de "play" sobre un registro.
+ * Inicializa o controla elementos UI y comportamiento a partir del objeto de opciones.
+ *
+ * @param {Object} o Objeto de opciones/estado para configurar la acción.
+ * @returns {void}
+ */
 const btnPlayRegistro = function( o ){
 	modRegistro( '<?php echo md5( IndexCtrl::API_FlujosHelperEstadoMod ); ?>', o );
 };
 
+/**
+ * Inicializa y gestiona los requerimientos usando el constructor de datos.
+ *
+ * @param {Object} dC Constructor de datos (data constructor) que proporciona los datos y dependencias necesarios.
+ */
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
 	const tablaCont = dC['tableContainer'];
@@ -672,6 +751,9 @@ const dataConstruct = {
 };
 const reqs = new Requerimientos ( dataConstruct );
 
+/**
+ * Ejecuta al cargarse el DOM: inicializa la vista llamando a reqs.dibujarDataTable()
+ */
 jQuery( document ).ready(function(){
 	reqs.dibujarDataTable();
 });

@@ -41,6 +41,7 @@ class Empleados extends Clsdatos {
 	private $dependencias_id = 0;
 	
     /**
+     * Obtiene el identificador de la dependencia.
      * @return number
      */
     public function getDependencias_id()
@@ -49,6 +50,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador de la dependencia.
      * @param number $dependencias_id
      */
     public function setDependencias_id($dependencias_id)
@@ -57,6 +59,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del empleado.
      * @return number
      */
     public function getId()
@@ -65,6 +68,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del tipo de documento.
      * @return number
      */
     public function getTipodoc_id()
@@ -73,6 +77,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el número de documento.
      * @return string
      */
     public function getDocumento()
@@ -81,6 +86,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del lugar de expedición de la cédula.
      * @return number
      */
     public function getLugarescedula_id()
@@ -89,6 +95,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene los nombres del empleado.
      * @return string
      */
     public function getNombres()
@@ -97,6 +104,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene los apellidos del empleado.
      * @return string
      */
     public function getApellidos()
@@ -105,6 +113,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el correo electrónico del empleado.
      * @return string
      */
     public function getMail()
@@ -113,6 +122,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de nacimiento del empleado.
      * @return string
      */
     public function getNacimiento()
@@ -121,6 +131,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del género del empleado.
      * @return number
      */
     public function getGeneros_id()
@@ -129,6 +140,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del lugar del empleado.
      * @return number
      */
     public function getLugares_id()
@@ -137,6 +149,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     *  Obtiene el grupo sanguíneo del empleado.
      * @return string
      */
     public function getGruposanguineo()
@@ -145,6 +158,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el código del empleado.
      * @return string
      */
     public function getCodigo()
@@ -153,6 +167,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre de usuario del empleado.
      * @return string
      */
     public function getUsuario()
@@ -161,6 +176,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la clave del empleado.
      * @return string
      */
     public function getClave()
@@ -169,6 +185,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la foto del empleado.
      * @return string
      */
     public function getFoto()
@@ -177,6 +194,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la dirección del empleado.
      * @return string
      */
     public function getDireccion()
@@ -185,6 +203,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el barrio del empleado.
      * @return string
      */
     public function getBarrio()
@@ -193,6 +212,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del lugar local del empleado.
      * @return number
      */
     public function getLoc_lugares_id()
@@ -201,6 +221,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del cargo del empleado.
      * @return number
      */
     public function getCargos_id()
@@ -209,6 +230,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del título del empleado.
      * @return number
      */
     public function getTitulos_id()
@@ -217,6 +239,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de creación del empleado.
      * @return string
      */
     public function getCreado()
@@ -225,6 +248,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del perfil del empleado.
      * @return number
      */
     public function getPerfil_id()
@@ -233,6 +257,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del empleado.
      * @return number
      */
     public function getEstado_id()
@@ -241,6 +266,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la EPS del empleado.
      * @return string
      */
     public function getEps()
@@ -249,6 +275,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la ARS del empleado.
      * @return string
      */
     public function getArs()
@@ -257,6 +284,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el oficio del empleado.
      * @return string
      */
     public function getOficio()
@@ -265,6 +293,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el salario mensual del empleado.
      * @return number
      */
     public function getSalariomes()
@@ -273,6 +302,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de inicio del contrato del empleado.
      * @return string
      */
     public function getContratoini()
@@ -281,6 +311,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha de fin del contrato del empleado.
      * @return string
      */
     public function getContratofin()
@@ -289,6 +320,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del empleado.
      * @param number $id
      */
     public function setId($id)
@@ -297,6 +329,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del tipo de documento.
      * @param number $tipodoc_id
      */
     public function setTipodoc_id($tipodoc_id)
@@ -305,6 +338,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el número de documento.
      * @param string $documento
      */
     public function setDocumento($documento)
@@ -313,6 +347,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del lugar de expedición de la cédula.
      * @param number $lugarescedula_id
      */
     public function setLugarescedula_id($lugarescedula_id)
@@ -321,6 +356,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece los nombres del empleado.
      * @param string $nombres
      */
     public function setNombres($nombres)
@@ -329,6 +365,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece los apellidos del empleado.
      * @param string $apellidos
      */
     public function setApellidos($apellidos)
@@ -337,6 +374,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el correo electrónico del empleado.
      * @param string $mail
      */
     public function setMail($mail)
@@ -345,6 +383,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de nacimiento del empleado.
      * @param string $nacimiento
      */
     public function setNacimiento($nacimiento)
@@ -353,6 +392,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del género del empleado.
      * @param number $generos_id
      */
     public function setGeneros_id($generos_id)
@@ -361,6 +401,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del lugar del empleado.
      * @param number $lugares_id
      */
     public function setLugares_id($lugares_id)
@@ -369,6 +410,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el grupo sanguíneo del empleado.
      * @param string $gruposanguineo
      */
     public function setGruposanguineo($gruposanguineo)
@@ -377,6 +419,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el código del empleado.
      * @param string $codigo
      */
     public function setCodigo($codigo)
@@ -385,6 +428,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el usuario del empleado.
      * @param string $usuario
      */
     public function setUsuario($usuario)
@@ -393,6 +437,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la clave del empleado.
      * @param string $clave
      */
     public function setClave($clave)
@@ -401,6 +446,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la foto del empleado.
      * @param string $foto
      */
     public function setFoto($foto)
@@ -409,6 +455,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la dirección del empleado.
      * @param string $direccion
      */
     public function setDireccion($direccion)
@@ -417,6 +464,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el barrio del empleado.
      * @param string $barrio
      */
     public function setBarrio($barrio)
@@ -425,6 +473,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del lugar local del empleado.
      * @param number $loc_lugares_id
      */
     public function setLoc_lugares_id($loc_lugares_id)
@@ -433,6 +482,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del cargo del empleado.
      * @param number $cargos_id
      */
     public function setCargos_id($cargos_id)
@@ -441,6 +491,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del título del empleado.
      * @param number $titulos_id
      */
     public function setTitulos_id($titulos_id)
@@ -449,6 +500,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de creación del empleado.
      * @param string $creado
      */
     public function setCreado($creado)
@@ -457,6 +509,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del perfil del empleado.
      * @param number $perfil_id
      */
     public function setPerfil_id($perfil_id)
@@ -465,6 +518,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del empleado.
      * @param number $estado_id
      */
     public function setEstado_id($estado_id)
@@ -473,6 +527,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la EPS del empleado.
      * @param string $eps
      */
     public function setEps($eps)
@@ -481,6 +536,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la ARS del empleado.
      * @param string $ars
      */
     public function setArs($ars)
@@ -489,6 +545,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el oficio del empleado.
      * @param string $oficio
      */
     public function setOficio($oficio)
@@ -497,6 +554,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece el salario mensual del empleado.
      * @param number $salariomes
      */
     public function setSalariomes($salariomes)
@@ -505,6 +563,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de inicio del contrato del empleado.
      * @param string $contratoini
      */
     public function setContratoini($contratoini)
@@ -513,6 +572,7 @@ class Empleados extends Clsdatos {
     }
 
     /**
+     * Establece la fecha de fin del contrato del empleado.
      * @param string $contratofin
      */
     public function setContratofin($contratofin)

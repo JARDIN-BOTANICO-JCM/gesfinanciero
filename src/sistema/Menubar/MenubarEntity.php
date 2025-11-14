@@ -14,6 +14,7 @@ class MenubarEntity {
 
     /**
      * Get the value of id
+     * @return int
      */ 
     public function getId()
     {
@@ -34,6 +35,7 @@ class MenubarEntity {
 
     /**
      * Get the value of slug
+     * @return string
      */ 
     public function getSlug()
     {
@@ -54,6 +56,7 @@ class MenubarEntity {
 
     /**
      * Get the value of orden
+     * @return int
      */ 
     public function getOrden()
     {
@@ -74,6 +77,7 @@ class MenubarEntity {
 
     /**
      * Get the value of nombre
+     * @return string
      */ 
     public function getNombre()
     {
@@ -94,6 +98,7 @@ class MenubarEntity {
 
     /**
      * Get the value of icono
+     * @return string
      */ 
     public function getIcono()
     {
@@ -114,12 +119,18 @@ class MenubarEntity {
 
     /**
      * Get the value of url
+     * @return string
      */ 
     public function getUrl()
     {
         return $this->url;
     }
 
+    /**
+     * Obtiene el identificador de la página usado en la URL.
+     *
+     * @return int|string|null Identificador de la página, o null si no está definido.
+     */
     public function getUrlPageId()
     {
         $url = parse_url($this->url, PHP_URL_QUERY);
@@ -148,6 +159,7 @@ class MenubarEntity {
 
     /**
      * Get the value of grupo
+     * @return MenubarGrupo
      */ 
     public function getGrupo()
     {
@@ -167,6 +179,7 @@ class MenubarEntity {
 
     /**
      * Get the value of visible
+     * @return mixed
      */ 
     public function getVisible()
     {

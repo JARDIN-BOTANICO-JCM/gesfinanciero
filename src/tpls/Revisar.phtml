@@ -310,6 +310,12 @@ var pdfDoc = null,
     canvas = document.getElementById('the-canvas'),
     ctx = canvas.getContext('2d');
 
+/**
+ * Renderiza la página indicada.
+ *
+ * @param int $num Número de página a mostrar.
+ * @return void
+ */
 function renderPage(num) {
 	pageRendering = true;
 	
@@ -349,6 +355,12 @@ function renderPage(num) {
 	document.getElementById('page_num').textContent = num;
 }
 
+/**
+ * Añade una página a la cola para su renderizado.
+ *
+ * @param int $num Número de página a renderizar.
+ * @return void
+ */
 function queueRenderPage(num) {
     if (pageRendering) {
 		pageNumPending = num;
@@ -357,6 +369,11 @@ function queueRenderPage(num) {
     }
 }
 
+/**
+ * Navega a la página anterior en la interfaz de revisión.
+ *
+ * @return void
+ */
 function onPrevPage() {
 	if (pageNum <= 1) {
 		return;
@@ -366,6 +383,13 @@ function onPrevPage() {
 }
 document.getElementById('prev').addEventListener('click', onPrevPage);
 
+/**
+ * Avanza a la siguiente página del flujo de revisión.
+ *
+ * Actualiza la paginación y realiza las acciones necesarias al cambiar de página.
+ *
+ * @return void
+ */
 function onNextPage() {
 	if (pageNum >= pdfDoc.numPages) {
 		return;

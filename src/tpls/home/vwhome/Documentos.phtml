@@ -209,7 +209,10 @@ const btnOkFirma = function( colorbtn ){
 const cntContinuar = 'cntContinuar';
 const btnEditarForms = 'btnEditarForms';
 const btnEnviarRevisar = 'btnEnviarRevisar';
-
+ /**
+  * Requerimientos 
+  * @param dC data constructor
+  */
 const Requerimientos = function( dC ){ // dC = data constructor
 	const _this = this;
 	const tablaCont = dC['tableContainer'];
@@ -818,12 +821,21 @@ const Requerimientos = function( dC ){ // dC = data constructor
     };
 };
 
+/**
+ * Ajusta la vista de los botones según el estado del paquete.
+ * Si el estado es 2 o 4, elimina los botones de edición y envío para revisión.
+ * No retorna ningún valor.
+ */
 const vistaPorEstado = function(){
 	if( idPqEst == 2 || idPqEst == 4 ){
 		jQuery('#' + btnEditarForms + ', #' + btnEnviarRevisar ).remove();
 	}
 };
 
+/** 
+ * Verifica si todos los documentos han sido firmados.
+ * Si no quedan documentos pendientes de firma, muestra el contenedor
+*/
 const docOkFirmados = function(){
 	const faltan = jQuery( '.firmaNoCls' ).length;
 	if( faltan == 0 ){
@@ -832,10 +844,23 @@ const docOkFirmados = function(){
 	}
 };
 
+/**
+ * Muestra el contenedor de formularios para edición.
+ */
 const modFormularios = function(){
 	jQuery( '#cardProcs' ).show('fast');
 };
 
+/**
+ * Ejecuta la firma de un PDF desde la interfaz.
+ *
+ * - Cierra modales y muestra un modal de carga.
+ * - Obtiene los datos del elemento disparador y la información del usuario, y envía una petición AJAX para firmar.
+ * - Actualiza la interfaz (clases de botones, inserta indicador de firma) si la firma es exitosa.
+ * - Muestra mensajes de error/modales en caso de fallo.
+ *
+ * @param {HTMLElement|jQuery} o Elemento que dispara la acción (se leen sus atributos data-).
+ */
 const firmarPdf = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -898,6 +923,13 @@ const firmarPdf = function( o ){
     });
 };
 
+/**
+ * Realiza la petición para generar/obtener un documento (PDF) desde los datos
+ * del elemento pasado, cierra modales activos, envía la información al servidor
+ * y abre el resultado en una nueva ventana. Muestra un modal de error si falla.
+ *
+ * @param {HTMLElement|EventTarget} o Elemento origen con atributos data- (p. ej. data-target)
+ */
 const actividadRepo = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -941,6 +973,12 @@ const actividadRepo = function( o ){
     });
 };
 
+/**
+ * Valida y procesa los archivos seleccionados mediante chkUploadFiles,
+ * respetando el tamaño máximo configurado en PHP. Loggea los archivos en consola.
+ *
+ * @param {Event|HTMLInputElement} o Elemento o evento del input de archivos
+ */
 const chkArchivo = function( o ){
 	chkUploadFiles( o, <?php echo Utiles::getPostMaxSizeMB() ; ?>, function( fl ){
 		console.log( fl );
@@ -949,6 +987,15 @@ const chkArchivo = function( o ){
 
 
 let reqs = null;
+
+/**
+ * listaProcesos()
+ *
+ * Obtiene la información del usuario actual y construye una tabla de requerimientos
+ * dentro del contenedor especificado.
+ *
+ * @return void
+ */
 const listaProcesos = function(){
 	home.navUser(function( uDt ){
 		const dataConstruct = {

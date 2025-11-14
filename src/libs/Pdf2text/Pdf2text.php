@@ -78,6 +78,15 @@ class Pdf2text
     }
     
     public $objetosTj1 = array();
+
+    /**
+     * Procesa un bloque de datos de PDF (fragmentos separados por 'Tj'), extrae y agrupa texto por renglón,
+     * y compara cada texto encontrado con los patrones definidos en $this->buscar['def']. Al detectar
+     * coincidencias registra los resultados mediante $this->agregarEncontrados().
+     *
+     * @param string $data Bloque de contenido del PDF a analizar.
+     * @return void No devuelve valor; produce efectos en el estado interno (resultados registrados).
+     */
     private function objetosBusqueda1( $data ) {
         
         $mismapal = array();
@@ -181,6 +190,17 @@ class Pdf2text
         }
     }
     
+    /**
+     * Busca y reconoce pares de firmantes (exactamente 2) dentro del texto crudo extraído de un PDF.
+     * Recorre segmentos separados por "Tj", limpia y agrupa texto por línea, compara combinaciones
+     * de los dos firmantes (en ambos órdenes) y, si los encuentra en la misma línea, registra sus
+     * coordenadas llamando a $this->agregarEncontrados.
+     *
+     * Nota: Este método sólo opera cuando $this->buscar['def'] contiene exactamente dos elementos.
+     *
+     * @param string $data Texto crudo extraído del PDF.
+     * @return void
+     */
     private function objetosBusqueda2( $data ) {
         $mismapal = array();
         $linid = 0;
@@ -296,6 +316,20 @@ class Pdf2text
         
     }
     
+    /**
+     * Agrega un objeto encontrado si $txt no está vacío.
+     *
+     * Busca en $objData un elemento que termine en "tm" (insensible a mayúsculas) para usarlo
+     * como referencia de localización, la divide en tokens y construye un arreglo con:
+     * - los tokens de localización,
+     * - "pg" obtenido de $this->objetos['xref']['Paginas'],
+     * - "enc" con $txt limpiado de caracteres no deseados.
+     * Añade $objData a $this->objetosTj1, guarda el resultado en $this->retorno y marca $this->encontrado = true.
+     *
+     * @param array  $objData Arreglo de datos de posicionamiento/objeto extraído del PDF.
+     * @param string $txt     Texto encontrado asociado; si está vacío no realiza acción.
+     * @return void
+     */
     private function agregarEncontrados( $objData, $txt ){
         if( strlen( trim( $txt ) ) > 0 ){
             $this->objetosTj1[] = $objData;

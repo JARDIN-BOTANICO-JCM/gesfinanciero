@@ -2,6 +2,16 @@
 class Rest
 {   
     // a30004055c915a3c7bc971256074374e
+
+    /**
+     * Procesa la petición de recuperación/asignación de clave.
+     *
+     * Toma los datos de entrada, invoca la lógica de negocio para reasignar la clave,
+     * envía la respuesta en formato JSON (resultado o error) y termina la ejecución.
+     *
+     * @param mixed $data Datos recibidos para la operación (por ejemplo, arreglo o objeto).
+     * @return void Emite JSON y finaliza el script.
+     */
     private static function RecuAsignarClave($data){
         // "Api/Servidor/RecuAsignarClave"
         try{
@@ -13,10 +23,21 @@ class Rest
         }
         die("");
     }
-    
+      
     // 7cdf28cdb306941ec39675734b000b60
+    
+    /**
+     * Recupera datos por email y responde en formato JSON.
+     *
+     * Llama a OperacionesCtrl::RecuperarByEmailAjax con los datos proporcionados,
+     * imprime el resultado codificado en JSON o, en caso de excepción, un objeto
+     * JSON con la clave "err". Finaliza la ejecución.
+     *
+     * @param mixed $data Datos de entrada (por ejemplo, email u otros parámetros).
+     * @return void Imprime la respuesta JSON directamente y termina el script.
+     */
     private static function RecuperarByEmail($data){
-        // "Api/Servidor/RecuperarPorEmail"
+      // "Api/Servidor/RecuperarPorEmail"
         try{
             $ok = OperacionesCtrl::RecuperarByEmailAjax( $data );
             echo json_encode($ok);
@@ -25,9 +46,16 @@ class Rest
             echo json_encode($er);
         }
         die("");
-    }
-    
+}
+     
     // 88400f0088a755f38f2d3a8d6f3a39fd
+    /**
+     * Autentica un usuario mediante una petición (AJAX) y responde inmediatamente en JSON.
+     * Captura excepciones y devuelve un objeto JSON con el resultado o el error, luego finaliza la ejecución.
+     *
+     * @param mixed $data Datos de autenticación (por ejemplo usuario/clave).
+     * @return void Envía la respuesta JSON y termina el script.
+     */
     private static function AutenticaUsuarioSis( $data ){
         // "Api/Servidor/AutenticaUsuarioSis"
         try{
@@ -39,109 +67,20 @@ class Rest
         }
         die("");
     }
+
     
     // VERSION 2
-    private static function notkn_CheckComm ( $data ) {
-        OperacionesCtrl::authRequOff();
-        try{
-            OperacionesCtrl::comunicaciones_CheckForSend( $data );
-        }catch (Exception $ex){
-            $er = array("err" => $ex->getMessage());
-            echo json_encode($er);
-        }
-        die("");
-    }
-    
-    private static function notkn_Revisar ( $data ) {
-        try{
-            OperacionesCtrl::firmaspro_Revisar( $data );
-        }catch (Exception $ex){
-            $er = array("err" => $ex->getMessage());
-            echo json_encode($er);
-        }
-        die("");
-    }
-    
+
     /**
-     * 
-     * @param object $data
+     * Verifica comunicaciones para envío sin requerir autenticación.
+     *
+     * Desactiva temporalmente la verificación de autenticación, ejecuta la
+     * comprobación de comunicaciones con los datos proporcionados y, si ocurre
+     * una excepción, devuelve un JSON con el error y termina la ejecución.
+     *
+     * @param mixed $data Datos a validar para la comprobación de comunicaciones.
+     * @return void
      */
-    private static function tkn_GenerarToken( $data ){
-        try{
-            $ok = OperacionesCtrl::GenerarToken( $data );
-            echo json_encode($ok);
-        }catch (Exception $ex){
-            $er = array("err" => $ex->getMessage());
-            echo json_encode($er);
-        }
-        die("");
-    }
-    
-    /**
-     * Get header Authorization
-     * */
-    private static function getAuthorizationHeader(){
-        
-        if( isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ){
-            list($_SERVER['Authorization']) = array($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
-        }
-        
-        $headers = null;
-        if (isset($_SERVER['Authorization'])) {
-            $headers = trim($_SERVER["Authorization"]);
-        }
-        else if (isset($_SERVER['HTTP_AUTHORIZATION'])) { //Nginx or fast CGI
-            $headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
-        } elseif (function_exists('apache_request_headers')) {
-            $requestHeaders = apache_request_headers();
-            // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
-            $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
-            //print_r($requestHeaders);
-            if (isset($requestHeaders['Authorization'])) {
-                $headers = trim($requestHeaders['Authorization']);
-            }
-        }
-        
-        return $headers;
-    }
-    
-    /**
-     * get access token from header
-     * */
-    private static function getBearerToken() {
-        $headers = self::getAuthorizationHeader();
-        // HEADER: Get the access token from the header
-        if (!empty($headers)) {
-            $matches = null;
-            if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
-                return $matches[1];
-            }
-        }
-        return null;
-    }
-    
-    /**
-     * 
-     * @return array<u,c>   u = Usuario c = Clave
-     */
-    private static function getAuthBasic() {
-        if( isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ){
-            list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['REDIRECT_HTTP_AUTHORIZATION'], 6)));
-            //die( print_r( $_SERVER , true ) );
-            if (!isset($_SERVER['PHP_AUTH_USER'])) {
-                /*
-                 header('WWW-Authenticate: Basic realm="My Realm"');
-                 header('HTTP/1.0 401 Unauthorized');
-                 header('Content-Type: application/json');
-                 echo '{"err":"Ingrese usuario y clave"}';
-                 exit;
-                 */
-            } else {
-                return array('u' => $_SERVER['PHP_AUTH_USER'] , 'c' => $_SERVER['PHP_AUTH_PW']);
-            }
-        }
-    }
-    
     public static function handler()
     {
         ini_set("allow_url_fopen", true);

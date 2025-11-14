@@ -19,6 +19,15 @@ class Campos {
     
     private $registros = array();
     
+    /**
+     * Constructor de la clase Campos.
+     *
+     * Inicializa las propiedades a partir del array asociativo $d. Requiere que $d['objeto'] esté presente;
+     * si además faltan 'id' o 'label' lanza una excepción con código IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO.
+     *
+     * @param array|null $d Array con claves posibles: objeto, id, label, visible, campo, defecto, extra, tipo, data, esfecha, nombrecampo.
+     * @throws Exception Si falta 'id' o 'label' cuando 'objeto' está presente.
+     */
     public function __construct( $d = null ){
         if ( isset( $d['objeto'] ) ) {
             if ( isset( $d['id'] ) ) {
@@ -86,16 +95,40 @@ class Campos {
         }
     }
     
+    /**
+     * Agrega un nuevo objeto Campos al conjunto de registros.
+     *
+     * Establece 'objeto' = true en los datos, crea la instancia y la guarda
+     * en $this->registros usando su id como clave.
+     *
+     * @param array $d Datos para crear el objeto Campos.
+     * @return void
+     */
     public function agregar( $d ){
         $d['objeto'] = true;
         $c = new Campos( $d );
         $this->registros[ $c->getId() ] = $c;
     }
     
+    /**
+     * Devuelve los registros almacenados en la instancia.
+     *
+     * @return mixed Los registros (por ejemplo, un array).
+     */
     public function obtener(){
         return $this->registros;
     }
-    
+
+   
+    /**
+     * Genera el HTML de los campos registrados y lo devuelve como una cadena.
+     *
+     * Recorre los registros configurados y construye los elementos HTML
+     * correspondientes según su tipo (visible, oculto, select, input, file,
+     * checkbox, textarea), incluyendo etiquetas, valores por defecto y atributos.
+     *
+     * @return string HTML generado concatenado.
+     */
     public function obtenerHTML( ) {
         $html = array();
         
@@ -160,7 +193,7 @@ class Campos {
     }
     
     /**
-     *
+     * Obtiene el nombre del campo.
      * @return string
      */
     public function getNombrecampo(){
@@ -168,7 +201,8 @@ class Campos {
     }
     
     /**
-     * @return string
+     * Obtiene el identificador.
+     * @return string 
      */
     public function getId()
     {
@@ -176,6 +210,7 @@ class Campos {
     }
     
     /**
+     * Obtiene la etiqueta.
      * @return string
      */
     public function getLabel()
@@ -184,6 +219,7 @@ class Campos {
     }
     
     /**
+     * Obtiene la visibilidad.
      * @return boolean
      */
     public function getVisible()
@@ -192,6 +228,7 @@ class Campos {
     }
     
     /**
+     * Obtiene el identificador del campo.
      * @return number
      */
     public function getCampo()
@@ -200,6 +237,7 @@ class Campos {
     }
     
     /**
+     * Obtiene el valor por defecto.
      * @return string
      */
     public function getDefecto()
@@ -208,6 +246,7 @@ class Campos {
     }
     
     /**
+     * Obtiene información extra.
      * @return string
      */
     public function getExtra()
@@ -216,7 +255,8 @@ class Campos {
     }
     
     /**
-     * @return string
+     * Obtiene el tipo de campo.
+     * @return string tipo
      */
     public function getTipo()
     {
@@ -224,6 +264,7 @@ class Campos {
     }
     
     /**
+     * Obtiene los datos.
      * @return mixed
      */
     public function getData()
@@ -232,6 +273,7 @@ class Campos {
     }
     
     /**
+     * Obtiene si es fecha.
      * @return boolean
      */
     public function getEsfecha()
@@ -240,6 +282,7 @@ class Campos {
     }
     
     /**
+     * Establece el identificador.
      * @param string $id
      */
     public function setId($id)
@@ -248,6 +291,7 @@ class Campos {
     }
     
     /**
+     * Establece la etiqueta.
      * @param string $label
      */
     public function setLabel($label)
@@ -256,6 +300,7 @@ class Campos {
     }
     
     /**
+     * Establece la visibilidad.
      * @param boolean $visible
      */
     public function setVisible($visible)
@@ -264,6 +309,7 @@ class Campos {
     }
     
     /**
+     * Establece el identificador del campo.
      * @param number $campo
      */
     public function setCampo($campo)
@@ -272,6 +318,7 @@ class Campos {
     }
     
     /**
+     * Establece el valor por defecto.
      * @param string $defecto
      */
     public function setDefecto($defecto)
@@ -280,6 +327,7 @@ class Campos {
     }
     
     /**
+     * Establece información extra.
      * @param string $extra
      */
     public function setExtra($extra)
@@ -288,6 +336,7 @@ class Campos {
     }
     
     /**
+     * Establece el tipo de campo.
      * @param string $tipo
      */
     public function setTipo($tipo)
@@ -296,6 +345,7 @@ class Campos {
     }
     
     /**
+     * Establece los datos.
      * @param mixed $data
      */
     public function setData($data)
@@ -304,6 +354,7 @@ class Campos {
     }
     
     /**
+     * Establece si es fecha.
      * @param boolean $esfecha
      */
     public function setEsfecha($esfecha)
@@ -312,7 +363,7 @@ class Campos {
     }
     
     /**
-     *
+     * Establece el nombre del campo.
      * @param string $nombrecampo
      */
     public function setNombrecampo( $nombrecampo ) {

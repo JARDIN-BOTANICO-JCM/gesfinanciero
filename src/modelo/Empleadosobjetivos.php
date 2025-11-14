@@ -14,6 +14,7 @@ class Empleadosobjetivos extends Clsdatos {
     private $orden = 0;
     
     /**
+     * Obtiene el orden.
      * @return number
      */
     public function getOrden()
@@ -22,6 +23,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Establece el orden.
      * @param number $orden
      */
     public function setOrden($orden)
@@ -30,6 +32,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -38,6 +41,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Obtiene la descripción.
      * @return string
      */
     public function getDescripcion()
@@ -46,6 +50,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del empleado.
      * @return number
      */
     public function getEmpleados_id()
@@ -54,6 +59,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado del objetivo.
      * @return number
      */
     public function getEmpleadosobjetivosestados_id()
@@ -62,6 +68,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Obtiene la vigencia.
      * @return string
      */
     public function getVigencia()
@@ -70,6 +77,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -78,6 +86,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Establece la descripción.
      * @param string $descripcion
      */
     public function setDescripcion($descripcion)
@@ -86,6 +95,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del empleado.
      * @param number $empleados_id
      */
     public function setEmpleados_id($empleados_id)
@@ -94,6 +104,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del objetivo.
      * @param number $empleadosobjetivosestados_id
      */
     public function setEmpleadosobjetivosestados_id($empleadosobjetivosestados_id)
@@ -102,6 +113,7 @@ class Empleadosobjetivos extends Clsdatos {
     }
 
     /**
+     * Establece la vigencia.
      * @param string $vigencia
      */
     public function setVigencia($vigencia)

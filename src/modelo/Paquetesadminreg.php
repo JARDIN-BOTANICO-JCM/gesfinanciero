@@ -15,6 +15,7 @@ class Paquetesadminreg extends Clsdatos {
     private $usuarios = "";
    
     /**
+     * Obtiene el identificador del registro de administración de paquetes.
      * @return number
      */
     public function getId()
@@ -23,6 +24,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del paquete asociado al registro de administración.
      * @return number
      */
     public function getPaquetes_id()
@@ -31,6 +33,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Obtiene la razón del registro de administración de paquetes.
      * @return string
      */
     public function getRazon()
@@ -39,6 +42,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Obtiene el valor asociado al registro de administración de paquetes.
      * @return string
      */
     public function getValor()
@@ -47,6 +51,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha del registro de administración de paquetes.
      * @return string
      */
     public function getFecha()
@@ -55,6 +60,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Obtiene el usuario asociado al registro de administración de paquetes.
      * @return string
      */
     public function getUsuarios()
@@ -63,6 +69,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del registro de administración de paquetes.
      * @param number $id
      */
     public function setId($id)
@@ -71,6 +78,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del paquete asociado al registro de administración.
      * @param number $paquetes_id
      */
     public function setPaquetes_id($paquetes_id)
@@ -79,6 +87,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Establece la razón del registro de administración de paquetes.
      * @param string $razon
      */
     public function setRazon($razon)
@@ -87,6 +96,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Establece el valor asociado al registro de administración de paquetes.
      * @param string $valor
      */
     public function setValor($valor)
@@ -95,6 +105,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Establece la fecha del registro de administración de paquetes.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -103,6 +114,7 @@ class Paquetesadminreg extends Clsdatos {
     }
 
     /**
+     * Establece el usuario asociado al registro de administración de paquetes.
      * @param string $usuarios
      */
     public function setUsuarios($usuarios)

@@ -15,7 +15,9 @@ class Cargadatos extends Clsdatos {
 	private $tiposaceptados = "";
 	
     /**
-     * @return number
+     * Obtiene el identificador del objeto.
+     *
+     * @return number Identificador del registro.
      */
     public function getId()
     {
@@ -23,15 +25,19 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @return string
+     * Obtiene el nombre asociado al objeto.
+     *
+     * @return string Nombre almacenado en la propiedad $nombre.
      */
     public function getNombre()
     {
         return $this->nombre;
     }
-
+    
     /**
-     * @return string
+     * Devuelve la etiqueta asociada al objeto.
+     *
+     * @return string La etiqueta actual o null si no está definida.
      */
     public function getLabel()
     {
@@ -39,7 +45,9 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @return string
+     * Devuelve la colección de usuarios asociados.
+     *
+     * @return string usuarios, o null si no existen.
      */
     public function getUsuarios()
     {
@@ -47,7 +55,9 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @return string
+     * Devuelve la fecha asociada al objeto.
+     *
+     * @return string Fecha almacenada.
      */
     public function getFecha()
     {
@@ -55,7 +65,9 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @return number
+     * Devuelve el valor de la propiedad "multiple".
+     *
+     * @return number Valor almacenado en $this->multiple.
      */
     public function getMultiple()
     {
@@ -65,13 +77,22 @@ class Cargadatos extends Clsdatos {
     /**
      * @return string
      */
+
+    /**
+     * Devuelve los tipos aceptados.
+     *
+     * @return string tipos aceptados o null si no hay ninguno.
+     */
     public function getTiposaceptados()
     {
         return $this->tiposaceptados;
     }
 
     /**
-     * @param number $id
+     * Establece el identificador del objeto.
+     *
+     * @param mixed $id Identificador a asignar.
+     * @return void
      */
     public function setId($id)
     {
@@ -79,7 +100,10 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @param string $nombre
+     * Establece el nombre del elemento.
+     *
+     * @param string $nombre Nombre a asignar.
+     * @return void
      */
     public function setNombre($nombre)
     {
@@ -87,7 +111,10 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @param string $label
+     * Establece la etiqueta del objeto.
+     *
+     * @param string $label Etiqueta a asignar.
+     * @return void
      */
     public function setLabel($label)
     {
@@ -95,7 +122,10 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @param string $usuarios
+     * Asigna la colección de usuarios al objeto.
+     *
+     * @param string $usuarios Usuarios .
+     * @return void
      */
     public function setUsuarios($usuarios)
     {
@@ -103,7 +133,10 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @param string $fecha
+     * Establece la fecha del objeto.
+     *
+     * @param string $fecha Fecha a asignar (por ejemplo, cadena o \DateTime).
+     * @return void
      */
     public function setFecha($fecha)
     {
@@ -111,7 +144,10 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @param number $multiple
+     * Establece si el elemento permite múltiples valores.
+     *
+     * @param number $multiple Valor lógico que activa o desactiva la multiplicidad.
+     * @return void
      */
     public function setMultiple($multiple)
     {
@@ -119,7 +155,10 @@ class Cargadatos extends Clsdatos {
     }
 
     /**
-     * @param string $tiposaceptados
+     * Establece los tipos aceptados para este objeto.
+     *
+     * @param string $tiposaceptados Tipos aceptados (por ejemplo, array de extensiones o cadena).
+     * @return void
      */
     public function setTiposaceptados($tiposaceptados)
     {

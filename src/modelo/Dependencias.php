@@ -10,6 +10,7 @@ class Dependencias extends Clsdatos {
     private $nombre = "";
     private $usuarios_id = 0;
     /**
+     * Obtiene el identificador de la dependencia.
      * @return number
      */
     public function getId()
@@ -18,6 +19,7 @@ class Dependencias extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre de la dependencia.
      * @return string
      */
     public function getNombre()
@@ -26,6 +28,7 @@ class Dependencias extends Clsdatos {
     }
 
     /**
+     *  Obtiene el ID del usuario asociado a la dependencia.
      * @return number
      */
     public function getUsuarios_id()
@@ -34,6 +37,7 @@ class Dependencias extends Clsdatos {
     }
 
     /**
+     * Establece el identificador de la dependencia.
      * @param number $id
      */
     public function setId($id)
@@ -42,6 +46,7 @@ class Dependencias extends Clsdatos {
     }
 
     /**
+     * Establece el nombre de la dependencia.
      * @param string $nombre
      */
     public function setNombre($nombre)
@@ -50,6 +55,7 @@ class Dependencias extends Clsdatos {
     }
 
     /**
+     * Establece el ID del usuario asociado a la dependencia.
      * @param number $usuarios_id
      */
     public function setUsuarios_id($usuarios_id)

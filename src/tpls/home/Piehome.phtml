@@ -116,6 +116,11 @@ if (isset( $_REQUEST['logout'] ) ) {
     </svg>
     
     <script type="application/javascript">
+
+	/**
+	 * Solicita confirmación para cerrar la sesión; si se confirma,
+	 * redirige al controlador de cierre de sesión (index.php?logout=true).
+	 */
     const cerrarSesion = function(){
         if( confirm('\xBFDesea cerrar su sesi\xF3n?') ){
             location.href = './index.php?logout=true';
@@ -123,15 +128,13 @@ if (isset( $_REQUEST['logout'] ) ) {
     };
     </script>
     <script type="application/javascript">
-    const closeAllModal = function(){
-        jQuery('.modal.show').each(function() {
-            const modal = bootstrap.Modal.getInstance(this);
-            if (modal) modal.hide();
-        });
-    };
-    </script>
-    
-    <script type="application/javascript">
+
+	/**
+	 * Cierra todos los modales de Bootstrap actualmente visibles.
+	 * Recorre los elementos con la clase '.modal.show' y oculta cada instancia encontrada.
+	 *
+	 * @return void
+	 */
     var aAsPostf = function(e, o){
         e.stopPropagation();
         e.preventDefault();
@@ -153,6 +156,15 @@ if (isset( $_REQUEST['logout'] ) ) {
     </script>
 
     <script type="application/javascript">
+
+	/**
+	 * ValidadorGlob
+	 *
+	 * Función que realiza validaciones globales del formulario.
+	 * Devuelve true si todos los checks pasan, false en caso contrario.
+	 *
+	 * @return bool
+	 */
     const ValidadorGlob = function(){
         var _this = this;
 
@@ -314,6 +326,15 @@ if (isset( $_REQUEST['logout'] ) ) {
 <script type="application/javascript">
 let regIdHijo = 0;
 
+/**
+ * Renderiza un contenedor de encuesta usando datos JSON y un id de registro.
+ *
+ * Inicializa la variable regIdHijo a 0 y delega el renderizado de campos a renderFields.
+ *
+ * @param {Object} json Datos de la encuesta en formato JSON.
+ * @param {string|number} regId Identificador del registro principal.
+ * @returns {jQuery} Contenedor jQuery (div) con el formulario renderizado.
+ */
 function renderEncuesta(json, regId) {
 	regIdHijo = 0;
     var form = jQuery('<div class="p-3 border rounded bg-light"></div>');
@@ -321,6 +342,18 @@ function renderEncuesta(json, regId) {
     return form;
 }
 
+/**
+ * Renderiza recursivamente un conjunto de campos en un contenedor DOM.
+ *
+ * Crea elementos para tipos: checkbox (con soporte de hijos ocultables),
+ * text, datetime (inicia flatpickr), file y select. Añade inputs ocultos con
+ * el label, marca atributos required y data-required, y enlaza manejadores
+ * para mostrar/ocultar hijos cuando cambian los checkboxes. No retorna valor.
+ *
+ * @param array  $fields Array de objetos de campo (type, label, required, placeholder, options, children, checked).
+ * @param object $parent  Contenedor jQuery donde se insertan los campos.
+ * @param mixed  $regId   Identificador usado para construir atributos name/id.
+ */
 function renderFields(fields, parent, regId) {
   for (var i = 0; i < fields.length; i++) {
     var field = fields[i];
@@ -452,6 +485,15 @@ function renderFields(fields, parent, regId) {
   
 }
 
+/**
+ * Obtiene las respuestas del formulario '#formulario-respuestas'.
+ *
+ * Recorre los campos (input, select, checkbox y file) y construye un
+ * array con objetos que contienen {label, type, respuesta} y, si procede,
+ * la propiedad children con las respuestas anidadas (solo para checkboxes marcados).
+ *
+ * @return array Array de respuestas.
+ */
 function obtenerRespuestas() {
   var result = [];
   var form = jQuery('#formulario-respuestas');
@@ -504,6 +546,19 @@ function obtenerRespuestas() {
   return leerCampos(formulario, form);
 }
 
+/**
+ * RenderObligaciones
+ *
+ * Constructor/fábrica que prepara la representación de una tabla HTML para listar obligaciones.
+ * Genera filas con campos para comentarios y carga de evidencias, y expone un método render()
+ * que devuelve el HTML completo de la tabla.
+ *
+ * @param {Object} dC Configuración opcional.
+ * @param {string} [dC.tableId] Id de la tabla (se genera uno si no se proporciona).
+ * @property {Array} data Array de registros a mostrar.
+ * @property {string|null} regId Identificador de registro asociado a las filas.
+ * @method render() string Devuelve el HTML ensamblado de la tabla.
+ */
 const RenderObligaciones = function( dC ){
 	const self = this;
 	
@@ -568,6 +623,14 @@ const RenderObligaciones = function( dC ){
 </script>
 
 <script type="application/javascript">
+/**
+ * normalHead( d )
+ *
+ * Genera y retorna el HTML del encabezado normal de un alumno.
+ *
+ * @param array|object $d   Datos del alumno (nombres, apellidos, id, idhash, foto, nacimiento, documento, usuario, codigo, cursos_id, cursos, agenda, etc.).
+ * @return string HTML listo para insertar en el DOM.
+ */
 const normalHead = function( d ){
 	const fullnombre = jQuery.trim( d['nombres'] ) + ' ' + jQuery.trim( d['apellidos'] );
 	
@@ -579,6 +642,14 @@ const normalHead = function( d ){
 	
 	return html.join('');
 };
+/**
+ * tplAlumnosMini( d )
+ *
+ * Genera y retorna el HTML de una tarjeta de alumno en formato mini.
+ *
+ * @param array|object $d   Datos del alumno (nombres, apellidos, id, idhash, foto, nacimiento, documento, usuario, codigo, cursos_id, cursos, agenda, etc.).
+ * @return string HTML listo para insertar en el DOM.
+ */
 const tplAlumnosMini = function( d ){
 	const fullnombre = jQuery.trim( d['nombres'] ) + ' ' + jQuery.trim( d['apellidos'] );
 
@@ -626,6 +697,16 @@ const tplAlumnosMini = function( d ){
 	
 	return html.join('');
 };
+
+/**
+ * tplAlumnos( d, full )
+ *
+ * Genera y retorna el HTML de una tarjeta de alumno.
+ *
+ * @param array|object $d   Datos del alumno (nombres, apellidos, id, idhash, foto, nacimiento, documento, usuario, codigo, cursos_id, cursos, agenda, etc.).
+ * @param bool|null    $full Indica si se renderiza la vista completa (true) o la versión compacta (false). Por defecto true.
+ * @return string HTML listo para insertar en el DOM.
+ */
 const tplAlumnos = function( d, full ){
 	const nwAgendas = d['nuevos'];
 	
@@ -779,6 +860,13 @@ const tplAlumnos = function( d, full ){
 	return html.join('');
 };
 
+/**
+ * Genera el elemento de entrada correspondiente a la definición recibida.
+ *
+ * @param array $datos Arreglo con la definición del campo. Espera al menos 'd' (contiene tipo, id, requerido, placeholder, clase, valor, estilo, acepta, json) y opcionalmente 'regId'.
+ * @return string|array Devuelve el HTML del control como cadena. Para tipos especiales (ej. 'obligaciones') puede devolver un arreglo con 'html' y 'obj'.
+ * @throws Error Si el valor de 'tipo' no está soportado.
+ */
 const Home = function(){
 	const _this = this;
 	_this.recuperar = function( cls, fn ){
@@ -991,10 +1079,28 @@ const Home = function(){
         return elemento;
 	};
 };
+
 const home = new Home();
 </script>
 
 <script type="application/javascript">
+	
+/**
+ * gbl_SetNewPass(d)
+ *
+ * Breve: Procesa la petición para establecer una nueva contraseña, prepara los datos codificados
+ *        y llama a la función remota que realiza el cambio; muestra un modal con resultado.
+ *
+ * Parámetros:
+ *  - d (HTMLElement|jQuery): elemento que contiene los atributos data-idhash y data-text (selector o input).
+ *
+ * Comportamiento esencial:
+ *  - Extrae idhash y el valor del input referenciado por data-text.
+ *  - Serializa y codifica esos datos en Base64.
+ *  - Llama a home.navMrkNewPass con un callback que despliega un modal informando el éxito y detalles de conexión.
+ *
+ * Retorno: void
+ */
 const gbl_SetNewPass = function( d ){
 	const _o = jQuery( d );
 	const dt = _o.data();
@@ -1029,6 +1135,12 @@ const gbl_SetNewPass = function( d ){
 	opc);
 };
 
+/**
+ * Abre y muestra un modal para ingresar una nueva contraseña.
+ *
+ * @param {HTMLElement|jQuery} d Elemento que contiene datos en atributos data (por ejemplo: data-nombre, data-idhash)
+ *                              usados para construir el título y el botón de guardar.
+ */
 const gbl_ModalNewPass = function( d ){
 	const _o = jQuery( d );
 	const dt = _o.data();
@@ -1064,6 +1176,14 @@ const gbl_ModalNewPass = function( d ){
     //navMrkNewPass( fn, opc );
 };
 
+/**
+ * Renderiza la tarjeta principal de un mensaje como HTML.
+ *
+ * @param object $d Objeto con los datos del mensaje:
+ *                  - mensaje (base64), fullname, titulo, fecha,
+ *                  - id, idmsj, thumbnail, adjuntos, publicardesde, hashid
+ * @return string HTML generado para mostrar el resumen y el botón "Ver el mensaje completo"
+ */
 const nt_Principal = function( d ){
 	const html = [];
 	
@@ -1102,6 +1222,13 @@ const nt_Principal = function( d ){
 	return html.join("");
 };
 
+/**
+ * Genera el HTML de una tarjeta de noticia ("normal") a partir de los datos proporcionados.
+ *
+ * @param {Object} d Objeto con los datos de la noticia. Propiedades usadas: 
+ *                   mensaje (base64), thumbnail, titulo, fullname, id, idmsj, adjuntos, publicardesde, hashid.
+ * @returns {string} Cadena HTML de la tarjeta lista para insertar en el DOM.
+ */
 const nt_normales = function( d ){
 	const html = [];
 	
@@ -1135,6 +1262,15 @@ const nt_normales = function( d ){
 	return html.join("");
 };
 
+/**
+ * Genera y devuelve el markup HTML para un ítem de lista (notificación/entrada)
+ * a partir del objeto de datos proporcionado.
+ *
+ * @param  {Object} d      Objeto con propiedades usadas para construir el HTML
+ *                         (mensaje, thumbnail, foto, fecha, leido, id, idmsj,
+ *                         adjuntos, fullname, titulo, publicardesde, hashid, etc.).
+ * @return {string}        Cadena HTML lista para insertar en el DOM.
+ */
 const com_principal = function( d ){
 	const html = [];
 	
@@ -1197,6 +1333,17 @@ const com_principal = function( d ){
 	return html.join("");
 };
 
+/**
+ * Valida el tamaño de los archivos seleccionados y procesa los permitidos.
+ *
+ * Recorre los archivos del input/selector proporcionado, comprueba que cada uno
+ * sea menor o igual a mb megabytes y, si lo es, invoca la función fn con el archivo.
+ * Si hay archivos que superan el límite, muestra un modal con la lista de errores.
+ *
+ * @param {HTMLElement|string} o Input[type="file"] o selector jQuery que contiene los archivos.
+ * @param {number} mb Límite de tamaño por archivo en megabytes.
+ * @param {function(File):void} fn Callback que se ejecuta por cada archivo válido.
+ */
 const chkUploadFiles = function(o, mb, fn){
 	const errPreSrv = [];
 	jQuery.each( jQuery( o )[0].files, function(i, file) {
@@ -1229,6 +1376,15 @@ const chkUploadFiles = function(o, mb, fn){
 	}
 };
 
+/**
+ * Alterna la visibilidad de un campo de contraseña.
+ *
+ * Recibe el elemento disparador (con data-target apuntando al selector del input),
+ * cambia el tipo del input entre 'password' y 'text' y actualiza el icono del disparador.
+ *
+ * @param {HTMLElement|jQuery} o Elemento disparador que contiene data-target.
+ * @returns {void}
+ */
 const mostrarSecreto = function( o ){
 	const _o = jQuery( o );
 	const dt = _o.data();
@@ -1244,6 +1400,12 @@ const mostrarSecreto = function( o ){
 	}
 };
 
+/**
+ * Comprueba si existe un recurso en la URL indicada (petición HEAD).
+ *
+ * @param {string} url - URL del recurso a verificar.
+ * @param {function(boolean): void} callback - Callback llamado con true si existe, false en caso contrario.
+ */
 const archivoExiste = function (url, callback) {
 	fetch(url, { method: 'HEAD' })
 	.then(function (response) {
@@ -1257,6 +1419,13 @@ const archivoExiste = function (url, callback) {
 		callback(false);
     });
 };
+/**
+ * Inicializa y configura un editor CKEditor listo para insertarse en la página.
+ *
+ * @param {Object} ckeCfg - Configuración del editor (incluye contEditor).
+ * @param {string} configPath - Ruta al archivo de configuración personalizado de CKEditor.
+ * @returns {Function} Función que, al ejecutarse, crea o activa el editor según el entorno.
+ */
 
 const initSample = function( ckeCfg, configPath ) {
     
@@ -1286,6 +1455,12 @@ const initSample = function( ckeCfg, configPath ) {
 	}
 };
 
+/**
+ * Inicializa la lógica de la interfaz cuando el documento está listo.
+ *
+ * Ejecuta código de inicialización y registra manejadores una vez que el DOM
+ * ha terminado de cargarse.
+ */
 jQuery( document ).ready(function(){
 	const notisecs = jQuery('#notisecs');
 	const msjssecs = jQuery('#msjssecs');

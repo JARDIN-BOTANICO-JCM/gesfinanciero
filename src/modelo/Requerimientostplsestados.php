@@ -9,6 +9,7 @@ class Requerimientostplsestados extends Clsdatos {
     private $nombre = '';
     
     /**
+     * Obtiene el identificador del estado del requisito del template.
      * @return number
      */
     public function getId()
@@ -17,6 +18,7 @@ class Requerimientostplsestados extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre del estado del requisito del template.
      * @return string
      */
     public function getNombre()
@@ -25,6 +27,7 @@ class Requerimientostplsestados extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado del requisito del template.
      * @param number $id
      */
     public function setId($id)
@@ -33,6 +36,7 @@ class Requerimientostplsestados extends Clsdatos {
     }
 
     /**
+     * Establece el nombre del estado del requisito del template.
      * @param string $nombre
      */
     public function setNombre($nombre)

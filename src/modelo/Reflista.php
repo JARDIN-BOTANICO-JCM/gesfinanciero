@@ -16,6 +16,7 @@ class Reflista extends Clsdatos {
 	
 
 	/**
+     * Obtiene el identificador del tipo de requisito del paquete.
      * @return number
      */
     public function getPaquetereqtipos_id()
@@ -24,6 +25,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Obtiene la descripción del tipo de requisito del paquete.
      * @return string
      */
     public function getDescripcion()
@@ -32,6 +34,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Obtiene si el requisito del paquete es requerido.
      * @return number
      */
     public function getRequerido()
@@ -40,6 +43,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Obtiene el grupo del requisito del paquete.
      * @return string
      */
     public function getGrupo()
@@ -48,6 +52,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del tipo de requisito del paquete.
      * @param number $paquetereqtipos_id
      */
     public function setPaquetereqtipos_id($paquetereqtipos_id)
@@ -56,6 +61,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Establece la descripción del tipo de requisito del paquete.
      * @param string $descripcion
      */
     public function setDescripcion($descripcion)
@@ -64,6 +70,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Establece si el requisito del paquete es requerido.
      * @param number $requerido
      */
     public function setRequerido($requerido)
@@ -72,6 +79,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Establece el grupo del requisito del paquete.
      * @param string $grupo
      */
     public function setGrupo($grupo)
@@ -80,6 +88,7 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Obtiene la etiqueta del requisito del paquete.
      * @return string
      */
     public function getLabel()
@@ -88,22 +97,42 @@ class Reflista extends Clsdatos {
     }
 
     /**
+     * Establece la etiqueta del requisito del paquete.
      * @param string $label
      */
     public function setLabel($label)
     {
         $this->label = $label;
     }
-
+    
+    /**
+     * Obtiene el identificador del requisito del paquete.
+     * @return int
+     */
     public function getId (){ 
 		return $this->id;
 	} 
+	/**
+	 * Establece el identificador del requisito del paquete.
+	 *
+	 * @param int $vl Identificador del requisito.
+	 */
 	public function setId ( $vl ){ 
 		$this->id = $vl;
 	} 
+    /**
+     * Obtiene el nombre del requisito del paquete.
+     *
+     * @return string Nombre del requisito.
+     */
 	public function getNombre (){ 
 		return $this->nombre;
 	} 
+    /**
+     * Establece el nombre del requisito del paquete.
+     *
+     * @param string $vl Nombre del requisito.
+     */
 	public function setNombre ( $vl ){ 
 		$this->nombre = $vl;
 	} 

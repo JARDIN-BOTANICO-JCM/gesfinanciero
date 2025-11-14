@@ -543,6 +543,13 @@ jQuery(document).ready( function () {
     });
 });
 
+/**
+ * Abre el formulario para añadir un nuevo registro de contratista.
+ *
+ * Reinicia el identificador del registro, prepara y muestra el modal,
+ * elimina la capa de foto existente e inicializa el selector de fecha
+ * para el campo de nacimiento.
+ */
 var btnAddRegistro = function ( ) {
     idMod = null;
     modalFormulario();
@@ -556,6 +563,11 @@ var btnAddRegistro = function ( ) {
 	jQuery("#acureg").show();
 };
 
+/**
+ * Abre y devuelve un modal configurado para agregar un nuevo registro.
+ *
+ * @return object Instancia del modal creada por mngModal.dibujar con opciones predeterminadas.
+ */
 var modalFormulario = function () {
     var opc = {
             'id' : 'frmNuevoRegistro',
@@ -569,6 +581,11 @@ var modalFormulario = function () {
     return mngModal.dibujar( opc );
 };
 
+/**
+ * Crea y devuelve un modal de resumen titulado "Anexos" con opciones predeterminadas.
+ *
+ * @returns {Object} Instancia del modal creada por mngModal.dibujar.
+ */
 var modalFormularioRes = function () {
     var opc = {
             'id' : 'frmResumen',
@@ -582,6 +599,11 @@ var modalFormularioRes = function () {
     return mngModal.dibujar( opc );
 }
 
+/**
+ * Abre un modal y carga vía AJAX la lista de anexos de un contratista para mostrarlos y permitir su descarga.
+ *
+ * @param {HTMLElement} o Elemento disparador que contiene los atributos data-id (id del registro) y data-doc (carpeta de documentos).
+ */
 const btnVerAdjuntos = function( o ){        
     var _o = jQuery( o );
     const _idMod = _o.data('id');
@@ -631,6 +653,12 @@ const btnVerAdjuntos = function( o ){
 	
 };
 
+/**
+ * Inicializa la tabla de acudientes usando DataTables.
+ *
+ * Configura botones, idioma, columnas, orden y asigna a cada fila
+ * un id con formato "acuReg{registroId}" a partir del primer campo de datos.
+ */
 const tablaAcudientes = function(){
 	tbAcuList = null;
 	tbAcuList = jQuery('#tbAcuList').DataTable({
@@ -647,6 +675,13 @@ const tablaAcudientes = function(){
     });
 };
 
+/**
+ * Actualiza la tabla de acudientes: la limpia y agrega filas a partir del objeto recibido.
+ * Se espera que cada elemento contenga: id, fullname, documento, favorito, mail, tipoacudiente y telefonos.
+ * El campo "favorito" se renderiza como una etiqueta ("Si"/"No").
+ *
+ * @param {Object} o Objeto o arreglo de objetos con los datos de los acudientes.
+ */
 const tablaAcudientesAdd = function( o ){
 	tbAcuList.clear().draw();
 	
@@ -672,6 +707,13 @@ const tablaAcudientesAdd = function( o ){
     }
 };
 
+/**
+ * btnModRegistro - Abre el modal de edición de un contratista, solicita los datos por AJAX
+ * y rellena el formulario y elementos asociados (pickers, listas y vista previa de foto).
+ *
+ * @param {HTMLElement|jQuery} o Elemento/trigger que contiene el atributo data-id del registro a editar.
+ * @returns {void} No devuelve valor. Muestra/oculta modales y actualiza el DOM; en caso de error muestra un modal de alerta.
+ */
 const btnModRegistro = function ( o ) {
 	const opc = { 'id' : 'ajaxldr' };
     const objmdl = mngModal.dibujar( opc );
@@ -755,6 +797,10 @@ const btnModRegistro = function ( o ) {
     jQuery( _m ).modal('show');
 };
 
+/**
+ * Actualiza los datos del contratista.
+ * @return {void}
+ */
 const actualizar = function(){
     var fld = [];
     
@@ -821,6 +867,12 @@ const actualizar = function(){
 	});
 };
 
+/**
+ * Activa el elemento proporcionado.
+ *
+ * @param mixed $o Objeto o identificador del elemento a activar.
+ * @return void
+ */
 const activar = function( o ){
 	estadousuario(
 		{
@@ -831,6 +883,12 @@ const activar = function( o ){
 	);
 };
 
+/**
+ * Elimina un contratista o elemento relacionado.
+ *
+ * @param {Object|HTMLElement} o Objeto o elemento que identifica el registro a eliminar.
+ * @return {void}
+ */
 const eliminar = function( o ){
 	estadousuario(
 		{
@@ -841,6 +899,12 @@ const eliminar = function( o ){
 	);
 };
 
+/**
+ * Determina el estado de un usuario a partir de los datos proporcionados.
+ *
+ * @param mixed $d Datos del usuario (objeto o arreglo) utilizados para evaluar su estado.
+ * @return string Cadena (texto o HTML) que representa el estado para mostrar en la interfaz.
+ */
 const estadousuario = function( d ){
 	const msj = d['msj'] || 'sin mensaje';
 	const api = d['api'];
@@ -884,6 +948,12 @@ const estadousuario = function( d ){
 
 };
 
+/**
+ * Construye y normaliza los datos de un contratista para su uso en la interfaz.
+ *
+ * @param {Object} o Objeto de entrada con información del contratista.
+ * @returns {Object} Objeto con campos formateados y valores por defecto aplicados.
+ */
 const cpDatos = function( o ){
 	const _o = jQuery( o );
 	jQuery('#codigo, #usuario').val( _o.val() );
@@ -891,6 +961,12 @@ const cpDatos = function( o ){
 	agregarEmail();
 };
 
+/**
+ * Agrega un email a la lista de contratistas.
+ * Valida el formato y actualiza la vista/estado correspondiente.
+ *
+ * @returns {void}
+ */
 const agregarEmail = function(){
 
 	const _documento = ("" + jQuery('#documento').val()).replace(/\D/ig, '');

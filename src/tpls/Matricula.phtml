@@ -1019,6 +1019,12 @@ $clase_files = "clsanexos";
     	
     	let bro = null;
     	
+        /**
+         * Gestiona los hermanos asociados a una matrícula.
+         *
+         * @param mixed $d Datos de entrada (array/objeto) usados para obtener o actualizar hermanos.
+         * @return mixed Resultado del procesamiento o void si no devuelve valor concreto.
+         */
     	const Hermanos = function ( d ){
     		const _this = this;
     		let idinc = 0;
@@ -1079,6 +1085,12 @@ $clase_files = "clsanexos";
     	};
     	
     	let gbl_correosunicos = true;
+
+        /**
+         * Comprueba si el correo ingresado es único.
+         *
+         * @return {boolean|Promise<boolean>} Devuelve true si no existe otro registro con el mismo correo, false en caso contrario.
+         */
     	const correoUnico = function(){
     		const madre_mail = jQuery('#contact_madre_mail');
     		const padre_mail = jQuery('#contact_padre_mail'); 
@@ -1109,10 +1121,22 @@ $clase_files = "clsanexos";
     		return correosunicos;
     	};
     	
+        /**
+         * Comprueba si un correo electrónico es único en el sistema.
+         *
+         * @param string $email Correo a verificar.
+         * @return bool Devuelve true si el correo no existe, false si ya está registrado.
+         */
     	const correoUnico_helper = function(){
     		gbl_correosunicos = correoUnico();
     	};
     	
+        /**
+         * Genera y envía el correo de reversión de una orden.
+         *
+         * @param {Object} o Objeto con los datos de la orden y opciones para el envío del correo.
+         * @returns {void}
+         */
     	const deOrderRevMail = function( o ){
     		if( gbl_correosunicos ){
     			deOrder( o );
@@ -1122,6 +1146,12 @@ $clase_files = "clsanexos";
     		}
     	};
     	
+        /**
+         * Llena en el objeto dado los campos relacionados con respuestas Sí/No.
+         *
+         * @param {Object} o Objeto destino donde se colocan los valores.
+         * @returns {void}
+         */
     	const llenarDatosSiNo = function( o ){
     		const _o = jQuery( o );
     		const dt = _o.data();
@@ -1180,6 +1210,13 @@ $clase_files = "clsanexos";
     		}
     	};
     	
+        /**
+         * Agrega los elementos "padres" a la lista de selección de la matrícula.
+         *
+         * Actualiza la colección/visualización correspondiente.
+         *
+         * @return void
+         */
     	const agregarListaPadres = function(){
     		const contactm = jQuery('.contact_madreCls:checked');
     		const contactp = jQuery('.contact_padreCls:checked');
@@ -1201,6 +1238,12 @@ $clase_files = "clsanexos";
     		
     	};
     	
+        /**
+         * Determina el acudiente correspondiente a partir de los datos proporcionados.
+         *
+         * @param array|object $o Estructura con la información del registro (p. ej., alumno, tutor).
+         * @return string Nombre o identificador del acudiente; devuelve cadena vacía si no se encuentra.
+         */
     	const quienAcudiente = function( o ){
     		const _o = jQuery( o );
     		const dt = _o.data();
@@ -1216,6 +1259,12 @@ $clase_files = "clsanexos";
     		}
     	};
     	
+        /**
+         * Ordena elementos en orden descendente según el valor proporcionado.
+         *
+         * @param mixed $o Elemento, arreglo u objeto a evaluar para determinar el orden.
+         * @return mixed Resultado de la comparación/ordenación.
+         */
         const deOrder = function( o ){
         	const _o = jQuery( o );
         	const dt = _o.data();
@@ -1238,6 +1287,13 @@ $clase_files = "clsanexos";
         	});
         	
         };
+        
+        /**
+         * Actualiza o renderiza la tabla de efectivos según las opciones recibidas.
+         *
+         * @param {Object} o Parámetros y datos de configuración para la tabla.
+         * @returns {void}
+         */
         const tabEff = function( o ){
         	const _o = jQuery( o );
         	if( !_o.hasClass( activo ) ){
@@ -1255,6 +1311,12 @@ $clase_files = "clsanexos";
         	}
         };
         
+        /**
+         * Recolecta datos del formulario y ejecuta un callback con los mismos.
+         *
+         * @param {HTMLFormElement|Object} frm - Formulario o datos a procesar.
+         * @param {Function} fn - Función a invocar con los datos recolectados.
+         */
         const recolectar = function( frm, fn ){
         	var o = jQuery( frm );
       		jsonObj = [];
@@ -1270,6 +1332,13 @@ $clase_files = "clsanexos";
       		
       		fn( tmpJson );
         };
+       
+        /**
+         * Actualiza los datos del objeto indicado.
+         *
+         * @param {number} nOb Índice o identificador del objeto a actualizar.
+         * @return {void}
+         */
         const actualizar = function( nOb ){
             var fld = [];
             
@@ -1359,6 +1428,14 @@ $clase_files = "clsanexos";
         
         
         const idItemSel = "btnAnexosItem";
+        
+        /**
+         * Devuelve la plantilla HTML para un ítem de anexos.
+         *
+         * Plantilla utilizada en la vista de matrícula para renderizar un elemento de anexos.
+         *
+         * @return string HTML del ítem de anexos
+         */
         const tplAnexosItem = function(){
         	const _btnHtml = [];
             _btnHtml.push( '<button id="' + idItemSel + '" class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-anexos" style="display: none;"> ');
@@ -1377,6 +1454,12 @@ $clase_files = "clsanexos";
         };
         
         const idDocItemSel = "btnDocsFirma";
+        
+        /**
+         * Genera y devuelve la plantilla HTML de un ítem de firma de documento.
+         *
+         * @return string Plantilla HTML para un elemento de firma.
+         */
         const tplDocSigItem = function(){
         	const _btnHtml = [];
             _btnHtml.push( '<button id="' + idDocItemSel + '" class="list-group-item list-group-item-action lh-sm d-flex justify-content-start disabled" onclick="tabEff( this );" data-idtab="#tab-docsig" style="display: none;" > ');
@@ -1394,6 +1477,12 @@ $clase_files = "clsanexos";
             return _btnHtml.join('');
         };
         
+        /**
+         * Genera y devuelve la plantilla HTML del formulario de anexos.
+         *
+         * @param {Object} dt Datos utilizados para poblar la plantilla.
+         * @returns {string} HTML resultante del formulario de anexos.
+         */
         const tplFrmAnexos = function( dt ){
         	const _vl = dt[ 'vl' ];
 			const _tplfrm = [];
@@ -1418,6 +1507,12 @@ $clase_files = "clsanexos";
 			return _tplfrm.join('');
         };
         
+        /**
+         * Solicita los anexos relacionados con una matrícula.
+         *
+         * @param {Object} o Objeto con parámetros u opciones para la solicitud.
+         * @returns {void}
+         */
         const solicitarAnexos = function( o ){
         	const _o = jQuery( o );
         	const _item = jQuery( '#' + idItemSel );
@@ -1478,6 +1573,13 @@ $clase_files = "clsanexos";
         };
         
         let tplFrmTokenHtml = "";
+        
+        /**
+         * Genera y devuelve la plantilla HTML del formulario para ingresar el código de confirmación.
+         *
+         * @param {Object} d Datos utilizados para poblar la plantilla.
+         * @returns {string} HTML del formulario de código de confirmación.
+         */
         const tplFrmToken = function( d ){
         	const _camposDS = [];
         	
@@ -1499,6 +1601,12 @@ $clase_files = "clsanexos";
         
         let dtRegF = null;
         let dtRegD = null;
+        /**
+         * Configura y envía el código de firma al correo del usuario.
+         *
+         * @param {Object} d Datos adicionales para la configuración (opcional).
+         * @returns {void}
+         */
         const configFirmas = function( d ){
         	let prin = true;
         	
@@ -1588,6 +1696,12 @@ $clase_files = "clsanexos";
         
         const BTN_DATA_ROL_REV = "revisar";
         const BTN_DATA_ROL_FIR = "firmar";
+        
+        /**
+         * Verifica el código de activación ingresado por el usuario.
+         *
+         * @returns {void}
+         */
         const chkCode = function(){
         	ut.validarFrm( 'frmvalcls_11' , function ( r ) {
                 const form_data = new FormData();
@@ -1678,6 +1792,12 @@ $clase_files = "clsanexos";
             });
         };
         
+        /**
+         * Gestiona el estado del documento y actualiza la interfaz según los datos recibidos.
+         *
+         * @param {Object} d - Datos del documento (estado y propiedades asociadas).
+         * @returns {void} No devuelve valor.
+         */
         const docEstadoMng = function( d ){      
         	const nmF = d['id'];
         	const dDt = lgDoc.obtenerPorId( nmF );
@@ -1703,6 +1823,12 @@ $clase_files = "clsanexos";
 
         };
         
+        /**
+         * Añade un estudiante al usuario.
+         *
+         * Función encargada de crear la asociación entre un estudiante y el usuario
+         * y de actualizar la interfaz o estado correspondiente.
+         */
         const addEstUsr = function(){
         	const iddoc = ( "" + jQuery('#documento').val() );
         	const nom = ( "" + jQuery('#nombres').val() ).toLocaleLowerCase();
@@ -1720,6 +1846,11 @@ $clase_files = "clsanexos";
         	
         };
         
+        /**
+         * Agrega un código de estudiante al formulario o lista correspondiente.
+         *
+         * @returns {void}
+         */
         const addEstCode = function(){
         	const tmpCod = ("" + jQuery('#documento').val() ).replace(/\D+/ig,'');
         	jQuery('#documento').val( tmpCod );
@@ -1733,6 +1864,12 @@ $clase_files = "clsanexos";
         const anexInfo = <?php echo $_CFG_MATRICULA_ANEXLS; ?>;
         const lsDocSig = <?php echo $_CFG_MATRICULA_DOC4SIG; ?>;
         
+        /**
+         * Gestiona los datos del usuario recibidos.
+         *
+         * @param {Object} dt Datos del usuario a procesar (estructura según contexto).
+         * @returns {void} No devuelve valor explícito; realiza acciones sobre la UI o estado.
+         */
         const gUsrData = function( dt ){
         	const lbl_cont = 'contact_';
         	for (const key in dt ) {
@@ -1795,6 +1932,12 @@ $clase_files = "clsanexos";
         	}
         };
         
+        /**
+         * Obtiene y formatea los datos de hermanos a partir de la entrada `dt`.
+         *
+         * @param {Array|Object} dt Datos de entrada con información de hermanos.
+         * @return {Array} Lista formateada de hermanos para uso en la interfaz/logic.
+         */
         const gHermanosData = function( dt ){
         	for (const key in dt ) {
             	if (Object.hasOwnProperty.call( dt, key)) {
@@ -1810,6 +1953,12 @@ $clase_files = "clsanexos";
         	}
         };
         
+        /**
+         * Genera/obtiene los datos de historial a partir de la entrada proporcionada.
+         *
+         * @param mixed dt Fecha o dato usado para construir el historial.
+         * @return array Datos del historial formateados para su uso en la interfaz.
+         */
         const gHistorialData = function( dt ){
         	document.getElementById('frmval_9').reset();
         	for (const key in dt ) {
@@ -1829,6 +1978,13 @@ $clase_files = "clsanexos";
         	}
         };
         
+        /**
+         * Limpia los campos y el estado asociados a "Ned" en la interfaz.
+         *
+         * Restablece valores por defecto y elimina datos temporales del formulario.
+         *
+         * @returns {void}
+         */
         const limpiarNed = function(){
             jQuery("#nuevousr").val('1');
             jQuery("#nhid").val('0');
@@ -1857,12 +2013,25 @@ $clase_files = "clsanexos";
             jQuery("#contact_direccion").val('');
         };
         
+        /**
+         * Gestiona la obtención y visualización de los anexos anteriores de la matrícula.
+         *
+         * Breve: carga los archivos y metadatos necesarios y los prepara para mostrarse en la interfaz.
+         *
+         * @returns {void}
+         */
         const anexosAnt = function(){
         	const clsAnt = jQuery(".clsAnt");
         	
         	clsAnt.remove();
         };
         
+        /**
+         * Comprueba si el objeto proporcionado contiene la propiedad 'rev' y que esta tenga un valor válido.
+         *
+         * @param object $o Objeto a evaluar.
+         * @return bool     True si 'rev' existe y no está vacía; false en caso contrario.
+         */
         const revExists = function( o ){
         	const _o = jQuery( o );
         	const cls = _o.parent().parent().parent();
@@ -1930,6 +2099,13 @@ $clase_files = "clsanexos";
         	});
         };
         
+        /**
+         * Abre y gestiona el formulario del modal de matrícula.
+         *
+         * Inicializa eventos, validaciones y el manejo de envío y cierre del modal.
+         *
+         * @returns {void}
+         */
         const modalFormulario = function () {
             const opc = {
                 'id' : 'frmNuevoRegistro',
@@ -1943,6 +2119,12 @@ $clase_files = "clsanexos";
             return mngModal.dibujar( opc );
         }
         
+        /**
+         * Función helper para renderizar y gestionar la visualización de una firma en el visor.
+         *
+         * @param mixed $o Objeto o configuración con los datos de la firma.
+         * @return HTMLElement|void Nodo HTML insertado o void si no se genera salida.
+         */
         const firmaViewer_Helper = function( o ){
         	const dt = o['ob'];
         	
@@ -1990,6 +2172,14 @@ $clase_files = "clsanexos";
         	jQuery( _m ).modal('show'); 
         	
         };
+        
+        /**
+         * Helper para ejecución de firma/certificación.
+         * Inicializa y ejecuta la lógica de firma usando las opciones proporcionadas.
+         *
+         * @param {Object} o - Objeto de configuración/parametros para la operación de firma.
+         * @returns {any} Resultado de la operación de firma (o undefined si no aplica).
+         */
         const firmaCertify_Helper = function( o ){
         	const dt = o['ob'];
         	
@@ -2013,6 +2203,13 @@ $clase_files = "clsanexos";
         };
         
         let btnHelper = null;
+        
+        /**
+         * Helper que genera la firma para un objeto dado.
+         *
+         * @param {Object} o Opciones o datos de entrada para generar la firma.
+         * @return {string} Firma generada.
+         */
         const firmaGen_Helper = function( o ){
         	const _o = jQuery( o );
         	
@@ -2035,6 +2232,12 @@ $clase_files = "clsanexos";
         
         
         
+        /**
+         * Inicializa la lógica de la vista cuando el DOM está listo.
+         *
+         * Aquí se colocan los manejadores de eventos y las inicializaciones
+         * necesarias para la interacción de la página.
+         */
         jQuery( document ).ready(function(){
         
         	jQuery('#nacimiento').flatpickr({});

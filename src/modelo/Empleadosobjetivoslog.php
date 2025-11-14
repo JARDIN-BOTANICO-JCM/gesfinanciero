@@ -20,6 +20,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     private $paquetesrequ_id = 0;
     
     /**
+     * Obtiene el identificador del paquete requerido.
      * @return number
      */
     public function getPaquetesrequ_id()
@@ -28,6 +29,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del paquete requerido.
      * @param number $paquetesrequ_id
      */
     public function setPaquetesrequ_id($paquetesrequ_id)
@@ -36,6 +38,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del ítem de requerimientos TPLS.
      * @return number
      */
     public function getRequerimientostplsitems_id()
@@ -44,6 +47,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del ítem de requerimientos TPLS.
      * @param number $requerimientostplsitems_id
      */
     public function setRequerimientostplsitems_id($requerimientostplsitems_id)
@@ -52,6 +56,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -60,6 +65,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la descripción.
      * @return string
      */
     public function getDescripcion()
@@ -68,6 +74,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene los archivos.
      * @return string
      */
     public function getArchivos()
@@ -76,6 +83,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene los archivos GES.
      * @return string
      */
     public function getArchivosges()
@@ -84,6 +92,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha.
      * @return string
      */
     public function getFecha()
@@ -92,6 +101,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el empleado.
      * @return string
      */
     public function getEmpleados()
@@ -100,6 +110,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del objetivo del empleado.
      * @return number
      */
     public function getEmpleadosobjetivos_id()
@@ -108,6 +119,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el feedback.
      * @return string
      */
     public function getFeedback()
@@ -116,6 +128,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el usuario que proporcionó el feedback.
      * @return string
      */
     public function getUsuariofeedback()
@@ -124,6 +137,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha del feedback.
      * @return string
      */
     public function getFechafeedback()
@@ -132,6 +146,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -140,6 +155,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece la descripción.
      * @param string $descripcion
      */
     public function setDescripcion($descripcion)
@@ -148,6 +164,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece los archivos.
      * @param string $archivos
      */
     public function setArchivos($archivos)
@@ -156,6 +173,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     *  Establece los archivos GES.
      * @param string $archivosges
      */
     public function setArchivosges($archivosges)
@@ -164,6 +182,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece la fecha.
      * @param string $fecha
      */
     public function setFecha($fecha)
@@ -172,6 +191,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     *  Establece el empleado.
      * @param string $empleados
      */
     public function setEmpleados($empleados)
@@ -180,6 +200,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del objetivo del empleado.
      * @param number $empleadosobjetivos_id
      */
     public function setEmpleadosobjetivos_id($empleadosobjetivos_id)
@@ -188,6 +209,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece el feedback.
      * @param string $feedback
      */
     public function setFeedback($feedback)
@@ -196,6 +218,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece el usuario que proporcionó el feedback.
      * @param string $usuariofeedback
      */
     public function setUsuariofeedback($usuariofeedback)
@@ -204,6 +227,7 @@ class Empleadosobjetivoslog extends Clsdatos {
     }
 
     /**
+     * Establece la fecha del feedback.
      * @param string $fechafeedback
      */
     public function setFechafeedback($fechafeedback)

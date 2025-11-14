@@ -4,6 +4,13 @@
  * @author yalfonso
  *
  */
+
+/**
+ * Establece la fecha del registro.
+ *
+ * @param string $fecha Fecha en formato 'YYYY-MM-DD HH:MM:SS'.
+ * @return void
+ */
 class Apibox extends Clsdatos { 
 
 	private $id = 0; 
@@ -14,7 +21,12 @@ class Apibox extends Clsdatos {
 	private $fecha = "1900-01-01 00:00:00";
 	
     /**
-     * @return string
+     * @return 
+     */
+    /**
+     * Devuelve el valor de la propiedad privada.
+     *
+     * @return string El valor almacenado en $privada.
      */
     public function getPrivada()
     {
@@ -22,7 +34,9 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @param string $privada
+     * Establece el valor de la propiedad privada.
+     *
+     * @param string $privada Nuevo valor para la propiedad privada.
      */
     public function setPrivada($privada)
     {
@@ -30,7 +44,9 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @return number
+     * Obtiene el identificador del objeto.
+     *
+     * @return int|null El ID del objeto.
      */
     public function getId()
     {
@@ -38,7 +54,9 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @return number
+     * Devuelve el ID del usuario asociado.
+     *
+     * @return int|null ID del usuario
      */
     public function getUsuarios_id()
     {
@@ -46,7 +64,9 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @return string
+     * Devuelve el valor de la propiedad 'publica'.
+     *
+     * @return mixed Valor de la propiedad pública.
      */
     public function getPublica()
     {
@@ -56,13 +76,21 @@ class Apibox extends Clsdatos {
     /**
      * @return number
      */
+
+    /**
+     * Obtiene el estado de activo del registro.
+     *
+     * @return number 
+     */
     public function getActivo()
     {
         return $this->activo;
     }
 
     /**
-     * @return string
+     * Obtiene la fecha almacenada.
+     *
+     * @return string Fecha almacenada.
      */
     public function getFecha()
     {
@@ -70,7 +98,10 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @param number $id
+     * Establece el identificador del objeto.
+     *
+     * @param mixed $id Identificador a asignar.
+     * @return void
      */
     public function setId($id)
     {
@@ -78,7 +109,10 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @param number $usuarios_id
+     * Establece el identificador del usuario.
+     *
+     * @param int|string $usuarios_id Identificador del usuario.
+     * @return void
      */
     public function setUsuarios_id($usuarios_id)
     {
@@ -86,7 +120,10 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @param string $publica
+     * Establece si el elemento es público.
+     *
+     * @param string $publica True si es pública, false en caso contrario.
+     * @return void
      */
     public function setPublica($publica)
     {
@@ -94,15 +131,21 @@ class Apibox extends Clsdatos {
     }
 
     /**
-     * @param number $activo
+     * Establece si el elemento está activo.
+     *
+     * @param number $activo Estado activo (1 para activo, 0 para inactivo).
+     * @return void
      */
     public function setActivo($activo)
     {
         $this->activo = $activo;
     }
-
+    
     /**
-     * @param string $fecha
+     * Establece la fecha asociada al objeto.
+     *
+     * @param string $fecha Fecha a asignar (cadena, objeto DateTime u otro formato aceptado).
+     * @return void
      */
     public function setFecha($fecha)
     {

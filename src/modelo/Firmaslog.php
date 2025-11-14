@@ -21,6 +21,7 @@ class Firmaslog extends Clsdatos {
 	private $documento = "";
 	
     /**
+     * Obtiene el identificador del usuario del perfil.
      * @return number
      */
     public function getPerfilusuarios_id()
@@ -29,6 +30,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el nombre completo.
      * @return string
      */
     public function getNombrefull()
@@ -37,6 +39,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el tipo de documento.
      * @return string
      */
     public function getTipodoc()
@@ -45,6 +48,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el documento.
      * @return string
      */
     public function getDocumento()
@@ -53,6 +57,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del usuario del perfil.
      * @param number $perfilusuarios_id
      */
     public function setPerfilusuarios_id($perfilusuarios_id)
@@ -61,6 +66,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el nombre completo.
      * @param string $nombrefull
      */
     public function setNombrefull($nombrefull)
@@ -69,6 +75,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el tipo de documento.
      * @param string $tipodoc
      */
     public function setTipodoc($tipodoc)
@@ -77,6 +84,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el documento.
      * @param string $documento
      */
     public function setDocumento($documento)
@@ -85,6 +93,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la URL del PDF.
      * @return string
      */
     public function getPdfurl()
@@ -93,6 +102,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece la URL del PDF.
      * @param string $pdfurl
      */
     public function setPdfurl($pdfurl)
@@ -101,6 +111,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador.
      * @return number
      */
     public function getId()
@@ -109,6 +120,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador de las firmas.
      * @return number
      */
     public function getFirmas_id()
@@ -117,6 +129,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el identificador del estado de la firma.
      * @return number
      */
     public function getFirmasestados_id()
@@ -125,6 +138,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la dirección IP.
      * @return string
      */
     public function getIp()
@@ -133,6 +147,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la ruta del PDF.
      * @return string
      */
     public function getPdfruta()
@@ -141,6 +156,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el hash del PDF.
      * @return string
      */
     public function getPdfhash()
@@ -149,6 +165,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene el número de páginas.
      * @return number
      */
     public function getPaginas()
@@ -157,6 +174,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Obtiene la fecha.
      * @return string
      */
     public function getFecha()
@@ -165,6 +183,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador.
      * @param number $id
      */
     public function setId($id)
@@ -173,6 +192,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador de las firmas.
      * @param number $firmas_id
      */
     public function setFirmas_id($firmas_id)
@@ -181,6 +201,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el identificador del estado de la firma.
      * @param number $firmasestados_id
      */
     public function setFirmasestados_id($firmasestados_id)
@@ -189,6 +210,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece la dirección IP.
      * @param string $ip
      */
     public function setIp($ip)
@@ -197,6 +219,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece la ruta del PDF.
      * @param string $pdfruta
      */
     public function setPdfruta($pdfruta)
@@ -205,6 +228,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el hash del PDF.
      * @param string $pdfhash
      */
     public function setPdfhash($pdfhash)
@@ -213,6 +237,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece el número de páginas.
      * @param number $paginas
      */
     public function setPaginas($paginas)
@@ -221,6 +246,7 @@ class Firmaslog extends Clsdatos {
     }
 
     /**
+     * Establece la fecha.
      * @param string $fecha
      */
     public function setFecha($fecha)
