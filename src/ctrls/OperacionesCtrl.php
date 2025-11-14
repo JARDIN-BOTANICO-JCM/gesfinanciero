@@ -12194,9 +12194,7 @@ EOD;
 	    
 	    return $arRes;
 	}
-<<<<<<< Updated upstream
 	
-=======
 	/**
 	 * Obtiene los datos necesarios para el revisor de un paquete de flujo.
 	 *
@@ -12213,7 +12211,6 @@ EOD;
 	 * @return array Estructura con las claves: 'docs', 'firmantes', 'solicitante' y 'paquete'.
 	 * @throws \Exception Si la sesión no está activa o ocurre un error durante la obtención.
 	 */
->>>>>>> Stashed changes
 	public static function flujositems_Helper_ObtenerRevisorData ( $d ){
 	    try {
 	        self::authRequ();
@@ -12306,7 +12303,6 @@ EOD;
 	    
 	    return self::retorno($result, 0, '');
 	}
-<<<<<<< Updated upstream
 	
 	public static function flujositems_Helper_EvaluarCriterio ( $d ){
 	    $cfg = self::LeerConfigCorp();
@@ -12398,7 +12394,6 @@ EOD;
 	    return [];
 	}
 	
-=======
 	/**
 	 * Obtiene los PDFs generados para los requisitos de mezcla de un paquete en un año lectivo.
 	 *
@@ -12415,7 +12410,6 @@ EOD;
 	 *   - 'url' (string) URL completa al archivo.
 	 *   - 'firmas_id' (array) Datos de firma: 'firmas_id', 'firmasestados_id', 'firmaslog_id'.
 	 */
->>>>>>> Stashed changes
 	public static function flujositems_Archivos_Helper_Obtener ( $d ){
 	    $cfg = OperacionesCtrl::LeerConfigCorp();
 	    $_CFG_REQUERIMIENTOS_MEZCLA = json_decode( (isset( $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]) ? $cfg[ OperacionesCtrl::CFG_REQUERIMIENTOS_MEZCLA ]["val"] : '[]' ), true );
