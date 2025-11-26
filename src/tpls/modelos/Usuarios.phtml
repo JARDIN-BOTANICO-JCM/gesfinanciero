@@ -1099,7 +1099,7 @@ if ($usu->getPerfil_id() == 1) {
                 const fullName = usuario.nombre;
                 const checkboxId = 'usuario_' + usuario.id + '_' + contenedorId;
 
-                html.push('<label class="list-group-item" for="' + checkboxId + '">');
+                html.push('<label class="list-group-item d-flex" for="' + checkboxId + '">');
                 html.push('    <input class="form-check-input me-2" type="checkbox" ');
                 html.push('           id="' + checkboxId + '" ');
                 html.push('           value="' + usuario.id + '" ');
