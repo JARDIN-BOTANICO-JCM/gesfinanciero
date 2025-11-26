@@ -2437,13 +2437,6 @@ class IndexCtrl extends Pagina {
 					die("");
 				}
 
-				/*
-				 * @vnavarro
-				 * TODO: tarea 7
-				 * Enrutamos a la funcion empleadosdetallescontrato_Helper_Agregar del controlador OperacionesCtrl.php
-				 * 1. la comparacion debe ser $_POST["ajax"] == md5( self::API_empleadosdetallescontrato_Helper_Add )
-				 * 2. la funcion debe ser $ok = OperacionesCtrl::empleadosdetallescontrato_Helper_Agregar( $_POST );
-				 */
 				if ($_POST["ajax"] == md5(self::API_empleadosdetallescontrato_Helper_Add)) {
 					try {
 						$ok = OperacionesCtrl::empleadosdetallescontrato_Helper_Agregar($_POST);
