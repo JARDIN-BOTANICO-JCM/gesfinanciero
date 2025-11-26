@@ -13963,8 +13963,10 @@ EOD;
 	
 	// paquetesreqcomentarios INI
 	/*
-	 * @yalfonso
-	 * TODO: Tarea 46 - Crear funci&oacute;n que ayude a agregar o modificar la tabla paquetesreqcomentarios
+	 * Agrega o actualiza un comentario de paquete de requerimiento a partir de un payload codificado.
+	 * @param array $d Array con la clave 'data' (string base64 que contiene el JSON con id, paquetesrequ_id y valor del comentario).
+	 * @return array Respuesta formateada por self::retorno con información sobre la creación o actualización del comentario.
+	 * @throws Exception Si falla la autenticación, la obtención de datos o la persistencia (por ejemplo al llamar a métodos auxiliares).
 	 */
 	public static function paquetesreqcomentarios_Helper_Agregar( $d ) {
 	    date_default_timezone_set('America/Bogota');
@@ -14011,8 +14013,11 @@ EOD;
 	    return self::retorno( [ "success" => true , 'idreg' => $idreg ], 0, '') ;
 	}
 	/*
-	 * @yalfonso
-	 * TODO: Tarea 47 - Crear funci&oacute;n que agregue datos a la tabla paquetesreqcomentarios
+	 * Inserta un nuevo registro de Paquetesreqcomentarios usando los datos proporcionados.
+	 * @param array $d Datos del comentario (paquetesrequ_id, valor, paquetesreqcomentariosestados_id, empleados, empleados_id, etc.).
+	 * @return int ID del registro creado.
+	 * @throws \Exception Si ocurre un error al guardar o faltan campos obligatorios; también se
+	 *                    establece el código HTTP correspondiente antes de lanzar la excepción.
 	 */
 	public static function paquetesreqcomentarios_Agregar( $d ) {
 	    date_default_timezone_set('America/Bogota');
@@ -14064,8 +14069,19 @@ EOD;
 	}
 	
 	/*
-	 * @yalfonso
-	 * TODO: Tarea 54 - Crear funci&oacute;n maneje los parametros que se envian para obtener data de la tabla paquetesreqcomentarios
+	 * Obtiene registros de la tabla "paquetesreqcomentarios" según filtros recibidos.
+	 * Parámetros esperados en $d:
+	 *  - 'id'                      => filtra por id
+	 *  - 'w_paquetesrequ_id'       => filtra por paquetesrequ_id
+	 *  - 'w_empleados_id'          => filtra por empleados_id
+	 *  - 'w_paquetesreqcomentariosestados_ids' => filtra por un conjunto de estados
+	 *  - 'ordendesc'               => ordena descendente por un campo
+	 *  - 'ordenasc'                => ordena ascendente por un campo
+	 *  - 'limite'                  => limita el número de resultados
+	 * 
+	 * @param array $d Filtros y opciones para la consulta.
+	 * @return mixed Resultado de la consulta.
+	 * @throws \Exception Si la sesión no está activa (ERR_COD_SESION_INACTIVA) o si ocurre un error en la consulta SQL.
 	 */
 	public static function paquetesreqcomentarios_Helper_Obtener( $d ) {
 	    date_default_timezone_set('America/Bogota');
@@ -14091,8 +14107,19 @@ EOD;
 	}
 	
 	/*
-	 * @yalfonso
-	 * TODO: Tarea 48 - Crear funci&oacute;n que obtenga los datos de la tabla paquetesreqcomentarios
+	 * Obtiene registros de la tabla "paquetesreqcomentarios" según filtros recibidos.
+	 * Parámetros esperados en $d:
+	 *  - 'id'                      => filtra por id
+	 *  - 'w_paquetesrequ_id'       => filtra por paquetesrequ_id
+	 *  - 'w_empleados_id'          => filtra por empleados_id
+	 *  - 'w_paquetesreqcomentariosestados_ids' => filtra por un conjunto de estados
+	 *  - 'ordendesc'               => ordena descendente por un campo
+	 *  - 'ordenasc'                => ordena ascendente por un campo
+	 *  - 'limite'                  => limita el número de resultados
+	 * 
+	 * @param array $d Filtros y opciones para la consulta.
+	 * @return mixed Resultado de la consulta.
+	 * @throws \Exception Si la sesión no está activa (ERR_COD_SESION_INACTIVA) o si ocurre un error en la consulta SQL.
 	 */
 	public static function paquetesreqcomentarios_Obtener( $d ) {
 	    try {
@@ -14171,8 +14198,17 @@ EOD;
 	    return $r;
 	}
 	/*
-	 * @yalfonso
-	 * TODO: Tarea 49 - Crear funci&oacute;n que modifique los datos de la tabla paquetesreqcomentarios
+	 * Modifica registros en la tabla "paquetesreqcomentarios".
+	 * Actualiza campos como valor, paquetesreqcomentariosestados_id, empleados, empleados
+	 * empleados_id y empleadosfecha. Se añade automáticamente el campo fechamod.
+	 * Es obligatorio indicar un filtro de actualización (id o w_paquetesrequ_id).
+	 * @param array $d Datos y filtros para la actualización. Claves aceptadas:
+	 * 			   - Filtros: id, w_paquetesrequ_id
+	 * 			 - Campos a actualizar: valor, paquetesreqcomentariosestados_id,
+	 * 			   empleados, empleados_id, empleadosfecha
+	 * @return mixed Resultado de la operación (por ejemplo, número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa, si no se proporciona un filtro
+	 * 				  para la actualización o si ocurre un error en la consulta SQL.
 	 */
 	public static function paquetesreqcomentarios_Modificar( $d ) {
 	    date_default_timezone_set('America/Bogota');
@@ -14232,8 +14268,12 @@ EOD;
 	    return $cu;
 	}
 	/*
-	 * @yalfonso
-	 * TODO: Tarea 50 - Crear funci&oacute;n que eliminar los datos de la tabla la tabla paquetesreqcomentarios
+	 * Elimina registros de la tabla "paquetesreqcomentarios" según filtros recibidos.
+	 * Parámetros esperados en $d:
+	 *  - 'id'                      => elimina por id
+	 * @param array $d Filtros para la eliminación.
+	 * @return mixed Resultado de la consulta.
+	 * @throws \Exception Si la sesión no está activa (ERR_COD_SESION_INACTIVA) o si ocurre un error de eliminación (ERR_COD_ELIMINACION_SQL).
 	 */
 	public static function paquetesreqcomentarios_Eliminar( $d ) {
 	    try {
@@ -14261,8 +14301,12 @@ EOD;
 	    return  true;
 	}
 	/*
-	 * @yalfonso
-	 * TODO: Tarea 57 - Crear funci&oacute;n maneje los comentarios eliminados de la tabla paquetesreqcomentarios
+	 * Elimina registros de la tabla "paquetesreqcomentarios" según filtros recibidos.
+	 * Parámetros esperados en $d:
+	 *  - 'data'                      => datos en base64 con el id del registro a eliminar
+	 * @param array $d Filtros para la eliminación.
+	 * @return mixed Resultado de la consulta.
+	 * @throws \Exception Si la sesión no está activa (ERR_COD_SESION_INACTIVA) o si ocurre un error de eliminación (ERR_COD_ELIMINACION_SQL).
 	 */
 	public static function paquetesreqcomentarios_Helper_Eliminar( $d ) {
 	    date_default_timezone_set('America/Bogota');
@@ -14290,8 +14334,10 @@ EOD;
 	
 	// apoyos INI
 	/*
-	 * @vnavarro
-	 * TODO: Tarea 62 - Crear funci&oacute;n que agregue datos a la tabla apoyos
+	 * Agrega un nuevo registro a la tabla "apoyos" utilizando los datos proporcionados.
+	 * @param array $d Datos del apoyo (supervisor_id, supervisor, asignado_id, asignado, etc.).
+	 * @return int ID del registro creado.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error al guardar
 	 */
 	public static function apoyos_Agregar( $d ) {
 	    // usa la Tarea 47 como ejemplo
@@ -14303,24 +14349,117 @@ EOD;
 	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
 	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
 	    }
+
+	    $o = new Apoyos();
+	    if (isset( $d['supervisor_id'] ) ) {
+	        $o->setSupervisor_id( $d['supervisor_id'] );
+	    }
+	    if (isset( $d['supervisor'] ) ) {
+	        $o->setSupervisor( $d['supervisor'] );
+	    }
+	    if (isset( $d['asignado_id'] ) ) {
+	        $o->setAsignado_id( $d['asignado_id'] );
+	    }
+	    if (isset( $d['asignado'] ) ) {
+	        $o->setAsignado( $d['asignado'] );
+	    }
+
+		$o->setUsuarios_id( $usu->getId() );
+	    $o->setUsuarios( $usu->getNombres() . " " . $usu->getApellidos() );
+		$o->setFecha( date('Y-m-d H:i:s'));
+
+		$id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $o->obtenerError(), IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
 	}
 	
-	/*
-	 * @vnavarro
-	 * TODO: Tarea 63 - Crear funci&oacute;n que obtenga los datos de la tabla apoyos
+	/**
+	 * Obtiene registros de la tabla "apoyos" según los filtros proporcionados.
+	 * parametros esperados en $d:
+	 *  - 'id'              => filtra por id
+	 * - 'supervisor_id'   => filtra por supervisor_id
+	 * 	- 'asignado_id'     => filtra por asignado_id
+	 *  - 'ordendesc'       => ordena los resultados de forma descendente
+	 * 
+	 * @param array $d Filtros y opciones para la consulta.
+	 * @return mixed Resultado de la consulta.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la consulta SQL.
 	 */
 	public static function apoyos_Obtener( $d ) {
-	    // usa la Tarea 48 como ejemplo
 	    try {
 	        self::authRequ();
 	    } catch (\Exception $e) {
 	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
 	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
 	    }
+
+		$r = new Singleton();
+		$r::$lnk->query( self::SQL_BIG_SELECTS );
+
+		$vr  = "apoyos.`id`, apoyos.`supervisor_id`, apoyos.`supervisor`, apoyos.`asignado_id`, apoyos.`asignado`, ";
+		$vr .= "apoyos.`usuarios_id`, apoyos.`usuarios`, apoyos.`fecha`, apoyos.`apoyosestados_id` ";
+		$tb  = '`apoyos` as apoyos ';
+		$pr = [];
+		$wh  = array();
+		if( isset( $d['id'] ) ){
+		    $wh[] = "apoyos.`id` = ?";
+		    $pr[] = $d['id'];
+		}
+		if( isset( $d['supervisor_id'] ) ){
+		    $wh[] = "apoyos.`supervisor_id` = ?";
+		    $pr[] = $d['supervisor_id'];
+		}
+		if( isset( $d['asignado_id'] ) ){
+		    $wh[] = "apoyos.`asignado_id` = ?";
+		    $pr[] = $d['asignado_id'];
+		}
+		$defWh = "";
+		if ( count( $wh ) > 0 ) {
+		    $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+		}
+		$orden = 'ORDER BY 1 desc ';
+		if (isset( $d['ordendesc'] ) ) {
+			$orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+		}
+		if (isset( $d['ordenasc'] ) ) {
+			$orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+		}
+		$limite = "";
+		if ( isset( $d['limite'] ) ) {
+			$limite = "LIMIT " . intval( $d['limite'] ) . " ";
+		}
+		$xt  = $defWh . $orden . $limite;
+		$sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+		
+		$r = Singleton::_safeRawQuery($sql, $pr); 
+		if ( isset( $r['err_info'] )) {
+		    http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+		    throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+		}
+		return $r;
+
+
 	}
 	/*
-	 * @vnavarro
-	 * TODO: Tarea 64 - Crear funci&oacute;n que modifique los datos de la tabla apoyos
+	 * Modifica registros en la tabla "apoyos".
+	 * Puede actualizar los campos supervisor_id, asignado_id y apoyosestados_id.
+	 * Es obligatorio indicar un filtro de actualización (id o combinación de supervisor_id y asignado_id).
+	 *  param array $d Datos y filtros para la actualización. Claves aceptadas:
+	 * 			- Filtros: id, supervisor_id y asignado_id
+	 * 			- Campos a actualizar: supervisor_id, asignado_id, apoyosestados_id
+	 * @return mixed Resultado de la operación (por ejemplo, número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa, si no se proporciona un filtro
+	 * 				  para la actualización o si ocurre un error en la consulta SQL.
 	 */
 	public static function apoyos_Modificar( $d ) {
 	    // usa la Tarea 49 como ejemplo
@@ -14332,10 +14471,55 @@ EOD;
 	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
 	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
 	    }
+
+		$tb  = "apoyos ";
+		$aSt = array();
+
+		if (isset( $d['supervisor_id'] ) ) {
+		    $aSt['supervisor_id'] = $d['supervisor_id'] ;
+		}
+		if (isset( $d['asignado_id'] ) ) {
+		    $aSt['asignado_id'] = $d['asignado_id'] ;
+		}
+		if (isset( $d['apoyosestados_id'] ) ) {
+		    $aSt['apoyosestados_id'] = $d['apoyosestados_id'] ;
+		}
+		$pr = [];
+		$wh  = '';
+		if ( isset( $d['id'] ) ) {
+		    $wh  = 'id = ?';
+		    $pr[] = $d['id'];
+		}
+		if ( isset( $d['supervisor_id'] ) && isset( $d['asignado_id'] ) ) {
+		    $wh  = 'supervisor_id = ? AND asignado_id = ?';
+		    $pr[] = $d['supervisor_id'] ;
+		    $pr[] = $d['asignado_id'] ;
+		}
+		if ( $wh == '' ) {
+		    http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+		    throw new Exception( 'Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+		}
+		$xt = $wh;
+		$cu = null;
+
+		try {
+		    $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+		} catch (\Throwable $th) {
+		    http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+		    throw new \Exception($th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+		}
+		return $cu;
 	}
 	/*
-	 * @vnavarro
-	 * TODO: Tarea 65 - Crear funci&oacute;n que eliminar los datos de la tabla la tabla apoyos
+	 * 
+	 * Elimina registros de la tabla "apoyos" según los filtros proporcionados.
+	 * Parámetros esperados en $d:
+	 * - 'id'              => elimina por id
+	 * - 'supervisor_id'   => elimina por supervisor_id
+	 * - 'asignado_id'     => elimina por asignado_id
+	 * - 'clean'           => si es true, elimina todos los registros
+	 * @return mixed Resultado de la operación (por ejemplo, número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa, si no se proporciona un filtro
 	 */
 	public static function apoyos_Eliminar( $d ) {
 	    try {
@@ -14345,28 +14529,103 @@ EOD;
 	        throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
 	    }
 	    
-	    //Usa esta funcion para eliminar
-	    //Singleton::_safeDelete($table, $where);
+	    $tb = "apoyos ";
+	    $pr = [];
+	    $wh = '';
+	    
+	    // Eliminar por ID específico
+	    if ( isset( $d['id'] ) ) {
+	        $wh = "id = ?";
+	        $pr[] = $d['id'];
+	    }
+	    // Eliminar por supervisor_id y asignado_id específicos
+	    else if ( isset( $d['supervisor_id'] ) && isset( $d['asignado_id'] ) ) {
+	        $wh = "supervisor_id = ? AND asignado_id = ?";
+	        $pr[] = $d['supervisor_id'];
+	        $pr[] = $d['asignado_id'];
+	    }
+	    // Eliminar todos los apoyos de un supervisor
+	    else if ( isset( $d['supervisor_id'] ) ) {
+	        $wh = "supervisor_id = ?";
+	        $pr[] = $d['supervisor_id'];
+	    }
+	    // Eliminar todos los apoyos donde aparece un asignado
+	    else if ( isset( $d['asignado_id'] ) ) {
+	        $wh = "asignado_id = ?";
+	        $pr[] = $d['asignado_id'];
+	    }
+	    // Limpiar toda la tabla (solo si viene clean = true)
+	    else if ( isset( $d['clean'] ) && $d['clean'] == true ) {
+	        $wh = "id > 0";
+	    }
+	    
+	    // Validar que se especificó al menos un criterio
+	    if ( empty($wh) ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'apoyos_Eliminar: Debe especificar al menos un criterio para eliminar (id, supervisor_id, asignado_id, o clean)', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    try {
+	        // Usar _safeDelete con parámetros preparados para mayor seguridad
+	        return Singleton::_safeDelete( trim($tb), $wh, $pr );
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( 'apoyos_Eliminar: ' . $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
 	}
 	/*
-	 * @vnavarro
-	 * TODO: Tarea 66 - Crear funci&oacute;n que ayude a agregar o modificar la tabla apoyos
+	 * agrega o modifica registros en la tabla "apoyos" según si ya existe un registro con el mismo supervisor_id y asignado_id.
+	 * Parámetros esperados en $d:
+	 * 	 - 'data' => cadena base64 con JSON que contiene:
+	 *   - 'supervisor_id' => ID del supervisor
+	 *   - 'supervisor'    => Nombre del supervisor
+	 *   - 'asignado_id'   => ID del asignado
+	 *   - 'asignado'      => Nombre del asignado
+	 * @return mixed Resultado de la operación con el ID del registro afectado.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la consulta SQL.
 	 */
 	public static function apoyos_Helper_Agregar( $d ) {
 	    // usa la Tarea 46 como ejemplo
 	    date_default_timezone_set('America/Bogota');
-	    $usu = null;
+	    
 	    try {
 	        $usu = self::authRequ();
 	    } catch (\Exception $e) {
 	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
 	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
 	    }
-	    //$data = base64_decode( $d[ 'data' ] );
-	    //$json = json_decode( $data, true );
+
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
 	    
-	    // usa esta funcion para retornar los datos en esta funcion
-	    //return self::retorno( [ "success" => true ], 0, '') ;
+	    $idreg = 0;
+		
+		$apoyosActuales = self::apoyos_Obtener([
+	        'supervisor_id' => $json['supervisor_id'],
+	        'asignado_id' => $json['asignado_id'] 
+	    ]);
+	 	
+		$tieneApoyos = count($apoyosActuales) > 0;
+		
+	    if ( $tieneApoyos) {
+	        $idreg = $json['supervisor_id'];
+	        try {
+	            self::apoyos_Modificar( $json );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'apoyos_Helper_Agregar - apoyos_Modificar: ' . $e->getMessage() ) ;
+	        }
+	    }
+	    else {
+	        try {
+	            $idreg = self::apoyos_Agregar( [ "supervisor_id" => $json['supervisor_id'], "supervisor" => $json['supervisor'], "asignado_id" => $json['asignado_id'], "asignado" => $json['asignado'] ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            return self::retorno( [], $e->getCode(), 'apoyos_Helper_Agregar - apoyos_Agregar: ' . $e->getMessage() ) ;
+	        }
+	    }
+	    
+	    return self::retorno( [ "success" => true , 'idreg' => $idreg ], 0, '') ;
 	}
 	// apoyos FIN
 	
