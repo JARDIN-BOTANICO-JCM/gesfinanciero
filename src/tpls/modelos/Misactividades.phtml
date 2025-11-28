@@ -132,7 +132,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	const TIPODOCS_SIGNS = 0;
 	const TIPODOCS_PACKS = 1;
 	const TIPODOCS_ATTACHED = 2;
-	
+	const TIPODOCS_OBLIG = 3;
 	
 	_this.dibujarTb = function(){
 		const html = [];
@@ -281,7 +281,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		}
 	};
 	
-	_this.verPdf = function( o ){	
+	_this.verPdf = function( o ){
 		const _o = jQuery( o );
 		const dt = _o.data();
 		
@@ -291,11 +291,32 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Vista previa','btnCerrarX' : true, 'level' : 'l1', 'size' : 'modal-xl' } );
         const cuerpo = jQuery(objmdlErr + ' .modal-body');
         
+        const filei = ut.pathInfo( _urlpdf );
+        
+        let estxt = false;
+        
         const _html = [];
         _html.push( '<div class="modal-body p-0">' );
         _html.push( '	<div class="row" >' );
         _html.push( '		<div id="comdivcont_pdf" class="col-9" style="height: 50vh;" >' );
-        _html.push( '			<iframe src="' + _urlpdf + '#toolbar=1" style="width:100%; height:100%; border:none;"  allowfullscreen ></iframe>' );
+        
+        const laExt = ("" + filei['extension'] ).toLowerCase();
+        
+<?php // TOOO: Tarea 87 - Agregar soporte de documentos tipo imagen, pdf y textos ?>
+        if( laExt == "pdf" ){
+        	_html.push( '			<iframe src="' + _urlpdf + '#toolbar=1" style="width:100%; height:100%; border:none;"  allowfullscreen ></iframe>' );
+        }
+        else if( laExt == "txt" || laExt == "csv" ){
+        	estxt = true;
+        	_html.push( '			<pre id="cp_multiviewer" class="form-control" style="width:100%; height:100%;"></pre>' );
+        }
+        else if( laExt == "gif" || laExt == "jpg" || laExt == "jpeg" || laExt == "png" ){
+        	_html.push( '			<img src="' + _urlpdf + '" id="cp_multiviewer" class="form-control" style="width:100%;" />' );
+        }
+        else{
+        	_html.push( '			<div class="form-control d-flex justify-content-center" style="width:100%; height:100%;"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#gbl-info-fill"/></svg> El archivo ' + laExt + ' no se reconoce</div>' );
+        }
+        
         _html.push( '		</div >' );
         
 <?php // TODO: Tarea 45 - Agregar soporte en el front para comentarios en documentos subidos ?>
@@ -324,7 +345,16 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		_html.push( '				</li>' );
 		_html.push( '				<li class="list-group-item p-0 mt-1">' );
 		if( dt['tipodoc'] == TIPODOCS_PACKS || dt['tipodoc'] == TIPODOCS_ATTACHED ){
-			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetesrequ_id="' + dt['id'] + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+		
+			let flid_txt = "";
+			if ( Object.hasOwnProperty.call( dt, 'paraforms' ) ) {
+				if( dt['paraforms'] === "true" || dt['paraforms'] == true ){
+					const cltxturl = ("" + ut.b64EncodeUnicode( dt['url'] ) ).replace("==","").replace("=","");
+					flid_txt = 'data-flid_id="' + cltxturl + '"';
+				}
+			}
+		
+			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " ' + flid_txt + ' data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetesrequ_id="' + dt['id'] + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
 		}
 		else if( dt['tipodoc'] == TIPODOCS_SIGNS ){
 			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetes_id="' + idMod + '" data-url="' + _urlpdf + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
@@ -391,6 +421,20 @@ const Requerimientos = function( dC ){ // dC = data constructor
         };
         _this.comentarios_Obtener( cfgGetCom );
 
+		if( estxt ){
+			jQuery("#cp_multiviewer").html( validadorGlob.ajaxspinner( {"label":"Cargando... "} ) );
+			
+			setTimeout(function(){
+    			ut.loadTextFromUrl( _urlpdf, function(err, text){
+                    if (err) {
+                        jQuery("#cp_multiviewer").html('Error: ' + err);
+                    } else {
+                        jQuery("#cp_multiviewer").html(text);
+                    }
+                });
+			}, 1000);
+		}
+
         jQuery( objmdlErr ).modal('show');
 	};
 
@@ -406,26 +450,36 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		else if( dt['tipodoc'] == TIPODOCS_SIGNS ){
 			api = '<?php echo md5( IndexCtrl::API_FirmascomentariosHelperGet ); ?>';
 		}
-		dt['idmod'] = idMod;
 		
-		const form_data = new FormData();
-        form_data.append('ajax', api );
-        form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
-		__TransportarData(
-			form_data,
-			function( oR ) {
-				const fn = o['fn'];
-				fn( oR );
-			},
-			function ( err ) {
-                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
-                const alerta = jQuery(objmdlErr + ' div.alert');
-                alerta.attr('class','alert alert-danger');
-                alerta.html( err.responseText );
-
-                jQuery( objmdlErr ).modal('show');
-			}
-		);
+		if( api === '' ){
+			jQuery("#comdivcont_pdf").attr("class","col-12");
+			jQuery("#comdivcont_coms").hide();
+		}
+		else{
+		
+			dt['idmod'] = idMod;
+		
+    		const form_data = new FormData();
+            form_data.append('ajax', api );
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+    		__TransportarData(
+    			form_data,
+    			function( oR ) {
+    				const fn = o['fn'];
+    				fn( oR );
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    			}
+    		);
+		
+		}
+		
 	};
 	
 <?php // TODO: Tarea 55 - Controlar en el front enviar datos al servidor ?>
@@ -435,9 +489,13 @@ const Requerimientos = function( dC ){ // dC = data constructor
 <?php // TODO: Tarea 81 - feat: controlar el tipo de data que viaja al servidor segun el tipo de documento ?>
 		let api = '';
 		let dt = {};
-		if( data['tipodoc'] == TIPODOCS_PACKS || data['tipodoc'] == TIPODOCS_ATTACHED ){
+		if( data['tipodoc'] == TIPODOCS_PACKS ){
 			api = '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperAdd ); ?>';
 			dt = { "valor" : data['valor'] , "paquetesrequ_id" : data['paquetesrequ_id'] };
+		}
+		else if( data['tipodoc'] == TIPODOCS_ATTACHED ){
+			api = '<?php echo md5( IndexCtrl::API_PaquetesreqcomentariosHelperAdd ); ?>';
+			dt = { "valor" : data['valor'] , "paquetesrequ_id" : data['paquetesrequ_id'], "flid_id" : data['flid_id'] };
 		}
 		else if( data['tipodoc'] == TIPODOCS_SIGNS ){
 			api = '<?php echo md5( IndexCtrl::API_FirmascomentariosHelperAdd ); ?>';
@@ -517,6 +575,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
             	let payload = { 'valor' : cleantxt , 'paquetesrequ_id' : dt['paquetesrequ_id'], 'tipodoc' : dt['tipodoc'] };
             	if( dt['tipodoc'] == TIPODOCS_SIGNS ){
             		payload = { 'valor' : cleantxt , 'url' : dt['url'], 'paquetes_id' : dt['paquetes_id'], 'tipodoc' : dt['tipodoc'] };
+            	}
+            	else if( dt['tipodoc'] == TIPODOCS_ATTACHED ){
+            		payload = { 'valor' : cleantxt , 'paquetesrequ_id' : dt['paquetesrequ_id'], 'tipodoc' : dt['tipodoc'] , 'flid_id' : dt['flid_id'] };
             	}
             	
                 const cfgAgregar = {
@@ -598,7 +659,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		_html.push('		<small>' + _fecha + '</small> ');
 		_html.push('		<div> ');
 		_html.push('			<a href="#" style="font-size: 0.8em;" data-tipodoc="' + o['tipodoc'] + '" data-target="#' + _id + '" data-idreg="' + _idreg + '" onclick="reqs.comentarios_Eliminar_Click( this );" ><i class="fas fa-trash"></i></a> ');
-		_html.push('			<span data-toggle="tooltip" data-placement="top" title="' + _icons[ _estados_id ]['nombre'] + '">' + _icons[ _estados_id ]['ico'] + '</span> ');
+		
+		let detalles = "";
+		
+		_html.push('			<span data-toggle="tooltip" data-placement="top" title="' + _icons[ _estados_id ]['nombre'] + '' + detalles + '">' + _icons[ _estados_id ]['ico'] + '</span> ');
 		_html.push('		</div> ');
 		_html.push('	</small> ');
 		_html.push('</div>');
@@ -718,6 +782,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const firmantes = res['firmantes'];
 		const solicitante = res['solicitante'];
 		const pks = res['paquete'];
+		const oblis = res['obligaciones'];
 		
 		const nombrefull = ( "" + jQuery.trim( solicitante['nombres'] + ' ' + solicitante['apellidos'] )).toLowerCase();
 		
@@ -731,11 +796,11 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('			<button id="btnVolverSolicitudes" class="btn btn-outline-danger" data-target="#contProce" onclick="reqs.btnCloseModInfo( this )" ><i class="bi bi-chevron-left"></i> Volver</button>');
 		html.push('		</div>');
 		html.push('		<div class="">');
-		//html.push('			<button id="btnDevolver" class="btn btn-warning" data-target="#contProce" onclick="reqs.btnCloseModInfo( this )" >Devolver a <span style="text-transform: capitalize;">' + nombrefull + '</span></button>');
+		html.push('			<div style="display: none;" id="lblDevolver" class="alert alert-warning" >Esperando ajustes de <span style="text-transform: capitalize;">' + nombrefull + '</span></div>');
 		html.push('		</div>');
 		html.push('		<div class="">');
 		html.push('			<button style="display: none;" id="btnContinuar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
-		html.push('			<button id="btnDevolver" class="btn btn-outline-danger" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Devolver esta solicitud" data-nid="' + nextid + '" data-idMod="' + idMod + '" data-rechazar="true" >Devolver solicitud</button>');
+		html.push('			<button style="display: none;" id="btnDevolver" class="btn btn-outline-danger" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Devolver esta solicitud" data-nid="' + nextid + '" data-idMod="' + idMod + '" data-rechazar="true" >Devolver solicitud</button>');
 		html.push('			<button style="display: none;" id="btnFinalizar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Finalizar solicitud" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
 		html.push('		</div>');
 		html.push('	</div>');
@@ -744,19 +809,30 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		<h4 class="mb-2">Documentos para Firmar</h4>');
 		html.push('		<div class="list-group">');
 		
-		for (const key in docs) {
-    	    if (Object.hasOwnProperty.call( docs, key ) ) {
-    	        const _el = docs[key];
-    	        
-    	        const bs = _el['bs'];
-    	        const url = _el['url'];
-    	        const fl = ut.pathInfo( bs );
-    	        
-    	        const fancy = ( "" + fl['filename'] ).replace(/sig_/ig, "").replace(/_/ig," ");
-    	        
-				html.push('			<button data-url="' + _el['bs'] + '" data-firmantes="' + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + '" data-esfirmable="true" data-tipodoc="' + TIPODOCS_SIGNS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + fancy + '</button>');
-			}
+		if( docs.length > 0 ){
+			for (const key in docs) {
+        	    if (Object.hasOwnProperty.call( docs, key ) ) {
+        	        const _el = docs[key];
+        	        
+        	        const bs = _el['bs'];
+        	        const url = _el['url'];
+        	        const fl = ut.pathInfo( bs );
+        	        
+        	        const fancy = ( "" + fl['filename'] ).replace(/sig_/ig, "").replace(/_/ig," ");
+        	        
+    				html.push('			<button data-url="' + _el['bs'] + '" data-firmantes="' + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + '" data-esfirmable="true" data-tipodoc="' + TIPODOCS_SIGNS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">');
+    				html.push('				' + fancy );
+    				html.push('			</button>');
+    			}
+    		}
 		}
+		
+		else{
+			html.push('			<li class="list-group-item ">');
+			html.push('				<svg class="bi flex-shrink-0 me-2" width="16" height="16" role="img" aria-label="Success:"><use xlink:href="#gbl-info-fill"/></svg>');
+			html.push('				Esperando correcci&oacute;n de documentos</li>');
+		}
+		
 		html.push('		</div>');
 		html.push('	</div>');
 		
@@ -771,8 +847,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        
     	        if( _el['paquetereqtipos_id'] !== 6 ){
     	        	if( ("" +  jQuery.trim( _el['valor'] ) ).length > 0 ){
-    	        		confilesadj = true;
-    	        		html.push('			<button data-id="' + _el['id'] + '" data-url="' + _el['valor'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_PACKS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _el['ref_label'] + '</button>');
+    	        		if( _el['valor'] !== "obligaciones" ){
+    	        			confilesadj = true;
+	    	        		html.push('			<button data-id="' + _el['id'] + '" data-url="' + _el['valor'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_PACKS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _el['ref_label'] + '</button>');
+    	        		}
     	        	}
     	        }
 			}
@@ -785,10 +863,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		</div>');
 		html.push('	</div>');
 		
-		html.push('	<div class="mt-3">');
-		html.push('		<h4 class="mb-2">Adjuntos de los formularios</h4>');
-		html.push('		<div class="list-group">');
-		
+		const lsadjuntosforms = [];
 		let confiles = false;
 		for (const key in pks) {
     	    if (Object.hasOwnProperty.call( pks, key ) ) {
@@ -803,7 +878,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 	        
                 	        if( _eJs['file'] == 1 ){
                 	        	confiles = true
-                	        	html.push('			<button data-id="' + _el['id'] + '" data-url="' + _el['value'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_ATTACHED + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _eJs['label'] + '</button>');
+                	        	lsadjuntosforms.push('			<button data-id="' + _el['id'] + '" data-url="' + _eJs['value'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_ATTACHED + '" data-paraforms="true" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _eJs['label'] + '</button>');
                 	        }
             	        }
         	        }
@@ -811,15 +886,62 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        }
 			}
 		}
-		
-		if( !confiles ){
-			html.push('			<li class="list-group-item list-group-item-action">Sin adjuntos</li>');
+<?php // TODO: Tarea 85 - fixed: mostrar solo si hay archivos adjuntos ?>
+		if( confiles ){
+			html.push('	<div class="mt-3">');
+    		html.push('		<h4 class="mb-2">Adjuntos de los formularios</h4>');
+    		html.push('		<div class="list-group">');
+    		html.push(			lsadjuntosforms.join('') );
+    		html.push('		</div>');
+    		html.push('	</div>');
 		}
 		
-		html.push('		</div>');
-		html.push('	</div>');
-		
 		//html.push('</div>');
+
+<?php // TODO: Tarea 98 - Agregar una tabla que controle las obligaciones y sus respuestas ?>		
+		html.push('	<div class="mt-3">');
+		html.push('		<h4 class="mb-2">Obligaciones</h4>');
+		
+		let obliconfilesadj = false;
+		const lsobli = [];
+		for (const key in oblis) {
+    	    if (Object.hasOwnProperty.call( oblis, key ) ) {
+    	        const _el = oblis[key];
+    	        
+    	        obliconfilesadj = true;
+    	        lsobli.push('		<tr>');
+        		lsobli.push('			<td>' + _el['empleadosobjetivos_descripcion'] + '</td>');
+        		lsobli.push('			<td>' + _el['descripcion'] + '</td>');
+        		
+        		let btnFl = '';
+        		if( ("" + _el['archivos']).length > 0 ){
+        			const filei = ut.pathInfo( _el['archivos'] );
+        			btnFl  = '<button data-url="' + _el['archivos'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_OBLIG + '" onclick="reqs.verPdf( this );" type="button" class="btn btn-link">' + filei['filename'] + '</button>';
+        		}
+        		lsobli.push('			<td>' + btnFl + '</td>');
+        		lsobli.push('		</tr>');
+			}
+		}
+		
+		if( lsobli.length > 0 ){
+			html.push('		<table class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;" >');
+			html.push('			<thead>');
+			html.push('				<tr>');
+			html.push('					<th width="40%" >Descripci&oacute;n</th> ');
+			html.push('					<th width="40%">Respuesta</th> ');
+			html.push('					<th width="20%">Archivo</th> ');
+			html.push('				</tr>');
+			html.push('			</thead>');
+			html.push('			<tbody>' + lsobli.join('') + '</tbody>');
+			html.push('		</table>');
+		}
+		else{
+			html.push('		<div class="list-group">');
+			html.push('			<li class="list-group-item list-group-item-action">Sin adjuntos</li>');
+			html.push('		</div>');
+		}
+		
+		html.push('	</div>');
 
     	return html.join('');
 	};
@@ -866,6 +988,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		
 		idMod = dt['id'];
 		
+		const paquetesestados_id = dt['paquetesestados_id'];
+		
 		const target = jQuery( dt['target'] );
 		
 		const contProce = jQuery('#contProce');
@@ -903,13 +1027,23 @@ const Requerimientos = function( dC ){ // dC = data constructor
 					card.html(htmlFinal);
 
         			if( nextname === "" ){
+        				if( paquetesestados_id == 1 || paquetesestados_id == 2 ){
+        					jQuery('#btnDevolver').show('fast');
+        				}
         				jQuery('#btnFinalizar').show('fast');
         				jQuery('#btnContinuar').hide('fast');
         			}
         			else{
         				jQuery('#btnFinalizar').hide('fast');
-        				jQuery('#btnContinuar').show('fast');
+        				if( paquetesestados_id == 1 || paquetesestados_id == 2 ){
+        					jQuery('#btnDevolver').show('fast');
+    						jQuery('#btnContinuar').show('fast');
+        				}
         			}
+        			
+        			if( paquetesestados_id == 5 ){
+    					jQuery('#lblDevolver').show('fast');
+    				}
         			
         		});
 				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
@@ -1046,7 +1180,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	
 	const btnInfoHtml = function( dtInfo ){
 		const html = [];
-    	html.push('<button onclick="reqs.modInfo(this);" data-mesaplica="' + dtInfo.mesaplica + '" data-flujos_id="' + dtInfo.flujos_id + '" data-empleados_id="' + dtInfo.empleados_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
+    	html.push('<button onclick="reqs.modInfo(this);" data-paquetesestados_id="' + dtInfo.paquetesestados_id + '" data-mesaplica="' + dtInfo.mesaplica + '" data-flujos_id="' + dtInfo.flujos_id + '" data-empleados_id="' + dtInfo.empleados_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
         html.push('	<i class="bi bi-eye-fill fs-5"></i>');
         html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
         html.push('		<h6 class="mb-0 text-white">Editar</h6>');
