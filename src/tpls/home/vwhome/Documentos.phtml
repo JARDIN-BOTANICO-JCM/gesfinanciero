@@ -81,7 +81,7 @@ try {
                         <ol id="olBreadcrumbFlujo" class="breadcrumb"></ol>
                     </nav>
                 </div>
-				<div id="cardDocs" class="card-body" style="display: none;" ></div>
+<?php //TODO: Tarea 90 - controlar la remocion del elemento cardDocs en todo el sitio ?>
 				<div id="cardProcs" class="card-body"></div>
 			</div>
             
@@ -203,7 +203,8 @@ const btnAgregarReg = function(){
 };
 
 const btnOkFirma = function( colorbtn ){
-	return '<button class="btn ' + colorbtn + ' flex-grow-1 firmaOkCls" ><i class="bi bi-check-circle me-1"></i>Documento firmado</button>';
+	return '<div class="text-success"><i class="bi bi-check-circle me-1"></i> Firmado</div>';
+	//return '<button class="btn ' + colorbtn + ' flex-grow-1 firmaOkCls" ><i class="bi bi-check-circle me-1"></i>Documento firmado</button>';
 };
 
 const cntContinuar = 'cntContinuar';
@@ -236,10 +237,6 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		
 		target.hide('fast');
 		contCardProcs.show('fast');
-
-		const cardDocs = jQuery('#cardDocs');
-		cardDocs.hide();
-		cardDocs.html ( '' );
 		
 		jQuery( '#cardProcs' ).show('fast');
 		
@@ -253,6 +250,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const items = res['items'][0];
 		const requs = res['requs'];
 		const resul = res['res'];
+		const comentarios = res['comentarios'];
 		
 		const html = [];
 		html.push('<div class="d-flex justify-content-between">');
@@ -264,12 +262,24 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('	</div>');
 		html.push('	<div>');
 		html.push('		<button id="btnVolverSolicitudes" class="btn btn-outline-danger" data-target="#contProce" onclick="reqs.btnCloseModInfo( this )" ><i class="bi bi-chevron-left"></i> Volver</button>');
+		html.push('		<button id="' + btnEditarForms + '" onclick="modFormularios();" class="btn btn-secondary ms-1 " ><i class="bi bi-pencil-square me-3"></i>Editar nuevamente formularios</button>' );
+		html.push('		<button id="' + btnEnviarRevisar + '" class="btn btn-primary ms-1 " onclick="reqs.enviarRevisar( this )" ><i class="bi bi-send me-3"></i>Enviar a revisar</button>' );
 		html.push('	</div>');
 		html.push('</div>');
 			
 		html.push('<div class="row" id="contTb">');
-		html.push('	<div class="col-12">');
-		html.push('		' + formRequsHtml( requs, resul ) );
+		html.push('	<div class="col-8">');
+		html.push('		' + formRequsHtml( requs, resul, comentarios ) );
+		html.push('	</div>');
+		html.push('	<div class="col-4" >');
+		html.push('		<div class="card" >');
+		html.push('			<div class="card-body" > ');
+		html.push('				<h5>Archivos generados</h5>');
+		html.push('				<ul id="contFileList" class="list-group">');
+		html.push('					<li class="list-group-item"><svg class="bi flex-shrink-0 mb-1 me-2" width="16" height="16" role="img" aria-label="Success:"><use xlink:href="#info-fill"/></svg> No ha generado archivos</li>');
+		html.push('				</ul>');
+		html.push('			</div>');
+		html.push('		</div>');
 		html.push('	</div>');
 		html.push('</div>');
 
@@ -280,6 +290,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const src = d['src'];
 		const ref = d['ref'];
 		let val = "";
+		let id = 0;
 		
         for (const key in src) {
     	    if (Object.hasOwnProperty.call( src, key ) ) {
@@ -287,15 +298,68 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        
     	        if( _el['ref'] == ref ){
     	        	val = _el['valor'];
+    	        	id = _el['id'];
     	        }
     	        
 	        }
 		}
 		
-		return val;
+		return { 'file' : val , id : id };
 	};
 	
-	const formRequsHtml = function( d, vals ){
+<?php // TODO: Tarea 93 - Crear una funcion en front que capture los comentarios de los formularios ?>
+	const reunirComentarios = function( d ){
+		const grppcoms = [];
+		
+		const tipo = d['tipo'];
+		const src = d['src'];
+		
+		if( tipo == 0 ){
+			for (const key in src) {
+        	    if (Object.hasOwnProperty.call( src, key ) ) {
+        	        const _el = src[key];
+        	        grppcoms.push( { 'id' : _el['id'], 'fecha' : _el['fecha'], 'usuarios' : _el['usuarios'], 'valor' : _el['valor'], 'tipo' : tipo } );
+    	        }
+            }
+		}
+		else{
+			const paquetesrequ_id = src['id'];
+    		const comentarios = d['comms'];
+    		
+    		if( src['paquetereqtipos_id'] == 6 ){
+    			const fl = d['filename'];
+    			for (const key in comentarios) {
+            	    if (Object.hasOwnProperty.call( comentarios, key ) ) {
+            	        const _el = comentarios[key];
+            	        if( paquetesrequ_id == _el['paquetesrequ_id'] ){
+            	        	const comfl = JSON.parse( _el['valor'] );
+            	        	const rutafl = ut.b64DecodeUnicode( comfl['flid_id'] );
+            	        	if( fl == rutafl ){
+            	        		grppcoms.push( { 'id' : _el['id'], 'fecha': _el['fecha'], 'usuarios' : _el['usuarios'], 'valor' : comfl['valor'], 'tipo' : tipo } );
+            	        	}
+            	        }
+        	        }
+                }
+    		}
+    		else{
+    		
+			    for (const key in comentarios) {
+            	    if (Object.hasOwnProperty.call( comentarios, key ) ) {
+            	        const _el = comentarios[key];
+            	        if( paquetesrequ_id == _el['paquetesrequ_id'] ){
+            	        	grppcoms.push( { 'id' : _el['id'], 'fecha': _el['fecha'], 'usuarios' : _el['usuarios'], 'valor' : _el['valor'], 'tipo' : tipo } );
+            	        }
+        	        }
+                }
+    		
+    		}
+    		
+		}
+        
+        return grppcoms;
+	};
+	
+	const formRequsHtml = function( d, vals, comms ){
 		const html = [];
 		
         for (const key in d) {
@@ -322,6 +386,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        	html.push('	<span class="h3">' + elCfgDt['titulo'] + '</span><br>' );
     	        	html.push('	<div class="text-muted mb-3">' + elCfgDt['descripcion'] + '</div>' );
     	        	html.push('	' + elObj.prop('outerHTML') );
+    	        	
     	        }
     	        else if( _el['paquetereqtipos'] == 'obligaciones' ){
     	        	const elCfgDt = _el['descripcion'];
@@ -338,9 +403,21 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        	const jsondefv = JSON.parse( ut.b64DecodeUnicode( vals ) );
     	        	
     	        	const defval = asignarValoresCampos( { 'src' : jsondefv, 'ref' : _el['ref_nombre'] } );
-    	        	elemCfg['valor'] = defval;
+    	        	elemCfg['valor'] = defval['file'];
+    	        	
+    	        	const commsTxt = reunirComentarios( { 'src' : defval, 'comms' : comms, 'tipo' : _el['paquetereqtipos_id'] } );
     	        	
         	        html.push('	<label class="form-label" for="' + elName + '">' + _el['ref_label'] + ' ' + requeridoEle + '</label>');
+        	        
+<?php // TODO: Tarea 94 - Crear un boton que permita leer los comentarios en los documentos subidos directamente ?>
+        	        if( commsTxt.length > 0 ){
+        	        	html.push(' - ');
+        	        	html.push('		<button onclick="reqs.vercomentariosdocs( this )" data-fl="' + elName + '" data-comms="' + ut.b64EncodeUnicode( JSON.stringify( commsTxt ) ) + '" type="button" class="btn btn-sm p-0">');
+            	        html.push('			<i class="fas fa-eye"></i>');
+    					html.push('			<span class="text-danger">' + commsTxt.length + ' Comentarios</span>');
+    					html.push('		</button>');
+        	        }
+        	        
         	        html.push('	' +  home.entradasCampos( { 'd' : elemCfg } ) );
         	        html.push('	<small class="text-muted" >' + _el['descripcion'] + '</small>');
     	        }
@@ -390,7 +467,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         			form_data,
         			function( o ) {
         			
-        				jQuery( "#" + cntContinuar  + ", .firmaOkCls"  ).hide('fast');
+        				//jQuery( "#" + cntContinuar  + ", .firmaOkCls"  ).hide('fast');
         				
         				documentosList( o['result'] );
         				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
@@ -444,8 +521,19 @@ const Requerimientos = function( dC ){ // dC = data constructor
                             		requerido = "";
                             		const pthi = ut.pathInfo( tmpVal );
                             		const uHtml = [];
+                            		
+<?php // TODO: Tarea 97 - Agregar visualmente los botones que permiten ver los comentarios ?>
+                                    const commsTxt = reunirComentarios( { 'src' : _el, 'comms' : d['comentarios'], 'filename' : tmpVal, 'tipo' : _el['paquetereqtipos_id'] } );
+                            		
                             		uHtml.push('<div>');
                             		uHtml.push('	<a href="' + tmpVal + '" target="win' + nw + '" >' + pthi['basename'] + '</a>' );
+                            		if( commsTxt.length > 0 ){
+                        	        	uHtml.push(' - ');
+                        	        	uHtml.push('		<button onclick="reqs.vercomentariosdocs( this )" data-fl="' + pthi['filename'] + '" data-comms="' + ut.b64EncodeUnicode( JSON.stringify( commsTxt ) ) + '" type="button" class="btn btn-sm p-0">');
+                            	        uHtml.push('			<i class="fas fa-eye"></i>');
+                    					uHtml.push('			<span class="text-danger">' + commsTxt.length + ' Comentarios</span>');
+                    					uHtml.push('		</button>');
+                            		}
                             		uHtml.push('</div>');
                             		url = uHtml.join('');
                             		
@@ -483,11 +571,12 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	};
 	
 	const documentosList = function( dt ){
-		const cardDocs = jQuery('#cardDocs');
+		const contFileList = jQuery('#contFileList');
+		
 		const docs = dt['docs'];
 		
-		cardDocs.hide();
-		cardDocs.html ( '' );
+<?php //TODO: Tarea 88 - Mostrar lista de archivos y preparar espacio para mostrar comentarios al usuario que solicita servicios ?>
+		const lidata = [];
 		
 		const lista = [];
 		if( docs.length > 0 ){
@@ -506,67 +595,71 @@ const Requerimientos = function( dC ){ // dC = data constructor
         	        
         	        const btnfirId = "btnFir_" + key;
         	        const btnfirDown = "btnFirDown_" + key;
+
+<?php //TODO: Tarea 89 - remover listado de archivos generados tipo grid ?>
+        	        let colorbtn = 'btn-primary';
         	        
-					lista.push('<div class="col"> ');
-					lista.push('	<div class="card h-100 text-center"> ');
-					lista.push('		<button data-target="#' + btnfirId + '" data-evento="<?php echo OperacionesCtrl::FIRMASPRO_EVENTO_REVISION; ?>" data-fldtipo="proceso" data-anyo="' + prms[1] + '" data-ide="' + prms[2] + '" data-pdf="' + prms[3] + '" class="btn" onclick="actividadRepo(this);" >');
-					lista.push('		<i class="bi bi-file-earmark-pdf display-4 mt-3 text-danger"></i> ');
-					lista.push('		<div class="card-body"> ');
-					lista.push('			<h5 class="card-title">' + fancy + '</h5> ');
-					lista.push('		</div> ');
-					lista.push('		</button>');
-					
-					lista.push('		<div class="card-footer p-0"> ');
-					
-					lista.push('			<div class="btn-group w-100 d-flex"> ');
-					
-					let colorbtn = 'btn-primary';
-					let colorbtndown = 'btn-outline-primary';
-					
-					if( firmasid['firmasestados_id'] == 1 || firmasid['firmasestados_id'] == null ){
+        	        let icofl = '<i class="fas fa-file-pdf"></i>';
+        	        if( ("" + fl['filename']).toLowerCase() == "csv" ){
+        	        	icofl = '<i class="fas fa-file-csv"></i>';
+        	        }
+        	        else if( ("" + fl['filename']).toLowerCase() == "txt" ){
+        	        	icofl = '<i class="fas fa-file-alt"></i>';
+        	        }
+        	        
+<?php //TODO: Tarea 91 - agregar la cantidad de comentarios creados por supervisores ?>
+        	        let _docdt = [];
+					if ( Object.hasOwnProperty.call( firmasid, 'firmascomentarios' ) ) {
+						_docdt = firmasid['firmascomentarios'];
+					}
+        	        
+        	        lidata.push('					<li class="list-group-item d-flex justify-content-between">');
+        	        lidata.push('						<div>' );
+        	        lidata.push('							<button class="btn btn-link p-0 text-start" data-target="#' + btnfirId + '" data-evento="<?php echo OperacionesCtrl::FIRMASPRO_EVENTO_REVISION; ?>" data-fldtipo="proceso" data-anyo="' + prms[1] + '" data-ide="' + prms[2] + '" data-pdf="' + prms[3] + '" onclick="actividadRepo(this);" >');
+        	        lidata.push('							' + icofl + ' ' + fancy + '' );
+        	        lidata.push('							</button>' );
+        	        
+        	        if( _docdt.length > 0 ){
+            	        const txts = [];
+            	        
+            	        const allcoms = reunirComentarios( { 'src' : _docdt, 'tipo' : 0 } );
+
+        	        	lidata.push('						<div>' );
+        	        	lidata.push('							<button onclick="reqs.vercomentariosdocs( this )" data-fl="' + fancy + '" data-comms="' + ut.b64EncodeUnicode( JSON.stringify( allcoms ) ) + '" type="button" class="btn btn-sm p-0">');
+        	        	lidata.push('								<i class="fas fa-eye"></i>' );
+        	        	lidata.push('								<span class="text-muted">' + _docdt.length + ' Comentarios</span>' );
+        	        	lidata.push('							</button>' );
+        	        	lidata.push('						</div>' );
+        	        }
+        	        
+        	        lidata.push('						</div>' );
+        	        
+        	        if( firmasid['firmasestados_id'] == 1 || firmasid['firmasestados_id'] == null ){
     					let habilitado = '';
     					if( firmasid['firmasestados_id'] == null ){
-    						habilitado = 'disabled="disabled"';
+    						habilitado = 'disabled="disabled" ';
     					}
-						lista.push('				<button id="' + btnfirId + '" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" class="btn ' + colorbtn + ' flex-grow-1 firmaNoCls" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button>');
+    					
+    					let btnFirTmp = '<button id="' + btnfirId + '" class="btn btn-sm py-1 ' + colorbtn + ' firmaNoCls" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button>';
+    					
+    					if( habilitado != '' ){
+    						btnFirTmp = '<span data-toggle="tooltip" data-placement="top" title="Primero debe revisar el archivo \'' + fancy + '\'"><button id="' + btnfirId + '" class="btn btn-sm py-1 ' + colorbtn + ' firmaNoCls" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button></span>';
+    					}
+    					
+						lidata.push('						' + btnFirTmp );
 					}
 					else{
 						colorbtn = 'btn-success';
 						colorbtndown = 'btn-outline-success';
-						lista.push('				' + btnOkFirma( colorbtn ) );
+						lidata.push('						' + btnOkFirma( colorbtn ) );
 					}
-					
-					lista.push('				<button id="' + btnfirDown + '" type="button" class="btn ' + colorbtndown + ' dropdown-toggle dropdown-toggle-split flex-grow-0 px-2" style="width: 2rem;" data-bs-toggle="dropdown" aria-expanded="false"> ');
-					lista.push('					<span class="visually-hidden">Toggle Dropdown</span> ');
-					lista.push('				</button> ');
-					lista.push('				<ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start"> ');
-					lista.push('					<li><button data-target="#' + btnfirId + '" data-evento="<?php echo OperacionesCtrl::FIRMASPRO_EVENTO_REVISION; ?>" data-fldtipo="proceso" data-anyo="' + prms[1] + '" data-ide="' + prms[2] + '" data-pdf="' + prms[3] + '" class="dropdown-item" href="' + url + '" onclick="actividadRepo(this);">Ver Archivo</button></li> ');
-					lista.push('				</ul> ');
-					lista.push('			</div > ');
-					
-					lista.push('		</div> ');
-					lista.push('	</div> ');
-					lista.push('</div> ');
+        	        lidata.push('					</li>');
         	        
 				}
 			}
-			
-			const _html = [];
-    		_html.push('<div class="row row-cols-1 row-cols-md-3 g-4">');
-    		_html.push('	' + lista.join('') );
-    		_html.push('</div>');
-    		_html.push('<div id="' + cntContinuar + '" style="display: none;" class="row my-1 g-4">');
-    		_html.push('	<div class="col col mt-3">');
-    		_html.push('		<div class="d-flex justify-content-end">');
-    		_html.push('			<button class="btn btn-outline-danger" onclick="reqs.btnCloseModInfo( \'#btnVolverSolicitudes\' );" ><i class="bi bi-chevron-left"></i> Volver</button>' );
-    		_html.push('			<button id="' + btnEditarForms + '" onclick="modFormularios();" class="btn btn-secondary ms-1 " ><i class="bi bi-pencil-square me-3"></i>Editar nuevamente formularios</button>' );
-    		_html.push('			<button id="' + btnEnviarRevisar + '" class="btn btn-primary ms-1 " onclick="reqs.enviarRevisar( this )" ><i class="bi bi-send me-3"></i>Enviar a revisar</button>' );
-    		_html.push('		</div>');
-    		_html.push('	</div>');
-    		_html.push('</div>');
+    		contFileList.html ( lidata.join('') );
     		
-    		cardDocs.html ( _html.join('') );
-    		cardDocs.show('fast');
+    		jQuery('[data-toggle="tooltip"]').tooltip();
 		}
 		
 		_this.enviarRevisar = function( o ){
@@ -607,6 +700,70 @@ const Requerimientos = function( dC ){ // dC = data constructor
         		);
             });
 		};
+		
+	};
+	
+<?php //TODO: Tarea 92 - crear la funcion que muestra los comentarios que puso el supervisor ?>
+	_this.vercomentariosdocs = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const fl = dt['fl'];
+		const comms = JSON.parse( ut.b64DecodeUnicode( dt['comms'] ) );
+		
+		const objmdl = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Archivo ' + fl ,'btnCerrarX' : true, 'level' : 'err' } );
+        const cuerpo = jQuery(objmdl + ' .modal-body');
+        cuerpo.html( '<div class="d-flex align-items-center "><strong>Cargando...</strong><div class="spinner-border ms-auto spinner-border-sm" role="status" aria-hidden="true"></div></div>' );
+        jQuery( objmdl ).modal('show');
+                    
+		home.navUser(function( uDt ){
+
+			const comlei = [];
+			for ( const key in comms ) {
+        	    if ( Object.hasOwnProperty.call( comms, key ) ) {
+        	        const _el = comms[ key ];
+        	        comlei.push( { "id" : _el['id'], "fl" : fl, "tipo" : _el['tipo'] } );
+    	        }
+	        }
+			const payload = { "token" : uDt, "comentarios" : comlei };
+			
+			const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_ComentariosVirtual_Helper_Add ); ?>');
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( payload ) ) );
+    
+    		__TransportarData(
+    			form_data,
+    			function( o ) {
+                    const lista = [];
+                    lista.push( '<h5>Comentarios</h5>' );
+                    lista.push( '<ul class="list-group"> ');
+                    for ( const key in comms ) {
+                	    if ( Object.hasOwnProperty.call( comms, key ) ) {
+                	        const _el = comms[ key ];
+                	        lista.push( '	<li class="list-group-item ">');
+                	        lista.push( '		<div >' + _el['valor'] + '</div>');
+                	        lista.push( '		<div class="d-flex justify-content-between text-muted">');
+                	        lista.push( '			<small class="text-muted">' + _el['usuarios'] + '</small>');
+                	        lista.push( '			<small >' + _el['fecha'] + '</small>');
+                	        lista.push( '		</div>');
+                	        lista.push( '	</li> ');
+            	        }
+                    }
+            		lista.push( '</ul> ');
+            		
+            		cuerpo.html( lista.join('') );
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			}
+    		);
+		});
 		
 	};
 	
@@ -666,10 +823,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
             			card.html( btnModInfoHtml( { 'res': o, 'data' : dt } ) );
             			
             			const jsondefv = JSON.parse( ut.b64DecodeUnicode( o['res'] ) );
-            			formsDefVals( { 'data' : jsondefv } );
+            			formsDefVals( { 'data' : jsondefv, 'comentarios' : o['comentarios'] } );
             			
             			const jsonoblig = JSON.parse( ut.b64DecodeUnicode( o['obli'] ) );
-            			formsDefObliVals( { 'data' : jsonoblig } );
+            			formsDefObliVals( { 'data' : jsonoblig, 'comentarios' : o['comentarios'] } );
             			
             			documentosList( o );
             			
@@ -840,7 +997,7 @@ const docOkFirmados = function(){
 	const faltan = jQuery( '.firmaNoCls' ).length;
 	if( faltan == 0 ){
 		jQuery( '#' + cntContinuar ).show('fast');
-		jQuery( '#cardProcs' ).hide('fast');
+		//jQuery( '#cardProcs' ).hide('fast');
 	}
 };
 
@@ -950,6 +1107,11 @@ const actividadRepo = function( o ){
 				const url = result['url'];
 				
 				jQuery( target ).removeAttr('disabled');
+				const contbtn = jQuery( target ).parent();
+				
+				const tip = bootstrap.Tooltip.getInstance(contbtn[0]);
+				if (tip) tip.dispose();
+				contbtn.removeData();
 				
 				window.open( url , '_blankpdf');
 			},

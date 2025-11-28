@@ -70,7 +70,41 @@ class Rest
 
     
     // VERSION 2
+<<<<<<< Updated upstream
 
+=======
+    private static function notkn_CheckComm ( $data ) {
+        OperacionesCtrl::authRequOff();
+        try{
+            OperacionesCtrl::comunicaciones_CheckForSend( $data );
+        }catch (Exception $ex){
+            $er = array("err" => $ex->getMessage());
+            echo json_encode($er);
+        }
+        die("");
+    }
+    
+    private static function notkn_Revisar ( $data ) {
+        try{
+            OperacionesCtrl::firmaspro_Revisar( $data );
+        }catch (Exception $ex){
+            $er = array("err" => $ex->getMessage());
+            echo json_encode($er);
+        }
+        die("");
+    }
+    
+    private static function notkn_GestorDocumental( $data ){
+        try{
+            OperacionesCtrl::gestordocumentalHelper( $data );
+        }catch (Exception $ex){
+            $er = array("err" => $ex->getMessage());
+            echo json_encode($er);
+        }
+        die("");
+    }
+    
+>>>>>>> Stashed changes
     /**
      * Verifica comunicaciones para envío sin requerir autenticación.
      *

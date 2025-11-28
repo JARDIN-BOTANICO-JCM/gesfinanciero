@@ -1072,6 +1072,10 @@ class IndexCtrl extends Pagina {
 	const API_PaquetesrequHelperAdd = 'API_PaquetesrequHelperAdd';
 	// Paquetesrequ FIN
 	
+	// Controlador comentarios INI
+	const API_ComentariosVirtual_Helper_Add = 'API_ComentariosVirtual_Helper_Add';
+	// Controlador comentarios FIN
+	
 	// Paquetesreqcomentarios INI
 	const API_PaquetesreqcomentariosHelperGet = 'API_PaquetesreqcomentariosHelperGet';
 	const API_PaquetesreqcomentariosHelperAdd = 'API_PaquetesreqcomentariosHelperAdd';
@@ -2288,6 +2292,24 @@ class IndexCtrl extends Pagina {
 				}
 
 				// Paquetesrequ FIN
+				
+				// Controlador comentarios INI
+				/*
+				 * @yalfonso
+				 * TODO: Tarea 96 - Agregar controlador de enrutamiento para indicar que los mensajes ya se leyeron 
+				 */
+				// Apoyos INI
+				if ( $_POST["ajax"] == md5(self::API_ComentariosVirtual_Helper_Add) ) {
+				    try {
+				        $ok = OperacionesCtrl::comentarios_Virtual_Helper_Agregar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Controlador comentarios FIN
 				
 				// paquetesreqcomentarios INI
 				if ($_POST["ajax"] == md5(self::API_PaquetesreqcomentariosHelperGet)) {
