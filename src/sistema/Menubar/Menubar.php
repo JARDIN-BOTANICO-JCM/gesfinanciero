@@ -386,7 +386,7 @@ class Menubar {
     <div class="vh-100" data-simplebar>
         <!-- Brand logo -->
         <a class="navbar-brand" href="./index.php">
-            <img src="./temas/img/Acappdemy_r_text_logo.png" alt="" height="64">
+            <img src="./temas/img/Logo_JBB.png" alt="" height="64" width="100">
         </a>
         <!-- Navbar nav -->
         <ul class="navbar-nav flex-column" id="sideNavbar">
@@ -422,9 +422,8 @@ class Menubar {
         <!-- Card -->
         <div class="card bg-dark-primary shadow-none text-center mx-4 my-8">
             <div class="card-body py-2">
-                <img src="./temas/favicon/favicon_120x120.png" alt="" height="92" />
+                <img src="./temas/img/logo_aqui_si_pasa.png" alt="" height="92" />
                 <div class="mt-0">
-                    <h5 class="text-white">Nuevapp</h5>
                     <small class="d-block mb-3 text-muted">&copy; 2025</small>
                 </div>
             </div>

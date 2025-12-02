@@ -31,6 +31,7 @@
 		
 		<!-- Custom -->
 		<link rel="stylesheet" href="./temas/css/theme.min.css?v=0.0.2">
+		<link rel="stylesheet" href="./temas/css/custom-theme.css?v=0.0.2">
 		
 		<!-- JS -->
 		<script type="text/javascript" src="./temas/js/jquery-3.6.0.min.js "></script>
@@ -94,4 +95,17 @@
 		</script>
 		
 	</head>
-	<body >
+	<?php
+	$themeClass = 'admin-theme'; // valor por defecto
+	$usu = null;
+	
+	if (isset( $_SESSION["usu"] )) {
+		$usu = $_SESSION["usu"];
+	   if( $usu->getPerfil_id() == IndexCtrl::PERFILES_CONTRATISTA ){
+      	$themeClass = 'contratista-theme';
+   		 }
+	}
+	?>
+	<body class="<?php echo $themeClass; ?>"></body>
+</html>
+
