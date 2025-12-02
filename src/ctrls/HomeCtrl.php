@@ -1,4 +1,3 @@
-
 <?php
 /**
  * HomeCtrl - Clase controladora para manejar la página de inicio y funcionalidad de enrutamiento
@@ -152,7 +151,7 @@ class HomeCtrl extends Pagina {
      * - Incluye plantilla de pie de página y cierra etiquetas HTML
      *
      * @return void
-     * @throws Ninguna pero puede incluir plantilla de error si no encuentra la página
+     * @throws Null pero puede incluir plantilla de error si no encuentra la página
      */
 
     public function render(){

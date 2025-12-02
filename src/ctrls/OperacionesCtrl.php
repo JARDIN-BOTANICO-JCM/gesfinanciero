@@ -2931,7 +2931,8 @@ class OperacionesCtrl {
 	const USUARIOS_PERFIL_FINANCIERO = "6";
 	const USUARIOS_PERFIL_SUPERVISORADM = "7";
 	const USUARIOS_PERFIL_PROVEEDOR = "8";
-	const USUARIOS_PERFIL_RUTA = "9";
+	const USUARIOS_PERFIL_API = "9";
+	const USUARIOS_PERFIL_SOPORTE = "10";
 	
 	// Uso de la funcion de agregar o modificar
 	const USUARIOS_HELPER_AGREGAR = "1";
@@ -3046,6 +3047,11 @@ class OperacionesCtrl {
 	        }
 	    }
 	    
+	    $supervisor = '';
+	    if ( isset( $d['supervisor'] ) ) {
+	        $supervisor = $d['supervisor'];
+	    }
+	    
 		$_d = array(
 			'tipodoc_id' => $d['tipodoc_id'],
 			'documento' => $d['documento'],
@@ -3071,7 +3077,8 @@ class OperacionesCtrl {
 		    'oficio' => $_oficio,
 		    'salariomes' => $_salariomes,
 		    'contratoini' => $_contratoini,
-		    'contratofin' => $_contratofin
+		    'contratofin' => $_contratofin,
+		    'supervisor' => $supervisor
 		);
 
 		$idUsr = null;
@@ -3200,7 +3207,7 @@ class OperacionesCtrl {
 			    }
 			}
 		}
-		elseif ( $perfil == self::USUARIOS_PERFIL_ADMINISTRADOR || $perfil == self::USUARIOS_PERFIL_SUPERVISOR || $perfil == self::USUARIOS_PERFIL_SUPERVISORADM || $perfil == self::USUARIOS_PERFIL_PROVEEDOR || $perfil == self::USUARIOS_PERFIL_RUTA ) {
+		elseif ( $perfil == self::USUARIOS_PERFIL_ADMINISTRADOR || $perfil == self::USUARIOS_PERFIL_SUPERVISOR || $perfil == self::USUARIOS_PERFIL_SUPERVISORADM || $perfil == self::USUARIOS_PERFIL_PROVEEDOR || $perfil == self::USUARIOS_PERFIL_API || $perfil == self::USUARIOS_PERFIL_SOPORTE ) {
 			try {
 				$idUsr = self::usuarios_Agregar( $_d );
 			} catch (\Throwable $th) {
@@ -3255,7 +3262,7 @@ class OperacionesCtrl {
 	 *   - Si no existe, fija mail a "<identificador>@empty.com".
 	 *   - Si no existe, fija código al número de documento.
 	 *   - Si no existe, fija usuario como "tipodoc_id + documento".
-	 * - Para USUARIOS_PERFIL_FINANCIERO, USUARIOS_PERFIL_PROVEEDOR o USUARIOS_PERFIL_RUTA:
+	 * - Para USUARIOS_PERFIL_FINANCIERO, USUARIOS_PERFIL_PROVEEDOR o USUARIOS_PERFIL_API:
 	 *   - Fija código y usuario al número de documento.
 	 *   - Establece generos_id = 1.
 	 *
@@ -3264,7 +3271,7 @@ class OperacionesCtrl {
 	 * - Usa Utiles::CleanSpecialChars para limpiar nombres y preg_replace para extraer dígitos del documento.
 	 *
 	 * @param array  &$d     Array asociativo con los datos del usuario (se modifica por referencia).
-	 * @param int    $perfil Constante de perfil (USUARIOS_PERFIL_EMPLEADOS, USUARIOS_PERFIL_FINANCIERO, USUARIOS_PERFIL_PROVEEDOR, USUARIOS_PERFIL_RUTA).
+	 * @param int    $perfil Constante de perfil (USUARIOS_PERFIL_EMPLEADOS, USUARIOS_PERFIL_FINANCIERO, USUARIOS_PERFIL_PROVEEDOR, USUARIOS_PERFIL_API).
 	 * @return void
 	 */
 	public static function mnguserAdd_Prepare( &$d, $perfil ){
@@ -3295,7 +3302,7 @@ class OperacionesCtrl {
 	        }
 	        
 	    }
-	    if ( $perfil == self::USUARIOS_PERFIL_FINANCIERO || $perfil == self::USUARIOS_PERFIL_PROVEEDOR || $perfil == self::USUARIOS_PERFIL_RUTA ) {
+	    if ( $perfil == self::USUARIOS_PERFIL_FINANCIERO || $perfil == self::USUARIOS_PERFIL_PROVEEDOR || $perfil == self::USUARIOS_PERFIL_API ) {
 	        $d['codigo'] = $d['documento'];
 	        $d['usuario'] = $d['documento'];
 	        $d['generos_id'] = 1;
@@ -3722,7 +3729,7 @@ class OperacionesCtrl {
 	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
 	        throw new \Exception( 'empleados_NuevaClaveAjax - authRequ : ' . $e->getMessage() );
 	    }
-	    if ( $usu->getPerfil_id() == self::USUARIOS_PERFIL_SUPER_USUARIO || $usu->getPerfil_id() == self::USUARIOS_PERFIL_ADMINISTRADOR || $usu->getPerfil_id() == self::USUARIOS_PERFIL_SUPERVISORADM ) {
+	    if ( $usu->getPerfil_id() == self::USUARIOS_PERFIL_SUPER_USUARIO || $usu->getPerfil_id() == self::USUARIOS_PERFIL_ADMINISTRADOR || $usu->getPerfil_id() == self::USUARIOS_PERFIL_SOPORTE ) {
 	        
 	        $usr = null;
 	        $_id = $d['id'];
@@ -3744,9 +3751,12 @@ class OperacionesCtrl {
 	        $clv = Utiles::nuevoCl(8);
 	        $ea = $dt["mail"];
 	        
+	        // TODO: Tarea 107 - Impedir que sea posible la asignacion de clave de forma manual desde alguna API
+            /*
 	        if ( isset( $d['setclave'] ) ) {
 	            $clv = $d['setclave'];
 	        }
+	        */
 	        
 	        $addDt = array(
 	            'id' => $_id,
@@ -5158,7 +5168,8 @@ class OperacionesCtrl {
 	            $xt .= ' OR id = ' . self::USUARIOS_PERFIL_FINANCIERO;
 	            $xt .= ' OR id = ' . self::USUARIOS_PERFIL_SUPERVISORADM;
 	            $xt .= ' OR id = ' . self::USUARIOS_PERFIL_PROVEEDOR;
-	            $xt .= ' OR id = ' . self::USUARIOS_PERFIL_RUTA . ' ';
+	            $xt .= ' OR id = ' . self::USUARIOS_PERFIL_API;
+	            $xt .= ' OR id = ' . self::USUARIOS_PERFIL_SOPORTE . ' ';
 	        } 
 	        
 	        if ( isset( $d['perfil_id'] ) ) {
@@ -5811,7 +5822,10 @@ class OperacionesCtrl {
 		$o->setContratoini($contratoini);
 		$o->setContratofin($contratofin);
 		
-
+		if (isset( $d['supervisor'] ) ) {
+		    $o->setSupervisor( $d['supervisor'] );
+		}
+		
 		$id = $o->saveData();
 		if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
 			http_response_code( 500 );
@@ -5954,6 +5968,8 @@ class OperacionesCtrl {
 		if( isset($d['contratoini']) ){ $stA['contratoini'] = $d['contratoini']; }
 		if( isset($d['contratofin']) ){ $stA['contratofin'] = $d['contratofin'] ; }
 		
+		if( isset($d['supervisor']) ){ $stA['supervisor'] = $d['supervisor'] ; }
+		
 		if( count( $stA ) < 1 ){
 		    http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
 		    throw new \Exception( '[' . IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO . '] usuarios_Modificar: Sin datos para modificar' );
@@ -6094,7 +6110,7 @@ class OperacionesCtrl {
 		$vr .= "lugna.nombre as lugares ,estu.gruposanguineo, estu.codigo, estu.usuario, estu.foto, estu.direccion, estu.barrio, ";
 		$vr .= "estu.loc_lugares_id,luglo.nombre as loc_lugares, estu.cargos_id, carg.nombre as cargos, estu.titulos_id, titul.nombre as titulos, ";
 		$vr .= "estu.creado, estu.perfil_id, perfi.nombre as perfil, estu.estado_id, estad.nombre as estado ";
-		$vr .= ",estu.oficio,estu.salariomes,estu.contratoini,estu.contratofin ";
+		$vr .= ",estu.oficio,estu.salariomes,estu.contratoini,estu.contratofin, estu.supervisor ";
 		
 		if ( isset( $d['tokenid'] ) ) {
 		    if( $d['tokenid'] ){
@@ -6116,6 +6132,10 @@ class OperacionesCtrl {
 		$wh = "";
 		if( isset( $d['id'] ) ){
 			$wh = 'where estu.id = ' . $d['id'] . ' ';
+		}
+		
+		if( isset( $d['w_supervisor'] ) ){
+		    $wh = 'where estu.supervisor = ' . $d['w_supervisor'] . ' ';
 		}
 
 		if ( isset( $d['perfil_id']) ) {
@@ -7195,7 +7215,7 @@ class OperacionesCtrl {
 		}
 
 		$tb = "";
-		if ( $perfil_id == self::USUARIOS_PERFIL_ADMINISTRADOR || $perfil_id == self::USUARIOS_PERFIL_SUPERVISOR || $perfil_id == self::USUARIOS_PERFIL_SUPERVISORADM || $perfil_id == self::USUARIOS_PERFIL_FINANCIERO || $perfil_id == self::USUARIOS_PERFIL_PROVEEDOR || $perfil_id == self::USUARIOS_PERFIL_RUTA  ) {
+		if ( $perfil_id == self::USUARIOS_PERFIL_ADMINISTRADOR || $perfil_id == self::USUARIOS_PERFIL_SUPERVISOR || $perfil_id == self::USUARIOS_PERFIL_SUPERVISORADM || $perfil_id == self::USUARIOS_PERFIL_FINANCIERO || $perfil_id == self::USUARIOS_PERFIL_PROVEEDOR || $perfil_id == self::USUARIOS_PERFIL_API  ) {
 			$tb = 'usuarios';
 		}
 		elseif ( $perfil_id == self::USUARIOS_PERFIL_EMPLEADOS ) {
@@ -15936,88 +15956,8 @@ EOD;
 	    
 	    return $rDt;
 	}
-	/**
-	 * Genera y devuelve un token para "login as" cifrado y codificado en base64.
-	 *
-	 * Este método valida la sesión del usuario actual, obtiene los datos del empleado/acudiente
-	 * según los parámetros recibidos, construye un payload con {acudientes_id, empleados_id, tipo},
-	 * lo cifra usando la(s) llave(s) pública(s) asociadas al token del usuario autenticado y devuelve
-	 * el resultado en base64.
-	 *
-	 * @param array $d Arreglo con la clave 'params' que contiene un JSON con:
-	 *                 - tipo (int): 4 => id de empleado, 5 => id de contact/acudiente
-	 *                 - id   (mixed): identificador según el tipo
-	 *
-	 * @return string Token cifrado y codificado en base64. Cadena vacía si no hay resultados.
-	 *
-	 * @throws Exception Si la sesión no está activa, si falta el acudiente relacionado,
-	 *                   si ocurre un error al obtener empleados o al obtener/usar el token.
-	 */
-	public static function home_LoginAs_Get( $d ){
-	    $usu = null;
-	    try {
-	        $usu = self::authRequ();
-	    } catch (\Exception $e) {
-	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
-	        throw new \Exception( $e->getMessage() );
-	    }
-	    
-	    $json = json_decode( $d['params'] , true );
-	    $tipo = $json['tipo'];
-	    
-	    $arDt = array();
-	    $arDt['paraeditar'] = true;
-	    if ( $tipo == 4 ) {
-	        $arDt['id'] = $json['id'];
-	    }
-	    elseif ( $tipo == 5 ){
-	        $arDt['contact_id'] = $json['id'];
-	    }
-	    
-	    try {
-	        $r = self::empleados_Obtener( $arDt );
-	    } catch (Exception $e) {
-	        throw new Exception( 'home_LoginAs_Get: ' . $e->getMessage() );
-	    }
-	    
-	    $crypttext = "";
-	    if ( count( $r ) > 0 ) {
-	        $usrlg = $r[ 0 ];
-	        
-	        if ( trim( $usrlg['contact_id'] ) == '' ) {
-	            http_response_code( IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA );
-	            throw new Exception( '[' . IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA . '] home_LoginAs_Get - empleados_Obtener: El alumno no tiene relacionado un acudiente' );
-	        }
-	        
-	        $tk_g = null;
-	        try {
-	            $tk_g = self::ObtenerToken( array( 'id' => $usu->getId(), 'privada' => true ) ) ;
-	        } catch (Exception $e) {
-	            throw new Exception( 'home_LoginAs_Get - ObtenerToken: ' . $e->getMessage() );
-	        }
-	        
-	        //die( print_r( $tk_g ) );
-
-	        //$decrypted = "";
-	        foreach ($tk_g as $vK ) {
-	            $pk = $vK['publica'];
-	            
-	            $signDt = array();
-	            $signDt['acudientes_id'] = $usrlg['contact_id'];
-	            $signDt['empleados_id'] = $usrlg['id'];
-	            $signDt['tipo'] = $tipo;
-	            
-	            $jsDt = json_encode( $signDt );
-	            
-	            openssl_public_encrypt( $jsDt, $crypttext, $pk );
-	        }
-	        
-	        //die( $crypttext );
-	    }
-	    
-	    $rDef = base64_encode( $crypttext );
-	    return $rDef;
-	}
+	
+	// TODO: Tarea 101 - Remover el controlador LoginAs para usuarios contratistas
 	
 	/**
 	 * Obtiene el perfil de un empleado a partir de una clave codificada.

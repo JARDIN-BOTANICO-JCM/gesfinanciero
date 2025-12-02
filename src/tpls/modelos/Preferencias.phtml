@@ -21,7 +21,7 @@ $filtroUsr = array(
         OperacionesCtrl::USUARIOS_PERFIL_FINANCIERO,
         OperacionesCtrl::USUARIOS_PERFIL_SUPERVISOR,
         OperacionesCtrl::USUARIOS_PERFIL_SUPERVISORADM,
-        OperacionesCtrl::USUARIOS_PERFIL_RUTA
+        OperacionesCtrl::USUARIOS_PERFIL_API
         //,OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO
     )
 );
@@ -77,8 +77,15 @@ try {
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-12">
                     <h4 class="mb-3">Configuraciones de la plataforma</h4>
+<?php               if ( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SOPORTE || $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPERVISOR ) :?>
+                	<div class="row">
+                        <div class="col-12 mb-3" >
+                        	<div class="alert alert-warning">No tiene configuraciones para ajustar</div>
+                        </div>
+                    </div>
+<?php               endif; ?>
                 	
-                	<?php if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ) :?>
+                	<?php if ( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO ) :?>
                 	<div class="row">
                         <div class="col-12 mb-3" >
                         
@@ -104,9 +111,9 @@ try {
                 	</div>
                 	<?php endif; ?>
                 	
-                	<?php if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
-                	    $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
-                	    $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO ) : ?>
+                	<?php if ( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO ||
+                	    $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ||
+                	    $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_FINANCIERO ) : ?>
                 	<div class="row">
                         <div class="col-12 mb-3" >
                         

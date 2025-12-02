@@ -50,7 +50,9 @@ class IndexCtrl extends Pagina {
     const PERFILES_FINANCIERO = 6;
     const PERFILES_SUPERVISORADMIN = 7;
     const PERFILES_PROVEEDOR = 8;
-    const PERFILES_RUTA = 9;
+    const PERFILES_API = 9;
+    const PERFILES_SOPORTE = "10";
+    
     
     // IDs Usabilidad
     const WEB_USR_LGN_OK = 'WEB_USR_LGN_OK';

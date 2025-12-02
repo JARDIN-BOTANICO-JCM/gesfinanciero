@@ -129,12 +129,10 @@ if ($usu->getPerfil_id() == 1) {
                         </div>
                         <div>
                             <?php if ($usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR): ?>
-                                <a href="#" class="btn btn-outline-primary" onclick="btnAsignarApoyoSupervisor();">Apoyo a
-                                    Supervisor</a>
+                                <a href="#" class="btn btn-outline-primary" onclick="btnAsignarApoyoSupervisor();">Apoyo a Supervisor</a>
                             <?php endif; ?>
                             <?php //if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO ) : ?>
-                            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stcMdl_l2"
-                                onclick="btnAddRegistro();">Agregar registro</a>
+                            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stcMdl_l2" onclick="btnAddRegistro();">Agregar registro</a>
                             <?php //endif; ?>
                         </div>
                     </div>
@@ -380,7 +378,7 @@ if ($usu->getPerfil_id() == 1) {
                         <h4 class="mb-1">Perfil</h4>
                     </div>
                     <div class="row">
-                        <div class="mb-3 col-md-12">
+                        <div class="mb-3 col-md-6">
                             <label class="form-label" for="perfil_id">Perfil</label>
                             <select class="form-select" aria-label="Perfil" id="perfil_id" name="perfil_id">
                                 <?php foreach ($d_perfil_id as $v): ?>
@@ -395,6 +393,21 @@ if ($usu->getPerfil_id() == 1) {
                                 <?php endforeach; ?>
                             </select>
                         </div>
+                        
+                        <div class="mb-3 col-md-6">
+                            <label class="form-label" for="supervisor">Es supervisor?</label>
+<?php
+                            $sv_lectura = ' id="supervisor" name="supervisor"';
+                            if ( !($usu->getPerfil_id() == 1 || $usu->getPerfil_id() == 2) ) {
+                                $sv_lectura = ' id="supervisor" onlyread="onlyread" ';
+                            }
+?>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" <?php echo $sv_lectura; ?> >
+                                <label class="form-check-label" for="supervisor">S&iacute;</label>
+                            </div>
+                        </div>
+                        
                     </div>
 
                 </div>
@@ -518,10 +531,10 @@ if ($usu->getPerfil_id() == 1) {
 
                     <?php if ($usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO): ?>
                         d.columns[20]['search']['value'] = 1;
-                        d.columns[19]['search']['value'] = [1, 2, 6, 7, 8, 9];
+                        d.columns[19]['search']['value'] = [1, 2, 3, 6, 7, 8, 9, 10];
                     <?php elseif ($usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR): ?>
                         d.columns[20]['search']['value'] = 1;
-                        d.columns[19]['search']['value'] = [2, 6, 7, 8, 9];
+                        d.columns[19]['search']['value'] = [2, 3, 6, 7, 8, 9, 10];
                     <?php else: ?>
                         d.columns[0]['search']['value'] = [<?php echo $usu->getId() ?>];
                     <?php endif; ?>
@@ -772,6 +785,11 @@ if ($usu->getPerfil_id() == 1) {
                                         jQuery('#prefoto').html('<img src="./repo/avatar/' + _elDiv + '" style="height: 55px; " />');
                                     }
                                 }
+                                else if (key == 'supervisor') {
+                                    if ( _elDiv == 1 ) {
+                                        jQuery('#' + key).prop("checked", true );
+                                    }
+                                }
                                 else if (key == 'salariomes') {
                                     setTimeout(function () {
                                         jQuery('#' + key).val(parseInt(_elDiv));
@@ -826,7 +844,16 @@ if ($usu->getPerfil_id() == 1) {
             for (const k in r) {
                 if (Object.hasOwnProperty.call(r, k)) {
                     const _el = r[k];
-                    form_data.append(k, _el);
+                    let vlPre = _el;
+                    if( jQuery("#" + k).attr('type') == "checkbox" ){
+                    	if( jQuery("#" + k).is(":checked") ){
+                    		vlPre = 1;
+                    	}
+                    	else{
+                    		vlPre = 0;
+                    	}
+                    }
+                    form_data.append(k, vlPre);
                 }
             }
 
@@ -939,10 +966,14 @@ if ($usu->getPerfil_id() == 1) {
                 // Llenar el select con los supervisores
                 if (data.data && data.data.length > 0) {
                     data.data.forEach(function (supervisor) {
-                        const fullName = supervisor.nombres + ' ' + supervisor.apellidos;
-                        jQuery('#supervisor_id_apoyo').append(
-                            '<option value="' + supervisor.id + '">' + fullName + '</option>'
-                        );
+                    
+                    	if( supervisor['supervisor'] == 1 ){
+                    		const fullName = supervisor.nombres + ' ' + supervisor.apellidos;
+                            jQuery('#supervisor_id_apoyo').append(
+                                '<option value="' + supervisor.id + '">' + fullName + '</option>'
+                            );
+                    	} 
+
                     });
                 } else {
                     console.warn('No se encontraron supervisores');

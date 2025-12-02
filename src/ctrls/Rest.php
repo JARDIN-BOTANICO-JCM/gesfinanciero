@@ -70,7 +70,6 @@ class Rest
 
     
     // VERSION 2
-
     private static function notkn_CheckComm ( $data ) {
         OperacionesCtrl::authRequOff();
         try{

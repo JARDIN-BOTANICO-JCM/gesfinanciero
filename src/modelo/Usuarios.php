@@ -38,6 +38,25 @@ class Usuarios extends Clsdatos {
 	private $contratoini = "1900-01-01 00:00:00";
 	private $contratofin = "1900-01-01 00:00:00";
 	
+	// TODO: Tarea 99 - Agregar el campo supervisor en la tabla usuarios
+	private $supervisor = 0;
+	
+    /**
+     * @return number
+     */
+    public function getSupervisor()
+    {
+        return $this->supervisor;
+    }
+
+    /**
+     * @param number $supervisor
+     */
+    public function setSupervisor($supervisor)
+    {
+        $this->supervisor = $supervisor;
+    }
+
     /**
      * Obtiene el identificador del usuario.
      * @return number
