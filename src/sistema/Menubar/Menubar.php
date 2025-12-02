@@ -80,7 +80,8 @@ class Menubar {
         }
 
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR )
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISOR)
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::ENTIDAD_CARGAS );
@@ -132,22 +133,30 @@ class Menubar {
             $this->agregar( $m1 );
         }
         
-        // Todos tienen acceso
-        $m1 = new MenubarEntity();
-        $m1->setId( self::ENTIDAD_CONTRATISTAS );
-        $m1->setNombre('Contratistas');
-        $m1->setSlug( $meG->getCodigo() . '-contratistas');
-        $m1->setGrupo( $meG );
-        $m1->setUrl('./index.php?pageid=modelos/Contratistas.phtml');
-        $m1->setVisible(true);
-        $this->agregar( $m1 );
+        if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SOPORTE ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISOR)
+        {
+            $m1 = new MenubarEntity();
+            $m1->setId( self::ENTIDAD_CONTRATISTAS );
+            $m1->setNombre('Contratistas');
+            $m1->setSlug( $meG->getCodigo() . '-contratistas');
+            $m1->setGrupo( $meG );
+            $m1->setUrl('./index.php?pageid=modelos/Contratistas.phtml');
+            $m1->setVisible(true);
+            $this->agregar( $m1 );
+        }
         
         $meG = new MenubarGrupo('actividades','Actividades','<i class="nav-icon fe fe-file me-2"></i>');
         
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO )
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISOR )
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::ACTIVIDADES_MIACTIVIDADES );
@@ -163,7 +172,8 @@ class Menubar {
         
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN )
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISOR )
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::SISTEMA_USUARIOS );
@@ -176,8 +186,7 @@ class Menubar {
         }
         
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN )
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR )
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::SISTEMA_MIESPACIO );
@@ -191,8 +200,8 @@ class Menubar {
 
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO )
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_FINANCIERO ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SOPORTE)
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::SISTEMA_PREFERENCIAS );
@@ -207,7 +216,8 @@ class Menubar {
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
             $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISOR ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN)
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN ||
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SOPORTE )
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::SISTEMA_PERFIL );
@@ -233,8 +243,7 @@ class Menubar {
         }
         
         if ( $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPER_USUARIO ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR ||
-            $usu->getPerfil_id() == \IndexCtrl::PERFILES_SUPERVISORADMIN)
+            $usu->getPerfil_id() == \IndexCtrl::PERFILES_ADMINISTRADOR )
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::SISTEMA_TPLSEDITOR );
@@ -388,6 +397,8 @@ class Menubar {
             <li class="nav-item">
                 <div class="nav-divider"></div>
             </li>
+<?php // TODO: Tarea 109 - Remover en front administracion links sin documentos ?>
+<?php /* 
             <!-- Nav item -->
             <li class="nav-item">
                 <div class="navbar-heading">Documentation</div>
@@ -405,6 +416,7 @@ class Menubar {
                     <span class="badge bg-primary ms-2">1.0.0</span>
                 </a>
             </li>
+*/ ?>
         </ul>
 
         <!-- Card -->
@@ -507,6 +519,8 @@ class Menubar {
             <li class="nav-item">
                 <div class="nav-divider" style="border: 0;border-top: 1px solid rgb(211 113 54);margin-bottom: 1rem;margin-top: 1rem;"></div>
             </li>
+<?php // TODO: Tarea 108 - Remover en home del contratista links sin documentos ?>
+<?php /*
             <!-- Nav item -->
             <li class="nav-item">
                 <div class="navbar-heading" style="color: #ffb471;">Documentation</div>
@@ -524,6 +538,7 @@ class Menubar {
                     <span class="badge ms-2" style="background-color: rgba(253,253,253,0.13) !important;" >1.0.0</span>
                 </a>
             </li>
+*/ ?>
         </ul>
 
         <!-- Card -->

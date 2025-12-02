@@ -127,6 +127,16 @@ if (isset( $_REQUEST['logout'] ) ) {
         }
     };
     </script>
+    
+    <script type="application/javascript">
+    const closeAllModal = function(){
+        jQuery('.modal.show').each(function() {
+            const modal = bootstrap.Modal.getInstance(this);
+            if (modal) modal.hide();
+        });
+    };
+    </script>
+    
     <script type="application/javascript">
 
 	/**

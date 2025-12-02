@@ -22,10 +22,19 @@ if ( Seguridad::isLogin() ) {
         <!-- Container fluid -->
         	<div class="container-fluid p-4" >
                 <div class="row" >
+<?php               if ( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO || 
+                        $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ||
+                        $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPERVISOR ) : ?>
                     <div class="col-lg-12 col-md-12 col-12 d-flex justify-content-center align-items-center" >
                 		<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#gbl-info-fill"/></svg>
                     	<h3 class="mt-2">Definiendo Dashboard</h3>
                     </div>
+<?php               else: ?>
+					<div class="col-lg-12 col-md-12 col-12 d-flex justify-content-center align-items-center" >
+                		<svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#gbl-info-fill"/></svg>
+                    	<h3 class="mt-2">Este perfil no tiene dashboard</h3>
+                    </div>
+<?php               endif; ?>
             	</div>
             </div>
             <div class="container-fluid p-4" style="display: none;">

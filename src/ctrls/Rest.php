@@ -70,9 +70,6 @@ class Rest
 
     
     // VERSION 2
-<<<<<<< Updated upstream
-
-=======
     private static function notkn_CheckComm ( $data ) {
         OperacionesCtrl::authRequOff();
         try{
@@ -104,7 +101,6 @@ class Rest
         die("");
     }
     
->>>>>>> Stashed changes
     /**
      * Verifica comunicaciones para envío sin requerir autenticación.
      *

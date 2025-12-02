@@ -11,7 +11,7 @@ $cfg = OperacionesCtrl::LeerConfigCorp();
 
 $aslogin = false ;
 $assuperadmi = false;
-if ( $usu->getPerfil_id() == 1 || $usu->getPerfil_id() == 2 || $usu->getPerfil_id() == 7 ) {
+if ( $usu->getPerfil_id() == 1 || $usu->getPerfil_id() == 2 || $usu->getPerfil_id() == 7 || $usu->getPerfil_id() == 10 ) {
     $aslogin = true ;
     
     if ( $usu->getPerfil_id() == 1 || $usu->getPerfil_id() == 2 ) {
@@ -103,6 +103,9 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                         </div>
                         <div>
                         
+<?php // TODO: Tarea 106 - Solo dejar el boton de descargar toda la base de datos de contratistas sin mas opciones ?>
+							<a href="index.php?ajaxl=<?php echo md5(IndexCtrl::API_LNK_DESCARGAR_ALUMNOS) ?>&conid=false&activos=true" target="nwalumcsv0" class="btn btn-outline-primary" >Descargar todo <i class="fas fa-download"></i></a>
+<?php /*							
                             <div class="btn-group">
                             	<a href="index.php?ajaxl=<?php echo md5(IndexCtrl::API_LNK_DESCARGAR_ALUMNOS) ?>&conid=false&activos=true" target="nwalumcsv0" class="btn btn-outline-primary" >Descargar todo <i class="fas fa-download"></i></a>
                             	<button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split px-2" data-bs-toggle="dropdown" aria-expanded="false">
@@ -114,16 +117,21 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                                     <li><a class="dropdown-item" href="index.php?ajaxl=<?php echo md5(IndexCtrl::API_LNK_DESCARGAR_ALUMNOS) ?>&conid=true&activos=false" target="nwalumcsv3">Todos los campos y todos los estados</a></li>
                             	</ul>
                             </div>
+*/ ?>
                         
+<?php // TODO: Tarea 104 - Remover las vistas de usuarios eliminados y luego volver a ver los activos ?>
+<?php /*
                         	<?php if ( $verbtns['activos'] ) : ?>
 							<a href="./index.php?pageid=<?php echo $_REQUEST['pageid'] ?>" class="btn btn-secondary"><i class="fas fa-user-check"></i> Usuarios activos</a>
                         	<?php endif; ?>
                         	<?php if ( $verbtns['papelera'] ) : ?>
                         	<a href="./index.php?pageid=<?php echo $_REQUEST['pageid'] ?>&verpapelera=<?php echo $verpapelera; ?>" class="btn btn-secondary"><i class="fas fa-trash"></i> Papelera</a>
                         	<?php endif; ?>
-                        	
-                        	
+*/ ?>
+<?php // TODO: Tarea 105 - Remover boton para agregar registros a mano ?>                        	
+<?php /*
                             <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#stcMdl_l2" onclick="btnAddRegistro();">Agregar registro</a>
+*/ ?>
                         </div>
                     </div>
                 </div>
@@ -260,6 +268,7 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                         <input type="text" class="form-control" placeholder="Usuario" id="usuario" name="usuario" required="">
                     </div>
 
+<?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR ): ?>
                     <div class="col-md-3 col-12 mb-4" id="capafoto">
                         <div>
                             <!-- logo -->
@@ -270,6 +279,7 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                             </div>
                         </div>
                     </div>
+<?php endif; ?>
 
                 </div>
             </div>
@@ -340,7 +350,9 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
         <div class="d-flex justify-content-end">
             <!-- buttons -->
             <a href="#" class="btn btn-outline-primary me-2" data-bs-dismiss="modal">Cancel</a>
+<?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR ): ?>
             <button class="btn btn-primary" type="submit" onclick="actualizar();">Guardar</button>
+<?php endif; ?>
         </div>
     </form>
 </div>
@@ -493,7 +505,9 @@ jQuery(document).ready( function () {
                     html.push('     <h6 class="mb-0 text-white">Adjuntos</h6> ');
                     html.push(' </div> ');
                     html.push('</button> ');
-                    
+
+<?php // TODO: Tarea 103 - Remover la posibilidad de eliminar usuarios ?>
+<?php /*
                 	<?php if ( $verbtns['papelera'] ) : ?>
                 	html.push('<button onclick="eliminar(this);" data-id="' + data['id'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip" data-toggle="tooltip" data-placement="top" title="Eliminar" > ');
                     html.push(' <i class="fe fe-trash-2 fs-5"></i> ');
@@ -509,17 +523,9 @@ jQuery(document).ready( function () {
                     html.push(' </div> ');
                     html.push('</button> ');
                 	<?php endif; ?>
-                    
+*/ ?>
+<?php // TODO: Tarea 100 - Remover loginAs ?>
                     <?php if ( $aslogin ): ?>
-                    <?php   if ( $assuperadmi ) : ?>
-                    html.push('<button onclick="ictrl.loginAs(this);" data-id="' + data['id'] + '" data-tipo="4" class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip" data-toggle="tooltip" data-placement="top" title="Iniciar sesi&oacute;n" > ');
-                    html.push(' <i class="fas fa-user-secret"></i> ');
-                    html.push(' <div id="btnIniAuth' + data['id'] + '" class="d-none"> ');
-                    html.push('     <h6 class="mb-0 text-white">Iniciar sesi&oacute;n</h6> ');
-                    html.push(' </div> ');
-                    html.push('</button> ');
-                    <?php   endif; ?>
-                    
                     html.push('<span class="dropdown dropstart ms-2"> ');
                     html.push('	<a class="btn-icon btn btn-ghost btn-sm rounded-circle" href="#" role="button" id="extraOpc' + data['id'] + '" data-bs-toggle="dropdown"  data-bs-offset="-20,20" aria-expanded="false" style="height: 1.1875rem; width: 1.1875rem;" > ');
                     html.push('		<i class="fe fe-more-vertical"></i> ');
@@ -527,14 +533,16 @@ jQuery(document).ready( function () {
                     html.push('	<span class="dropdown-menu" aria-labelledby="extraOpc' + data['id'] + '"> ');
                     html.push('		<span class="dropdown-header">Extra</span> ');
                     html.push('		<button class="dropdown-item" onclick="nuevoPass(this);" data-id="' + data['id'] + '" data-notificar="1"><i class="fas fa-key dropdown-item-icon"></i>Env&iacute;ar nueva clave</button> ');
+<?php // TODO: Tarea 106 - Remover las opciones de asignaciones de claves de forma manual ?>
+<?php /* 
                     html.push('		<button class="dropdown-item" onclick="nuevoAluPassManual( this );" data-id="' + data['id'] + '" data-notificar="1"><i class="fa-solid fa-lock dropdown-item-icon"></i> Asignar nueva clave</button> ');
                     <?php   if ( $assuperadmi ) : ?>
                     html.push('		<button class="dropdown-item" onclick="nuevoAluPassManual( this );" data-id="' + data['id'] + '" data-notificar="0"><i class="fas fa-user-shield dropdown-item-icon"></i> Asignar nueva clave y no notificar</button> ');
                     <?php   endif; ?>
                     html.push('	</span> ');
                     html.push('</span> ');
+*/?>
                     <?php endif; ?>
-
                     return html.join('');
                 },
                 'targets': <?php echo $idTarget ; ?>
