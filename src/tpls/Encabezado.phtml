@@ -101,11 +101,10 @@
 	
 	if (isset( $_SESSION["usu"] )) {
 		$usu = $_SESSION["usu"];
-	   if( $usu->getPerfil_id() == 2 ){
-      $themeClass = 'contratista-theme';
-	   
-    }
-}
+	   if( $usu->getPerfil_id() == IndexCtrl::PERFILES_CONTRATISTA ){
+      	$themeClass = 'contratista-theme';
+   		 }
+	}
 	?>
 	<body class="<?php echo $themeClass; ?>"></body>
 </html>
