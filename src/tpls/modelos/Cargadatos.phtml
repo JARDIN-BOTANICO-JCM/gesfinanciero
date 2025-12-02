@@ -2,6 +2,11 @@
 use src\sistema\Menubar\Menubar;
 use src\sistema\Headerbar\Headerbar;
 
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+
 $l_anyolectivo = array();
 try {
 	$l_anyolectivo = OperacionesCtrl::anyolectivo_Obtener();
@@ -50,6 +55,7 @@ try {
 				</div>
 			</div>
 
+<?php if( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO | $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ) : ?>
 			<div class="card">
 				<div class="card-body">
 					<h4 class="mb-0">Centro de control</h4>
@@ -100,6 +106,7 @@ try {
 					</form>
 				</div>
 			</div>
+<?php endif; ?>
 
 			<?php
 			/*
@@ -190,6 +197,8 @@ try {
 					</form>
 				</div>
 			</div>
+			
+<?php if( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO | $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ) : ?>
 			<div class="card mt-4">
 				<div class="card-body">
 					<div class="d-lg-flex justify-content-between align-items-center mb-3">
@@ -222,6 +231,7 @@ try {
 					</div>
 				</div>
 			</div>
+<?php endif; ?>
 		</div>
 	</div>
 </div>

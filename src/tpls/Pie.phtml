@@ -297,14 +297,17 @@ if ( isset( $_SESSION['usu'] ) ) {
     	passManual( o , '<?php echo md5( IndexCtrl::API_UsuariosClaveAsignadaAdminManual ); ?>' );
     };
     
+<?php // TODO: Tarea 107 - Remover el controlador en front para asignacion clave manual ?>
     /**
      * Cambia la clave manualmente para un alumno dado.
      * @param {Object} o Elemento o contexto desde donde se invoca la función.
      * @param {string} api Identificador de la API para la operación.
      */
+<?php /*
     const nuevoAluPassManual = function( o ){
     	passManual( o , '<?php echo md5( IndexCtrl::API_EmpleadosClaveAsignadaAdminManual ); ?>' );
     };
+*/ ?>
     
     /**
      * Cambia la clave manualmente para un usuario dado.
@@ -910,16 +913,8 @@ if ( isset( $_SESSION['usu'] ) ) {
     			}
     	    );
     	}
-    	
-    	<?php if ( $loginas ) : ?>
-    	_this.loginAs = function( o ){
-    		const _o = jQuery( o );
-    		const dt = JSON.stringify( _o.data( ) );
-    		generalNav('<?php echo md5( IndexCtrl::API_Home_LoginAs ); ?>', dt, function( dtR ){
-    			ut.crearFormulario( "home.php", {'las' : dtR }, 'post', 'las_page' );
-    		});
-    	};
-    	<?php endif; ?>
+
+<?php // TODO: Tarea 102 - Remover el controlador en front para impersonalizacion ?>    	
     	
     	_this.safeOp = function( pr, fn ){
     		generalNav('<?php echo md5( IndexCtrl::API_LoginSystemAjax ); ?>', pr, fn );
