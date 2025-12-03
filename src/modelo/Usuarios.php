@@ -56,7 +56,7 @@ class Usuarios extends Clsdatos {
     {
         $this->supervisor = $supervisor;
     }
-
+	
     /**
      * Obtiene el identificador del usuario.
      * @return number
