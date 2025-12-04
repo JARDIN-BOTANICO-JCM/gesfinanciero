@@ -503,20 +503,20 @@ class Menubar {
         }
         
         ?>
-<nav class="navbar-vertical navbar navbar-dark bg-dark" style="background-color: #cc5b0a !important;">
+<nav class="navbar-vertical navbar navbar-dark bg-dark">
     <div class="vh-100" data-simplebar>
         <!-- Brand logo -->
         <a class="navbar-brand" href="home.php?pageid=home/Main.phtml">
-            <img src="./temas/img/Acappdemy_r_text_logo.png" alt="" height="64">
+            <img src="../temas/img/Logo_JBB.png" alt="" height="64" width="100">
         </a>
         <!-- Navbar nav -->
         <ul class="navbar-nav flex-column" id="sideNavbar">
 
-            <?php echo $m->listarMenu( $pageid, array('navitemTop' => 'color: #e1bb9e;') ); ?>
+            <?php echo $m->listarMenu( $pageid); ?>
 
             <!-- Nav item -->
             <li class="nav-item">
-                <div class="nav-divider" style="border: 0;border-top: 1px solid rgb(211 113 54);margin-bottom: 1rem;margin-top: 1rem;"></div>
+                <div class="nav-divider" ></div>
             </li>
 <?php // TODO: Tarea 108 - Remover en home del contratista links sin documentos ?>
 <?php /*
@@ -541,12 +541,11 @@ class Menubar {
         </ul>
 
         <!-- Card -->
-        <div class="card bg-dark-primary shadow-none text-center mx-4 my-8" style="background-color: rgba(253,253,253,0.13) !important;" >
+        <div class="card bg-dark-primary shadow-none text-center mx-4 my-8" >
             <div class="card-body py-2">
-                <img src="./temas/favicon/favicon_120x120.png" alt="" height="92" />
+                <img src="./temas/img/logo_aqui_si_pasa.png" alt="" height="92" />
                 <div class="mt-0">
-                    <h5 class="text-white">Nuevapp</h5>
-                    <small class="d-block mb-3 " style="color: #c8b4a5;">&copy; 2025</small>
+                    <small class="d-block mb-3 ">&copy; 2025</small>
                 </div>
             </div>
         </div>
