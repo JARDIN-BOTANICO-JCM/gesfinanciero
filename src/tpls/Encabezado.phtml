@@ -95,17 +95,6 @@
 		</script>
 		
 	</head>
-	<?php
-	$themeClass = 'admin-theme'; // valor por defecto
-	$usu = null;
-	
-	if (isset( $_SESSION["usu"] )) {
-		$usu = $_SESSION["usu"];
-	   if( $usu->getPerfil_id() == IndexCtrl::PERFILES_CONTRATISTA ){
-      	$themeClass = 'contratista-theme';
-   		 }
-	}
-	?>
-	<body class="<?php echo $themeClass; ?>"></body>
+	<body class="admin-theme"></body>
 </html>
 
