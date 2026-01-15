@@ -386,7 +386,7 @@ const actualizar = function(){
         jQuery( objmdl ).modal('show');
 
         var form_data = new FormData();
-        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EmpleadosMod ); ?>');
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EmpleadosHomeMod ); ?>');
         form_data.append('key', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
 
 		__TransportarData(
@@ -429,7 +429,7 @@ const nuevoMail = function(){
         jQuery( objmdl ).modal('show');
 
         var form_data = new FormData();
-        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EmpleadosMod ); ?>');
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_EmpleadosHomeMod ); ?>');
         form_data.append('idhash', modid );
         
         form_data.append( 'mail' , jQuery('#nwemail').val() );

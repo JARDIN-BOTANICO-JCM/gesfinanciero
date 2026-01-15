@@ -20,6 +20,8 @@ try {
 } catch (\Throwable $th) {
 	throw new \Exception($th->getMessage());
 }
+
+$tipodocrev = array_flip ( OperacionesCtrl::TIPODOC_DOS_LETRAS );
 ?>
 <div id="db-wrapper" class="">
 	<!-- navbar vertical -->
@@ -56,12 +58,11 @@ try {
 			</div>
 
 <?php if( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO | $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ) : ?>
-			<div class="card">
+			<div class="card mb-4">
 				<div class="card-body">
 					<h4 class="mb-0">Centro de control</h4>
 					<p class="mb-4">
-						Aqu&iacute; puede subir los archivos necesarios para que los usuarios puedan generar sus
-						documentos autom&aacute;ticamente
+						Aqu&iacute; puede subir los archivos necesarios para que los usuarios puedan generar sus documentos autom&aacute;ticamente
 					</p>
 					<form id="frmval" class="row frmvalcls ">
 						<div class="col-12 mb-3">
@@ -104,6 +105,26 @@ try {
 							</button>
 						</div>
 					</form>
+				</div>
+			</div>
+<?php endif; ?>
+
+<?php 
+/*
+ * @yalfonso
+ * TODO: Tarea 121 - Se agrega el formulario para asignar usuarios
+ * 
+ */
+?>
+<?php if( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO | $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ) : ?>
+			<div class="card">
+				<div class="card-body">
+					<h4 class="mb-0">Asignaciones</h4>
+					<p class="mb-4">
+						Aqu&iacute; puede asignar los contratistas a los supervisores o apoyos
+					</p>
+					
+					<div id="asignacionesSuperCont" class="row mb-3" ></div>
 				</div>
 			</div>
 <?php endif; ?>
@@ -205,14 +226,11 @@ try {
 						<div>
 							<h4 class="mb-1">Carga de datos desde BOGDATA</h4>
 							<p class="text-muted mb-0">
-								<strong>Trae</strong> los datos del empleado desde BOGDATA.xlsx y
-								<strong>completa</strong> manualmente los meses y días del contrato,
-								agregándolos o actualizándolos según corresponda.
+								<strong>Trae</strong> los datos del empleado desde BOGDATA.xlsx y <strong>completa</strong> manualmente los meses y días del contrato, agregándolos o actualizándolos según corresponda.
 							</p>
 						</div>
 						<div class="mt-3 mt-lg-0">
-							<button type="button" class="btn btn-outline-secondary" onclick="cargarBogdata();"> Cargar
-								desde BOGDATA </button>
+							<button type="button" class="btn btn-outline-secondary" onclick="cargarBogdata();"> Cargar desde BOGDATA </button>
 						</div>
 
 					</div>
@@ -235,6 +253,403 @@ try {
 		</div>
 	</div>
 </div>
+
+<script type="application/javascript">
+let asignaciones = null;
+
+<?php 
+// TODO: Tarea 128 - Crear clase Asignaciones para UI y controlar eventos del usuario final 
+?>
+const Asignaciones = function( dC ){ // dC = data constructor
+	const self = this;
+	const instancia = dC['inst'];
+	const lssupers = dC['listSupers'];
+	let tbInter = null;
+	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
+	
+	const btnVerLista = 'btnVerLista' + tableId;
+	
+	// Crear la tabla inicialmente
+	self.dibujarTb = function(){
+    	const html = [];
+    	html.push('<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;"></table>');
+    	return html.join('');
+	};
+	
+	// Lista supervisores y apoyos
+	self.listarSupersGUI = function(){
+		const _o = jQuery( lssupers );
+		const gblId = "lsSupsId" + tableId;
+		
+		_o.html('Cargando...');
+		
+		const cfg = {
+			'fn' : function( data ){
+        		const html = [];
+        		html.push( '<div class="col-md-10 col-12">' );
+        		html.push( '	<div class="form-floating">' );
+        		html.push( '		<select class="form-select" id="' + gblId + '" aria-label="Supervisores y apoyos" >' );
+        		html.push( '			<option value="" disabled="disabled" selected="selected" >Seleccione un supervisor o apoyo</option>' );
+        		for ( const key in data ) {
+            	    if ( Object.hasOwnProperty.call( data, key ) ) {
+            	        const _el = data[ key ];
+            	        const lbl = _el['nombres'] + ' ' + _el['apellidos'];
+            	        html.push( '			<option value="' + _el['id'] + '" >' + lbl + '</option>' );
+            	        const _opt = _el['apoyos'];
+            	        
+            	        if( _opt.length > 0 ){
+                	        html.push( '			<optgroup label="Apoyos de ' + lbl + '" >' );
+                	        for ( const kOpt in _opt ) {
+                        	    if ( Object.hasOwnProperty.call( _opt, kOpt ) ) {
+                        	        const _elOpt = _opt[ kOpt ];
+                        	        html.push( '			<option value="' + _elOpt['asignado_id'] + '" >' + _elOpt['asignado'] + '</option>' );
+                    	        }
+                	        }
+                	        html.push( '			</optgroup >' );
+            	        }
+        	        }
+    	        }
+        		html.push( '		</select>' );
+        		html.push( '		<label for="' + gblId + '">Supervisores y apoyos</label>' );
+        		html.push( '	</div>' );
+        		html.push( '</div>' );
+        		html.push( '<div class="col-md-2 col-12">' );
+        		html.push( '	<div class="d-grid gap-2">' );
+        		html.push( '		<button id="' + btnVerLista + '" data-target="#' + gblId + '" class="btn btn-primary" onclick="' + instancia + '.modalwin( this );" disabled="disabled" >Lista contratistas</butto>' );
+        		html.push( '	</div>' );
+        		html.push( '</div>' );
+        		
+        		const objUi = jQuery( html.join('') );
+        		objUi.find( "#" + gblId ).on('change', function(){
+        			objUi.find( "#" + btnVerLista).prop("disabled", false);
+        		});
+        		
+        		_o.html( objUi );
+			
+			}
+		};
+		self.listarSupers( cfg );
+	};
+	
+	self.listarSupers = function( d ){
+		const fn = d['fn'];
+		
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_Usuarios_Asistentes_Helper); ?>');
+
+		__TransportarData(
+  			form_data,
+  			function ( data ) {
+  				fn( data );
+			},
+			function (err) {
+				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html(err.responseText);
+
+				jQuery(objmdlErr).modal('show');
+				//setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	};
+	
+	self.mostrarData = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		jQuery( dt['cls'] ).hide();
+		jQuery( dt['mostrar'] ).show('fast');
+	};
+	
+	// mostrar opciones para asignar a supervisores o apoyos
+	self.modalwin = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const target = dt['target'];
+		
+		const superv = jQuery( target );
+		const nombresuper = superv.find('option:selected').text();
+		
+		const gblId = "modalId" + tableId;
+		
+		const sdata = { 'supervisor_id' : superv.val() };
+		
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_ApoyosGetHelperById ); ?>');
+		form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( sdata ) ) );
+
+		__TransportarData(
+  			form_data,
+  			function ( data ) {
+  			
+  				const htmlNuevos = [];
+  				for ( const key in data ) {
+            	    if ( Object.hasOwnProperty.call( data, key ) ) {
+            	        const _el = data[ key ];
+            	        
+        				let tpdRegistrado = "CC";
+        				if ( Object.hasOwnProperty.call( TIPODOC_DOS_LETRAS_JS, _el['tipodoc_id'] ) ) {
+    						tpdRegistrado = TIPODOC_DOS_LETRAS_JS[ _el['tipodoc_id'] ];
+    					}
+						
+						const horaAsig = ( "" + _el['fechamodifica'] ).split(' ');
+						const _fecha = horaAsig[0];
+						const _hora = ("" + horaAsig[1]).split( ':' );
+						
+						let _nombretmp = '<span class="text-warning">(Sin datos registrados)</span>';
+						if( _el['empleados_fullname'] !== null ){
+							_nombretmp = _el['empleados_fullname'];
+						}
+						
+						htmlNuevos.push('	<li class="list-group-item">');
+        				htmlNuevos.push('		<div>');
+        				htmlNuevos.push('			<label class="" for="">' + _nombretmp + '</label>');
+        				htmlNuevos.push('		</div>');
+        				htmlNuevos.push('		<small>' + tpdRegistrado + ' - ' + _el['documento'] + '</small><small class="text-muted"> - Asignado a <strong>' + _el['usuarios_fullname'] + '</strong> [' + _fecha + ' ' + _hora[0] + ':' + _hora[1] + '] por ' + _el['asignador'] + '</small>');
+        				htmlNuevos.push('	</li>');
+        				
+        	        }
+    	        }
+  			
+  				const html = [];
+        		html.push('<div id="' + gblId + '" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="tit_' + gblId + '" aria-hidden="true" >');
+        		html.push('	<div class="modal-dialog modal-dialog-scrollable modal-xl">');
+        		html.push('		<div class="modal-content">');
+        		html.push('			<div class="modal-header">');
+                html.push('				<h5 id="tit_' + gblId + '" class="modal-title">Asignar contratistas para ' + nombresuper + '</h5>');
+                html.push('				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>');
+              	html.push('			</div>');
+              	html.push('			<div class="modal-body">');
+                html.push('				<div class="row ">');
+                html.push('					<div class="col-md-6 col-12 mb-3">');
+                html.push('						<div class="form-floating mb-3">');
+				html.push('							<select class="form-select" id="tpd_' + gblId + '" aria-label="Floating label select example">');
+<?php                                                   foreach ( OperacionesCtrl::TIPODOC_DOS_LETRAS as $kTpd => $vTpd ) : ?>
+				html.push('								<option value="<?php echo $kTpd ?>"><?php echo $vTpd ?></option>');
+<?php                                                   endforeach; ?>
+				html.push('							</select>');
+				html.push('							<label for="tpd_' + gblId + '">Tipo de documento</label>');
+				html.push('						</div>');
+                html.push('						<div class="form-floating mb-3">');
+				html.push('							<textarea class="form-control" placeholder="Pega los n&uacute;meros de documentos" id="txta' + gblId + '" style="min-height: 300px"></textarea>');
+				html.push('							<label for="txta' + gblId + '">Por asignar</label>');
+				html.push('						</div>');
+				html.push('						<button data-btnview="#btnradio2' + gblId + '" data-mostrar="#cntNews' + gblId + '" data-cls=".grpContDataCls' + gblId + '" data-supervisor_id="' + superv.val() + '" data-target="#txta' + gblId + '"  data-targettpd="#tpd_' + gblId + '" class="btn btn-primary" onclick="' + instancia + '.preasignar( this );">Validar usuarios</button>' );
+              	html.push('					</div>');
+              	html.push('					<div class="col-md-6 col-12 mb-3">');
+              	html.push('						<div class="d-flex justify-content-between"> ');
+              	html.push('							<h5>Lista de asignados</h5>');
+              	html.push('							<div class="btn-group btn-group-sm mb-3" role="group" aria-label="Small button group">');
+              	
+              	html.push('								<input type="radio" class="btn-check" name="btnradio' + gblId + '" id="btnradio1' + gblId + '" autocomplete="off" checked="checked" onclick="' + instancia + '.mostrarData( this );" data-mostrar="#cntCurr' + gblId + '" data-cls=".grpContDataCls' + gblId + '" >');
+            	html.push('								<label class="btn btn-outline-primary py-0" for="btnradio1' + gblId + '">Asignados</label>');
+
+              	html.push('								<input type="radio" class="btn-check" name="btnradio' + gblId + '" id="btnradio2' + gblId + '" autocomplete="off" disabled="disabled" onclick="' + instancia + '.mostrarData( this );"  data-mostrar="#cntNews' + gblId + '" data-cls=".grpContDataCls' + gblId + '" >');
+              	html.push('								<label class="btn btn-outline-primary py-0" for="btnradio2' + gblId + '">Procesados</label>');
+              	
+              	html.push('							</div>');
+              	html.push('						</div>');
+              	html.push('						<form id="cntNews' + gblId + '" class="cntNewsCls' + gblId + ' grpContDataCls' + gblId + '" style="display: none;"></form>');
+              	
+              	let grpListItem = '						<li class="list-group-item text-muted">No tiene usuarios asignados</li>';
+              	if( data.length > 0 ){
+              		grpListItem = htmlNuevos.join('');
+              	}
+              	
+              	html.push('						<div id="cntCurr' + gblId + '" class="grpContDataCls' + gblId + '" >');
+              	html.push('							<ul class="list-group">' + grpListItem + '</ul>');
+              	html.push('						</div>');
+              	html.push('					</div>');
+              	html.push('				</div>');
+              	html.push('			</div>');
+              	html.push('			<div class="modal-footer">');
+                html.push('				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>');
+                html.push('				<button data-contlist="#cntNews' + gblId + '" data-contcls="cntNewsCls' + gblId + '" data-supervidor_id="' + superv.val() + '" type="button" class="btn btn-primary" onclick="' + instancia + '.salvarAsignaciones( this );">Guardar asignaciones</button>');
+              	html.push('			</div>');
+            	html.push('		</div>');
+          		html.push('	</div>');
+        		html.push('</div>');
+        		
+        		if( jQuery( "#" + gblId ).length ){
+        			jQuery( "#" + gblId ).remove();
+        		}
+        		
+        		const oModal = jQuery( html.join('') );
+        		oModal.modal('show');
+			},
+			function (err) {
+				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html(err.responseText);
+
+				jQuery(objmdlErr).modal('show');
+				//setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	};
+	
+	self.salvarAsignaciones = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const idform = dt['contcls'] ;
+		
+		const contlist = jQuery( dt['contlist'] );
+		const supervidor_id = dt['supervidor_id'];
+		
+		ut.validarFrm(idform, function (r) {
+		
+			const datapl = { 'data' : r , 'supervidor_id' : supervidor_id };
+		
+			const form_data = new FormData();
+			form_data.append('ajax', '<?php echo md5(IndexCtrl::API_Asignaciones_Helper_Agregar ); ?>');
+			form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( datapl ) ) );
+			
+    		__TransportarData(
+      			form_data,
+      			function ( data ) {
+      				console.log( data );
+    			},
+    			function (err) {
+    				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+    				const alerta = jQuery(objmdlErr + ' div.alert');
+    				alerta.attr('class', 'alert alert-danger');
+    				alerta.html(err.responseText);
+    
+    				jQuery(objmdlErr).modal('show');
+				}
+    		);
+		
+		});
+	};
+	
+	self.preasignar = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		
+		const target = jQuery( dt['target'] );
+		const targettpd = jQuery( dt['targettpd'] );
+		const tpdBuscado = targettpd.find('option:selected').text();
+		
+		const contres = jQuery( dt['mostrar'] );
+		
+		jQuery( dt['btnview'] ).removeAttr('disabled');
+		jQuery( dt['btnview'] ).trigger('click');
+		self.mostrarData( o );
+		
+		contres.html( '<div class="mb-2">Actualmente se est&aacute;n revisando los datos ingresados.</div>' + validadorGlob.ajaxspinner( { 'label' : 'Espere un momento' } ) );
+		
+		const sdata = {
+			'reg_documento' : jQuery.trim( target.val() ),
+			'reg_tipodoc_id' : targettpd.val() ,
+			'supervisor_id' : dt['supervisor_id']
+		};
+		
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_Asignaciones_Helper_GetPre ); ?>');
+		form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( sdata ) ) );
+		__TransportarData(
+  			form_data,
+  			function ( data ) {
+  				const result = data['result'];
+  				const datar = result['data'];
+  				const resumen = datar['resumen'];
+  				
+  				const htmlNuevos = [];
+  				const htmlErrs = [];
+  				
+  				for ( const key in resumen ) {
+            	    if ( Object.hasOwnProperty.call( resumen, key ) ) {
+            	        const _el = resumen[ key ];
+            	        
+            	        const itemls = 'item' + targettpd.val() + '' + key;
+            	        let idl = "";
+            	        let vlchk = ""; 
+            	        if( _el === false){
+            	        	idl = 'list' + targettpd.val() + '' + key;
+            	        	vlchk = ut.b64EncodeUnicode( JSON.stringify( { "empleados_id":0,"tipodoc_id":targettpd.val(),"documento": key, "nombres" : "","registrado":false } ) );
+            	        	
+            				htmlErrs.push('	<li id="' + itemls + '" class="list-group-item list-group-item-danger ">');
+            				htmlErrs.push('		<div>');
+            				htmlErrs.push('			<input class="form-check-input me-1" type="checkbox" value="' + vlchk + '" id="' + idl + '" name="' + idl + '">');
+            				htmlErrs.push('			<label class="form-check-label stretched-link" for="' + idl + '">' + tpdBuscado + ' - ' + key + '</label>');
+            				htmlErrs.push('		</div>');
+            				htmlErrs.push('		<small>');
+            				htmlErrs.push('			El usuario <strong>no</strong> existe en la base de datos ni en el archivo bogdata');
+            				htmlErrs.push('		</small>');
+            				htmlErrs.push('	</li>');
+            	        }
+            	        else{
+            	        	idl = 'list' + _el['tipodoc_id'] + '' + _el['documento'];
+            	        	vlchk = ut.b64EncodeUnicode( JSON.stringify( _el ) );
+            	        	
+            	        	let mostrarnombre = _el['nombres'];
+            	        	if( jQuery.trim( mostrarnombre ) == "" ){
+            	        		mostrarnombre = '<span class="text-warning">(Sin datos registrados)</span>';
+            	        	}
+            	        	
+            				htmlNuevos.push('	<li id="' + itemls + '" class="list-group-item">');
+            				htmlNuevos.push('		<div>');
+            				htmlNuevos.push('			<input class="form-check-input me-1" type="checkbox" value="' + vlchk + '" id="' + idl + '" name="' + idl + '">');
+            				htmlNuevos.push('			<label class="form-check-label stretched-link" for="' + idl + '">' + mostrarnombre + '</label>');
+            				htmlNuevos.push('		</div>');
+            				
+            				let txt = "";
+            				let tpdRegistrado = "CC";
+            				if( parseInt( _el['tipodoc_id'] ) !== parseInt( targettpd.val() ) ){
+            					if ( Object.hasOwnProperty.call( TIPODOC_DOS_LETRAS_JS, _el['tipodoc_id'] ) ) {
+            						tpdRegistrado = TIPODOC_DOS_LETRAS_JS[ _el['tipodoc_id'] ];
+            					}
+            				
+            					txt = '<strong class="text-danger">(No es ' + tpdBuscado + ')</strong> ';
+            				}
+            				
+            				const asignador = _el['asignado'];
+            				let nmAsignador = "nadie";
+            				let fcAsignador = "d&iacute;a est&aacute; pediente";
+            				if ( Object.hasOwnProperty.call( asignador, "nombres" ) ) {
+            					nmAsignador = asignador['nombres'];
+            					fcAsignador = asignador['fechamodifica'];
+            				}
+            				
+            				htmlNuevos.push('		<small>' + txt + tpdRegistrado + ' - ' + _el['documento'] + '</small><small class="text-muted"> - Asignado a <strong>' + nmAsignador + '</strong> el ' + fcAsignador + '</small>');
+            				htmlNuevos.push('	</li>');
+            	        }
+        	        }
+    	        }
+    	        
+    	        const htmlLs = [];
+  				htmlLs.push('<ul class="list-group">');
+  				htmlLs.push( htmlNuevos.join('') );
+  				htmlLs.push( htmlErrs.join('') );
+				htmlLs.push('</ul>');
+				contres.html( htmlLs.join('') );
+				
+			},
+			function (err) {
+				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html(err.responseText);
+
+				jQuery(objmdlErr).modal('show');
+			}
+		);
+	};
+};
+const listaAsignaciones = function(){
+	const dataConstruct = {
+		'inst' : 'asignaciones',
+		'listSupers' : '#asignacionesSuperCont'
+    };
+	asignaciones = new Asignaciones ( dataConstruct );
+	asignaciones.listarSupersGUI();
+};
+</script>
 
 <script type="application/javascript">
 
@@ -654,35 +1069,35 @@ try {
 
 	const limpiarPreCarga = function () {
 		const frm = document.getElementById('frmcont');
-	/**
-	 * Verifica que $frm exista y sea truthy; si no, sale inmediatamente del método.
-	 *
-	 * @param mixed $frm Estructura o referencia al formulario a procesar.
-	 * @return void
-	 */
-    if (!frm) return;
-
-    // Resetea a valores por defecto del HTML
-    frm.reset();
-
-    // Asegura que el <select> quede en la opción placeholder
-    const sel = document.getElementById('tipodoc_id');
-    if (sel) sel.selectedIndex = 0; // primera opción: "Seleccione"
-
-    // Vacía explícitamente los numéricos (por si tenían un valor por defecto)
-    ['meses', 'dias'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
-
-    // Quita estados de validación de Bootstrap (si los usas)
-    frm.classList.remove('was-validated');
-    frm.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
-      el.classList.remove('is-valid', 'is-invalid');
-    });
-
-    // Opcional: enfoca el primer campo
-    document.getElementById('tipodoc_id')?.focus();
+    	/**
+    	 * Verifica que $frm exista y sea truthy; si no, sale inmediatamente del método.
+    	 *
+    	 * @param mixed $frm Estructura o referencia al formulario a procesar.
+    	 * @return void
+    	 */
+        if (!frm) return;
+    
+        // Resetea a valores por defecto del HTML
+        frm.reset();
+    
+        // Asegura que el <select> quede en la opción placeholder
+        const sel = document.getElementById('tipodoc_id');
+        if (sel) sel.selectedIndex = 0; // primera opción: "Seleccione"
+    
+        // Vacía explícitamente los numéricos (por si tenían un valor por defecto)
+        ['meses', 'dias'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    
+        // Quita estados de validación de Bootstrap (si los usas)
+        frm.classList.remove('was-validated');
+        frm.querySelectorAll('.is-valid, .is-invalid').forEach(el => {
+          el.classList.remove('is-valid', 'is-invalid');
+        });
+    
+        // Opcional: enfoca el primer campo
+        document.getElementById('tipodoc_id')?.focus();
 	};
 	const TIPODOC_DOS_LETRAS_JS = {
 		1: 'CC', 2: 'CE', 3: 'NIT', 4: 'TI', 5: 'PA',
@@ -690,4 +1105,11 @@ try {
 		11: 'NITE', 12: 'NITPN', 13: 'RC', 14: 'NUIP', 15: 'PTP'
 	};
 
+</script>
+
+
+<script type="application/javascript">
+jQuery( document ).ready(function(){
+	listaAsignaciones();
+});
 </script>
