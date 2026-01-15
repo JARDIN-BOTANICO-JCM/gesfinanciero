@@ -453,6 +453,15 @@ class IndexCtrl extends Pagina {
 	 */
 	const API_EmpleadosMod = 'API_EmpleadosMod';
 	/**
+	 * Constante de endpoint API para operaciones de modificación de empleados edsde el home
+	 *
+	 * Esta constante define el identificador de endpoint utilizado para manejar
+	 * solicitudes de modificación de empleados en la API
+	 *
+	 * @const string API_EmpleadosHomeMod El endpoint de API para modificar empleados desde el home
+	 */
+	const API_EmpleadosHomeMod = 'API_EmpleadosHomeMod';
+	/**
 	 * Constante de endpoint API para gestionar empleados eliminados.
 	 * 
 	 * Esta constante define el identificador del endpoint de API utilizado para manejar
@@ -675,7 +684,17 @@ class IndexCtrl extends Pagina {
 	 */
 	const API_Bogdata_Consultar = 'API_Bogdata_Consultar';
 	// Cargadatos.phtml FIN
-
+	
+    /**
+     * Constante de endpoint de API para consultar los supervisores y apoyos
+     * 
+     * Esta constante define el identificador de endpoint utilizado para 
+     * listar los Supervisores y sus apoyos
+     * 
+     * @var string API_Usuarios_Asistentes_Helper El endpoint de API para consultar los supervisores y apoyos
+     */
+	const API_Usuarios_Asistentes_Helper = 'API_Usuarios_Asistentes_Helper';
+	
 	// Usuarios FIN
 
 	// Codigoactiva INI
@@ -1092,7 +1111,40 @@ class IndexCtrl extends Pagina {
 	const API_ApoyosGet = 'API_ApoyosGet';
 	const API_ApooyosHelperAdd = 'API_ApooyosHelperAdd';
 	const API_ApoyosDel = 'API_ApoyosDel';
+	const API_ApoyosGetHelperById = 'API_ApoyosGetHelperById';
+	const API_ApoyosGetHelperMisApoyo = 'API_ApoyosGetHelperMisApoyo';
 	// Apoyos FIN
+	
+	// Asignaciones INI
+	/*
+	 * @author yalfonso
+	 * TODO: Tarea 123 - Agregar constantes para accedar a la tabla Asignaciones para obtener ajax 
+	 */
+	const API_Asignaciones_Get_Helper_Ajax = 'API_Asignaciones_Get_Helper_Ajax';
+	/*
+	 * @author yalfonso
+	 * TODO: Tarea 126 - Agregar constantes para consultar en bogdata si el usuario existe y traer sus datos
+	 */
+	const API_Asignaciones_Helper_GetPre = 'API_Asignaciones_Helper_GetPre';
+	
+	/*
+	 * @author yalfonso
+	 * TODO: Tarea 130 - Agregar constantes para registrar datos en la tabla Asignaciones
+	 */
+	const API_Asignaciones_Helper_Agregar = 'API_Asignaciones_Helper_Agregar';
+	
+	/*
+	 * @author yalfonso
+	 * TODO: Tarea 132 - Agregar constantes para obtener las asignaciones por el id del empleado
+	 */
+	const API_Asignaciones_Helper_Get_By_EmplId = 'API_Asignaciones_Helper_Get_By_EmplId';
+	
+	/*
+	 * @author yalfonso
+	 * TODO: Tarea 136 - Agregar constantes para asignar empleados por empleados_id
+	 */
+	const API_Asignaciones_Helper_Add_By_EmplId = 'API_Asignaciones_Helper_Add_By_EmplId';
+	// Asignaciones FIN
 
 	// Reflista INI
 	/**
@@ -1540,6 +1592,17 @@ class IndexCtrl extends Pagina {
 					}
 					die("");
 				}
+				if ($_POST["ajax"] == md5(self::API_EmpleadosHomeMod)) {
+				    try {
+				        $_POST["home"] = true;
+				        $ok = OperacionesCtrl::Empleados_Helper_Modificar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
 				if ($_POST["ajax"] == md5(self::API_EmpleadosRm)) {
 					try {
 						$ok = OperacionesCtrl::Empleados_Eliminar($_POST);
@@ -1776,6 +1839,17 @@ class IndexCtrl extends Pagina {
 						echo json_encode($er);
 					}
 					die("");
+				}
+				
+				if ($_POST["ajax"] == md5(self::API_Usuarios_Asistentes_Helper)) {
+				    try {
+				        $ok = OperacionesCtrl::usuarios_Obtener_Asignaciones_Helper( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
 				}
 				// Cargadatos.phtml FIN
 
@@ -2381,7 +2455,80 @@ class IndexCtrl extends Pagina {
 				    }
 				    die("");
 				}
+				if ( $_POST["ajax"] == md5(self::API_ApoyosGetHelperById) ) {
+				    try {
+				        $ok = OperacionesCtrl::apoyos_Obtener_Por_Id_Helper($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5(self::API_ApoyosGetHelperMisApoyo) ) {
+				    try {
+				        $ok = OperacionesCtrl::apoyos_Helper_Mis_Apoyos($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
 				// Apoyos FIN
+				
+				// Asignaciones INI
+				if ( $_POST["ajax"] == md5( self::API_Asignaciones_Get_Helper_Ajax ) ) {
+				    try {
+				        $ok = OperacionesCtrl::asignaciones_Obtener_Helper_Ajax( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_Asignaciones_Helper_GetPre ) ) {
+				    try {
+				        $ok = OperacionesCtrl::asignaciones_Helper_Obtener_Coincidencias( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_Asignaciones_Helper_Agregar ) ) {
+				    try {
+				        $ok = OperacionesCtrl::asignaciones_Helper_Agregar( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_Asignaciones_Helper_Get_By_EmplId) ) {
+				    try {
+				        $ok = OperacionesCtrl::asignaciones_Helper_Obtener_By_Empleados_Id( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_Asignaciones_Helper_Add_By_EmplId) ) {
+				    try {
+				        $ok = OperacionesCtrl::asignaciones_Helper_Agregar_By_Empleados_Ids( $_POST );
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Asignaciones FIN
 
 				if ($_POST["ajax"] == md5(self::API_PaquetesAdminReg_Helper_Add)) {
 					try {

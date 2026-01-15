@@ -1,8 +1,22 @@
 <?php
 use src\sistema\Menubar\Menubar;
 use src\sistema\Headerbar\Headerbar;
+use PhpOffice\PhpSpreadsheet\Style\Supervisor;
 
 $usu = OperacionesCtrl::authRequ();
+// Esta variable almacena si es supervisor o no
+$essupervisor = $usu->getSupervisor();
+
+/*
+ * TODO: Tarea 131 - Debe consultar quienes son los apoyos para ver los usuarios asignados
+ */ 
+$l_apoyos = [];
+try {
+    $l_apoyos = OperacionesCtrl::apoyos_Obtener_Por_Id_Helper( [ "data" => base64_encode( json_encode( [ 'supervisor_id' => $usu->getId() ] ) ) ] );
+} catch (Exception $e) {
+    throw $e;
+}
+$idempleados = array_column( $l_apoyos, 'empleados_id') ;
 
 $l_flujositems = array();
 try {
@@ -23,6 +37,26 @@ $paraRevisar = [];
 foreach ($l_flujositems as $kFluI ) {
     $paraRevisar[] = $kFluI['id'];
 }
+
+if ( !$essupervisor ) {
+    try {
+        $misuper = OperacionesCtrl::apoyos_Obtener([ "asignado_id" => $usu->getId() ]);
+    } catch (Exception $e) {
+        throw $e;
+    }
+    foreach ( $misuper as $kMisup ) {
+        $paraRevisar[] = $kMisup['supervisor_id'];
+    }
+    
+    $supervi = 0;
+    foreach ( $idempleados as $kIdE ) {
+        $supervi = $kIdE;
+    }
+    $paraRevisar[] = $supervi;
+}
+
+//die( "apoyos: <pre>" . print_r( $l_apoyos, true ) );
+
 ?>
 <div id="db-wrapper" class="">
     <!-- navbar vertical -->
@@ -106,6 +140,7 @@ foreach ($l_flujositems as $kFluI ) {
 
 let idMod = null;
 
+const d_idempleados = <?php echo json_encode( $idempleados ); ?>;
 const d_paraRevisar = <?php echo json_encode( $paraRevisar ); ?>;
 const d_paquetesestados_id = <?php echo json_encode( $l_paquetesestados_id ); ?>;
 
@@ -128,6 +163,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	let nextid = 0;
 	
 	let indexCom = 0;
+	
+	let asignadosCache = {};
 	
 	const TIPODOCS_SIGNS = 0;
 	const TIPODOCS_PACKS = 1;
@@ -302,7 +339,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         
         const laExt = ("" + filei['extension'] ).toLowerCase();
         
-<?php // TOOO: Tarea 87 - Agregar soporte de documentos tipo imagen, pdf y textos ?>
+<?php // TODO: Tarea 87 - Agregar soporte de documentos tipo imagen, pdf y textos ?>
         if( laExt == "pdf" ){
         	_html.push( '			<iframe src="' + _urlpdf + '#toolbar=1" style="width:100%; height:100%; border:none;"  allowfullscreen ></iframe>' );
         }
@@ -1065,7 +1102,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	const rol3FormHtml = function() {
 		const html = [];
 		html.push('<div class="mt-3">');
-		html.push('  <h4 class="mb-2">Creación de Terceros</h4>');
+		html.push('  <h4 class="mb-2">Creaci&oacute;n de Terceros</h4>');
 		html.push('  <form id="frmter" class="row g-3 frmtercls ">');
 
 		html.push('    <div class="col-md-5">');
@@ -1203,6 +1240,14 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 	d.columns[ 6 ]['search']['value'] = [ 2, 5 ];
                 	if( d_paraRevisar.length > 0 ){
                 		d.columns[ 4 ]['search']['value'] = d_paraRevisar;
+<?php                   if( !$essupervisor ) : ?>
+						if( d_idempleados.length ){
+							d.columns[ 8 ]['search']['value'] = d_idempleados;
+						}
+						else{
+							d.columns[ 8 ]['search']['value'] = [ -1 ];
+						}
+<?php                   endif;?>
                 	}
                 	else{
                 		d.columns[ 4 ]['search']['value'] = 0;
@@ -1264,6 +1309,20 @@ const Requerimientos = function( dC ){ // dC = data constructor
         		},
                 { 'title' : 'Plantilla', data: 'flujos_id', visible : false  },
                 { data: 'empleados_id', visible : false },
+        		{ 
+        			'title' : 'Asignado a', 
+        			data: null, 
+        			visible : true,
+        			render : function(data, type, row){
+        				let txt = '<span class="asignado" data-id="0">Nadie</span>';
+        				if (Object.hasOwnProperty.call( data, 'empleados_id' ) ) {
+            				if ( data['empleados_id'] > 0 ) {
+                            	txt = `<button class="btn btn-sm btn-link p-0 asignado" data-empl="${data['empleados']}" data-id="${data['empleados_id']}" onclick="reqs.reasignarApoyoModal( this );"><strong class="text-danger">Nadie</strong></button>`;
+                        	}
+                    	}
+                    	return txt;
+        			}
+    			},
                 {
                     title: 'Acciones',
                     data: null,
@@ -1285,11 +1344,158 @@ const Requerimientos = function( dC ){ // dC = data constructor
             language: lengua_es,
             processing: true
         });
+        
+        
+        jQuery('#' + tableId).on('draw.dt', function () {
+        
+            let ids = [];
+        
+            jQuery('.asignado').each(function () {
+                let id = jQuery(this).data('id');
+                if (id > 0 && !asignadosCache[id]) {
+                    ids.push(id);
+                }
+            });
+        
+            if (ids.length === 0) {
+                return;
+            }
+
+    		const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_Asignaciones_Helper_Get_By_EmplId ); ?>');
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( ids ) ) );
+    		__TransportarData(
+    			form_data,
+    			function( oR ) {
+    			
+    				for (const key in oR) {
+                	    if (Object.hasOwnProperty.call( oR, key ) ) {
+                	        const _el = oR[key];
+                	        asignadosCache[ _el['empleados_id'] ] = _el;
+            	        }
+        	        }
+        
+                    jQuery('.asignado').each(function () {
+                        let el = jQuery(this);
+                        let id = el.data('id');
+        
+                        if (asignadosCache[id]) {
+                            el.text(asignadosCache[id]['usuarios_fullname']);
+                        }
+                    });
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			}
+    		);
+        });
 		
+	};
+	
+	_this.reasignarApoyo = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const target = jQuery( dt['target'] );
+		const datas = { 'empleados_id' : dt['empleados_id'], 'usuarios_id' : target.val() };
+		
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_Asignaciones_Helper_Add_By_EmplId ); ?>');
+		form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( datas ) ) );
+
+		__TransportarData(
+			form_data,
+  			function ( data ) {
+  				_this.recargarTabla();
+  				closeAllModal();
+  			},
+			function (err) {
+				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html(err.responseText);
+
+				jQuery(objmdlErr).modal('show');
+				//setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+	};
+	
+	_this.reasignarApoyoModal = function( o  ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const empl = dt['empl'];
+		const gblId = 'mdl_' + tableId;
+		
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_ApoyosGetHelperMisApoyo ); ?>');
+
+		__TransportarData(
+  			form_data,
+  			function ( data ) {
+  				const html = [];
+        		html.push('<div id="' + gblId + '" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="tit_' + tableId + '" aria-hidden="true" >');
+        		html.push('	<div class="modal-dialog modal-dialog-scrollable">');
+        		html.push('		<div class="modal-content">');
+        		html.push('			<div class="modal-header">');
+                html.push('				<h5 id="tit_' + tableId + '" class="modal-title">Asignar apoyo a ' + empl + '</h5>');
+                html.push('				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>');
+              	html.push('			</div>');
+              	html.push('			<div class="modal-body">');
+                html.push('				<div class="row ">');
+                html.push('					<div class="col-md-12 col-12 mb-3">');
+                html.push('						<div class="form-floating mb-3">');
+        		html.push('							<select class="form-select" id="tpd_' + tableId + '" aria-label="Lista de apoyos">');
+        		html.push('								<option value="" disabled="disabled" selected="selected">Seleccione un apoyo</option>');
+        		for (const key in data) {
+            	    if (Object.hasOwnProperty.call( data, key ) ) {
+            	        const _el = data[key];
+            			html.push('								<option value="' + _el['asignado_id'] + '">' + _el['asignado'] + '</option>');
+        	        }
+    	        }
+        		html.push('							</select>');
+        		html.push('							<label for="tpd_' + tableId + '">Listado de apoyos</label>');
+        		html.push('						</div>');
+              	html.push('					</div>');
+              	html.push('				</div>');
+              	html.push('			</div>');
+              	html.push('			<div class="modal-footer">');
+                html.push('				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>');
+                html.push('				<button type="button" class="btn btn-primary" data-target="#tpd_' + tableId + '" data-empleados_id=' + dt['id'] + ' onclick="reqs.reasignarApoyo( this );" >Guardar asignaciones</button>');
+              	html.push('			</div>');
+            	html.push('		</div>');
+          		html.push('	</div>');
+        		html.push('</div>');
+        		
+        		if( jQuery( "#" + gblId ).length ){
+        			jQuery( "#" + gblId ).remove();
+        		}
+        		
+        		const oModal = jQuery( html.join('') );
+        		oModal.modal('show');
+  			},
+			function (err) {
+				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html(err.responseText);
+
+				jQuery(objmdlErr).modal('show');
+				//setTimeout(function () { jQuery(objmdl).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
 	};
 	
     _this.recargarTabla = function () {
         if ( tbInter ) {
+        	asignadosCache = {};
 			tbInter.ajax.reload(null, false);
         }
     };

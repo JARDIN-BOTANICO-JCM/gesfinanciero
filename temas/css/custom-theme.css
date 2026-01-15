@@ -1,6 +1,6 @@
 .admin-theme {
   --bs-primary: #8CBE23;
-  --bs-secondary: #bed481 ;
+  --bs-secondary: #828d65 ;
   --bs-dark: #3B672C;
   
   --bs-light-primary: #D4E2AD;
@@ -426,12 +426,6 @@
 .navbar-light .navbar-nav .nav-item .nav-link.active,
 .navbar-light .navbar-nav .nav-item .nav-link:hover {
   color: var(--bs-dark) !important;
-}
-
-.sidenav.navbar .navbar-nav .nav-item.active {
-  background-color: var(--bs-light-primary);
-  border-radius: 0.5rem;
-  color: var(--bs-primary) !important;
 }
 
 .navbar-vertical .navbar-nav .nav-item .nav-link.active {

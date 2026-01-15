@@ -426,12 +426,12 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		}
 		
 		const formu = [];
-		formu.push('<form id="frmval" class="frmvalcls">');
+		formu.push('<form id="frmval" class="frmvalobjcls">');
 		formu.push( html.join('') );
-		formu.push('	<div class="d-grid gap-2">');
-		formu.push('		<button data-formid="frmvalcls" onclick="reqs.guardaFormulario( this );" class="btn btn-primary" type="button" rol="button" >Guardar formularios y generar documentos</button>');
-		formu.push('	</div >');
 		formu.push('</form >');
+		formu.push('	<div class="d-grid gap-2">');
+		formu.push('		<button type="button" data-formid="frmvalobjcls" onclick="reqs.guardaFormulario( this );" class="btn btn-primary" >Guardar formularios y generar documentos</button>');
+		formu.push('	</div >');
 		
 		return formu.join('');
 	};

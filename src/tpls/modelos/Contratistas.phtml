@@ -31,6 +31,15 @@ try {
 } catch (\Throwable $th) {
     throw new \Exception( $th->getMessage() );
 }
+
+// TODO: Tarea 113 - Obtener el listado de dependencias en Contratistas.phtml
+$d_dependencias = null;
+try {
+    $d_dependencias = OperacionesCtrl::dependencias_Obtener([]);
+} catch (Exception $e) {
+    throw new \Exception( $th->getMessage() , $e->getCode());
+}
+
 $columnas = array(
     'id' => array('lbl' => 'Id', 'visible' => 'true'),
     'tipodoc_id' => array('lbl' => 'tipodoc_id', 'visible' => 'false'),
@@ -318,8 +327,7 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                 <div class="row">
                     <div class="mb-3 col-md-6">
                         <label class="form-label" for="empleadosdetallescontrato_meses">Meses</label>
-                        <input type="text" class="form-control" placeholder="Meses" 
-                        id="empleadosdetallescontrato_meses" name="empleadosdetallescontrato_meses" >
+                        <input type="text" class="form-control" placeholder="Meses" id="empleadosdetallescontrato_meses" name="empleadosdetallescontrato_meses" >
                     </div>
                     <div class="mb-3 col-md-6">
                         <label class="form-label" for="empleadosdetallescontrato_dias">D&iacute;as</label>
@@ -329,20 +337,32 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                 <div class="row">
                     <div class="mb-3 col-md-6">
 						<label for="fechainicio" class="form-label">Fecha de inicio</label>
-						<input type="date" class="form-control" id="fechainicio" name="fechainicio" required
-								placeholder="Fecha de inicio">
+						<div class="input-group me-3  ">
+							<input type="text" class="form-control" id="fechainicio" name="fechainicio" required placeholder="Fecha de inicio">
+						</div>
 					</div>
 					<div class="mb-3 col-md-6">
 						<label for="fileactaini" class="form-label">Acta de inicio</label>
-						<input
-							required
-							accept=".pdf,application/pdf" type="file" 
-							class="form-control" id="fileactaini" 
-							name="fileactaini"
-							id="fileactaini"
-							placeholder="Acta de inicio">
+						<input required accept=".pdf,application/pdf" type="file" class="form-control" id="fileactaini" name="fileactaini" id="fileactaini" placeholder="Acta de inicio">
 					</div>
                 </div>
+                
+<?php // TODO: Tarea 112 - Agregar el select para la lista de dependencias en Contratistas.phtml ?>
+                <div class="row">
+                	
+                	<div class="mb-3 col-md-6">
+                        <label class="form-label" for="contrato">No. Contrato</label>
+                        <input type="text" class="form-control" placeholder="No. de contrato" id="contrato" name="contrato" >
+                    </div>
+                    <div class="mb-3 col-md-6">
+						<label for="dependencias_id" class="form-label">Dependencia</label>
+						<select class="form-select" aria-label="Default select example" id="dependencias_id" name="dependencias_id" >
+<?php                   foreach( $d_dependencias as $v ) : ?>
+                            <option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
+<?php                   endforeach; ?>
+						</select>
+					</div>
+				</div>
 
             </div>
         </div>
@@ -564,8 +584,10 @@ var btnAddRegistro = function ( ) {
 
     jQuery('#capafoto').remove();
 
-    const nacimiento_time = jQuery('#nacimiento').flatpickr({
-        static: true
+    const nacimiento_time = jQuery('#nacimiento,#fechainicio').flatpickr({
+        static: true,
+        enableTime: false,
+        dateFormat: "Y-m-d"
     });
     
 	jQuery("#acureg").show();
@@ -735,8 +757,10 @@ const btnModRegistro = function ( o ) {
     tablaAcudientes();
     jQuery("#acurlist").show();
     
-    const nacimiento_time = jQuery('#nacimiento').flatpickr({
-        static: true
+    const nacimiento_time = jQuery('#nacimiento,#fechainicio').flatpickr({
+        static: true,
+        enableTime: false,
+        dateFormat: "Y-m-d"
     });
 
     var form_data = new FormData();
@@ -768,6 +792,14 @@ const btnModRegistro = function ( o ) {
                                 }
                                 else if ( key == 'loc_lugares' ) {
                                 	jQuery('#loc_lugares_id_livesearch').val( _elDiv );
+                                }
+                                else if ( key == 'fechainicio' || key == 'nacimiento' ){
+                                	const txt = ( "" + _elDiv).split(' ');
+                                	
+                                	const fp = document.querySelector('#' + key)._flatpickr;
+                                    fp.set('dateFormat', 'Y-m-d');
+                                    fp.set('enableTime', false);
+                                    fp.setDate( txt[0] );
                                 }
                                 else if ( key == 'foto' ) {
                                     if( ("" + _elDiv).length > 0 ){
@@ -842,6 +874,10 @@ const actualizar = function(){
 					form_data.append( k , _el);
 				}
 			}
+		}
+		
+		if (jQuery('#fileactaini').prop('files').length > 0) {
+			form_data.append('fileactaini', jQuery('#fileactaini').prop('files')[0]);
 		}
 
 		__TransportarData(

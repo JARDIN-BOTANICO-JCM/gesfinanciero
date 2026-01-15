@@ -3047,9 +3047,15 @@ class OperacionesCtrl {
 	        }
 	    }
 	    
-	    $supervisor = '';
+	    $supervisor = '0';
 	    if ( isset( $d['supervisor'] ) ) {
 	        $supervisor = $d['supervisor'];
+	    }
+	    
+	    // TODO: Tarea 114 - Controlar la variable dependencias_id para permitir su insercion
+	    $dependencias_id = '1';
+	    if ( isset( $d['dependencias_id'] ) ) {
+	        $dependencias_id = $d['dependencias_id'];
 	    }
 	    
 		$_d = array(
@@ -3078,7 +3084,8 @@ class OperacionesCtrl {
 		    'salariomes' => $_salariomes,
 		    'contratoini' => $_contratoini,
 		    'contratofin' => $_contratofin,
-		    'supervisor' => $supervisor
+		    'supervisor' => $supervisor,
+		    'dependencias_id' => $dependencias_id
 		);
 
 		$idUsr = null;
@@ -3170,21 +3177,25 @@ class OperacionesCtrl {
 			 *   3. Usa la variable $idUsr para el campo empleados_id  
 			 */
 			
-				if (isset($d['empleadosdetallescontrato_meses']) && isset($d['empleadosdetallescontrato_dias']) || isset($d['fechainicio']) && isset($d['fileactaini'])) {
-					$payload = array(
-						'empleados_id' => $idUsr['id'],
-						'meses' => intval($d['empleadosdetallescontrato_meses']),
-						'dias'  => intval($d['empleadosdetallescontrato_dias']),
-						'fechainicio' => $d['fechainicio'] ?? null,
-						'fileactaini' => $d['fileactaini'] ?? null
-					);
-
-					try {
-						self::empleadosdetallescontrato_Agregar($payload);
-					} catch (\Throwable $th) {
-						throw new \Exception('mnguserAdd_Helper - empleadosdetallescontrato_Agregar: ' . $th->getMessage());
-					}
+			if (isset($d['empleadosdetallescontrato_meses']) && isset($d['empleadosdetallescontrato_dias']) || isset($d['fechainicio']) && isset($d['fileactaini'])) {
+				$payload = array(
+					'empleados_id' => $idUsr['id'],
+					'meses' => intval($d['empleadosdetallescontrato_meses']),
+					'dias'  => intval($d['empleadosdetallescontrato_dias']),
+					'fechainicio' => $d['fechainicio'] ?? '1900-01-01 00:00:00'
+				);
+				if ( isset( $_FILES['fileactaini'] ) ) {
+				    if ( isset( $_FILES['filename'] ) ) {
+				        $payload['fileactaini'] = $d['fileactaini'];
+				    }
 				}
+
+				try {
+					self::empleadosdetallescontrato_Agregar($payload);
+				} catch (\Throwable $th) {
+					throw new \Exception('mnguserAdd_Helper - empleadosdetallescontrato_Agregar: ' . $th->getMessage());
+				}
+			}
 			
 			
 			foreach ( $d as $anId => $anVl ) {
@@ -3461,9 +3472,21 @@ class OperacionesCtrl {
 	 *                   ocurridos al procesar/guardar el detalle del contrato.
 	 */
 	public static function empleados_Helper_Modificar( $d ){
+	    self::authRequOff();
 	    $r = null;
+	    
+	    $cfg = $d;
+	    
+	    if ( isset( $d['home'] ) ) {
+	        if ( $d['home'] ) {
+	            $dtB64Dec = base64_decode( $d['key'] );
+	            $json = json_decode( $dtB64Dec , true );
+	            
+	            $cfg = $json;
+	        }
+	    }
 	    try {
-	        self::empleados_Modificar($d);
+	        self::empleados_Modificar($cfg);
 	    } catch (Exception $e) {
 	        throw $e;
 	    }
@@ -3482,20 +3505,23 @@ class OperacionesCtrl {
 		if ( isset($d['empleadosdetallescontrato_meses']) || isset($d['empleadosdetallescontrato_dias']) || isset($d['fechainicio']) || isset($d['fileactaini']) ) {
 			try {
 				$detalleContrato = array(
-				'documento' => $d['documento'],
-				'tipodoc_id' => $d['tipodoc_id'],
-				'meses' => isset($d['empleadosdetallescontrato_meses']) ? intval($d['empleadosdetallescontrato_meses']) : 0,
-				'dias' => isset($d['empleadosdetallescontrato_dias']) ? intval($d['empleadosdetallescontrato_dias']) : 0,
-				'empleados_id' => $d['id'],
-				'fechainicio' => $d['fechainicio'] ?? null,
-				'fileactaini' => $d['fileactaini'] ?? null
-			);
-
-			$payload = [
-				'data' => base64_encode(
-					json_encode($detalleContrato, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)
-				)
-			];
+    				'documento' => $d['documento'],
+    				'tipodoc_id' => $d['tipodoc_id'],
+    				'meses' => isset($d['empleadosdetallescontrato_meses']) ? intval($d['empleadosdetallescontrato_meses']) : 0,
+    				'dias' => isset($d['empleadosdetallescontrato_dias']) ? intval($d['empleadosdetallescontrato_dias']) : 0,
+    				'empleados_id' => $d['id'],
+    				'fechainicio' => $d['fechainicio'] ?? null,
+    				'fileactaini' => $d['fileactaini'] ?? null
+    			);
+    			if ( isset( $d['contrato'] ) ) {
+    			    $detalleContrato['contrato'] = $d['contrato'] ;
+    			}
+    
+    			$payload = [
+    				'data' => base64_encode(
+    					json_encode($detalleContrato, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)
+    				)
+    			];
 
 				self::empleadosdetallescontrato_Helper_Agregar($payload);
 			} catch (\Throwable $th) {
@@ -4099,7 +4125,8 @@ class OperacionesCtrl {
 		$vr .= "edc.meses as empleadosdetallescontrato_meses, ";
 		$vr .= "edc.dias as empleadosdetallescontrato_dias, ";
 		$vr .= "edc.fileactaini as fileactaini,";
-		$vr .= "edc.fechainicio as fechainicio ";
+		$vr .= "edc.fechainicio as fechainicio, ";
+		$vr .= "edc.contrato ";
 
 		$tb  = '`empleados` as empl ';
 		
@@ -4131,6 +4158,15 @@ class OperacionesCtrl {
 		if( isset( $d['w_documento'] ) ){
 		    $wh[] = "empl.`documento` = ?";
 		    $pr[] = $d['w_documento'];
+		}
+		if( isset( $d['w_documentos'] ) ){
+		    $ids = $d['w_documentos'];
+		    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+		    $wh[] = "empl.`documento` IN (" . $placeholders . ")";
+		    
+		    foreach ( $ids as $vPr ) {
+		        $pr[] = $vPr;
+		    }
 		}
 		if( isset( $d['w_tipodoc_id'] ) ){
 		    $wh[] = "empl.`tipodoc_id` = ?";
@@ -4458,6 +4494,13 @@ class OperacionesCtrl {
 	                    $idMngUsr = self::mnguserAdd_Helper( $nwU , self::USUARIOS_PERFIL_EMPLEADOS );
 	                } catch (Exception $e) {
 	                    $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - mnguserAdd_Helper: ' . $e->getMessage() );
+	                    throw new Exception( json_encode( $msjr ), $e->getCode() );
+	                }
+	                
+	                try {
+	                    self::asignaciones_Modificar( [ 'empleados_id' => $idMngUsr['id'], 'w_documento' => $identif, 'w_tipodoc_id' => $tipodoc_id, 'actualizatercero' => false ] );
+	                } catch (Exception $e) {
+	                    $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - asignaciones_Modificarv: ' . $e->getMessage() );
 	                    throw new Exception( json_encode( $msjr ), $e->getCode() );
 	                }
 	                
@@ -6286,6 +6329,54 @@ class OperacionesCtrl {
 	    
 	    return true;
 	    
+	}
+	
+	/**
+	 * @author yalfonso
+	 * 
+	 * TODO: Tarea 124 - Agregar una función usuarios_Obtener_Asignaciones_Helper que liste los supervisores y apoyos en un mismo arreglo
+	 * 
+	 * @throws Exception
+	 * @return mixed|array[]
+	 */
+	public static function usuarios_Obtener_Asignaciones_Helper( $d ) {
+	    $sups = [];
+	    try {
+	        $sups = self::usuarios_Obtener( [ 'w_supervisor' => 1 ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'usuarios_Obtener_Asignaciones_Helper - usuarios_Obtener: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    $idsSups = [];
+	    $lista = [];
+	    foreach ($sups as $kSup) {
+	        if ( $kSup['estado_id'] == 1 ) {
+	            $lista[ $kSup['id'] ] = [
+	                "id" => $kSup['id'],
+	                "nombres" => $kSup['nombres'],
+	                "apellidos" => $kSup['apellidos'],
+	                "apoyos" => []
+	            ];
+	            $idsSups[] = $kSup['id'];
+	        }
+	    }
+	    
+	    $lsapoyos = [];
+	    try {
+	        $lsapoyos = self::apoyos_Obtener( [ 'w_supervisor_ids' => $idsSups ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'usuarios_Obtener_Asignaciones_Helper - apoyos_Obtener: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    foreach ( $lsapoyos as $kLs ) {
+	        if ( isset( $lista[ $kLs['supervisor_id'] ] ) ) {
+	            $lista[ $kLs['supervisor_id'] ]['apoyos'][] = $kLs;
+	        }
+	    }
+	    
+	    return $lista;
 	}
 	
 	// Usuarios FIN
@@ -12088,6 +12179,15 @@ EOD;
 	        $wh[] = "flui.`usuarios_id` = ?";
 	        $pr[] = $d['w_usuarios_id'];
 	    }
+	    if( isset( $d['w_usuarios_ids'] ) ){
+	        $ids = $d['w_usuarios_ids'];
+	        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+	        $wh[] = "flui.`usuarios_id` IN (" . $placeholders . ")";
+	        
+	        foreach ( $ids as $vPr ) {
+	            $pr[] = $vPr;
+	        }
+	    }
 	    
 	    $defWh = "";
 	    if ( count( $wh ) > 0 ) {
@@ -12110,7 +12210,7 @@ EOD;
 	    $xt  = $jn . $defWh . $orden . $limite;
 	    
 	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
-	    //die( $sql );
+	    //die( $sql . "<br>" . print_r($pr, true) );
 	    $r = array();
 	    try {
 	        $r = Singleton::_safeRawQuery($sql, $pr);
@@ -12150,11 +12250,24 @@ EOD;
 	        'ordenasc' => 6
 	    );
 	    
-	    $ladata = self::paquetesrequ_Obtener( [ 'w_paquetes_id' => $json['id'] ] );
+	    $ladata = [];
+	    try {
+	        $ladata = self::paquetesrequ_Obtener( [ 'w_paquetes_id' => $json['id'] ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'flujositems_Helper_Obtener - paquetesrequ_Obtener:' . $e->getMessage() , $e->getCode() );
+	    }
 	    
 	    $obligacionesres = [];
 	    
-	    $r = self::flujositems_Obtener( $cfg );
+	    $r = [];
+	    try {
+	        $r = self::flujositems_Obtener( $cfg );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'flujositems_Helper_Obtener - flujositems_Obtener:' . $e->getMessage() , $e->getCode() );
+	    }
+	    
 	    $requerimientostpls_id = 0;
 	    $flujos_id = 0;
 	    foreach ( $r as $kR ) {
@@ -12163,10 +12276,21 @@ EOD;
 	    }
 	    $t = array();
 	    if ( $requerimientostpls_id > 0 ) {
-	        $t = self::requerimientostplsitems_Obtener( array( 'w_requerimientostpls_id' => $requerimientostpls_id, 'ordenasc' => 1 ) );
+	        try {
+	            $t = self::requerimientostplsitems_Obtener( array( 'w_requerimientostpls_id' => $requerimientostpls_id, 'ordenasc' => 1 ) );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            throw new Exception( 'flujositems_Helper_Obtener - requerimientostplsitems_Obtener:' . $e->getMessage() , $e->getCode() );
+	        }
 	    }
 	    //die( "t: " . print_r( $t, true ) );
-	    $todoelflujo = self::flujositems_Obtener( [ 'w_flujos_id' => $flujos_id, 'ordenasc' => 6 ] );
+	    $todoelflujo = [];
+	    try {
+	        $todoelflujo = self::flujositems_Obtener( [ 'w_flujos_id' => $flujos_id, 'ordenasc' => 6 ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'flujositems_Helper_Obtener - flujositems_Obtener:' . $e->getMessage() , $e->getCode() );
+	    }
 	    
 	    $tDef = array();
 	    foreach ( $t as $kT ) {
@@ -12175,7 +12299,13 @@ EOD;
 	            
 	            $jsonFrm = [];
 	            if ( isset( $tempData['id'] ) ) {
-	                $jsonFrm = self::formularios_Obtener( array( 'id' => $tempData['id'] ) );
+	                $jsonFrm = [];
+	                try {
+	                    $jsonFrm = self::formularios_Obtener( array( 'id' => $tempData['id'] ) );
+	                } catch (Exception $e) {
+	                    http_response_code( $e->getCode() );
+	                    throw new Exception( 'flujositems_Helper_Obtener - formularios_Obtener:' . $e->getMessage() , $e->getCode() );
+	                }
 	                
 	                foreach ( $jsonFrm as $vJson ) {
 	                    $kT['descripcion'] = [ 'titulo' => $vJson['titulo'], 'descripcion' => $vJson['descripcion'], 'json' => $vJson['json'] ];
@@ -12187,8 +12317,13 @@ EOD;
 	            
 	        }
 	        else if ( $kT['paquetereqtipos_id'] == 7 ) {
-	            $jsObj = self::empleadosobjetivos_Obtener( [ 'w_empleados_id_md5' => $uDt['id'] , 'ordenasc' => 1 ] );
-	            
+	            $jsObj = [];
+	            try {
+	                $jsObj = self::empleadosobjetivos_Obtener( [ 'w_empleados_id_md5' => $uDt['id'] , 'ordenasc' => 1 ] );
+	            } catch (Exception $e) {
+	                http_response_code( $e->getCode() );
+	                throw new Exception( 'flujositems_Helper_Obtener - empleadosobjetivos_Obtener:' . $e->getMessage() , $e->getCode() );
+	            }
 	            //die( "jsObj:\n" . print_r( $jsObj, true ) );
 	            
 	            $kT['descripcion'] = [ 'titulo' => 'Obligaciones', 'descripcion' => 'Carga la informaci&oacute;n y evidencias de tus avances', 'json' => $jsObj ];
@@ -12196,11 +12331,18 @@ EOD;
 	            
 	            $tDef[] = $kT;
 	            
-	            $tempobl = self::empleadosobjetivoslog_Obtener([
-	                "w_empleados_id_md5" => $uDt['id'],
-	                "w_requerimientostplsitems_id" => $kT['id'],
-	                'w_paquetes_id' => $json['id']
-	            ]);
+	            $tempobl = [];
+	            try {
+	                $tempobl = self::empleadosobjetivoslog_Obtener([
+	                    "w_empleados_id_md5" => $uDt['id'],
+	                    "w_requerimientostplsitems_id" => $kT['id'],
+	                    'w_paquetes_id' => $json['id']
+	                ]);
+	            } catch (Exception $e) {
+	                http_response_code( $e->getCode() );
+	                throw new Exception( 'flujositems_Helper_Obtener - empleadosobjetivoslog_Obtener:' . $e->getMessage() , $e->getCode() );
+	            }
+	            
 	            foreach ($tempobl as $kTmp) {
 	                $obligacionesres[] = [
 	                    'archivos' => $kTmp['archivos'],
@@ -12221,7 +12363,16 @@ EOD;
 	    
 	    // TODO: Tarea 92 - Obtener los comentarios de los archivos subidos en formularios
 	    $idcomms = array_column( $ladata, 'id');
-	    $comenfrm = self::paquetesreqcomentarios_Obtener( [ 'w_paquetesrequ_ids' => $idcomms ] );
+	    //die( "idcomms:<br>" . print_r( $idcomms , true ) );
+	    $comenfrm = [];
+	    if ( count( $idcomms ) > 0 ) {
+	        try {
+	            $comenfrm = self::paquetesreqcomentarios_Obtener( [ 'w_paquetesrequ_ids' => $idcomms ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            throw new Exception( 'flujositems_Helper_Obtener - paquetesreqcomentarios_Obtener:' . $e->getMessage() , $e->getCode() );
+	        }
+	    }
 	    
 	    $arRes = array(
 	        'obli' => base64_encode( json_encode( $obligacionesres ) ),
@@ -12971,7 +13122,7 @@ EOD;
 	        $usu = self::authRequ();
 	    } catch (\Exception $e) {
 	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
-	        throw new \Exception( "empleadosdetallescontrato_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( "paquetes_Helper_MoverAdmin: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
 	    }
 	    
 	    $data = base64_decode( $d[ 'data' ] );
@@ -13586,6 +13737,7 @@ EOD;
 	    
 	    //$empleadosContract = [];
 	    if ( count( $empleados ) > 0 ) {
+	        
 	        $empleado = $empleados[0];
 	        //die( print_r( $empleado, true ) );
 	        //die( print_r( $json, true ) );
@@ -13618,6 +13770,7 @@ EOD;
 	        //echo "json:\n" . print_r( $json, true );
 	        //die( 'flujositems_flujos_id: ' . print_r( $flujositems_flujos_id , true ) );
 	        
+	        /*
 	        $addnuevo = true;
 	        $msjReturn = "Datos guardados con \xE9xito";
 	        if (count( $paquetesrequ_exists ) > 0 )
@@ -13625,6 +13778,8 @@ EOD;
 	            $addnuevo = false;
 	            $msjReturn = 'Actualizaci\xF3n exitosa';
 	        }
+	        */
+	        $msjReturn = (count($paquetesrequ_exists) > 0) ? 'Actualizaci\xF3n exitosa' : 'Datos guardados con \xE9xito';
 	        
 	        //echo "paquetesrequ_exists: ";
 	        //die( print_r( $paquetesrequ_exists , true ) );
@@ -13652,7 +13807,9 @@ EOD;
 	                            }
 	                        };
 	                        
-	                        if ( $paquetesrequ_id == 0 ) {
+	                        //if ( $paquetesrequ_id == 0 ) {
+	                        $esNuevo = ($paquetesrequ_id === 0);
+	                        if ($esNuevo) {
 	                            $regs = [
 	                                'ref' => '[obligaciones]',
 	                                'valor' => 'obligaciones',
@@ -13684,6 +13841,7 @@ EOD;
 	                    self::empleadosobjetivoslog_Helper_Agregar( $regsOb );
 	                }
 	            }
+	            
 	        }
 	        
 	        // Campos con funciones especificas
@@ -13713,6 +13871,8 @@ EOD;
 	                        'usuariomodifica' => trim((string)$empleado['nombres'] . ' ' . $empleado['apellidos']),
 	                        'perfilmodifica' => $empleado['perfil']
 	                    ];
+	                    
+	                    /*
 	                    if( $addnuevo ){
 	                        try {
 	                            self::paquetesrequ_Agregar( $regs );
@@ -13728,6 +13888,32 @@ EOD;
 	                                }
 	                            };
 	                            
+	                            $regs['id'] = $paquetesrequ_id;
+	                            try {
+	                                self::paquetesrequ_Modificar( $regs );
+	                            } catch (Exception $e) {
+	                                throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Modificar (campos): ' . $e->getMessage(), $e->getCode() );
+	                            }
+	                        }
+	                    }
+	                    */
+	                    $esNuevo = true;
+	                    foreach ($paquetesrequ_exists as $pkEx) {
+	                        if ($pkEx['ref'] === '[' . $formid . ']') {
+	                            $esNuevo = false;
+	                            $paquetesrequ_id = $pkEx['id'];
+	                            break;
+	                        }
+	                    }
+	                    
+	                    if ($esNuevo) {
+	                        try {
+	                            self::paquetesrequ_Agregar( $regs );
+	                        } catch (Exception $e) {
+	                            throw new Exception( 'paquetesrequ_Helper_Agregar - paquetesrequ_Agregar (campos): ' . $e->getMessage(), $e->getCode() );
+	                        }
+	                    } else {
+	                        if (strlen(trim((string)$valor)) > 1) {
 	                            $regs['id'] = $paquetesrequ_id;
 	                            try {
 	                                self::paquetesrequ_Modificar( $regs );
@@ -13763,11 +13949,15 @@ EOD;
 	                        $paquetesrequ_id = $pkEx['id'];
 	                    }
 	                };
+	                /*
 	                if ( $paquetesrequ_id == 0) {
 	                    $addnuevo = true;
 	                }
 	                
 	                if( $addnuevo ){
+	                */
+	                $esNuevo = ($paquetesrequ_id === 0);
+	                if ($esNuevo) {
 	                    try {
 	                        self::paquetesrequ_Agregar( $regs );
 	                    } catch (Exception $e) {
@@ -14025,6 +14215,8 @@ EOD;
 	 * TODO: Tarea 95 - Crear funci&oacute;n que controle cuando el contratista lee los comentarios
 	 */
 	public static function comentarios_Virtual_Helper_Agregar( $d ) {
+	    self::authRequOff();
+	    
 	    date_default_timezone_set('America/Bogota');
 	    $data = base64_decode( $d[ 'data' ] );
 	    $json = json_decode( $data, true );
@@ -14597,6 +14789,16 @@ EOD;
 		    $wh[] = "apoyos.`asignado_id` = ?";
 		    $pr[] = $d['asignado_id'];
 		}
+		if( isset( $d['w_supervisor_ids'] ) ){
+		    $ids = $d['w_supervisor_ids'];
+		    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+		    $wh[] = "apoyos.`supervisor_id` IN (" . $placeholders . ")";
+		    
+		    foreach ( $ids as $vPr ) {
+		        $pr[] = $vPr;
+		    }
+		}
+		
 		$defWh = "";
 		if ( count( $wh ) > 0 ) {
 		    $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
@@ -14801,7 +15003,640 @@ EOD;
 	    
 	    return self::retorno( [ "success" => true , 'idreg' => $idreg ], 0, '') ;
 	}
+	
+	/**
+	 * @author yalfonso
+	 *
+	 * TODO: Tarea 125 - Obtener los supervisores y apoyos desde el id del supervisor
+	 */
+	public static function apoyos_Obtener_Por_Id_Helper( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d['data'] );
+	    $json = json_decode( $data , true );
+	    
+	    $suprs = $json[ 'supervisor_id' ];
+	    $apoyos = [];
+	    try {
+	        $apoyos = self::apoyos_Obtener( [ 'supervisor_id' => $suprs ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'apoyos_Obtener_Por_Id_Helper - apoyos_Obtener:' . $e->getMessage() , $e->getCode() );
+	    }
+	    
+	    $ids = [];
+	    $ids[ $json['supervisor_id'] ] = $json['supervisor_id'];
+	    $primero = true;
+	    foreach ( $apoyos as $kAp ) {
+	        if ( $primero ) {
+	            $ids[ $kAp['supervisor_id'] ] = $kAp['supervisor_id'];
+	        }
+	        $primero = false;
+	        
+	        $ids[ $kAp['asignado_id'] ] = $kAp['asignado_id'];
+	    }
+	    //die( "ids:\n<br>" . print_r( $ids , true ) );
+	    $asignaciones = [];
+	    try {
+	        $asignaciones = self::asignaciones_Obtener( [ 'w_usuarios_ids' => $ids ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'apoyos_Obtener_Por_Id_Helper - asignaciones_Obtener' . $e->getMessage() , $e->getCode() );
+	    }
+	    
+	    return $asignaciones;
+	}
+	/**
+	 * @author yalfonso
+	 *
+	 * TODO: Tarea 135 - Crea una funcion para obtener mis apoyos
+	 */
+	public static function apoyos_Helper_Mis_Apoyos( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $rAp = [];
+	    try {
+	        $rAp = self::apoyos_Obtener( [ "supervisor_id" => $usu->getId() ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'apoyos_Helper_Mis_Apoyos - apoyos_Obtener' . $e->getMessage() , $e->getCode() );
+	    }
+	    
+	    return $rAp;
+	}
+	
 	// apoyos FIN
+	
+	// asignaciones INI
+	public static function asignaciones_Obtener_Helper_Ajax( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    return Singleton::_dataTable( array( 'tb' => 'asignaciones', 'codifica_a' => IndexCtrl::CHARS_TO, 'codifica_desde' => IndexCtrl::CHARS_FR ) );
+	}
+	
+	/**
+	 * TODO: Tarea 117 - Agregar la función que permite agregar registros a la tabla Asignaciones
+	 * Agrega un nuevo registro a la tabla "asignaciones" utilizando los datos proporcionados.
+	 * @param array $d Datos del apoyo (usuarios_id, empleados_id, etc.).
+	 * @return int ID del registro creado.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error al guardar
+	 */
+	public static function asignaciones_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $o = new Asignaciones();
+	    if (isset( $d['usuarios_id'] ) ) {
+	        $o->setUsuarios_id( $d['usuarios_id'] );
+	    }
+	    if (isset( $d['tipodoc_id'] ) ) {
+	        $o->setTipodoc_id( $d['tipodoc_id'] );
+	    }
+	    if (isset( $d['documento'] ) ) {
+	        $o->setDocumento( $d['documento'] );
+	    }
+	    if (isset( $d['empleados_id'] ) ) {
+	        $o->setEmpleados_id( $d['empleados_id'] );
+	    }
+	    $o->setAsignador_id( $usu->getId() );
+	    $o->setAsignador( $usu->getNombres() . " " . $usu->getApellidos() );
+	    $o->setFecha( date('Y-m-d H:i:s'));
+	    $o->setFechamodifica( date('Y-m-d H:i:s') );
+	    
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $o->obtenerError(), IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	}
+	
+	/**
+	 * TODO: Tarea 118 - Agregar la función que permite obtener registros de la tabla Asignaciones
+	 * Obtiene registros de la tabla "asignaciones" según los filtros proporcionados.
+	 * parametros esperados en $d:
+	 *  - 'id'              => filtra por id
+	 *  - 'w_usuarios_id'   => filtra por supervisor_id
+	 * 	- 'w_empleados_id'  => filtra por asignado_id
+	 *  - 'ordendesc'       => ordena los resultados de forma descendente
+	 *
+	 * @param array $d Filtros y opciones para la consulta.
+	 * @return mixed Resultado de la consulta.
+	 * @throws \Exception Si la sesión no está activa o si ocurre un error en la consulta SQL.
+	 */
+	public static function asignaciones_Obtener( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "asig.`id`, asig.`usuarios_id`, concat(usr.nombres, ' ', usr.apellidos) as usuarios_fullname, asig.tipodoc_id, ";
+	    $vr .= "asig.documento, asig.`empleados_id`, concat(emp.nombres, ' ', emp.apellidos) as empleados_fullname, asig.`asignador_id`, ";
+	    $vr .= "asig.`asignador`, asig.`fecha`, asig.`fechamodifica` ";
+	    
+	    $tb  = '`asignaciones` as asig ';
+	    
+	    $jn  = 'LEFT JOIN usuarios as usr on asig.usuarios_id = usr.id ';
+	    $jn .= 'LEFT JOIN empleados as emp on asig.empleados_id = emp.id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "asig.`id` = ?";
+	        $pr[] = $d['id'];
+	    }
+	    if( isset( $d['w_usuarios_id'] ) ){
+	        $wh[] = "asig.`usuarios_id` = ?";
+	        $pr[] = $d['w_usuarios_id'];
+	    }
+	    if( isset( $d['w_tipodoc_id'] ) ){
+	        $wh[] = "asig.`tipodoc_id` = ?";
+	        $pr[] = $d['w_tipodoc_id'];
+	    }
+	    if( isset( $d['w_usuarios_ids'] ) ){
+	        $ids = $d['w_usuarios_ids'];
+	        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+	        $wh[] = "asig.`usuarios_id` IN (" . $placeholders . ")";
+	        
+	        foreach ( $ids as $vPr ) {
+	            $pr[] = $vPr;
+	        }
+	    }
+	    if( isset( $d['w_documentos'] ) ){
+	        $ids = $d['w_documentos'];
+	        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+	        $wh[] = "asig.`documento` IN (" . $placeholders . ")";
+	        
+	        foreach ( $ids as $vPr ) {
+	            $pr[] = $vPr;
+	        }
+	    }
+	    if( isset( $d['w_empleados_id'] ) ){
+	        $wh[] = "asig.`empleados_id` = ?";
+	        $pr[] = $d['w_empleados_id'];
+	    }
+	    if( isset( $d['w_empleados_ids'] ) ){
+	        $ids = $d['w_empleados_ids'];
+	        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+	        $wh[] = "asig.`empleados_id` IN (" . $placeholders . ")";
+	        
+	        foreach ( $ids as $vPr ) {
+	            $pr[] = $vPr;
+	        }
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    
+	    //die( $sql );
+	    
+	    $r = Singleton::_safeRawQuery($sql, $pr);
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    return $r;
+	    
+	    
+	}
+	/**
+	 * TODO: Tarea 119 - Agregar la función que permite modificar registros a la tabla Asignaciones
+	 * Modifica registros en la tabla "asignaciones".
+	 * Puede actualizar los campos usuarios_id y empleados_id.
+	 * Es obligatorio indicar un filtro de actualización.
+	 * @param array $d Datos y filtros para la actualización. Claves aceptadas:
+	 * 			- Filtros: id
+	 * 			- Campos a actualizar: usuarios_id, empleados_id
+	 * @return mixed Resultado de la operación (por ejemplo, número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa, si no se proporciona un filtro
+	 * 				  para la actualización o si ocurre un error en la consulta SQL.
+	 */
+	public static function asignaciones_Modificar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb  = "asignaciones ";
+	    $aSt = array();
+	    if (isset( $d['usuarios_id'] ) ) {
+	        $aSt['usuarios_id'] = $d['usuarios_id'] ;
+	    }
+	    if (isset( $d['empleados_id'] ) ) {
+	        $aSt['empleados_id'] = $d['empleados_id'] ;
+	    }
+	    
+	    // Si el usuario se esta registrando no debe
+	    // actualizar los datos de asignador ya que 
+	    // nadie lo esta asignando a un supervisor o apoyo
+	    $actualizatercero = true;
+	    if ( isset( $d['actualizatercero'] ) ) {
+	        if( $d['actualizatercero'] ){
+	            $actualizatercero = $d['actualizatercero'];
+	        }
+	    }
+	    if ($actualizatercero) {
+	        $aSt['asignador_id'] = $usu->getId();
+	        $aSt['asignador'] = $usu->getNombres() . " " . $usu->getApellidos();
+	        $aSt['fechamodifica'] = date('Y-m-d H:i:s');
+	    }
+	    
+	    $pr = [];
+	    $wh  = [];
+	    if ( isset( $d['id'] ) ) {
+	        $wh[]  = 'id = ?';
+	        $pr[] = $d['id'];
+	    }
+	    if ( isset( $d['w_documento'] ) ) {
+	        $wh[]  = 'documento = ?';
+	        $pr[] = $d['w_documento'];
+	    }
+	    if ( isset( $d['w_tipodoc_id'] ) ) {
+	        $wh[]  = 'tipodoc_id = ?';
+	        $pr[] = $d['w_tipodoc_id'];
+	    }
+	    if ( count( $wh ) == 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    $xt = implode(" AND ", $wh);
+	    $cu = null;
+	    
+	    try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception($th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    return $cu;
+	}
+	/**
+	 * TODO: Tarea 120 - Agregar la función que permite eliminar registros a la tabla Asignaciones
+	 * Elimina registros de la tabla "asignaciones" según los filtros proporcionados.
+	 * Parámetros esperados en $d:
+	 * - 'id'              => elimina por id
+	 * - 'clean'           => si es true, elimina todos los registros
+	 * @return mixed Resultado de la operación (por ejemplo, número de filas afectadas).
+	 * @throws \Exception Si la sesión no está activa, si no se proporciona un filtro
+	 */
+	public static function asignaciones_Eliminar( $d ) {
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $tb = "asignaciones ";
+	    $pr = [];
+	    $wh = '';
+	    
+	    // Eliminar por ID específico
+	    if ( isset( $d['id'] ) ) {
+	        $wh = "id = ?";
+	        $pr[] = $d['id'];
+	    }
+	    // Limpiar toda la tabla (solo si viene clean = true)
+	    else if ( isset( $d['clean'] ) && $d['clean'] == true ) {
+	        $wh = "id > 0";
+	    }
+	    
+	    // Validar que se especificó al menos un criterio
+	    if ( empty($wh) ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Debe indicar un filtro para eliminar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    try {
+	        // Usar _safeDelete con parámetros preparados para mayor seguridad
+	        return Singleton::_safeDelete( trim($tb), $wh, $pr );
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	        throw new \Exception( $th->getMessage(), IndexCtrl::ERR_COD_ELIMINACION_SQL );
+	    }
+	}
+	
+	/**
+	 * @author yalfonso
+	 *
+	 * TODO: Tarea 127 - Obtener las coincidencias por documento separados por nuevas lineas
+	 */
+	public static function asignaciones_Helper_Obtener_Coincidencias( $d ) {
+	    set_time_limit(300);
+	    include_once ( dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'libs' . DIRECTORY_SEPARATOR . 'phpspreadsheet_1_23_0' . DIRECTORY_SEPARATOR . 'PhpSpreadSheet.php');
+	    
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $dt = base64_decode( $d['data'] );
+	    $js = json_decode($dt, true) ;
+	    
+	    $supervisor_id = $js['supervisor_id'];
+	    
+	    $tipodoc_id = $js['reg_tipodoc_id'];
+	    $tipodoc = trim( self::TIPODOC_DOS_LETRAS[ $tipodoc_id ] );
+	    $tipodocrev = array_flip(self::TIPODOC_DOS_LETRAS);
+	    
+	    $identif = trim( $js['reg_documento'] );
+	    $lineas = preg_split('/\R/', $identif);
+	    
+	    // Primero buscamos si los usuarios ya están asignados
+	    $yaAsig = self::asignaciones_Obtener( [ 'w_tipodoc_id' => $tipodoc_id, 'w_documentos' => $lineas ] );
+
+	    // convertir en indices los valores
+	    $listaIndex = array_fill_keys($lineas, false);
+	    $buscarEnTbEmpleados = $listaIndex;
+	    
+	    // Para que haga la busqueda por docs en la tabla empleados,
+	    // es necesario asignar las cedulas a cada registro del arreglo
+	    foreach ( $buscarEnTbEmpleados as $kBe => $vBe ) {
+	        $buscarEnTbEmpleados[ $kBe ] = $kBe;
+	    }
+	    
+	    foreach ( $yaAsig as $kyaA ) {
+	        if ( isset( $listaIndex[ $kyaA['documento'] ] ) ) {
+	            $datares = [
+	                "empleados_id" => $kyaA['id'],
+	                "tipodoc_id" => $kyaA['tipodoc_id'],
+	                "documento" => $kyaA[ 'documento' ],
+	                "nombres" => trim( (string) $kyaA['empleados_fullname'] ),
+	                "registrado" => true,
+	                "asignado" => [ 
+	                    "nombres" => $kyaA['usuarios_fullname'],
+	                    "fechamodifica" => date( "Y-m-d H:i", strtotime( $kyaA['fechamodifica'] ) )
+	                ]
+	            ];
+	            
+	            $listaIndex[ $kyaA['documento'] ] = $datares;
+	            unset( $buscarEnTbEmpleados[ $kyaA['documento'] ] );
+	        }
+	    }
+	    
+	    // Revisamos si hay algun registro que no se encontro
+	    $hayFalse = false;
+	    foreach ( $listaIndex as $kF ) {
+	        if ( $kF === false ) {
+	            $hayFalse = true;
+	            break;
+	        }
+	    }
+	    
+	    $registros = [];
+	    $paraAsignar = [];
+	    
+	    // si hay registros no encontrados entonces
+	    // lo buscamos en la tabla de empleados
+	    if ( $hayFalse ) {
+	        // Buscamos si ya existen en la tabla empleados
+	        $paraAsignar = self::empleados_Obtener( [ 'w_documentos' => $buscarEnTbEmpleados ] );
+	        
+	        foreach ( $paraAsignar as $kParaA ) {
+	            if( isset( $listaIndex[ $kParaA['documento'] ] ) ) {
+	                // Si el usuario se encuentra en la tabla entonces 
+	                // cambiamos el false por los datos del ususario
+	                $datares = [
+	                    "empleados_id" => $kParaA['id'],
+	                    "tipodoc_id" => $kParaA['tipodoc_id'],
+	                    "documento" => $kParaA[ 'documento' ],
+	                    "nombres" => trim( (string) $kParaA['nombres'] . " " . $kParaA['apellidos'] ),
+	                    "registrado" => true,
+	                    "asignado" => []
+	                ];
+	                $listaIndex[ $kParaA['documento'] ] = $datares;
+	            }
+	        }
+	        
+	        // Volvemos a revisar si hay algun registro que no se encontro
+	        $hayFalse = false;
+	        foreach ( $listaIndex as $kF ) {
+	            if ( $kF === false ) {
+	                $hayFalse = true;
+	                break;
+	            }
+	        }
+	        
+	        if( $hayFalse ){
+	            $registros = self::empleados_Procesar_Archivos( array( 'w_nombre' => 'bogdata', 'buscarpor' => [] ) );
+	            
+	            // indexamos el arreglo ya q tiene muchos registros
+	            $indice = [];
+	            foreach ($registros as $registro) {
+	                $indice[ $registro[ 'nmero_doc_bp_beneficiario' ] ] = $registro;
+	            }
+	            
+	            foreach ( $listaIndex as $kLi => $vLi ) {
+	                if ( $vLi === false ) {
+	                    if ( isset( $indice[ $kLi ] ) ) {
+	                        $bog = $indice[ $kLi ];
+	                        
+	                        $tipodoctmp = 0;
+	                        if ( isset( $tipodocrev[ $bog['tipo_doc_bp_beneficiario'] ] ) ) {
+	                            $tipodoctmp = $tipodocrev[ $bog['tipo_doc_bp_beneficiario'] ];
+	                        }
+	                        
+	                        $datares = [
+	                            "empleados_id" => 0,
+	                            "tipodoc_id" => $tipodoctmp,
+	                            "documento" => $bog[ 'nmero_doc_bp_beneficiario' ],
+	                            "nombres" => $bog["nombre_bp_beneficiario"],
+	                            "registrado" =>false,
+	                            "asignado" => [ 
+	                                "nombres" => "nadie",
+	                                "fechamodifica" => 'd&iacute;a pendiente por asignar'
+	                            ]
+	                        ];
+	                        $listaIndex[ $kLi ] = $datares;
+	                    }
+	                }
+	            }
+	        }
+	        
+	    }
+	    
+	    $result = [
+            "data" => [
+                "resumen" => $listaIndex
+            ], 
+	    ];
+	    
+	    return self::retorno($result, 0, "") ;
+	}
+	/**
+	 * @author yalfonso
+	 *
+	 * TODO: Tarea 129 - Obtiene el payload y lo descifra para poder insertar los datos en la tabla asignaciones 
+	 */
+	public static function asignaciones_Helper_Agregar( $d ){
+	    $dt = base64_decode( $d['data'] );
+	    $js = json_decode($dt, true) ;
+	    
+	    $data = $js['data'];
+	    //die( "testdt: " . print_r( $data, true ));
+	    $cfg = [];
+	    $documentos = [];
+	    foreach ( $data as $kDt ) {
+	        if( $kDt !== false ){
+	            $b64 = base64_decode( $kDt );
+	            $newd = json_decode( $b64, true );
+	            $documentos[] = $newd['documento'];
+	            
+	            $idarr = $newd['tipodoc_id'] . $newd['documento'];
+	            $cfg[ $idarr ] = [
+	                "usuarios_id" => $js['supervidor_id'],
+	                "tipodoc_id" => $newd['tipodoc_id'],
+	                "documento" => $newd['documento'],
+	                "empleados_id" => $newd['empleados_id']
+	            ];
+	        }
+	    }
+	    
+	    $asigs = self::asignaciones_Obtener( [ 'w_documentos' => $documentos ] );
+	    // indexar
+	    $asigInd = [];
+	    foreach ($asigs as $kAsig) {
+	        $idarr = $kAsig['tipodoc_id'] . $kAsig['documento'];
+	        $asigInd[ $idarr ] = $kAsig;
+	    }
+	    
+	    $regsok = [];
+	    foreach ( $cfg as $kCfg => $vCfg ) {
+	        if ( isset( $asigInd[ $kCfg ] ) ) {
+	            $modcfg = [
+	                'usuarios_id' => $vCfg['usuarios_id'],
+	                'w_documento' => $vCfg['documento'],
+	                'w_tipodoc_id' => $vCfg['tipodoc_id']
+	            ];
+	            $rId = self::asignaciones_Modificar( $modcfg );
+	            $regsok[ $kCfg ] = ["id" => $rId, "idui" => $kCfg, "nuevo" => false];
+	        }
+	        else {
+	            $rId = self::asignaciones_Agregar( $vCfg );
+	            $regsok[ $kCfg ] = ["id" => $rId, "idui" => $kCfg, "nuevo" => true];
+	        }
+	    }
+	    
+	    $result = [
+	        "regs" => $regsok
+	    ];
+	    
+	    return self::retorno($result, 0, "");
+	}
+	/**
+	 * @author yalfonso
+	 *
+	 * TODO: Tarea 134 - Obtiene el payload y lo descifra para poder insertar los datos en la tabla asignaciones desde el id del empleado
+	 */
+	public static function asignaciones_Helper_Agregar_By_Empleados_Ids( $d ){
+	    $dt = base64_decode( $d['data'] );
+	    $js = json_decode($dt, true) ;
+	    
+	    $rD = [];
+	    try {
+	        $rD = self::empleados_Obtener( [ "id" => $js['empleados_id'] ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'asignaciones_Helper_Agregar_By_Empleados_Ids - empleados_Obtener: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    $rDef = [];
+	    foreach ( $rD as $kRd) {
+	        $dtClean = [
+	            "documento" => $kRd['documento'],
+	            "tipodoc_id" => $kRd['tipodoc_id'],
+	            "empleados_id" => $js['empleados_id']
+	        ];
+	        
+	        $payload = [
+	            "data" => [ base64_encode( json_encode( $dtClean ) ) ],
+	            "supervidor_id" => $js['usuarios_id']
+	        ];
+	        
+	        try {
+	            $rDef = self::asignaciones_Helper_Agregar( [ "data" => base64_encode( json_encode( $payload ) ) ] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            throw new Exception( 'asignaciones_Helper_Agregar_By_Empleados_Ids - asignaciones_Helper_Agregar: ' . $e->getMessage(), $e->getCode() );
+	        }
+	    }
+	    
+	    return $rDef;
+	}
+	/**
+	 * @author yalfonso
+	 *
+	 * TODO: Tarea 133 - Obtiene el payload y lo descifra para obtener los datos de la tabla asignaciones
+	 */
+	public static function asignaciones_Helper_Obtener_By_Empleados_Id( $d ){
+	    $dt = base64_decode( $d['data'] );
+	    $js = json_decode($dt, true) ;
+	    
+	    $r1 = [];
+	    try {
+	        $r1 = self::asignaciones_Obtener( [ 'w_empleados_ids' => $js ] );
+	    } catch (Exception $e) {
+	        http_response_code( $e->getCode() );
+	        throw new Exception( 'asignaciones_Helper_Obtener_By_Empleados_Id - asignaciones_Obtener: ' . $e->getMessage(), $e->getCode() );
+	    }
+	    
+	    return $r1;
+	}
+	// asignaciones FIN
 	
 	// reflista INI
 	/**
@@ -14883,8 +15718,10 @@ EOD;
 
 		$items = (isset($json[0]) && is_array($json[0])) ? $json : [$json];
 
+		$anyo = OperacionesCtrl::anyolectivo_Obtener();
+		$c_anyo = $anyo[ 0 ];
+		
 		foreach ($items as $it) {
-
 			if (!is_numeric($it['tipodoc_id'] )) {
 				$it['tipodoc_id'] = array_search(strtoupper(trim($it['tipodoc_id'])), self::TIPODOC_DOS_LETRAS, true);
 			}
@@ -14901,30 +15738,51 @@ EOD;
 
 			$contExiste = self::empleadosdetallescontrato_Obtener(['documento' => $doc ] );	
 			try {
-			if ( count( $contExiste ) > 0 ) {
-				//Modificación
-				$detalleContrato = array(
-					'w_documento' => $it['documento'],
-					'w_tipodoc_id' => $it['tipodoc_id'],
-					'meses' => $it['meses'],
-					'dias' => $it['dias'],
-					'fechainicio' => $it['fechainicio'] ?? null,
-					'fileactaini' => $it['fileactaini'] ?? null
-				);
-				 if (isset($it['empleados_id'])) {
-					$detalleContrato['empleados_id'] = $it['empleados_id'];
-				}
-				if (isset($it['contrato']) && trim((string)$it['contrato']) !== '') {
-					$detalleContrato['contrato'] = trim((string)$it['contrato']);
-				}
-				self::empleadosdetallescontrato_modificar($detalleContrato);
-			} else {
-				// Nuevo registro
-				self::empleadosdetallescontrato_agregar($it);
-			}
-		} catch (\Throwable $th) {
-			return self::retorno('error', 'Error en empleadosdetallescontrato_Helper_Agregar: ' . $th->getMessage(), null, false);
-		}
+    			if ( count( $contExiste ) > 0 ) {
+    				//Modificación
+    				$detalleContrato = array(
+    					'w_documento' => $it['documento'],
+    					'w_tipodoc_id' => $it['tipodoc_id'],
+    					'meses' => $it['meses'],
+    					'dias' => $it['dias'],
+    					'fechainicio' => $it['fechainicio'] ?? '1900-01-01 00:00:00'
+    				);
+    				
+                    if (isset($it['empleados_id'])) {
+                        $detalleContrato['empleados_id'] = $it['empleados_id'];
+                    }
+    				if (isset($it['contrato']) && trim((string)$it['contrato']) !== '') {
+    					$detalleContrato['contrato'] = trim((string)$it['contrato']);
+    				}
+    				
+    				if ( isset( $_FILES['fileactaini'] ) ) {
+    				    
+    				    if ( !isset( $it['contrato'] ) || trim((string)$it['contrato']) === '') {
+    				        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+    				        throw new Exception( "El n&uacute;mero de contrato es obligatorio" , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+    				    }
+    				    
+    				    $rutaabs = "repo" . DIRECTORY_SEPARATOR . "anexos" . DIRECTORY_SEPARATOR . $c_anyo['id'] ;
+    				    $fld_base = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . $rutaabs;
+    				    $fld_empl = preg_replace('/\D/', '', $it['documento'] ) . DIRECTORY_SEPARATOR . "contrato";
+    				    $fld_cont = $fld_base . DIRECTORY_SEPARATOR . $fld_empl;
+    				    if( !file_exists( $fld_cont ) ){
+    				        mkdir($fld_cont, 0777, true);
+    				    }
+    				    
+    				    $newflnm = 'fileactaini_' . $it['contrato'];
+    				    $defname = self::SubirArchivo($newflnm, $fld_cont, 'fileactaini');
+    				    $detalleContrato['fileactaini'] = $rutaabs . '/' . $fld_empl . '/' . $defname;
+    				}
+    				
+    				self::empleadosdetallescontrato_modificar($detalleContrato);
+    			} else {
+    				// Nuevo registro
+    				self::empleadosdetallescontrato_agregar($it);
+    			}
+    		} catch (\Throwable $th) {
+    		    return self::retorno([], $th->getCode(), $th->getMessage());
+    		}
 		}
 		return self::retorno('ok', 'Contratos procesados correctamente', null);
 		
@@ -15451,6 +16309,22 @@ EOD;
 	    return $r;
 	}
 	// Formularios FIN
+	
+	// Dependencias INI
+	public static function dependencias_Obtener( $d ){
+	    $tb = "dependencias";
+	    $r = [];
+	    try {
+	        $r = Singleton::_readEstado( [ 'tabla' => $tb ] );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new Exception( $e->getMessage(), IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    return $r;
+	}
+	
+	// Dependencias FIN
+	
 	
 	// Gestordocumental INI
 	public static function gestordocumentalHelper( $d ){

@@ -545,7 +545,7 @@ class Menubar {
             <div class="card-body py-2">
                 <img src="./temas/img/logo_aqui_si_pasa.png" alt="" height="92" />
                 <div class="mt-0">
-                    <small class="d-block mb-3 ">&copy; 2025</small>
+                    <small class="d-block mb-3 text-white">&copy; 2025</small>
                 </div>
             </div>
         </div>
