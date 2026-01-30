@@ -1,6 +1,7 @@
 # Archivos del sistema
 .DS_Store
 Thumbs.db
+._*
 
 # Configuración de IDEs
 .buildpath
