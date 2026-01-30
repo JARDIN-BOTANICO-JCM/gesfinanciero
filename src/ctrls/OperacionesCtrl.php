@@ -7053,17 +7053,20 @@ class OperacionesCtrl {
 	    
 	    $cfgDt = json_decode( base64_decode( $_CFG_DEDUCCIONES_DATA ) , true );
 	    
+	    // TODO: Tarea 140 - Se agrega un control para que verifique si el id 'firma' existe en el arreglo
 	    $data = [];
 	    foreach ( $cfgDt as $kDt ) {
-	        $data[] = [
-	            "firma" => $kDt['firma'],
-	            "criterio" => base64_decode( $kDt['firma'] ),
-	            "deducciones" => count($kDt['deducciones']),
-	            "fecha" => $kDt['fecha'],
-	            "usuario" => $kDt['usuario'],
-	            "fechamod" => $kDt['fechamod'],
-	            "registro" => $kDt //base64_encode( json_encode( $kDt ) )
-	        ];
+	        if( isset ( $kDt['firma'] ) ){
+	            $data[] = [
+	                "firma" => $kDt['firma'],
+	                "criterio" => base64_decode( $kDt['firma'] ),
+	                "deducciones" => count($kDt['deducciones']),
+	                "fecha" => $kDt['fecha'],
+	                "usuario" => $kDt['usuario'],
+	                "fechamod" => $kDt['fechamod'],
+	                "registro" => $kDt //base64_encode( json_encode( $kDt ) )
+	            ];
+	        }
 	    }
 	    
 	    return $data;
