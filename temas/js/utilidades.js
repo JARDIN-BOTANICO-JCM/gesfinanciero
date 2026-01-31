@@ -388,19 +388,4 @@ var Utilidades = function(){
 		}
 	};
 	
-	// TODO: Tarea 86 - Core: En temas/js/utilidades.js agregar loadTextFromUrl para leer documentos de texto
-	this.loadTextFromUrl = function (url, callback) {
-	    var xhr = new XMLHttpRequest();
-	    xhr.open("GET", url, true);
-	
-	    xhr.onreadystatechange = function () {
-	        if (xhr.readyState === 4) {
-	            if (xhr.status === 200) callback(null, xhr.responseText);
-	            else callback(xhr.status);
-	        }
-	    };
-	
-	    xhr.send();
-	};
-	
 };

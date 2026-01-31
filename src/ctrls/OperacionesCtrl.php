@@ -12471,7 +12471,12 @@ EOD;
 	        foreach ( $qryMesAplica as $kMesA ) {
 	            $mesAplica = $kMesA;
 	        }
-	        $rEval = self::flujositems_Helper_EvaluarCriterio( $mesAplica );
+	        
+	        // TODO: Tarea 141 - Es necesario validar si mesAplica tiene datos para obtener los criterios para evaluar los salarios y obtener las deducciones
+	        $rEval = [];
+	        if ( count( $mesAplica ) > 0 ) {
+	            $rEval = self::flujositems_Helper_EvaluarCriterio( $mesAplica );
+	        }
 	        
 	        // reemplazamos los datos por defecto y dejamos los que puso el supervisor contabilidad
 	        $i_v = 0;
