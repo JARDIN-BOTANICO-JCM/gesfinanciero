@@ -41,6 +41,55 @@ try {
 }
 
 ?>
+<style>
+/* Asegura que el contenedor permita el scroll */
+.table-responsive-custom {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Suavidad en móviles */
+    margin-bottom: 1rem;
+}
+
+/* Evita que el texto de las celdas se amontone, forzando el scroll */
+table.dataTable.nowrap th, 
+table.dataTable.nowrap td {
+    white-space: nowrap;
+}
+
+
+.gu-mirror.d-flex {
+    display: flex !important;
+}
+
+.gu-over {
+    background-color: rgba(0, 123, 255, 0.05) !important;
+    outline: 2px solid #007bff;
+}
+.gu-transit {
+    opacity: 1 !important;
+    background-color: #d1ecf1 !important; /* Azul claro */
+    border: 2px dashed #0c5460 !important; /* Borde oscuro punteado */
+    color: transparent !important; /* Escondemos el texto del hueco para que no distraiga */
+    overflow: hidden;
+}
+.gu-mirror {
+    transform: rotate(3deg); /* Un pequeño giro para que se note que flota */
+    background-color: white !important;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    cursor: grabbing !important;
+    
+    position: fixed !important;
+    margin: 0 !important;
+    z-index: 9999 !important;
+    opacity: 0.9;
+    
+    /* LA CLAVE: El mouse ignora este elemento y detecta lo que hay detrás */
+    pointer-events: none !important;
+    
+}
+
+
+</style>
 <div id="db-wrapper" class="">
     <!-- navbar vertical -->
     <!-- Sidebar -->
@@ -119,7 +168,7 @@ try {
                         
                         	<div class="card">
                     			<div class="card-body">
-                    				<h5 >Estandar deducciones</h5>
+                    				<h5 >Est&aacute;ndar deducciones</h5>
                     				<p class="mb-4">Personalice las deducciones que se realizaran a los usuarios</p>
                     				
                     				<div class="row">
@@ -211,6 +260,22 @@ try {
                         
                         </div>
                     </div>
+                    
+                	<div class="row">
+                        <div class="col-12 mb-3" >
+                        
+                        	<div class="card">
+                    			<div class="card-body">
+                    				<h5 >Maestra de descuentos</h5>
+                    				<p class="mb-4">Ingrese los registros de la tabla de porcentajes de descuentos y sus descripciones</p>
+                    				
+                    				<div class="row">
+                    					<div id="tbMasterCont" class="col-12" ></div>
+                					</div>
+            					</div>
+        					</div>
+    					</div>
+					</div>
                     <?php endif; ?>
 
                 </div>
@@ -223,6 +288,482 @@ try {
 </div>
 
 <script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+
+<script type="application/javascript">
+<?php // TODO: Tarea 147 - Crea una clase en front que permite controlar las tareas de la la Maestra de descuentos ?>
+const GestionDataTable = function(instancia, containerId, columnasIniciales) {
+    const self = this;
+    let table = null;
+    let tableId = "tbJson_" + ut.GetUUID();
+    
+    let rowGlb;
+    let currentData = [];
+    
+    self.datos = [];
+
+    self.init = function() {
+    	/*
+        let html = `
+            <div class="dt-buttons-container" style="margin-bottom:15px;">
+                <button type="button" class="btn btn-primary btn-sm btn-nuevo-${tableId}">Nuevo Registro</button>
+                <button type="button" class="btn btn-primary btn-sm btn-guardar-${tableId}">Guardar</button>
+                <input type="file" class="file-import-${tableId}" style="display:none" accept=".json">
+                <button type="button" onclick="jQuery('.file-import-${tableId}').click()">Importar JSON</button>
+            </div>
+            <div class="table-responsive-custom">
+            	<table id="${tableId}" class="table table-sm table-bordered table-striped table-hover responsive display" style="width:100%"></table>
+            </div>
+        `;
+        */
+        let html = `
+            <div class="dt-buttons-container" style="margin-bottom:15px;">
+                <button type="button" class="btn btn-primary btn-sm btn-nuevo-${tableId}">Nuevo Registro</button>
+                <button type="button" class="btn btn-primary btn-sm btn-guardar-${tableId}">Guardar</button>
+                <button type="button" class="btn btn-primary btn-sm btn-lista-${tableId}">Items grupo</button>
+            </div>
+            <div class="table-responsive-custom">
+            	<table id="${tableId}" class="table table-sm table-bordered table-striped table-hover responsive display" style="width:100%"></table>
+            </div>
+        `;
+        
+        jQuery(containerId).html(html);
+
+        table = jQuery(`#${tableId}`).DataTable({
+            data: self.datos,
+            columns: [
+                ...columnasIniciales,
+                {
+                    title: "Acciones",
+                    data: null,
+                    width: 30,
+                    render: function() {
+                        return `
+                            <button class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip btn-edit-row" data-template="btnEditTpl-${tableId}">
+                            	<i class="fe fe-edit fs-5"></i>
+                            	<div id="btnEditTpl-${tableId}" class="d-none">
+                            		<h6 class="mb-0 text-white">Editar</h6>
+                            	</div>
+                            </button>
+                            <button class="btn m-0 px-1 py-0 text-muted text-primary-hover ms-0 texttooltip btn-delete-row" data-template="btnDelTpl-${tableId}">
+                            	<i class="fe fe-trash-2 fs-5"></i>
+                            	<div id="btnDelTpl-${tableId}" class="d-none">
+                            		<h6 class="mb-0 text-white">Eliminar</h6>
+                            	</div>
+                            </button>
+                        `;
+                    }
+                }
+            ],
+            order: [[5, 'desc']],
+            responsive: false,
+            language: lengua_es,
+        });
+
+        self.bindEvents();
+    };
+    
+    self.getData = function( d ){
+    	const fn = d['fn'];
+        const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5(IndexCtrl::API_MaestrasVirtualGet); ?>');
+    
+        __TransportarData(
+            form_data,
+            function( oDt ) {
+            	try {
+                    const json = JSON.parse( ut.b64DecodeUnicode( oDt ) );
+                    table.clear().rows.add(json).draw();
+                    self.actualizarEstado();
+                } catch (err) {
+                    console.error("Error al cargar JSON", err);
+                }
+            	fn( oDt );
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+    
+                jQuery( objmdlErr ).modal('show');
+            }
+        );
+    };
+    
+    self.setFieldData = function(){
+    	ut.validarFrm( 'formmaestraCls' + tableId , function (r) {
+    		currentData.grupo = r['maestra-grupo-' + tableId ];
+    		currentData.cod_interno = r['maestra-cod_interno-' + tableId ];
+    		currentData.cod_desc = r['maestra-cod_desc-' + tableId ];
+    		currentData.porcentaje = r['maestra-porcentaje-' + tableId ];
+    		
+            rowGlb.data(currentData).draw();
+            self.actualizarEstado();
+    	});
+    };
+    
+    self.grpItems_Eliminar = function( o ){
+    	const _o = jQuery( o );
+    	const dt = _o.data();
+    	
+    	const li = jQuery( dt['li'] );
+    	const ul = jQuery( dt['ul'] );
+    	
+    	if( confirm( "Desea eliminar este registro?" ) ){
+    		li.hide("fast", function(){
+    			li.remove();
+    			
+    			const estanuevo = ul.find('li');
+    			if( estanuevo.length == 0 ){
+            		ul.html( '<li class="list-group-item estanuevo">No hay items</li>' );
+            	}
+    		});
+    	}
+    };
+    
+    self.grpItems_GuardarLista = function( o ){
+    	const _o = jQuery( o );
+    	const dt = _o.data();
+    	
+    	_o.attr( "disabled", "disabled" );
+    	_o.html( validadorGlob.ajaxspinner() );
+    	
+    	const lis = jQuery( dt['ul'] );
+    	
+    	const data = [];
+    	
+    	lis.find( 'li' ).each(function(i,obj){
+    		const _obj = jQuery( obj );
+    		const dtObj = _obj.data();
+    		data.push( dtObj['value'] );
+    	});
+    	
+    	const blob = JSON.stringify( data );
+        const dt64 = ut.b64EncodeUnicode( blob );
+		
+		const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5(IndexCtrl::API_MaestrasGrpVirtualAdd ); ?>' );
+        form_data.append('vl', dt64 );
+    
+        __TransportarData(
+            form_data,
+            function( oDt ) {
+            	_o.removeAttr( "disabled" );
+    			_o.html( "Guardar" );
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+    
+                jQuery( objmdlErr ).modal('show');
+            }
+        );
+        
+    };
+    
+    const grpItemsTpl = function( txt, target ){
+		const firma = ut.b64EncodeUnicode( ( "" + txt ).toLowerCase() ).replace(/==/ig, "").replace(/=/ig, "");
+		
+		const liId = 'li-' + firma;
+		
+		const htmlli = [];
+		
+    	htmlli.push( '<li id="' + liId + '" data-value="' + txt + '" class="list-group-item d-flex justify-content-between align-items-center" >' );
+    	htmlli.push( '	<div class="d-flex align-items-center" >' );
+    	htmlli.push( '		' + txt + '' );
+    	htmlli.push( '	</div>' );
+    	htmlli.push( '	<div >' );
+    	htmlli.push( '		<button data-ul="#' + target.attr('id') + '" data-li="#' + liId + '" class="btn-close" aria-label="Close" onclick="' + instancia + '.grpItems_Eliminar( this );"></button>' );
+    	htmlli.push( '	</div>' );
+    	htmlli.push( '</li>' );
+    	
+    	return { "id" : liId, "html" : htmlli.join('') }
+    };
+    
+    self.grpItems_Agregar = function( o ){
+    	const _o = jQuery( o );
+    	const dt = _o.data();
+    	
+    	const target = jQuery( dt['target'] );
+    	const valor = jQuery( dt['valor'] );
+    	
+    	ut.validarFrm( 'formmaestraItemGrpCls' + tableId, function (r) {
+    	
+			const txt = jQuery.trim( valor.val() );
+    	
+        	if( txt != null && ("" + txt ).length > 0 ){
+    			const estanuevo = target.find('.estanuevo');
+    			
+    			const obLi = grpItemsTpl( txt, target );
+    			const liId = obLi['id'];
+    			const unicoItem = target.find( '#' + liId );
+    			
+    			if( unicoItem.length ) {
+    				alert('El registro ya existe');
+    			}
+    			else{
+    				const htmlli = [];
+                	htmlli.push( '<li id="' + liId + '" data-value="' + txt + '" class="list-group-item d-flex justify-content-between align-items-center" >' );
+                	htmlli.push( '	<div class="d-flex align-items-center" >' );
+                	htmlli.push( '		' + txt + '' );
+                	htmlli.push( '	</div>' );
+                	htmlli.push( '	<div >' );
+                	htmlli.push( '		<button data-ul="#' + target.attr('id') + '" data-li="#' + liId + '" class="btn-close" aria-label="Close" onclick="' + instancia + '.grpItems_Eliminar( this );"></button>' );
+                	htmlli.push( '	</div>' );
+                	htmlli.push( '</li>' );
+                	
+                	if( estanuevo.length ){
+                		target.html( obLi['html'] );
+                	}
+                	else{
+                		target.append( obLi['html'] );
+                	}
+                	
+                	agregarAgarre( { "contenedor" : target.attr('id'), "hijos": 'list-group-item' } );
+                	
+    			}
+        	
+        	}
+    	
+    	});
+    };
+    
+    self.bindEvents = function() {
+        jQuery(`#${tableId} tbody`).on('click', '.btn-delete-row', function() {
+        
+        	if(	confirm('Desea eliminar este registro?') ){
+        		table.row(jQuery(this).parents('tr')).remove().draw();
+            	self.actualizarEstado();
+        	}
+        
+        });
+
+        jQuery(`#${tableId} tbody`).on('click', '.btn-edit-row', function() {
+            rowGlb = table.row(jQuery(this).parents('tr'));
+            currentData = rowGlb.data();
+            
+            const modalId = 'stcMdl-' + tableId;
+            if( jQuery( "#" + modalId ).length ){
+            	modalId.remove();
+            }
+            
+            const modalHtml = [];
+            modalHtml.push('<div class="modal fade" id="stcMdl-' + tableId + '" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="stcBLabel' + tableId + '" aria-hidden="true">');
+			modalHtml.push('	<div class="modal-dialog">');
+			modalHtml.push('		<div class="modal-content">');
+			modalHtml.push('			<div class="modal-header">');
+			modalHtml.push('				<h5 class="modal-title" id="stcBLabel' + tableId + '">Registro</h5>');
+			modalHtml.push('				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>');
+			modalHtml.push('			</div>');
+			modalHtml.push('			<div class="modal-body">');
+			
+			modalHtml.push('				<form id="formmaestra' + tableId + '" class="formmaestraCls' + tableId + '">');
+			modalHtml.push('					<div class="form-floating mb-3">');
+			modalHtml.push('						<input type="text" class="form-control" id="maestra-grupo-' + tableId + '" name="maestra-grupo-' + tableId + '" placeholder="grupo">');
+			modalHtml.push('						<label for="maestra-grupo-' + tableId + '">Grupo</label>');
+			modalHtml.push('					</div>');
+			
+			modalHtml.push('					<div class="form-floating mb-3">');
+			modalHtml.push('						<input required="required" type="text" class="form-control" id="maestra-cod_interno-' + tableId + '" name="maestra-cod_interno-' + tableId + '" placeholder="0000">');
+			modalHtml.push('						<label for="maestra-cod_interno-' + tableId + '">C&oacute;digo interno</label>');
+			modalHtml.push('					</div>');
+			
+			modalHtml.push('					<div class="form-floating mb-3">');
+			modalHtml.push('						<input required="required" type="text" class="form-control" id="maestra-cod_desc-' + tableId + '" name="maestra-cod_desc-' + tableId + '" placeholder="Descripci&oacute;n">');
+			modalHtml.push('						<label for="maestra-cod_desc-' + tableId + '">Descripci&oacute;n c&oacute;digo</label>');
+			modalHtml.push('					</div>');
+			
+			modalHtml.push('					<div class="form-floating mb-3">');
+			modalHtml.push('						<input required="required" type="number" class="form-control" id="maestra-porcentaje-' + tableId + '" name="maestra-porcentaje-' + tableId + '" placeholder="0.0" step="any">');
+			modalHtml.push('						<label for="maestra-porcentaje-' + tableId + '">Porcentaje</label>');
+			modalHtml.push('					</div>');
+			modalHtml.push('				</form>');
+			
+			modalHtml.push('			</div>');
+			modalHtml.push('			<div class="modal-footer">');
+			modalHtml.push('				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>');
+			modalHtml.push('				<button onclick="' + instancia + '.setFieldData();" type="button" class="btn btn-primary">Guardar</button>');
+			modalHtml.push('			</div>');
+			modalHtml.push('		</div>');
+			modalHtml.push('	</div>');
+			modalHtml.push('</div>');
+            
+            const mdl = jQuery( modalHtml.join('') );
+            mdl.modal('show');
+        });
+        jQuery(`.btn-nuevo-${tableId}`).on('click', function() {
+        	const fData = ictrl.getFormattedDate();
+        	
+            const nuevoObj = { id: ut.GetUUID(), grupo: "grp", cod_interno: "0000", cod_desc: "Descripci&oacute;n", porcentaje: "0.0", fecha: fData, creador: "<?php echo $usu->getNombres() . " " . $usu->getApellidos() ?>" };
+            table.row.add(nuevoObj).draw();
+            self.actualizarEstado();
+        });
+
+        jQuery(`.btn-guardar-${tableId}`).on('click', function() {
+			const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+            const data = table.rows().data().toArray();
+            const blob = JSON.stringify( data );
+            const dt64 = ut.b64EncodeUnicode( blob );
+            
+            const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5(IndexCtrl::API_MaestrasVirtualAdd ); ?>');
+            form_data.append('vl', dt64);
+        
+            __TransportarData(
+                form_data,
+                function( o ) {
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+        });
+
+    	jQuery(`.btn-lista-${tableId}`).on('click', function() {
+    		const frmId = 'formmaestraItemGrp' + tableId;
+    		const ulId = 'maestra-listGrp-' + tableId ;
+    		const idItemVacio = 'maestra-itemEmpty-' + tableId ;
+    		
+    		const modalId = 'stcMdlItemsGrp-' + tableId;
+    		if( jQuery( "#" + modalId ).length ){
+    			jQuery( "#" + modalId ).remove();
+    		}
+    		
+            const modalHtml = [];
+            modalHtml.push('<div class="modal fade" id="stcMdlItemsGrp-' + tableId + '" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="stcItemsBLabel' + tableId + '" aria-hidden="true">');
+			modalHtml.push('	<div class="modal-dialog modal-lg modal-dialog-scrollable">');
+			modalHtml.push('		<div class="modal-content">');
+			modalHtml.push('			<div class="modal-header">');
+			modalHtml.push('				<h5 class="modal-title" id="stcItemsBLabel' + tableId + '">Items del grupo</h5>');
+			modalHtml.push('				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>');
+			modalHtml.push('			</div>');
+			modalHtml.push('			<div class="modal-body">');
+			
+			modalHtml.push('				<form id="' + frmId + '" class="formmaestraItemGrpCls' + tableId + ' d-flex bd-highlight">');
+			modalHtml.push('					<div class="form-floating mb-3 flex-grow-1 bd-highlight">');
+			modalHtml.push('						<input required="required" type="text" class="form-control" id="maestra-itemgrupo-' + tableId + '" name="maestra-itemgrupo-' + tableId + '" placeholder="item nuevo">');
+			modalHtml.push('						<label for="maestra-itemgrupo-' + tableId + '">Grupo</label>');
+			modalHtml.push('					</div>');
+			
+			modalHtml.push('					<div class="bd-highlight ms-3">');
+			modalHtml.push('						<button data-valor="#maestra-itemgrupo-' + tableId + '" data-target="#maestra-listGrp-' + tableId + '" onclick="' + instancia + '.grpItems_Agregar( this );" type="button" class="btn btn-primary" >');
+			modalHtml.push('							Agregar item');
+			modalHtml.push('						</button>');
+			modalHtml.push('					</div>');
+			
+			modalHtml.push('				</form>');
+			
+			modalHtml.push('				<div class="card shadow-lg" style="">');
+			modalHtml.push('					<div class="card-header">');
+			modalHtml.push('						<h5>Items existentes</h5>');
+			modalHtml.push('					</div>');
+			modalHtml.push('					<div class="card-body">');
+			modalHtml.push('						<ul id="' + ulId + '" class="list-group">');
+			modalHtml.push('							<li id="' + idItemVacio + '" class="list-group-item estanuevo">' + validadorGlob.ajaxspinner() + '</li>');
+			modalHtml.push('						<ul >');
+			modalHtml.push('					</div>');
+			modalHtml.push('				</div >');
+			
+			modalHtml.push('			</div>');
+			modalHtml.push('			<div class="modal-footer">');
+			modalHtml.push('				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>');
+			modalHtml.push('				<button data-ul="#' + ulId + '" onclick="' + instancia + '.grpItems_GuardarLista( this );" type="button" class="btn btn-primary">Guardar</button>');
+			modalHtml.push('			</div>');
+			modalHtml.push('		</div>');
+			modalHtml.push('	</div>');
+			modalHtml.push('</div>');
+            
+            const mdl = jQuery( modalHtml.join('') );
+            mdl.modal('show');
+            
+			const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5(IndexCtrl::API_MaestrasGrpVirtualGet ); ?>');
+        
+            __TransportarData(
+                form_data,
+                function( oR ) {
+                	const oDt = JSON.parse( ut.b64DecodeUnicode( oR ) );
+                	
+                	if( oDt.length > 0 ){
+                		const htmltmp = [];
+                		for (const ind in oDt ) {
+                        	if ( Object.hasOwnProperty.call( oDt, ind ) ) {
+                        		const _el = oDt[ ind ];
+                        		const oItem = grpItemsTpl( _el, jQuery( ulId ) );
+                        		htmltmp.push( oItem['html'] );
+                    		}
+                		}
+                		jQuery("#" + ulId).html( htmltmp.join('') );
+                		agregarAgarre( { "contenedor" : ulId, "hijos": 'list-group-item' } );
+                	}
+                	else{
+                		jQuery( "#" + ulId ).html('No hay items');
+                	}
+                },
+                function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+            
+            mdl.find( '#' + frmId ).on('submit', function(e) {
+                e.preventDefault();
+                
+                const idBtnTmp = 'btnAddItemTrigger-' + tableId;
+                if( jQuery( "#" + idBtnTmp ).length ){
+                	jQuery( "#" + idBtnTmp ).remove();
+                }
+                
+                const btnTmp = '<button id="' + idBtnTmp + '" data-valor="#maestra-itemgrupo-' + tableId + '" data-target="#maestra-listGrp-' + tableId + '" ><button>'; 
+                self.grpItems_Agregar( jQuery( btnTmp ) );
+                return false;
+            });
+            
+    	});
+    	
+        jQuery(`.file-import-${tableId}`).on('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const json = JSON.parse(evt.target.result);
+                    table.clear().rows.add(json).draw();
+                    self.actualizarEstado();
+                } catch (err) {
+                    console.error("Error al cargar JSON", err);
+                }
+            };
+            reader.readAsText(file);
+        });
+        
+    };
+
+    self.actualizarEstado = function() {
+        self.datos = table.rows().data().toArray();
+        // Aquí podrías disparar self.instanceNameCtrlCambios si existe
+    };
+};
+</script>
+
 <script type="application/javascript">
 <?php 
 /*
@@ -342,8 +883,28 @@ const btnFirmCfgFrm = function( o ){
     
 };
 
+let miGestion;
 let deducciones;
+
 jQuery( document ).ready(function(){
 	deducciones = new Deducciones();
+	
+    const misColumnas = [
+        { title: "ID", data: "id", width: 300 },
+        { title: "Grupo", data: "grupo" },
+        { title: "C&oacute;digo interno", data: "cod_interno" },
+        { title: "Descripci&oacute;n c&oacute;digo", data: "cod_desc" },
+        { title: "%", data: "porcentaje" },
+        { title: "Fecha", data: "fecha", width: 150 },
+        { title: "Creador", data: "creador", width: 150 }
+    ];
+    
+    miGestion = new GestionDataTable("miGestion", "#tbMasterCont", misColumnas);
+    miGestion.init();
+    miGestion.getData( { 
+    	fn : function( oDt ){
+    	} 
+    });
+	
 });
 </script>

@@ -931,6 +931,13 @@ class IndexCtrl extends Pagina {
 	const API_DeduccionesVirtualDel = 'API_DeduccionesVirtualDel';
 	// Deducciones Virtual FIN
 
+	// Maestras Virtual INI
+	const API_MaestrasVirtualAdd = 'API_MaestrasVirtualAdd';
+	const API_MaestrasVirtualGet = 'API_MaestrasVirtualGet';
+	const API_MaestrasGrpVirtualAdd = 'API_MaestrasGrpVirtualAdd';
+	const API_MaestrasGrpVirtualGet = 'API_MaestrasGrpVirtualGet';
+	// Maestras Virtual FIN
+	
 	// requerimientos INI
 	/**
 	 * Constante de endpoint API para obtener requerimientos de plantillas vía AJAX
@@ -2182,6 +2189,50 @@ class IndexCtrl extends Pagina {
 				    die("");
 				}
 				// Deducciones Virtual FIN
+				
+				// Maestra Virtual INI
+				if ( $_POST["ajax"] == md5( self::API_MaestrasVirtualAdd ) ) {
+				    try {
+				        $ok = OperacionesCtrl::maestra_Virtual_Agregar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_MaestrasVirtualGet ) ) {
+				    try {
+				        $ok = OperacionesCtrl::maestra_Virtual_Obtener($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				
+				if ( $_POST["ajax"] == md5( self::API_MaestrasGrpVirtualAdd ) ) {
+				    try {
+				        $ok = OperacionesCtrl::maestraGrp_Virtual_Agregar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_MaestrasGrpVirtualGet ) ) {
+				    try {
+				        $ok = OperacionesCtrl::maestraGrp_Virtual_Obtener($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Maestra Virtual FIN
 
 				// requerimientostpls INI
 				if ($_POST["ajax"] == md5(self::API_RequerimientostplsGetAjax)) {
