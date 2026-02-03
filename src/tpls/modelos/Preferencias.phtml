@@ -336,7 +336,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
                     title: "Acciones",
                     data: null,
                     width: 30,
-                    render: function() {
+                    render: function(data, type, row) {
                         return `
                             <button class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip btn-edit-row" data-template="btnEditTpl-${tableId}">
                             	<i class="fe fe-edit fs-5"></i>
@@ -530,6 +530,28 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
     	});
     };
     
+    const maestraGrpObtener = function( fn ){
+    
+		const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5(IndexCtrl::API_MaestrasGrpVirtualGet ); ?>');
+    
+        __TransportarData(
+            form_data,
+            function( oR ) {
+            	fn( oR );
+            },
+            function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+    
+                jQuery( objmdlErr ).modal('show');
+            }
+        );
+    
+    };
+    
     self.bindEvents = function() {
         jQuery(`#${tableId} tbody`).on('click', '.btn-delete-row', function() {
         
@@ -541,12 +563,16 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
         });
 
         jQuery(`#${tableId} tbody`).on('click', '.btn-edit-row', function() {
+<?php       //TODO: Tarea 148 - Agregar la capacidad para modificar datos desde lo que existe?>
+        	const selContId = "maestragrpContSel-" + tableId;
+        	const selId = "maestra-grupo-" + tableId;
+        	
             rowGlb = table.row(jQuery(this).parents('tr'));
             currentData = rowGlb.data();
             
             const modalId = 'stcMdl-' + tableId;
             if( jQuery( "#" + modalId ).length ){
-            	modalId.remove();
+            	jQuery( "#" + modalId ).remove();
             }
             
             const modalHtml = [];
@@ -560,23 +586,34 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
 			modalHtml.push('			<div class="modal-body">');
 			
 			modalHtml.push('				<form id="formmaestra' + tableId + '" class="formmaestraCls' + tableId + '">');
-			modalHtml.push('					<div class="form-floating mb-3">');
-			modalHtml.push('						<input type="text" class="form-control" id="maestra-grupo-' + tableId + '" name="maestra-grupo-' + tableId + '" placeholder="grupo">');
-			modalHtml.push('						<label for="maestra-grupo-' + tableId + '">Grupo</label>');
+			modalHtml.push('					<div id="' + selContId + '" class="form-floating mb-3">');
+			modalHtml.push('						' + validadorGlob.ajaxspinner() );
 			modalHtml.push('					</div>');
 			
+			let cod_interno = "";
+			if( ("" + currentData['cod_interno']).length > 0 ){
+				cod_interno = currentData['cod_interno'];
+			}
 			modalHtml.push('					<div class="form-floating mb-3">');
-			modalHtml.push('						<input required="required" type="text" class="form-control" id="maestra-cod_interno-' + tableId + '" name="maestra-cod_interno-' + tableId + '" placeholder="0000">');
+			modalHtml.push('						<input value="' + cod_interno + '" required="required" type="text" class="form-control" id="maestra-cod_interno-' + tableId + '" name="maestra-cod_interno-' + tableId + '" placeholder="0000">');
 			modalHtml.push('						<label for="maestra-cod_interno-' + tableId + '">C&oacute;digo interno</label>');
 			modalHtml.push('					</div>');
 			
+			let cod_desc = "";
+			if( ("" + currentData['cod_desc']).length > 0 ){
+				cod_desc = currentData['cod_desc'];
+			}
 			modalHtml.push('					<div class="form-floating mb-3">');
-			modalHtml.push('						<input required="required" type="text" class="form-control" id="maestra-cod_desc-' + tableId + '" name="maestra-cod_desc-' + tableId + '" placeholder="Descripci&oacute;n">');
+			modalHtml.push('						<input value="' + cod_desc + '" required="required" type="text" class="form-control" id="maestra-cod_desc-' + tableId + '" name="maestra-cod_desc-' + tableId + '" placeholder="Descripci&oacute;n">');
 			modalHtml.push('						<label for="maestra-cod_desc-' + tableId + '">Descripci&oacute;n c&oacute;digo</label>');
 			modalHtml.push('					</div>');
 			
+			let porcentaje = "";
+			if( ("" + currentData['porcentaje']).length > 0 ){
+				porcentaje = currentData['porcentaje'];
+			}
 			modalHtml.push('					<div class="form-floating mb-3">');
-			modalHtml.push('						<input required="required" type="number" class="form-control" id="maestra-porcentaje-' + tableId + '" name="maestra-porcentaje-' + tableId + '" placeholder="0.0" step="any">');
+			modalHtml.push('						<input value="' + porcentaje + '" required="required" type="number" class="form-control" id="maestra-porcentaje-' + tableId + '" name="maestra-porcentaje-' + tableId + '" placeholder="0.0" step="any">');
 			modalHtml.push('						<label for="maestra-porcentaje-' + tableId + '">Porcentaje</label>');
 			modalHtml.push('					</div>');
 			modalHtml.push('				</form>');
@@ -584,7 +621,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
 			modalHtml.push('			</div>');
 			modalHtml.push('			<div class="modal-footer">');
 			modalHtml.push('				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>');
-			modalHtml.push('				<button onclick="' + instancia + '.setFieldData();" type="button" class="btn btn-primary">Guardar</button>');
+			modalHtml.push('				<button onclick="' + instancia + '.setFieldData();" type="button" class="btn btn-primary" data-bs-dismiss="modal">Actualizar tabla</button>');
 			modalHtml.push('			</div>');
 			modalHtml.push('		</div>');
 			modalHtml.push('	</div>');
@@ -592,6 +629,35 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
             
             const mdl = jQuery( modalHtml.join('') );
             mdl.modal('show');
+            
+            maestraGrpObtener(function( oR ){
+            
+				const oDt = JSON.parse( ut.b64DecodeUnicode( oR ) );
+				
+				const htmltmp = [];
+				htmltmp.push('<div class="form-floating">');
+				htmltmp.push('	<select class="form-select" id="' + selId + '" name="' + selId + '" aria-label="Grupos">');
+            	if( oDt.length > 0 ){
+            		for (const ind in oDt ) {
+                    	if ( Object.hasOwnProperty.call( oDt, ind ) ) {
+                    		const _el = oDt[ ind ];
+                    		let selItem = "";
+                			if( currentData['grupo'] == _el ){
+                				selItem = 'selected="selected"';
+                			}
+                    		
+                    		htmltmp.push('		<option value="' + _el + '" ' + selItem + '>' + _el + '</option>');
+                		}
+            		}
+            		
+            	}
+            	htmltmp.push('		</select>');
+            	htmltmp.push('	<label for="' + selId + '">Grupo</label>');
+            	htmltmp.push('</div>');
+            	jQuery("#" + selContId).html( htmltmp.join('') );
+            
+            });
+            
         });
         jQuery(`.btn-nuevo-${tableId}`).on('click', function() {
         	const fData = ictrl.getFormattedDate();
@@ -688,40 +754,27 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
             const mdl = jQuery( modalHtml.join('') );
             mdl.modal('show');
             
-			const form_data = new FormData();
-            form_data.append('ajax', '<?php echo md5(IndexCtrl::API_MaestrasGrpVirtualGet ); ?>');
-        
-            __TransportarData(
-                form_data,
-                function( oR ) {
-                	const oDt = JSON.parse( ut.b64DecodeUnicode( oR ) );
+            maestraGrpObtener(function( oR ){
+            
+				const oDt = JSON.parse( ut.b64DecodeUnicode( oR ) );
                 	
-                	if( oDt.length > 0 ){
-                		const htmltmp = [];
-                		for (const ind in oDt ) {
-                        	if ( Object.hasOwnProperty.call( oDt, ind ) ) {
-                        		const _el = oDt[ ind ];
-                        		const oItem = grpItemsTpl( _el, jQuery( ulId ) );
-                        		htmltmp.push( oItem['html'] );
-                    		}
+            	if( oDt.length > 0 ){
+            		const htmltmp = [];
+            		for (const ind in oDt ) {
+                    	if ( Object.hasOwnProperty.call( oDt, ind ) ) {
+                    		const _el = oDt[ ind ];
+                    		const oItem = grpItemsTpl( _el, jQuery( ulId ) );
+                    		htmltmp.push( oItem['html'] );
                 		}
-                		jQuery("#" + ulId).html( htmltmp.join('') );
-                		agregarAgarre( { "contenedor" : ulId, "hijos": 'list-group-item' } );
-                	}
-                	else{
-                		jQuery( "#" + ulId ).html('No hay items');
-                	}
-                },
-                function ( err ) {
-                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
-                    const alerta = jQuery(objmdlErr + ' div.alert');
-                    alerta.attr('class','alert alert-danger');
-                    alerta.html( err.responseText );
-        
-                    jQuery( objmdlErr ).modal('show');
-                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
-                }
-            );
+            		}
+            		jQuery("#" + ulId).html( htmltmp.join('') );
+            		agregarAgarre( { "contenedor" : ulId, "hijos": 'list-group-item' } );
+            	}
+            	else{
+            		jQuery( "#" + ulId ).html('No hay items');
+            	}
+            
+            });
             
             mdl.find( '#' + frmId ).on('submit', function(e) {
                 e.preventDefault();
