@@ -1248,6 +1248,12 @@ class OperacionesCtrl {
 	// Deducciones precargadas
 	const CFG_DEDUCCIONES_DATA = 'cfgdeduccionesdata';
 	
+	// Maestra
+	// TODO: Tarea 142 - Constante para identificar datos de la tabla maestra
+	const CFG_MAESTRA_DATA = 'cfgmaestradata';
+	// TODO: Tarea 143 - Constante para identificar datos de los grupos en tabla maestra
+	const CFG_MAESTRAGRP_DATA = 'cfgmaestragrpdata';
+	
 	// Configuracion para requerimientos
 	/**
      * Configuración para mezcla de requerimientos
@@ -7192,7 +7198,90 @@ class OperacionesCtrl {
 	    
 	    return self::retorno(['return' => true], '', '') ;
 	}
-	// Deducciones (virtual) INI
+	// Deducciones (virtual) FIN
+	
+	// Maestra Virtual INI
+	// TODO: Tarea 144 - Esta función agrega los datos de la tabla maestra de descuentos
+	public static function maestra_Virtual_Agregar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'maestra_Virtual_Agregar - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $newCfg = [
+	        "id" => self::CFG_MAESTRA_DATA,
+	        "vl" => $d[ 'vl' ],
+	        "ufull" => trim( $usu->getNombres() . " " . $usu->getApellidos())
+	    ];
+	    try {
+	        self::EscribirConfig( $newCfg );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        return self::retorno([], IndexCtrl::ERR_COD_MSJ_ERR_COMUN, 'maestra_Virtual_Agregar - EscribirConfig: ' . $e->getMessage());
+	    }
+	    
+	    return self::retorno(['return' => true], '', '') ;
+	}
+	// TODO: Tarea 145 - Esta función obtiene los datos de la tabla maestra de descuentos
+	public static function maestra_Virtual_Obtener( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'maestra_Virtual_Obtener - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_MAESTRA_DATA = isset( $cfg[ OperacionesCtrl::CFG_MAESTRA_DATA ]) ? $cfg[ OperacionesCtrl::CFG_MAESTRA_DATA ]["val"] : base64_encode( '[]' );
+	    
+	    return $_CFG_MAESTRA_DATA;
+	}
+	// TODO: Tarea 146 - Esta función agrega los datos de los grupos que usa la tabla maestra
+	public static function maestraGrp_Virtual_Agregar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'maestraGrp_Virtual_Agregar - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $newCfg = [
+	        "id" => self::CFG_MAESTRAGRP_DATA,
+	        "vl" => $d[ 'vl' ],
+	        "ufull" => trim( $usu->getNombres() . " " . $usu->getApellidos())
+	    ];
+	    try {
+	        self::EscribirConfig( $newCfg );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        return self::retorno([], IndexCtrl::ERR_COD_MSJ_ERR_COMUN, 'maestraGrp_Virtual_Agregar - EscribirConfig: ' . $e->getMessage());
+	    }
+	    
+	    return self::retorno(['return' => true], '', '') ;
+	}
+	// TODO: Tarea 147 - Esta función obtiene los datos de los grupos que usa la tabla maestra
+	public static function maestraGrp_Virtual_Obtener( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'maestraGrp_Virtual_Obtener - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_MAESTRAGRP_DATA = isset( $cfg[ OperacionesCtrl::CFG_MAESTRAGRP_DATA ]) ? $cfg[ OperacionesCtrl::CFG_MAESTRAGRP_DATA ]["val"] : base64_encode( '[]' );
+	    
+	    return $_CFG_MAESTRAGRP_DATA;
+	}
+	// Maestra Virtual FIN
 	
 	// Usabilidad INI
 	/**
