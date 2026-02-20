@@ -446,9 +446,19 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			ut.validarFrm( dt['formid'], function ( r ) {
             	closeAllModal();
             	
+            	const datafields = [];
+            	jQuery("[data-staticfield]").each(function(i,ob){
+                    const _ob = jQuery( ob );
+                    const _dt = _ob.data();
+                    if ( _dt['staticfield'] !== "" ) {
+						datafields.push( { 'campo' : _ob.attr('id'), 'staticfield' : _dt['staticfield'] } );
+                    }
+				});
+            	
             	r['paquetes_id'] = idMod;
             	r['flujositems_id'] = idFlId;
             	r['token'] = uDt;
+            	r['extras'] = datafields;
             	
         		const opc = { 'id' : 'ajaxldr' };
                 const objmdl = mngModal.dibujar( opc );

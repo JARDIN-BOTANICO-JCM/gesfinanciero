@@ -352,6 +352,7 @@ function renderEncuesta(json, regId) {
     return form;
 }
 
+<?php //TODO: Tarea 150 - Renderizar los nombres estáticos en los campos de los formularios ?>
 /**
  * Renderiza recursivamente un conjunto de campos en un contenedor DOM.
  *
@@ -368,7 +369,16 @@ function renderFields(fields, parent, regId) {
   for (var i = 0; i < fields.length; i++) {
     var field = fields[i];
     var formGroup = jQuery('<div class="mb-3"></div>');
+    
     var nameAttr = 'field_' + i + '_' + regId; // Math.floor(Math.random() * 100000);
+    
+    
+    let nameAttrSf = "";
+    if (Object.hasOwnProperty.call( field, 'staticfield' ) ) {
+    	if( field[ 'staticfield' ] !== "" ){
+    		nameAttrSf = field[ 'staticfield' ];
+    	}
+    }
 
     if (field.type === 'checkbox') {
       var label = jQuery('<label class="form-label"></label>')
@@ -377,7 +387,8 @@ function renderFields(fields, parent, regId) {
 
       var checkbox = jQuery('<input type="checkbox" class="form-check-input mt-1 ms-2">')
         .attr('id', nameAttr)
-        .attr('name', nameAttr);
+        .attr('name', nameAttr)
+        .attr('data-staticfield', nameAttrSf);
 
       if (field.required) {
 		checkbox.prop('required', true);
@@ -387,7 +398,8 @@ function renderFields(fields, parent, regId) {
       const ocultoName = 'ocul' + nameAttr;
       const oculto = jQuery('<input type="hidden" value="' + field.label + '">')
         .attr('id', ocultoName)
-        .attr('name', ocultoName);
+        .attr('name', ocultoName)
+        .attr('data-staticfield', nameAttrSf);
 
       formGroup.append(label, oculto, checkbox);
 
@@ -433,7 +445,8 @@ function renderFields(fields, parent, regId) {
       const ocultoName = 'ocul' + nameAttr;
       const oculto = jQuery('<input type="hidden" value="' + field.label + '">')
         .attr('id', ocultoName)
-        .attr('name', ocultoName);
+        .attr('name', ocultoName)
+        .attr('data-staticfield', nameAttrSf);
         
       formGroup.append(label, oculto);
       
@@ -442,16 +455,18 @@ function renderFields(fields, parent, regId) {
 
       if (field.type === 'text') {
         input = jQuery('<input type="text" class="form-control">')
-          .attr('id', nameAttr)
-          .attr('name', nameAttr)
-          .attr('placeholder', field.placeholder || '');
+			.attr('id', nameAttr)
+			.attr('name', nameAttr)
+			.attr('placeholder', field.placeholder || '')
+			.attr('data-staticfield', nameAttrSf);
       }
 
       else if (field.type === 'datetime') {
         input = jQuery('<input type="text" class="form-control datetime-input">')
-          .attr('id', nameAttr)
-          .attr('name', nameAttr)
-          .attr('placeholder', field.placeholder || '');
+            .attr('id', nameAttr)
+            .attr('name', nameAttr)
+            .attr('placeholder', field.placeholder || '')
+            .attr('data-staticfield', nameAttrSf);
 
         // Inicia flatpickr solo con fecha (sin hora)
         setTimeout(function () {
@@ -464,14 +479,17 @@ function renderFields(fields, parent, regId) {
 
       else if (field.type === 'file') {
         input = jQuery('<input type="file" class="form-control">')
-          .attr('id', nameAttr)
-          .attr('name', nameAttr);
+            .attr('id', nameAttr)
+            .attr('name', nameAttr)
+            .attr('data-staticfield', nameAttrSf);
       }
 
       else if (field.type === 'select') {
         input = jQuery('<select class="form-select"></select>')
-          .attr('id', nameAttr)
-          .attr('name', nameAttr);
+            .attr('id', nameAttr)
+            .attr('name', nameAttr)
+            .attr('data-staticfield', nameAttrSf);
+        
 		input.append('<option selected="selected" disabled="disabled" value="">Escoja una opci&oacute;n</option>');
 		
         if (field.options && Array.isArray(field.options)) {
