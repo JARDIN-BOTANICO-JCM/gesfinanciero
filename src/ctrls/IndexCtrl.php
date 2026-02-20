@@ -938,6 +938,13 @@ class IndexCtrl extends Pagina {
 	const API_MaestrasGrpVirtualGet = 'API_MaestrasGrpVirtualGet';
 	// Maestras Virtual FIN
 	
+	// Reglas Virtual INI
+	const API_ReglasVirtualAdd = 'API_ReglasVirtualAdd';
+	const API_ReglasVirtualGetAjax = 'API_ReglasVirtualGetAjax';
+	const API_ReglasVirtualDel = 'API_ReglasVirtualDel';
+	const API_ReglasVirtualHelperGet = 'API_ReglasVirtualHelperGet';
+	// Reglas Virtual FIN
+	
 	// requerimientos INI
 	/**
 	 * Constante de endpoint API para obtener requerimientos de plantillas vía AJAX
@@ -2233,6 +2240,51 @@ class IndexCtrl extends Pagina {
 				    die("");
 				}
 				// Maestra Virtual FIN
+				
+				// Reglas Virtual INI
+				if ( $_POST["ajax"] == md5( self::API_ReglasVirtualAdd ) ) {
+				    try {
+				        $ok = OperacionesCtrl::reglas_Virtual_Agregar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_ReglasVirtualGetAjax ) ) {
+				    try {
+				        $ok = OperacionesCtrl::reglas_Virtual_Obtener_Ajax($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				
+				if ( $_POST["ajax"] == md5( self::API_ReglasVirtualDel ) ) {
+				    try {
+				        $ok = OperacionesCtrl::reglas_Virtual_Eliminar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				
+				if ( $_POST["ajax"] == md5( self::API_ReglasVirtualHelperGet ) ) {
+				    try {
+				        $ok = OperacionesCtrl::reglas_Virtual_Helper_Obtener($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Reglas Virtual FIN
 
 				// requerimientostpls INI
 				if ($_POST["ajax"] == md5(self::API_RequerimientostplsGetAjax)) {

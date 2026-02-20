@@ -126,6 +126,7 @@ use src\sistema\Headerbar\Headerbar;
 var fieldIdCounter = 0;
 var formulario = [];
 
+<?php //TODO: Tarea 149 - Agregar un nuevo campo que permita identificar con un ID único los campos ?>
 /**
  * Añade dinámicamente un campo al contenedor especificado.
  *
@@ -153,11 +154,15 @@ function addField(container, data) {
     var typeCol = jQuery('<div class="col mb-2"></div>').append(typeSelect);
     
     var requiredCheck = jQuery('<div class="form-check">' +
+    '<label class="form-check-label">' +
     '<input class="form-check-input" type="checkbox">' +
-    '<label class="form-check-label">Obligatorio</label>' +
+    'Obligatorio' +
     '</div>');
     requiredCheck.find('input').prop('checked', data && data.required || false);
-    var requiredCol = jQuery('<div class="col mb-2"></div>').append(requiredCheck);
+    var requiredCol = jQuery('<div class="col-auto mb-2 d-flex align-items-center" style="width: 150px;min-height: 45px;"></div>').append(requiredCheck);
+    
+	const staticfieldNameInput = jQuery('<input type="text" class="form-control staticfield-input" placeholder="Identidad &uacute;nica del campo">').val(data && data.staticfield || '');
+	const staticfieldCol = jQuery('<div class="col mb-2"></div>').append( staticfieldNameInput );
     
     var deleteBtn = jQuery('<button type="button" rol="button" class="btn btn-danger btn-sm">Eliminar</button>');
     var deleteCol = jQuery('<div class="col-auto mb-2 text-end"></div>').append(deleteBtn);
@@ -165,7 +170,7 @@ function addField(container, data) {
     	field.remove();
     });
     
-    row.append(labelCol, placeholderCol, typeCol, requiredCol, deleteCol);
+    row.append(labelCol, placeholderCol, typeCol, requiredCol, staticfieldCol, deleteCol);
     //field.append('<span class="text-muted">field_' + fieldIdCounter + '</span>');
     field.append(row);
     
@@ -205,7 +210,7 @@ function addField(container, data) {
  * @param {HTMLElement} container Contenedor DOM donde se renderiza/actualiza el campo.
  * @param {Object} [data]       Datos opcionales para configurar el nuevo campo (valores, atributos, etc.).
  */
-function updateFieldType(selectEl, container, data) {
+function updateFieldType(selectEl, container, data) {	
     container.empty();
     var type = selectEl.val();
     
@@ -252,7 +257,8 @@ function serializeForm(container) {
       label: row.find('input[placeholder="Etiqueta"]').val(),
       placeholder: row.find('input.placeholder-input').val(),
       type: row.find('select').val(),
-      required: row.find('input[type="checkbox"]').prop('checked')
+      required: row.find('input[type="checkbox"]').prop('checked'),
+      staticfield: row.find('input.staticfield-input').val()
     };
 
     var extra = $card.find('> .mt-2');

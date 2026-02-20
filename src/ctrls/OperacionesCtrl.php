@@ -1254,6 +1254,9 @@ class OperacionesCtrl {
 	// TODO: Tarea 143 - Constante para identificar datos de los grupos en tabla maestra
 	const CFG_MAESTRAGRP_DATA = 'cfgmaestragrpdata';
 	
+	// Reglas
+	const CFG_REGLAS_DATA = 'cfgreglasdata';
+	
 	// Configuracion para requerimientos
 	/**
      * Configuración para mezcla de requerimientos
@@ -7283,6 +7286,271 @@ class OperacionesCtrl {
 	}
 	// Maestra Virtual FIN
 	
+	
+	// TODO: Tarea 154 - Crear una función que sirve para agregar reglas para deducciones
+	// Reglas Virtual INI
+	public static function reglas_Virtual_Agregar ( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'reglas_Virtual_Agregar - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    $usrdt = trim( $usu->getNombres() . " " . $usu->getApellidos());
+	    
+	    $cfg_dt_b64 = self::reglas_Virtual_Obtener( [] );
+	    $cfg_str = base64_decode( $cfg_dt_b64 );
+	    $cfg_json = json_decode( $cfg_str, true ) ;
+	    
+	    $data = $data = base64_decode( $d[ 'vl' ] );
+	    $json = json_decode( $data, true );
+	    $json['fechamod'] = date("Y-m-d H:i:s");
+	    $json['usuario'] = $usrdt;
+	    
+	    if ( !isset( $cfg_json[ $json['reglaid'] ] ) ) {
+	        foreach ( $cfg_json as $kCfgJ ) {
+	            if( isset( $kCfgJ['html'] ) ){
+	                if( $kCfgJ['html'] == $json['html'] ){
+	                    http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+	                    return self::retorno([], IndexCtrl::ERR_COD_REGISTRO_EXISTENTE, 'Ya existe esta regla');
+	                }
+	            }
+	        }
+	    }
+	    
+	    $cfg_json[ $json['reglaid'] ] = $json;
+	    
+	    $newCfg = [
+	        "id" => self::CFG_REGLAS_DATA,
+	        "vl" => base64_encode ( json_encode( $cfg_json ) ),
+	        "ufull" => $usrdt
+	    ];
+	    try {
+	        self::EscribirConfig( $newCfg );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        return self::retorno([], IndexCtrl::ERR_COD_MSJ_ERR_COMUN, 'reglas_Virtual_Agregar - EscribirConfig: ' . $e->getMessage());
+	    }
+	    
+	    return self::retorno(['return' => true], '', '') ;
+	}
+	// TODO: Tarea 155 - Crear una función para obtener los datos de las reglas de deducción
+	public static function reglas_Virtual_Obtener( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'maestraGrp_Virtual_Obtener - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    
+	    $cfg = self::LeerConfigCorp();
+	    $_CFG_REGLAS_DATA = isset( $cfg[ OperacionesCtrl::CFG_REGLAS_DATA ]) ? $cfg[ OperacionesCtrl::CFG_REGLAS_DATA ]["val"] : base64_encode( '[]' );
+	    
+	    return $_CFG_REGLAS_DATA;
+	}
+	// TODO: Tarea 156 - Crear una función para obtener los datos para la dataTable
+	public static function reglas_Virtual_Obtener_Ajax( $d ){
+	    $cfg_dt_b64 = self::reglas_Virtual_Obtener( [] );
+	    $cfg_str = base64_decode( $cfg_dt_b64 );
+	    $cfg_json = json_decode( $cfg_str, true ) ;
+	    
+	    $r = [];
+	    foreach ( $cfg_json as $kRg ) {
+	        
+	        if ( isset( $kRg['html'] ) ) {
+	            $exp = implode(" ", Utiles::htmlHandler( [ 'html' => $kRg['html'] ] ));
+	            
+	            $cols = [
+	                "id" => $kRg['reglaid'],
+	                "regla" => count( $kRg['mdeduc'] ),
+	                "exp" => $exp,
+	                "usuario" => $kRg["usuario"],
+	                "descr" => $kRg["descr"],
+	                "fechamod" => $kRg["fechamod"]
+	            ];
+	            
+	            $r[] = $cols;
+	        }
+	    }
+	    
+	    return $r;
+	}
+	// TODO: Tarea 157 - Crear una función para eliminar reglas
+	public static function reglas_Virtual_Eliminar ( $d ){
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        return self::retorno([], IndexCtrl::ERR_COD_SESION_INACTIVA, 'reglas_Virtual_Eliminar - Sesi&oacute;n finalizada, vuelve a iniciar sesi&oacute;n');
+	    }
+	    $usrdt = trim( $usu->getNombres() . " " . $usu->getApellidos());
+	    
+	    $cfg_dt_b64 = self::reglas_Virtual_Obtener( [] );
+	    $cfg_str = base64_decode( $cfg_dt_b64 );
+	    $cfg_json = json_decode( $cfg_str, true ) ;
+	    
+	    $data = $data = base64_decode( $d[ 'vl' ] );
+	    $json = json_decode( $data, true );
+	    
+	    if ( isset( $cfg_json[ $json['reglaid'] ] ) ) {
+	        unset( $cfg_json[ $json['reglaid'] ] ) ;
+	    }
+	    else{
+	        http_response_code( IndexCtrl::ERR_COD_USUARIO_NO_EXISTE_BY_ID );
+	        return self::retorno([], IndexCtrl::ERR_COD_USUARIO_NO_EXISTE_BY_ID, 'reglas_Virtual_Eliminar - Este registro no existe');
+	    }
+	    
+	    $cfg_json[ $json['reglaid'] ] = $json;
+	    
+	    $newCfg = [
+	        "id" => self::CFG_REGLAS_DATA,
+	        "vl" => base64_encode ( json_encode( $cfg_json ) ),
+	        "ufull" => $usrdt
+	    ];
+	    try {
+	        self::EscribirConfig( $newCfg );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        return self::retorno([], IndexCtrl::ERR_COD_MSJ_ERR_COMUN, 'reglas_Virtual_Eliminar - EscribirConfig: ' . $e->getMessage());
+	    }
+	    
+	    return self::retorno(['return' => true], '', '') ;
+	}
+	// TODO: Tarea 158 - Crear una función para obtener los datos de las reglas de deducción en forma de arreglo
+	public static function reglas_Virtual_Helper_Obtener ( $d ){
+	    
+	    $cfg_dt_b64 = self::reglas_Virtual_Obtener( [] );
+	    $cfg_str = base64_decode( $cfg_dt_b64 );
+	    $cfg_json = json_decode( $cfg_str, true ) ;
+	    
+	    $r = [];
+	    $data = base64_decode( $d[ 'vl' ] );
+	    $json = json_decode( $data, true );
+	    
+	    if ( isset( $cfg_json[ $json['reglaid'] ] ) ) {
+	        $r =  $cfg_json[ $json['reglaid'] ];
+	    }
+	    
+	    return $r;
+	}
+	// TODO: Tarea 159 - Crear una función que permita hacer validaciones de reglas y entregar las deducciones
+	public static function reglas_Virtual_Helper_Validar ( $d ){
+	    $cfg_dt_b64 = self::reglas_Virtual_Obtener( [] );
+	    $cfg_str = base64_decode( $cfg_dt_b64 );
+	    $reglas = json_decode( $cfg_str, true ) ;
+	    
+	    $maestraB64 = base64_decode( self::maestra_Virtual_Obtener( [] ) );
+	    $maestraJs = json_decode( $maestraB64 , true );
+	    
+	    $condi = [];
+	    foreach ( $reglas as $kRegla ) {
+	        
+	        $strinoriginal = $kRegla['html'];
+	        if (isset( $d['charfrom'] ) && isset( $d['charto'] ) ) {
+	            $strinoriginal = mb_convert_encoding( $kRegla['html'], $d['charto'], $d['charfrom'] );
+	        }
+	        elseif ( isset( $d['charto'] ) ) {
+	            $strinoriginal = mb_convert_encoding( $kRegla['html'], $d['charto'] );
+	        }
+	        
+	        $html = Utiles::htmlHandler( [ "html" => $strinoriginal ] );
+	        $regla = implode( " ", $html ) ;
+	        
+	        //echo "reglas: " . $regla . "\n";
+	        $evaluar = self::reglas_Virtual_Helper_TransformarCondicion( [
+	            'condicion' => $regla,
+	            'mapa' => $d
+	        ] );
+	        
+	        
+	        $test = eval( "return " . $evaluar . ";");
+	        if ( $test === true ) {
+	            //$condi[ $kRegla['reglaid'] ] = $kRegla['mdeduc'];
+	            $mdeduc = $kRegla['mdeduc'];
+	            
+	            foreach ( $mdeduc as $kLsM ) {
+	                
+	                foreach ( $maestraJs as $kJs ) {
+	                    if ( $kJs['id'] == $kLsM ) {
+	                        $condi[] = [
+	                            'cod' => $kJs['cod_interno'],
+	                            'desc' => $kJs['cod_desc'],
+	                            'perc' => $kJs['porcentaje']
+	                        ];
+	                    }
+	                }
+	                
+	            }
+
+	        }
+	    }
+	    
+	    return $condi;
+	}
+	
+	// TODO: Tarea 160 - Crear una función que reemplace el texto por una función evaluable
+	private static function reglas_Virtual_Helper_TransformarCondicion( $d ) {
+	    $condicion = $d['condicion'];
+	    $mapa = $d['mapa'];
+	    
+	    $operadores = [
+	        '='   => '==',
+	        'and' => '&&',
+	        'or'  => '||',
+	        'not' => '!',
+	        '('   => '(',
+	        ')'   => ')',
+	        '<'   => '<',
+	        '>'   => '>',
+	        '<='  => '<=',
+	        '>='  => '>='
+	    ];
+	    
+	    $tokens = preg_split('/(<=|>=|==|&&|\|\||[()=<>!])|\s+/', $condicion, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
+	    
+	    $resultado = [];
+	    foreach ($tokens as $token) {
+	        $tokenLower = strtolower($token);
+	        
+	        // CASO A: Es una llave del arreglo de datos
+	        if (isset($mapa[$token])) {
+	            $valor = $mapa[$token]['value'];
+	            
+	            if (is_numeric($valor)) {
+	                $resultado[] = $valor;
+	            } else {
+	                // Convertir a minúsculas y entre comillas
+	                $resultado[] = '"' . mb_strtolower($valor, 'UTF-8') . '"';
+	            }
+	            continue;
+	        }
+	        
+	        // CASO B: Es un operador permitido
+	        if (isset($operadores[$tokenLower])) {
+	            $resultado[] = $operadores[$tokenLower];
+	            continue;
+	        }
+	        
+	        // CASO C: Es un valor literal ya escrito (como "si" o "no" en el string original)
+	        // Si no es una llave del arreglo y no es operador, lo tratamos como string literal
+	        if (!in_array($tokenLower, ['&&', '||', '!', '==', '<', '>', '<=', '>=', '(', ')'])) {
+	            // Si el token ya viene con comillas, las quitamos para normalizar y las volvemos a poner
+	            $limpio = trim($token, '"\'');
+	            $resultado[] = '"' . mb_strtolower($limpio, 'UTF-8') . '"';
+	        } else {
+	            $resultado[] = $token;
+	        }
+	    }
+	    
+	    return implode(' ', $resultado);
+	}
+	
+	// Reglas Virtual FIN
+	
 	// Usabilidad INI
 	/**
 	 * Agrega una entrada de usabilidad construida desde el array $d.
@@ -12523,6 +12791,19 @@ EOD;
 	    
 	    $pkreq = self::paquetesrequ_Obtener([ 'w_paquetes_id' => $json['id'] ]);
 	    
+        // Revisamos que reglas se cumplen
+	    $rOkCampos = [];
+	    foreach ($pkreq as $kPk ) {
+	        // revisar las respuestas de cada formulario
+	        if ( isset( $kPk['valor'] ) ) {
+	            $resp = json_decode($kPk['valor'], true );
+	            $cfgdt = [ "arreglo" => $resp, "campo" => "staticfield", "vervalor" => true ];
+	            $rOkCampos = array_merge( $rOkCampos, self::formularios_Helper_buscarValoresCampo( $cfgdt ) );
+	        }
+	    }
+	    $rOkCampos['charto'] = 'iso-8859-1';
+	    $reglasDeduc = self::reglas_Virtual_Helper_Validar( $rOkCampos );
+	    
 	    $usr_perfilactual = 0;
 	    $usrs = [];
 	    foreach ($flujositems as $kItem) {
@@ -12579,6 +12860,10 @@ EOD;
 	            }
 	        }
 	        
+	        if ( count( $reglasDeduc ) > 0 ) {
+	            $rEval = array_merge( $rEval, $reglasDeduc );
+	        }
+	        
 	        $mesAplica['deducciones'] = $rEval;
 	    }
 	    
@@ -12597,7 +12882,8 @@ EOD;
 	        'solicitante' => $user,
 	        'paquete' => $pkreq,
 	        'datosmes' => $mesAplica,
-	        'obligaciones' => $tempobl
+	        'obligaciones' => $tempobl,
+	        'test' => $rOkCampos
 	    ];
 	    
 	    return self::retorno($result, 0, '');
@@ -12671,7 +12957,7 @@ EOD;
 	            }
 	            // >= >=
 	            elseif( $comp1['comparador'] == "mayorigual" && $comp2['comparador'] == "mayorigual" ){
-	                if( $valorccobro >= intval( $comp1['valor'] ) && $valorccobro <= intval( $comp2['valor'] ) ){
+	                if( $valorccobro >= intval( $comp1['valor'] ) && $valorccobro >= intval( $comp2['valor'] ) ){
 	                    return $kCfg['deducciones'];
 	                }
 	            }
@@ -12691,6 +12977,10 @@ EOD;
 	    }
 	    
 	    return [];
+	}
+	
+	public static function flujositems_Helper_EvaluarDecisionesReglas ( $d ){
+	    
 	}
 	
 	/**
@@ -13766,6 +14056,13 @@ EOD;
 	    $forms = array();
 	    $requerimientostplsitems = array();
 	    
+	    //TODO: Tarea 151 - Capturar los ids de los campos y su valor estático 
+	    // indexar extras
+	    $extras = [];
+	    foreach ( $d['extras'] as $kEx ) {
+	        $extras[ $kEx['campo'] ] = $kEx['staticfield'];
+	    }
+	    
 	    foreach ( $d as $kJs => $vJs ) {
 	        if ( Utiles::ComienzaEn($kJs, 'field')  ) {
 	            
@@ -13785,12 +14082,18 @@ EOD;
 	            }
 	            $hldr_fl['path'];
 	            
+	            $sfval = "";
+	            if ( isset( $extras[ $kJs ] ) ) {
+	                $sfval = $extras[ $kJs ];
+	            }
+	            
 	            $idlabel = 'ocul' . $kJs;
 	            $forms[ $requerimientostplsitems_id ]['data'][] = [
 	                'label' => $d[ $idlabel ],
 	                'value' => $valor,
 	                'field' => $kJs,
-	                'file' => $isfile
+	                'file' => $isfile,
+	                'staticfield' => $sfval
 	            ];
 	            $forms[ $requerimientostplsitems_id ]['ref'] = $requerimientostplsitems[ $requerimientostplsitems_id ];
 	        }
@@ -16372,6 +16675,12 @@ EOD;
 	        $wh[] = "frm.`nombre` = ? ";
 	        $pr[] = $d['w_nombre'] ;
 	    }
+	    if ( isset( $d['w_json_all'] ) ) {
+	        if ( $d['w_json_all'] ) {
+	            $wh[] = "JSON_SEARCH(frm.json, 'one', '', NULL, '$[*].staticfield') IS NOT NULL";
+	            //$pr[] = $d['w_nombre'] ;
+	        }
+	    }
 	    
 	    $defWh = "";
 	    if ( count( $wh ) > 0 ) {
@@ -16404,6 +16713,48 @@ EOD;
 	    }
 	    
 	    return $r;
+	}
+	
+	// TODO: Tarea 152 - Se crea una funcion que busque el valor de un campo dentro de un elemento JSON anidado 
+	/**
+	* Busca valores de un campo específico dentro de un arreglo recursivo.
+	* * @param array $d Debe contener ['arreglo' => [...], 'campo' => "nombre_del_campo"]
+	* @return array Lista de valores encontrados que no están vacíos.
+	*/
+	public static function formularios_Helper_buscarValoresCampo( $d ) {
+	    $resultados = [];
+	    $campoBusqueda = $d['campo'] ?? null;
+	    $elementos = $d['arreglo'] ?? [];
+	    $vervalor = $d['vervalor'] ?? false;
+	    
+	    if (!$campoBusqueda || !is_array($elementos)) {
+	        return $resultados;
+	    }
+	    
+	    foreach ($elementos as $nodo) {
+	        if (isset($nodo[$campoBusqueda]) && $nodo[$campoBusqueda] !== "") {
+	            //echo "nodo:\n" . print_r( $nodo , true );
+	            if( $vervalor ){
+	                $resultados[ $nodo[$campoBusqueda] ] = [
+	                    "value" => $nodo["value"] ,
+	                    "file" => $nodo["file"]
+	                ];
+	            }
+	            else{
+	               $resultados[] = $nodo[$campoBusqueda];
+	            }
+	        }
+	        if (isset($nodo['children']) && is_array($nodo['children'])) {
+	            $hijos = self::formularios_Helper_buscarValoresCampo([
+	                'arreglo'  => $nodo['children'],
+	                'campo'    => $campoBusqueda,
+	                'vervalor'    => $vervalor
+	            ]);
+	            $resultados = array_merge($resultados, $hijos);
+	        }
+	    }
+	    return $resultados;
+	    
 	}
 	// Formularios FIN
 	

@@ -40,6 +40,28 @@ try {
     throw new \Exception( $th->getMessage() );
 }
 
+$d_json_campos = [];
+try {
+    $d_json_campos = OperacionesCtrl::formularios_Obtener( [ 'w_json_all' => true ] );
+} catch (\Throwable $th) {
+    throw new \Exception( $th->getMessage() );
+}
+
+$d_json = [];
+foreach ( $d_json_campos as $kJs ) {
+    $objson = json_decode( $kJs['json'], true );
+    $cfgdt = [ "arreglo" => $objson, "campo" => "staticfield" ];
+    $d_json[ $kJs['id'] ] = OperacionesCtrl::formularios_Helper_buscarValoresCampo( $cfgdt );
+}
+
+$defReflista = [];
+$reflista = OperacionesCtrl::reflista_Obtener( [] );
+foreach ( $reflista as $kRl) {
+    if( !( $kRl['nombre'] == "[formulario]" ) ){
+        $defReflista[] = $kRl['nombre'];
+    }
+}
+$d_json[ 'reflista' ] = $defReflista;
 ?>
 <style>
 /* Asegura que el contenedor permita el scroll */
@@ -86,8 +108,36 @@ table.dataTable.nowrap td {
     /* LA CLAVE: El mouse ignora este elemento y detecta lo que hay detrás */
     pointer-events: none !important;
     
+    padding: 0px 10px;
 }
 
+.draggable { 
+    display: inline-block; 
+    padding: 6px 12px; 
+    margin: 5px; 
+    background-color: #f8f9fa; 
+    border: 1px solid #ced4da; 
+    border-radius: 4px; 
+    cursor: grab; 
+} 
+.dropzone { 
+    min-height: 80px;
+    border: 2px dashed #c6d7a4;
+    padding: 10px;
+    background-color: #f8fff5; 
+}
+.dropzone div{
+    border: dashed 2px #d1d1d1;
+    padding: 16px 16px;
+    background-color: #fbfbfb;
+    margin-right: 1px;
+}
+#operators div{
+    border: solid 1px #d1d1d1;
+    margin: 0px 3px 3px 0px;
+    padding: 0px 10px;
+}
+</style>
 
 </style>
 <div id="db-wrapper" class="">
@@ -276,6 +326,134 @@ table.dataTable.nowrap td {
         					</div>
     					</div>
 					</div>
+                    
+<?php               // TODO: Tare 153 - Crear la interface para crear reglas de descuentos ?>
+                	<div class="row">
+                        <div class="col-12 mb-3" >
+                        
+                        	<div class="card">
+                    			<div class="card-body">
+                    				<h5 >Reglas de descuentos</h5>
+                    				<p class="mb-4">Cree reglas basado en los valores o respuestas que los usuarios dan en los formularios para hacer descuentos</p>
+                    				
+                    				<div class="row">
+
+                                        <ul class="nav nav-tabs" id="reglas_myTab" role="tablist">
+                                            <li class="nav-item" role="presentation">
+                                        	    <button class="nav-link active" id="reglas_creartab" data-bs-toggle="tab" data-bs-target="#reglas_crear" type="button" role="tab" aria-controls="reglas_crear" aria-selected="true">Nueva regla</button>
+                                            </li>
+                                            <li class="nav-item" role="presentation">
+                                            	<button class="nav-link" id="reglas_listatab" data-bs-toggle="tab" data-bs-target="#reglas_lista" type="button" role="tab" aria-controls="reglas_lista" aria-selected="false" onclick="listarReglas( this );" >Listado reglas</button>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content" id="reglas_myTabContent">
+                                            <div class="tab-pane fade show active pt-3" id="reglas_crear" role="tabpanel" aria-labelledby="reglas_creartab">
+
+                                            	<div class="row mb-3">
+                                            		<div class="col-12 mb-3">
+                                            			<div class="form-floating">
+                                                        	<textarea class="form-control" placeholder="Descripci&oacute;n de la regla" id="reglas_descr"></textarea>
+                                                        	<label for="reglas_descr">Descripci&oacute;n de la regla</label>
+                                                        </div>
+                                            		</div>
+                                            	</div>
+
+        										<div class="row mb-3">
+                                                    <div class="col-md-4">
+        
+                                                        <div class="dropdown">
+                                                            <button class="btn btn-sm btn-primary dropdown-toggle py-0 mb-2" type="button" id="reglas_camposMenuListaFuente" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            	Seleccione los campos
+                                                            </button>
+                                                            <ul class="dropdown-menu" aria-labelledby="reglas_camposMenuListaFuente">
+                                                                <?php foreach ( $d_json_campos as $kCamp ) : ?>
+                                                                <li><button data-name="<?php echo $kCamp['titulo'] ?>" data-selval="#reglas_camposMenuListaFuente" data-target="#fields" data-value="<?php echo $kCamp['id'] ?>" class="dropdown-item" onclick="reglas.dibujarCampos( this );"><?php echo $kCamp['titulo'] ?></button></li>
+                                                                <?php endforeach; ?>
+                                                                <li><button data-name="Listas de referencia" data-selval="#reglas_camposMenuListaFuente" data-target="#fields" data-value="reflista" onclick="reglas.dibujarCampos( this );" class="dropdown-item" >Listas de referencia</button></li>
+                                                            </ul>
+                                                        </div>
+                                                        
+                                                        <div id="fields" class="border p-2 overflow-scroll" style="height: 100px;"></div>
+                                                    </div>
+                                            
+                                            		<div class="col-md-4">
+                                                        <h5>Operadores</h5>
+                                                        <div id="operators" class="border p-2 d-flex flex-wrap">
+                                                            <div class="draggable">=</div>
+                                                            <div class="draggable">And</div>
+                                                            <div class="draggable">Or</div>
+                                                            <div class="draggable">Not</div>
+                                                            <div class="draggable">(</div>
+                                                            <div class="draggable">)</div>
+                                                            <div class="draggable">&lt;</div>
+                                                            <div class="draggable">&gt;</div>
+                                                            <div class="draggable">&lt;=</div>
+                                                            <div class="draggable">&gt;=</div>
+                                                        </div>
+                                            		</div>
+                                            		
+                                            		<div class="col-md-4">
+                                                        <h5>Valores</h5>
+                                                        <input type="text" id="valueInput" class="form-control mb-2" placeholder="Escribe un valor y presiona Enter">
+                                                        <div id="values" class="border p-2 overflow-scroll" style="max-height: 70px;min-height: 40px;"></div>
+                                                    </div>
+                                            	</div>
+                                            	
+                                            	<div class="row mb-3">
+													<div class="col mb-3">
+                                                        <h5>&Aacute;rea de Construcci&oacute;n</h5>
+                                                        <div id="expressionArea" class="dropzone d-flex"></div>
+                                                    </div>
+            									</div>
+
+                                            	<div class="row mb-3">
+            										<div class="col">
+                                                        <button id="exportBtn" class="btn btn-primary">Exportar expresi&oacute;n</button>
+                                                        <pre id="output" class="mt-3 bg-light p-3 border"></pre>
+            										</div>
+                                            	</div>
+                                            	
+                                            	<div class="row mb-3">
+                                            		<h5>Maestra Deducciones</h5>
+                                            		<div id="reglas_maestraDeduccionesCont" class="col overflow-auto" style="max-height: 180px;">
+                                                		<div class="d-flex align-items-center ">
+                                                            <strong>Cargando...</strong>
+                                                            <div class="spinner-border ms-auto spinner-border-sm" role="status" aria-hidden="true"></div>
+                                                        </div>
+                                            		</div>
+                                            	</div>
+                                            	
+                                            	<div class="row mb-3">
+            									 	<div class="col-12 col-md-6 mb-3">
+            											<button data-fn="limpiarGUI" data-vertab="#reglas_listatab" data-descr="#reglas_descr" data-idtarget="#reglas_id" data-expressionarea="#expressionArea" data-output="#output" data-maestradeduccionescont="#reglas_maestraDeduccionesCont" onclick="reglas.guardarGUI( this );" class="btn btn-primary w-100">Guardar Regla</button>
+            										</div>
+            										<div class="col-12 col-md-6 mb-3">
+            											<button onclick="limpiarGUI( );" class="btn btn-danger w-100">Limpiar formulario</button>
+            										</div>
+            										<input type="hidden" id="reglas_id" value="" />
+                                            	</div>
+                                            
+                                            </div>
+                                            <div class="tab-pane fade pt-3" id="reglas_lista" role="tabpanel" aria-labelledby="reglas_listatab">
+                                            
+                                            	<div class="row table-responsive-custom" id="reglasContTb">
+                                                	<div class="col-3">
+                                                    	<div class="d-flex align-items-center">
+                                                          <strong>Loading...</strong>
+                                                          <div class="spinner-border spinner-border-sm ms-auto" role="status" aria-hidden="true"></div>
+                                                        </div>
+                                                	</div>
+                                                </div>
+                                            
+                                            </div>
+                                        </div>
+                    					
+                					</div>
+            					</div>
+        					</div>
+    					</div>
+					</div>
+					
                     <?php endif; ?>
 
                 </div>
@@ -288,6 +466,396 @@ table.dataTable.nowrap td {
 </div>
 
 <script type="application/javascript" src="./temas/js/DataTables/datatables.min.js"></script>
+
+<script type="application/javascript">
+<?php // TODO: Tarea 153 - Se crea la clase ReglasClass que permita manejar los eventos desde el front ?>
+const ReglasClass = function( ){
+	const ls_json = <?php echo json_encode( $d_json ); ?>;
+	
+	let tableId = "tbInt" + ut.GetUUID();
+	
+	const self = this;
+	
+	self.obtenerCamposById = function( d ){
+		let res = [];
+		
+		if ( Object.hasOwnProperty.call( ls_json, d ) ) {
+    		res = ls_json[ d ];
+		}
+		
+		return res;
+	};
+	
+	self.obtenerTodosCampos = function(){
+		return ls_json;
+	};
+	
+	self.dibujarCampos = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const target = jQuery( dt["target"] );
+		const selval = jQuery( dt["selval"] );
+		const selnam = dt["name"] ;
+		
+		let mintxt = selnam;
+		if( selnam.length > 35 ){
+			mintxt = selnam.substr(0, 36) + '...';
+		}
+		
+		selval.html( mintxt );
+		
+		const items = self.obtenerCamposById( dt['value'] );
+		
+		const defhtml = [];
+		defhtml.push ( '<div class="draggable">' );
+		defhtml.push ( items.join( '</div><div class="draggable">' ) );
+		defhtml.push ( '</div>' );
+		target.html( defhtml.join('') );
+	};
+	
+	self.dibujarMaestra = function( d ){
+		const data = d["data"];
+		const target = jQuery( d['target'] );
+		const html = [];
+		
+		html.push('<div class="list-group"> ');
+		for (const ind in data ) {
+        	if ( Object.hasOwnProperty.call( data, ind ) ) {
+        		const _el = data[ ind ];
+        		html.push('		<label class="list-group-item d-flex justify-content-start ">');
+            	html.push('			<input data-id="' + _el['id'] + '" class="form-check-input me-1" type="checkbox" value="">');
+            	html.push('			<div>');
+            	html.push('				<h5 class="mb-0">' + _el['cod_interno'] + '</h5>' );
+            	html.push('				<small class="text-muted">' + _el['cod_desc'] + ' - <strong>Porcentaje</strong> ' + _el['porcentaje'] + '</small>');
+            	html.push('			</div>');
+            	html.push('		</label>');
+    		}
+		}
+		html.push('</div>');
+		
+		target.html( html.join('') );
+
+	};
+	
+	self.guardarGUI = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const expressionarea = jQuery( dt[ 'expressionarea' ] );
+		const output = jQuery( dt[ 'output' ] );
+		const maestradeduccionescont = jQuery( dt['maestradeduccionescont'] );
+		const descr = jQuery( dt['descr'] );
+		
+		const html = ( "" + expressionarea.html() );
+		const exp = output.text();
+		
+		if( ("" + descr.val() ).length > 5 && expressionarea.find("div").length >= 3 && maestradeduccionescont.find(".form-check-input:checked").length > 0 ){
+		
+			let reglaid = ("" + jQuery( dt[ 'idtarget' ] ).val() );
+    		if( reglaid.length == "" ){
+    			reglaid = ut.GetUUID();
+    			jQuery( dt[ 'idtarget' ] ).val( reglaid );
+    		}
+		
+			const mdeduc = [];
+    		maestradeduccionescont.find( ".form-check-input" ).each(function( i, o ){
+                const _fci = jQuery( o );
+                const dt = _fci.data();
+                if( _fci.is(":checked") ){
+                    mdeduc.push( dt['id'] );
+                }
+            });
+    		
+    		const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+    		
+    		const sData = { "descr" : descr.val(), "reglaid": reglaid, "html" : html, "exp" : exp, "mdeduc": mdeduc};
+    		self.guardar( { 
+    			"data" : ut.b64EncodeUnicode( JSON.stringify( sData ) ), 
+    			"fn" : function( rDt ){
+    				jQuery( dt['vertab'] ).trigger( 'click' );
+    				
+    				if ( Object.hasOwnProperty.call( dt, "fn" ) ) {
+    					eval( dt['fn'] + "()" );
+    				}
+    				
+					setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			},
+    			"fne" :  function( err ){
+					const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    
+                    const jsondt = JSON.parse( err.responseText );
+                    
+                    alerta.html( jsondt['msj'] );
+        
+                    jQuery( objmdlErr ).modal('show');
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			}
+    		} );
+		
+		}
+		else{
+			alert( "Revise el \xE1rea de construcci\xF3n o la selecci\xF3n en la lista de la maestra de deducciones" );
+		}
+		
+	};
+	
+	self.guardar = function( d ){
+		const data = d[ 'data' ];
+		const fn = d[ 'fn' ];
+		const fne = d[ 'fne' ];
+		
+        const form_data = new FormData();
+        form_data.append('vl', data);
+        form_data.append('ajax', '<?php echo md5(IndexCtrl::API_ReglasVirtualAdd); ?>');
+    
+        __TransportarData(
+            form_data,
+            function( rDt ) {
+            	fn( rDt );
+            },
+            function ( err ) {
+                fne( err );
+            }
+        );
+		
+	};
+	
+	self.dibujarTb = function(){
+		const html = [];
+		
+		html.push('<table id="' + tableId + '" class="table table-sm table-bordered table-striped table-hover responsive" style="width: 100%;"></table>');
+		
+		return html.join('');
+	};
+	
+	self.dibujarDataTable = function( dt ){
+		const tb = self.dibujarTb();
+		jQuery( dt['contenedor'] ).html( tb );
+		
+		tbInter = jQuery( '#' + tableId ).DataTable({
+            data: dt['data'],
+            type: "text/json",
+            columns: [
+                { 
+                	'title' : 'Id', 
+                	data: 'id',
+                	render : function(data, type, row){
+                		const idIni = data.substr(0,3);
+                		const idFin = data.substr(-5);
+                		return idIni + "..." + idFin;
+                	} 
+            	},
+                { 'title' : 'Descripci&oacute;n', data: 'descr', width: '200px' },
+                { 'title' : 'Deducciones', data: 'regla' },
+                { 'title' : 'Expresi&oacute;n', data: 'exp' },
+                { 'title' : 'Creador', data: 'usuario' },
+                { 'title' : 'Modificaci&oacute;n', data: 'fechamod' },
+                { 
+                	'title' : 'Acciones', 
+                	data: null,
+                	render : function(data, type, row){
+                    	const html = [];
+                        html.push('<button onclick="' + dt['editar'] + '(this);" data-id="' + data['id'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip" data-template="one' + data['id'] + '">');
+                        html.push(' <i class="fe fe-edit fs-5"></i> ');
+                        html.push(' <div id="one' + data['id'] + '" class="d-none"> ');
+                        html.push('     <h6 class="mb-0 text-white">Editar</h6> ');
+                        html.push(' </div> ');
+                        html.push('</button> ');
+                        
+                        <?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR || $usu->getPerfil_id() == IndexCtrl::PERFILES_FINANCIERO ) : ?>
+                        html.push('<button onclick="reglas.eliminar_click(this);" data-id="' + data['id'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover ms-3 texttooltip" data-template="two' + data['id'] + '"> ');
+                        html.push(' <i class="fe fe-trash-2 fs-5"></i> ');
+                        html.push(' <div id="two' + data['id'] + '" class="d-none"> ');
+                        html.push('     <h6 class="mb-0 text-white">Eliminar</h6> ');
+                        html.push(' </div> ');
+                        html.push('</button> ');
+                        <?php endif; ?>
+                        
+                		return html.join('');
+                	}
+            	}
+            ],
+            order: [[5, 'desc']],
+            responsive: false,
+            language: lengua_es,
+            processing: true
+        });
+	};
+	
+	self.eliminar_click = function( o ){
+		if( confirm('Desea eliminar este registro?') ){
+			const opc = { 'id' : 'ajaxldr','size' : 'modal-lg' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+            
+    		const _o = jQuery( o );
+    		const dt = _o.data();
+    		
+    		const data = { "reglaid" : dt['id'] };
+    		
+    		const form_data = new FormData();
+            form_data.append('vl', ut.b64EncodeUnicode( JSON.stringify( data ) ) );
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_ReglasVirtualDel ); ?>');
+                
+    		__TransportarData(
+                form_data,
+                function( oR ) {
+                    const fila = _o.closest('tr');
+                    tbInter.row(fila).remove().draw();
+    
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                },
+                function ( err ) {
+                	const oErr = err.responseJSON;
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( oErr['msj'] );
+        
+                    jQuery( objmdlErr ).modal('show');
+                    setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+                }
+            );
+		}
+	};
+	
+	self.editar_click = function( o, fn ){
+		const opc = { 'id' : 'ajaxldr','size' : 'modal-lg' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const oData = { "reglaid" : dt['id'] };
+		
+		const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_ReglasVirtualHelperGet ); ?>');
+        form_data.append('vl', ut.b64EncodeUnicode( JSON.stringify( oData ) ) );
+        
+        __TransportarData(
+            form_data,
+            function( oR ) {
+            	fn( oR );
+            	setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            },
+            function ( err ) {
+            	const oErr = err.responseJSON;
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( oErr['msj'] );
+        
+                jQuery( objmdlErr ).modal('show');
+                setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+            }
+        );
+	};
+	
+};
+const reglas = new ReglasClass();
+
+const limpiarGUI = function(){
+	jQuery("#expressionArea").html( '' );
+	jQuery("#output").html( '' );
+	jQuery("#reglas_id").val( '' );
+	jQuery( "#reglas_descr" ).val('');
+	
+	jQuery("#reglas_maestraDeduccionesCont .form-check-input").prop('checked', false);
+};
+
+const btnReglasEditar = function( o ){
+	reglas.editar_click( o , function( dt ){
+		jQuery("#reglas_creartab").trigger('click');
+		
+		jQuery("#expressionArea").html( dt['html'] );
+		jQuery("#output").html( dt['exp'] );
+		jQuery("#reglas_id").val( dt['reglaid'] );
+		jQuery("#reglas_descr").val( dt['descr'] );
+		
+		jQuery("#reglas_maestraDeduccionesCont .form-check-input").prop('checked', false);
+		
+		const mdeduc = dt[ 'mdeduc' ];
+		for (const ind in mdeduc ) {
+        	if ( Object.hasOwnProperty.call( mdeduc, ind ) ) {
+        		const _el = mdeduc[ ind ];
+        		jQuery("[data-id=" + _el + "]").prop('checked', true);
+    		}
+		}
+	});
+};
+
+const listarReglas = function( o ){
+    const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
+    const objmdl = mngModal.dibujar( opc );
+    jQuery( objmdl ).modal('show');
+    
+    const form_data = new FormData();
+    form_data.append('ajax', '<?php echo md5( IndexCtrl::API_ReglasVirtualGetAjax ); ?>');
+    
+    __TransportarData(
+        form_data,
+        function( rDt ) {
+        	reglas.dibujarDataTable( { 'contenedor' : '#reglasContTb', 'data' : rDt , 'editar' : 'btnReglasEditar' } );
+        	setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        },
+        function ( err ) {
+        	const oErr = err.responseJSON;
+            const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+            const alerta = jQuery(objmdlErr + ' div.alert');
+            alerta.attr('class','alert alert-danger');
+            alerta.html( oErr['msj'] );
+    
+            jQuery( objmdlErr ).modal('show');
+            setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        }
+    );
+};
+
+</script>
+
+<script type="application/javascript">
+jQuery( document ).ready(function(){
+	var drake = dragula([
+        document.getElementById('fields'),
+        document.getElementById('operators'),
+        document.getElementById('values'),
+        document.getElementById('expressionArea')
+    ], {
+        copy: function (el, source) {
+        	return source.id !== 'expressionArea';
+        },
+        accepts: function (el, target) {
+        	return target.id === 'expressionArea';
+        },
+        removeOnSpill: true
+    });
+
+    document.getElementById('valueInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            let val = e.target.value.trim();
+            if ( val ) {
+                let div = document.createElement('div');
+                div.className = 'draggable';
+                div.textContent = `"${val}"`;
+                document.getElementById('values').appendChild(div);
+                e.target.value = '';
+            }
+        }
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', function() {
+        let items = document.querySelectorAll('#expressionArea .draggable');
+        let expression = Array.from(items).map(el => el.textContent).join(' ');
+        document.getElementById('output').textContent = expression;
+    });
+});
+</script>
 
 <script type="application/javascript">
 <?php // TODO: Tarea 147 - Crea una clase en front que permite controlar las tareas de la la Maestra de descuentos ?>
@@ -321,7 +889,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
                 <button type="button" class="btn btn-primary btn-sm btn-guardar-${tableId}">Guardar</button>
                 <button type="button" class="btn btn-primary btn-sm btn-lista-${tableId}">Items grupo</button>
             </div>
-            <div class="table-responsive-custom">
+            <div class="row table-responsive-custom">
             	<table id="${tableId}" class="table table-sm table-bordered table-striped table-hover responsive display" style="width:100%"></table>
             </div>
         `;
@@ -812,7 +1380,10 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
 
     self.actualizarEstado = function() {
         self.datos = table.rows().data().toArray();
-        // Aquí podrías disparar self.instanceNameCtrlCambios si existe
+    };
+    
+    self.obtenerDatos = function() {
+        return table.rows().data().toArray();
     };
 };
 </script>
@@ -956,6 +1527,9 @@ jQuery( document ).ready(function(){
     miGestion.init();
     miGestion.getData( { 
     	fn : function( oDt ){
+    		const dataDeducciones = JSON.parse( ut.b64DecodeUnicode( oDt ) );
+    		
+    		reglas.dibujarMaestra( { "target" : "#reglas_maestraDeduccionesCont", "data" : dataDeducciones } );
     	} 
     });
 	

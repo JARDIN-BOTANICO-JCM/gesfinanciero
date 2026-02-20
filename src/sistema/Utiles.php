@@ -691,5 +691,25 @@ class Utiles{
         return $size; // Retorna el tamaño en MB como número
     }
     
+    // TODO: Tarea 160 - Crea una funcion que maneje el texto html
+    public static function htmlHandler( $d ){
+        $html = $d['html'];
+        
+        $dom = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $dom->loadHTML( $html );
+        libxml_clear_errors();
+        
+        $xpath = new DOMXPath($dom);
+        $nodes = $xpath->query('//div[@class="draggable"]');
+        
+        $texts = [];
+        foreach ($nodes as $node) {
+            $texts[] = trim($node->textContent);
+        }
+        
+        return $texts;
+    }
+    
 }
 ?>
