@@ -12919,8 +12919,7 @@ EOD;
 	        'solicitante' => $user,
 	        'paquete' => $pkreq,
 	        'datosmes' => $mesAplica,
-	        'obligaciones' => $tempobl,
-	        'test' => $rOkCampos
+	        'obligaciones' => $tempobl
 	    ];
 	    
 	    return self::retorno($result, 0, '');
