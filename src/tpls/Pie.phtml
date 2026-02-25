@@ -1466,6 +1466,14 @@ const Deducciones = function( ){
         	campos.push('del');
         }
         
+        const ocultar = d['ocultar'];
+        let estilo = "";
+        let requ = 'required="required"';
+        if( d['ocultar'] ){
+        	estilo = 'style="display: none; "';
+        	requ = "";
+        }
+        
         let trigger = "";
         if( self.instanceName !== "" ){
         	trigger = self.instanceName + ".disparadores( this );";
@@ -1474,12 +1482,12 @@ const Deducciones = function( ){
         const totalCampos = campos.length || 1;
         const ancho = Math.floor(12 / totalCampos);
     
-        html.push(`<div class="row mb-1" id="${idrow}">`);
+        html.push(`<div class="row mb-1" id="${idrow}" ${estilo} >`);
     
         if (campos.includes('cod')) {
             html.push( '	<div class="col-md-' + ancho + '">' );
             html.push( '		<div class="form-floating">' );
-            html.push( '			<input type="text" class="form-control" onkeyup="' + trigger + '" id="deduc_cod_' + ri + '" name="deduc_cod_' + ri + '" placeholder="Descripci&oacute;n" value="' + (d.cod || '') + '" required="required" >' );
+            html.push( '			<input type="text" class="form-control" onkeyup="' + trigger + '" id="deduc_cod_' + ri + '" name="deduc_cod_' + ri + '" placeholder="Descripci&oacute;n" value="' + (d.cod || '') + '" ' + requ + ' >' );
             html.push( '			<label for="deduc_cod_' + ri + '">C&oacute;digo</label>' );
             html.push( '		</div>' );
             html.push( '	</div >' );
@@ -1488,7 +1496,7 @@ const Deducciones = function( ){
         if (campos.includes('desc')) {
             html.push( '	<div class="col-md-' + ancho + '">' );
             html.push( '		<div class="form-floating">' );
-            html.push( '			<input type="text" class="form-control" onkeyup="' + trigger + '" id="deduc_desc_' + ri + '" name="deduc_desc_' + ri + '" placeholder="Descripci&oacute;n" value="' + (d.desc || '') + '" required="required" >' );
+            html.push( '			<input type="text" class="form-control" onkeyup="' + trigger + '" id="deduc_desc_' + ri + '" name="deduc_desc_' + ri + '" placeholder="Descripci&oacute;n" value="' + (d.desc || '') + '" ' + requ + ' >' );
             html.push( '			<label for="deduc_desc_' + ri + '">Descripci&oacute;n</label>' );
             html.push( '		</div>' );
             html.push( '	</div >' );
@@ -1496,7 +1504,7 @@ const Deducciones = function( ){
         if (campos.includes('perc')) {
             html.push( '	<div class="col-md-' + ancho + '">' );
             html.push( '		<div class="form-floating">' );
-            html.push( '			<input data-labeltarget="#deduc_lbltotal_' + ri + '" data-inputtarget="#deduc_txttotal_' + ri + '" data-valorccobro="' + (d.baser || 0) + '" onkeyup="' + trigger + 'deducciones.calcular( this );" type="text" class="form-control" id="deduc_perc_' + ri + '" name="deduc_perc_' + ri + '" placeholder="Porcentajes" value="' + (d.perc || '') + '" required="required" >' );
+            html.push( '			<input data-labeltarget="#deduc_lbltotal_' + ri + '" data-inputtarget="#deduc_txttotal_' + ri + '" data-valorccobro="' + (d.baser || 0) + '" onkeyup="' + trigger + 'deducciones.calcular( this );" type="text" class="form-control" id="deduc_perc_' + ri + '" name="deduc_perc_' + ri + '" placeholder="Porcentajes" value="' + (d.perc || '') + '" ' + requ + ' >' );
             html.push( '			<label for="deduc_perc_' + ri + '">Porcentajes</label>' );
             html.push( '		</div>' );
             html.push( '	</div >' );
@@ -1550,6 +1558,87 @@ const Deducciones = function( ){
     	else{
     		return html.join('');
     	}
+    };
+    
+
+	self.tpletiquetas = function(d) {
+        const html = [];
+        const idrow = "deduc_row_" + ri;
+    
+        const campos = [];
+        if (typeof d === "object") {
+            campos.push('cod');
+            campos.push('desc');
+            campos.push('perc');
+            if ('baser' in d) {
+            	campos.push('baser');
+            	campos.push('valded');
+        	}
+        	campos.push('del');
+        }
+        
+        let trigger = "";
+        if( self.instanceName !== "" ){
+        	trigger = self.instanceName + ".disparadores( this );";
+        }
+
+        const totalCampos = campos.length || 1;
+        const ancho = Math.floor(12 / totalCampos);
+    
+    	const colorfondo = "#ededed";
+    
+        html.push(`<div class="row mb-1" id="${idrow}">`);
+    
+        html.push(`
+            	<div class="col-md-${ancho}">
+                	<div class="form-floating text-muted" >
+                    	<span class="form-control text-muted" style="background-color: ${colorfondo};" >${d.cod}</span>
+                    	<label style="opacity: .65;transform: scale(.85) translateY(-.5rem) translateX(.15rem);">C&oacute;digo</label>
+                	</div>
+            	</div>
+            	<div class="col-md-${ancho}">
+                	<div class="form-floating text-muted" >
+                    	<span class="form-control text-muted" style="background-color: ${colorfondo};" >${d.desc}</span>
+                    	<label style="opacity: .65;transform: scale(.85) translateY(-.5rem) translateX(.15rem);">Descripci&oacute;n</label>
+                	</div>
+            	</div>
+            	<div class="col-md-${ancho}">
+                	<div class="form-floating text-muted" >
+                    	<span class="form-control text-muted" style="background-color: ${colorfondo};" >${d.perc}</span>
+                    	<label style="opacity: .65;transform: scale(.85) translateY(-.5rem) translateX(.15rem);">Porcentajes</label>
+                	</div>
+            	</div>
+    	`);
+        
+        let comoRev = false;
+        let descuento = 0;
+        if (campos.includes('baser')) {
+        	const bser = ut.intToPesos( (d.baser || 0) ,2,',','.');
+            html.push(`
+            	<div class="col-md-${ancho}">
+                	<div class="form-floating text-muted" >
+                    	<span class="form-control text-muted" style="background-color: ${colorfondo};" >\$ ${bser}</span>
+                    	<label style="opacity: .65;transform: scale(.85) translateY(-.5rem) translateX(.15rem);">Base</label>
+                	</div>
+            	</div>`);
+                
+            descuento = d.baser * d.perc;
+            comoRev = true;
+        }
+        if (campos.includes('valded')) {
+        	const descval = ut.intToPesos( (descuento || 0) ,2,',','.');
+            html.push(`
+            	<div class="col-md-${ancho+1}">
+                	<div class="form-floating text-muted" >
+                    	<span class="form-control text-muted" style="background-color: ${colorfondo};" >\$ ${descval}</span>
+                    	<label style="opacity: .65;transform: scale(.85) translateY(-.5rem) translateX(.15rem);">Descuento</label>
+                	</div>
+            	</div>`);
+        }
+        html.push(`</div>`);
+    
+        ri++;
+    	return {"descuento" : ( descuento || 0 ), "html" : html.join('')};
     };
 	
 	self.eliminarcampo_click = function( o ){

@@ -652,7 +652,13 @@ const ReglasClass = function( ){
             	},
                 { 'title' : 'Descripci&oacute;n', data: 'descr', width: '200px' },
                 { 'title' : 'Deducciones', data: 'regla' },
-                { 'title' : 'Expresi&oacute;n', data: 'exp' },
+                { 
+                	'title' : 'Expresi&oacute;n', 
+                	data: 'exp',
+                	render : function(data, type, row){
+                		return decodeURIComponent(escape(data));
+                	}
+            	},
                 { 'title' : 'Creador', data: 'usuario' },
                 { 'title' : 'Modificaci&oacute;n', data: 'fechamod' },
                 { 
@@ -905,13 +911,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
                     data: null,
                     width: 30,
                     render: function(data, type, row) {
-                        return `
-                            <button class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip btn-edit-row" data-template="btnEditTpl-${tableId}">
-                            	<i class="fe fe-edit fs-5"></i>
-                            	<div id="btnEditTpl-${tableId}" class="d-none">
-                            		<h6 class="mb-0 text-white">Editar</h6>
-                            	</div>
-                            </button>
+                    	let btnDel = `
                             <button class="btn m-0 px-1 py-0 text-muted text-primary-hover ms-0 texttooltip btn-delete-row" data-template="btnDelTpl-${tableId}">
                             	<i class="fe fe-trash-2 fs-5"></i>
                             	<div id="btnDelTpl-${tableId}" class="d-none">
@@ -919,10 +919,19 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
                             	</div>
                             </button>
                         `;
+                    	const btnEdi = `
+                            <button class="btn m-0 px-1 py-0 text-muted text-primary-hover texttooltip btn-edit-row" data-template="btnEditTpl-${tableId}">
+                            	<i class="fe fe-edit fs-5"></i>
+                            	<div id="btnEditTpl-${tableId}" class="d-none">
+                            		<h6 class="mb-0 text-white">Editar</h6>
+                            	</div>
+                            </button>
+                        `;
+                        return `${btnEdi}${btnDel}`;
                     }
                 }
             ],
-            order: [[5, 'desc']],
+            order: [[6, 'desc']],
             responsive: false,
             language: lengua_es,
         });
@@ -964,6 +973,8 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
     		currentData.cod_interno = r['maestra-cod_interno-' + tableId ];
     		currentData.cod_desc = r['maestra-cod_desc-' + tableId ];
     		currentData.porcentaje = r['maestra-porcentaje-' + tableId ];
+    		currentData.esiva = r['maestra-esiva-' + tableId ];
+    		currentData.esreteiva = r['maestra-esreteiva-' + tableId ];
     		
             rowGlb.data(currentData).draw();
             self.actualizarEstado();
@@ -1134,6 +1145,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
 <?php       //TODO: Tarea 148 - Agregar la capacidad para modificar datos desde lo que existe?>
         	const selContId = "maestragrpContSel-" + tableId;
         	const selId = "maestra-grupo-" + tableId;
+        	const _thisEl = jQuery( this );
         	
             rowGlb = table.row(jQuery(this).parents('tr'));
             currentData = rowGlb.data();
@@ -1184,6 +1196,25 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
 			modalHtml.push('						<input value="' + porcentaje + '" required="required" type="number" class="form-control" id="maestra-porcentaje-' + tableId + '" name="maestra-porcentaje-' + tableId + '" placeholder="0.0" step="any">');
 			modalHtml.push('						<label for="maestra-porcentaje-' + tableId + '">Porcentaje</label>');
 			modalHtml.push('					</div>');
+			
+			let esiva = "";
+			if( currentData['esiva'] == "si" ){
+				esiva = 'checked="checked"';
+			}
+			modalHtml.push('					<div class="form-check form-switch">');
+			modalHtml.push('						<input ' + esiva +' value="si" class="form-check-input" type="checkbox" id="maestra-esiva-' + tableId + '" name="maestra-esiva-' + tableId + '">');
+			modalHtml.push('						<label class="form-check-label" for="maestra-esiva-' + tableId + '">Es IVA</label>');
+			modalHtml.push('					</div>');
+			
+			let esreteiva = "";
+			if( currentData['esreteiva'] == "si" ){
+				esreteiva = 'checked="checked"';
+			}
+			modalHtml.push('					<div class="form-check form-switch">');
+			modalHtml.push('						<input ' + esreteiva +' value="si" class="form-check-input" type="checkbox" id="maestra-esreteiva-' + tableId + '" name="maestra-esreteiva-' + tableId + '">');
+			modalHtml.push('						<label class="form-check-label" for="maestra-esreteiva-' + tableId + '">Es RETEIVA</label>');
+			modalHtml.push('					</div>');
+			
 			modalHtml.push('				</form>');
 			
 			modalHtml.push('			</div>');
@@ -1204,7 +1235,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
 				
 				const htmltmp = [];
 				htmltmp.push('<div class="form-floating">');
-				htmltmp.push('	<select class="form-select" id="' + selId + '" name="' + selId + '" aria-label="Grupos">');
+				htmltmp.push('	<select class="form-select" id="' + selId + '" name="' + selId + '" aria-label="Grupos" >');
             	if( oDt.length > 0 ){
             		for (const ind in oDt ) {
                     	if ( Object.hasOwnProperty.call( oDt, ind ) ) {
@@ -1213,8 +1244,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
                 			if( currentData['grupo'] == _el ){
                 				selItem = 'selected="selected"';
                 			}
-                    		
-                    		htmltmp.push('		<option value="' + _el + '" ' + selItem + '>' + _el + '</option>');
+                			htmltmp.push('		<option value="' + _el + '" ' + selItem + '>' + _el + '</option>');
                 		}
             		}
             		
@@ -1222,7 +1252,10 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
             	htmltmp.push('		</select>');
             	htmltmp.push('	<label for="' + selId + '">Grupo</label>');
             	htmltmp.push('</div>');
-            	jQuery("#" + selContId).html( htmltmp.join('') );
+            	
+            	setTimeout( function(){ 
+            		jQuery("#" + selContId).html( htmltmp.join('') ); 
+        		}, 500 );
             
             });
             
@@ -1230,7 +1263,7 @@ const GestionDataTable = function(instancia, containerId, columnasIniciales) {
         jQuery(`.btn-nuevo-${tableId}`).on('click', function() {
         	const fData = ictrl.getFormattedDate();
         	
-            const nuevoObj = { id: ut.GetUUID(), grupo: "grp", cod_interno: "0000", cod_desc: "Descripci&oacute;n", porcentaje: "0.0", fecha: fData, creador: "<?php echo $usu->getNombres() . " " . $usu->getApellidos() ?>" };
+            const nuevoObj = { id: ut.GetUUID(), grupo: "grp", cod_interno: "0000", cod_desc: "Descripci&oacute;n", porcentaje: "0.0", esiva : "false", esreteiva : false, fecha: fData, creador: "<?php echo $usu->getNombres() . " " . $usu->getApellidos() ?>" };
             table.row.add(nuevoObj).draw();
             self.actualizarEstado();
         });
@@ -1519,6 +1552,8 @@ jQuery( document ).ready(function(){
         { title: "C&oacute;digo interno", data: "cod_interno" },
         { title: "Descripci&oacute;n c&oacute;digo", data: "cod_desc" },
         { title: "%", data: "porcentaje" },
+        { title: "IVA", data: "esiva" },
+        { title: "RETEIVA", data: "esreteiva" },
         { title: "Fecha", data: "fecha", width: 150 },
         { title: "Creador", data: "creador", width: 150 }
     ];

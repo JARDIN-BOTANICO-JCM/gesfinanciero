@@ -1127,24 +1127,149 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		return html.join("");
 	};
 	
-	const rol4FormHtml = function( d ) {
+<?php // TODO: Tarea 161 - Crear una funcion que controle las deducciones cuando el usuario es resposable de IVA ?>
+	const esResponsableIVA = function( d ){
 		const datosmes = d['datosmes'];
 		const ddones = datosmes['deducciones'];
 		
 		const valorccobro = datosmes['valorccobro'];
 		
+		let iva = 0;
+		let reteiva = 0;
+		
+		let responsable = false;
+		
+		for (const key in ddones) {
+    	    if ( Object.hasOwnProperty.call( ddones, key ) ) {
+    	        const _el = ddones[key];
+    	        
+    	        let esiva = false;
+    	        if( Object.hasOwnProperty.call( _el, 'esiva' ) ){
+    	        	esiva = _el['esiva'];
+    	        }
+    	        let esreteiva = false;
+    	        if( Object.hasOwnProperty.call( _el, 'esreteiva' ) ){
+    	        	esreteiva = _el['esreteiva'];
+    	        }
+    	        
+    	        if( esiva == "si" ){
+    	        	iva = parseFloat(_el['perc']);
+    	        	responsable = true;
+    	        }
+    	        
+    	        if( esreteiva == "si" ){
+    	        	reteiva = parseFloat(_el['perc']);
+    	        }
+	        }
+        }
+        
+        let resultados = [];
+        if( responsable ){
+        	const porc_despuesiva = iva + parseFloat( 1.0 );
+        	const valDespuesIva = valorccobro / porc_despuesiva;
+        	
+        	const valorBase_fix = parseFloat( valDespuesIva.toFixed(2) );
+        	
+        	const valIva = parseFloat( valorBase_fix ) * iva;
+        	const valIva_fix = parseFloat( valIva.toFixed(2) );
+        	
+        	const valReveIva = valIva_fix * reteiva;
+        	const valReveIva_fix = parseFloat( valReveIva.toFixed(2) );
+        	
+        	resultados.push( {
+        		'base' : valorBase_fix,
+        		'iva' : valIva_fix,
+        		'reteiva' : valReveIva_fix
+        	} );
+        }        
+        
+        return resultados;
+	};
+	
+	const rol4FormHtml = function( d ) {
+		const datosmes = d['datosmes'];
+		const ddones = datosmes['deducciones'];
+		
+		let valorccobro = datosmes['valorccobro'];
+		
+		const responsableIVA = esResponsableIVA( d );
+		let valorccobroOri = valorccobro;
+		
 		deducciones.valorIndiceId( 0 );
 		
 		let totaldesc = 0;
 		const fieldsTmp = [];
+		
+		// si es responsable de iva
+		if( responsableIVA.length > 0 ){
+			valorccobroOri = responsableIVA[0]['base'];
+			
+			let htmlBruto = deducciones.tpletiquetas( { "cod" : "0", "desc" : "Valor en bruto", "perc" : "0.0", "baser" : valorccobro } );;
+			let htmlIva = "";
+			let htmlReteIva = "";
+			for (const key in ddones) {
+        	    if (Object.hasOwnProperty.call( ddones, key ) ) {
+        	        const _el = ddones[key];
+        	        
+    				//let esiva = false;
+        	        //if( Object.hasOwnProperty.call( _el, 'esiva' ) ){ esiva = _el['esiva']; }
+        	        let esreteiva = false;
+        	        if( Object.hasOwnProperty.call( _el, 'esreteiva' ) ){ esreteiva = _el['esreteiva']; }
+        	        
+        	        //if( esiva == "si" ){
+        	        //	htmlIva = deducciones.tpletiquetas( { "cod" : _el['cod'], "desc" : _el['desc'], "perc" : _el['perc'], "baser" : valorccobroOri } );
+        	        //}
+        	        if( esreteiva == "si" ){
+        	        	htmlReteIva = deducciones.tpletiquetas( { "cod" : _el['cod'], "desc" : _el['desc'], "perc" : _el['perc'], "baser" : responsableIVA[0]['iva'] } );
+        	        }
+
+    	        }
+	        }
+	        
+	        fieldsTmp.push ( htmlBruto['html'] );
+	        //fieldsTmp.push ( htmlIva['html'] );
+	        fieldsTmp.push ( htmlReteIva['html'] );
+			
+		}
+		
         for (const key in ddones) {
     	    if (Object.hasOwnProperty.call( ddones, key ) ) {
     	        const _el = ddones[key];
     	        
-    	        const dtCamps = deducciones.tplcampos( { "cod" : _el['cod'], "desc" : _el['desc'], "perc" : _el['perc'], "baser" : valorccobro } );
-    	        fieldsTmp.push ( dtCamps['html'] );
+    	        let esiva = false;
+    	        if( Object.hasOwnProperty.call( _el, 'esiva' ) ){
+    	        	esiva = _el['esiva'];
+    	        }
+    	        let esreteiva = false;
+    	        if( Object.hasOwnProperty.call( _el, 'esreteiva' ) ){
+    	        	esreteiva = _el['esreteiva'];
+    	        }
     	        
-    	        totaldesc += dtCamps['descuento'];
+    	        let nuevocampo = false;
+    	        let agregarCampo = true;
+    	        
+    	        if( responsableIVA.length > 0 ){
+    	        	nuevocampo = ( esiva == "si" || esreteiva == "si" );
+    	        	
+    	        	if( esreteiva == "si" ){
+        	        	valorccobroOri = responsableIVA[0]['iva'];
+        	        }
+        	        else{
+        	        	valorccobroOri = responsableIVA[0]['base'];
+        	        }
+        	        
+        	        if( esiva == "si" ){
+        	        	agregarCampo = false;
+        	        }
+    	        }
+    	        
+    	        if( agregarCampo ){
+    	        	const dtCamps = deducciones.tplcampos( { "cod" : _el['cod'], "desc" : _el['desc'], "perc" : _el['perc'], "baser" : valorccobroOri , "ocultar" : nuevocampo } );
+        	        fieldsTmp.push ( dtCamps['html'] );
+        	        
+        	        totaldesc += dtCamps['descuento'];
+    	        }
+    	        
 	        }
         }
 	
@@ -1166,10 +1291,21 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		<div class="col-1"></div>');
 		html.push('	</div>');
 		
+		const totalAPagarDescDormat = ut.intToPesos( ( valorccobro - totaldesc || 0) ,2,',','.');
+		html.push('	<div class="row mb-3 d-flex justify-content-end border-top pt-2" >');
+		html.push('		<div class="col-1 text-end">');
+		html.push('			<strong>A pagar</strong>');
+		html.push('		</div>');
+		html.push('		<div class="col-3" id="lbltotaldescuentos">');
+		html.push('			<strong>$ ' + totalAPagarDescDormat + '</strong>');
+		html.push('		</div>');
+		html.push('		<div class="col-1"></div>');
+		html.push('	</div>');
+		
 		html.push('	<div class="mt-3"> ');
 		html.push('		<div class="row"> ');
 		html.push('			<div class="col-6"> ');
-		html.push('					<button data-target="#frmcuarto" data-valorccobro="' + valorccobro +'" onclick="deducciones.agregar_click( this );" class="btn btn-secondary w-100" type="button">Agregar deducci&oacute;n</button>');
+		html.push('					<button data-target="#frmcuarto" data-valorccobro="' + valorccobroOri +'" onclick="deducciones.agregar_click( this );" class="btn btn-secondary w-100" type="button">Agregar deducci&oacute;n</button>');
 		html.push('			</div> ');
 		html.push('			<div class="col-6"> ');
 		html.push('				<button type="button" class="btn btn-primary w-100" onclick="reqs.actualizarDeducciones( this ); ">Guardar estas deducciones</button> ');

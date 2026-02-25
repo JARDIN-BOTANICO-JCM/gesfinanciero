@@ -7449,43 +7449,47 @@ class OperacionesCtrl {
 	    $condi = [];
 	    foreach ( $reglas as $kRegla ) {
 	        
-	        $strinoriginal = $kRegla['html'];
-	        if (isset( $d['charfrom'] ) && isset( $d['charto'] ) ) {
-	            $strinoriginal = mb_convert_encoding( $kRegla['html'], $d['charto'], $d['charfrom'] );
-	        }
-	        elseif ( isset( $d['charto'] ) ) {
-	            $strinoriginal = mb_convert_encoding( $kRegla['html'], $d['charto'] );
-	        }
-	        
-	        $html = Utiles::htmlHandler( [ "html" => $strinoriginal ] );
-	        $regla = implode( " ", $html ) ;
-	        
-	        //echo "reglas: " . $regla . "\n";
-	        $evaluar = self::reglas_Virtual_Helper_TransformarCondicion( [
-	            'condicion' => $regla,
-	            'mapa' => $d
-	        ] );
-	        
-	        
-	        $test = eval( "return " . $evaluar . ";");
-	        if ( $test === true ) {
-	            //$condi[ $kRegla['reglaid'] ] = $kRegla['mdeduc'];
-	            $mdeduc = $kRegla['mdeduc'];
+	        if( isset( $kRegla['html'] ) ){
+	            $strinoriginal = $kRegla['html'];
+	            if (isset( $d['charfrom'] ) && isset( $d['charto'] ) ) {
+	                $strinoriginal = mb_convert_encoding( $kRegla['html'], $d['charto'], $d['charfrom'] );
+	            }
+	            elseif ( isset( $d['charto'] ) ) {
+	                $strinoriginal = mb_convert_encoding( $kRegla['html'], $d['charto'] );
+	            }
 	            
-	            foreach ( $mdeduc as $kLsM ) {
+	            $html = Utiles::htmlHandler( [ "html" => $strinoriginal ] );
+	            $regla = implode( " ", $html ) ;
+	            
+	            //echo "reglas: " . $regla . "\n";
+	            $evaluar = self::reglas_Virtual_Helper_TransformarCondicion( [
+	                'condicion' => $regla,
+	                'mapa' => $d
+	            ] );
+	            
+	            
+	            $test = eval( "return " . $evaluar . ";");
+	            if ( $test === true ) {
+	                //$condi[ $kRegla['reglaid'] ] = $kRegla['mdeduc'];
+	                $mdeduc = $kRegla['mdeduc'];
 	                
-	                foreach ( $maestraJs as $kJs ) {
-	                    if ( $kJs['id'] == $kLsM ) {
-	                        $condi[] = [
-	                            'cod' => $kJs['cod_interno'],
-	                            'desc' => $kJs['cod_desc'],
-	                            'perc' => $kJs['porcentaje']
-	                        ];
+	                foreach ( $mdeduc as $kLsM ) {
+	                    
+	                    foreach ( $maestraJs as $kJs ) {
+	                        if ( $kJs['id'] == $kLsM ) {
+	                            $condi[] = [
+	                                'cod' => $kJs['cod_interno'],
+	                                'desc' => $kJs['cod_desc'],
+	                                'perc' => $kJs['porcentaje'],
+	                                'esiva' => $kJs['esiva'],
+	                                'esreteiva' => $kJs['esreteiva']
+	                            ];
+	                        }
 	                    }
+	                    
 	                }
 	                
 	            }
-
 	        }
 	    }
 	    
@@ -12791,19 +12795,6 @@ EOD;
 	    
 	    $pkreq = self::paquetesrequ_Obtener([ 'w_paquetes_id' => $json['id'] ]);
 	    
-        // Revisamos que reglas se cumplen
-	    $rOkCampos = [];
-	    foreach ($pkreq as $kPk ) {
-	        // revisar las respuestas de cada formulario
-	        if ( isset( $kPk['valor'] ) ) {
-	            $resp = json_decode($kPk['valor'], true );
-	            $cfgdt = [ "arreglo" => $resp, "campo" => "staticfield", "vervalor" => true ];
-	            $rOkCampos = array_merge( $rOkCampos, self::formularios_Helper_buscarValoresCampo( $cfgdt ) );
-	        }
-	    }
-	    $rOkCampos['charto'] = 'iso-8859-1';
-	    $reglasDeduc = self::reglas_Virtual_Helper_Validar( $rOkCampos );
-	    
 	    $usr_perfilactual = 0;
 	    $usrs = [];
 	    foreach ($flujositems as $kItem) {
@@ -12835,7 +12826,7 @@ EOD;
 	        foreach ($qryDeducc as $kDeduc) {
 	            $deduccDt = json_decode( $kDeduc['valor'], true );
 	        }
-	        
+	        //die( "d: " . print_r( $deduccDt, true ) );
 	        // obtener datos de config por defecto
 	        $qryMesAplica = self::datosmes_Obtener( [ 'w_mesaplica' => $json['mesaplica'] ] );
 	        foreach ( $qryMesAplica as $kMesA ) {
@@ -12848,22 +12839,68 @@ EOD;
 	            $rEval = self::flujositems_Helper_EvaluarCriterio( $mesAplica );
 	        }
 	        
-	        // reemplazamos los datos por defecto y dejamos los que puso el supervisor contabilidad
-	        $i_v = 0;
-	        foreach ($deduccDt as $kDed => $vDed) {
-	            if (Utiles::ComienzaEn( $kDed, "deduc_cod")) {
-	                $parts = explode("_", $kDed);
-	                $rEval[ $i_v ]['cod'] = $deduccDt[ 'deduc_cod_' . $parts[ 2 ] ];
-	                $rEval[ $i_v ]['desc'] = $deduccDt[ 'deduc_desc_' . $parts[ 2 ] ];
-	                $rEval[ $i_v ]['perc'] = $deduccDt[ 'deduc_perc_' . $parts[ 2 ] ];
-	                $i_v++;
+	        // Revisamos que reglas se cumplen
+	        $rOkCampos = [];
+	        foreach ($pkreq as $kPk ) {
+	            // revisar las respuestas de cada formulario
+	            if ( isset( $kPk['valor'] ) ) {
+	                $resp = json_decode($kPk['valor'], true );
+	                $cfgdt = [ "arreglo" => $resp, "campo" => "staticfield", "vervalor" => true ];
+	                $rOkCampos = array_merge( $rOkCampos, self::formularios_Helper_buscarValoresCampo( $cfgdt ) );
 	            }
 	        }
-	        
+	        $rOkCampos['charto'] = 'iso-8859-1';
+	        $reglasDeduc = self::reglas_Virtual_Helper_Validar( $rOkCampos );
 	        if ( count( $reglasDeduc ) > 0 ) {
 	            $rEval = array_merge( $rEval, $reglasDeduc );
 	        }
+
+	        // 1. Identificar todos los sufijos numéricos únicos en deduccDt (2, 3, 4, 5, 7...)
+	        $indicesDeduc = [];
+	        foreach ($deduccDt as $key => $value) {
+	            if (strpos($key, 'deduc_cod_') === 0) {
+	                $indicesDeduc[] = str_replace('deduc_cod_', '', $key);
+	            }
+	        }
 	        
+	        // 2. Si hay datos en deduccDt, construimos el resultado desde cero
+	        if (!empty($indicesDeduc)) {
+	            $rEvalFinal = [];
+	            
+	            foreach ($indicesDeduc as $num) {
+	                $codigoActual = $deduccDt["deduc_cod_$num"];
+	                
+	                // Buscamos si este código ya existía en rEval para preservar esiva/esreteiva
+	                $originalMatch = null;
+	                foreach ($rEval as $item) {
+	                    if ($item['cod'] == $codigoActual) {
+	                        $originalMatch = $item;
+	                        break;
+	                    }
+	                }
+	                
+	                // Construimos el nuevo objeto de deducción
+	                $rEvalFinal[] = [
+	                    'cod'        => $codigoActual,
+	                    'desc'       => $deduccDt["deduc_desc_$num"],
+	                    'perc'       => $deduccDt["deduc_perc_$num"],
+	                    // Si existía en rEval, usamos sus flags. Si es nuevo (como "test"), ponemos false.
+	                    'esiva'      => $deduccDt["deduc_esiva_$num"] ?? ($originalMatch['esiva'] ?? false),
+	                    'esreteiva'  => $deduccDt["deduc_esreteiva_$num"] ?? ($originalMatch['esreteiva'] ?? false),
+	                    'total'      => $deduccDt["deduc_txttotal_$num"] // Agregamos el total que ahora viene en el arreglo
+	                ];
+	            }
+	            
+	            $rEval = $rEvalFinal;
+	            
+	        } else {
+	            // Si deduccDt está vacío, rEval se queda como venía originalmente.
+	            // Opcional: puedes reindexarlo para asegurar el formato JSON de lista.
+	            $rEval = array_values($rEval);
+	        }
+	        
+	        // Resultado para tu JSON
+	        //$jsonOutput = json_encode(["deducciones" => $rEval]);
 	        $mesAplica['deducciones'] = $rEval;
 	    }
 	    
