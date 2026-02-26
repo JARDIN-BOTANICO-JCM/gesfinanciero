@@ -19,6 +19,19 @@ try {
 }
 
 ?>
+<style>
+/* CSS para el efecto de parpadeo */
+@keyframes blink {
+  0%   { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+  50%  { box-shadow: 0 0 20px rgba(255, 215, 0, 1); }
+  100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.8); }
+}
+
+.blink-effect {
+  animation: blink 0.6s ease-in-out infinite;
+}
+</style>
+
 <div id="db-wrapper" class="" style="background-color: #fefcfb; display: none;" >
     <!-- navbar vertical -->
     <!-- Sidebar -->
@@ -272,7 +285,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		' + formRequsHtml( requs, resul, comentarios ) );
 		html.push('	</div>');
 		html.push('	<div class="col-4" >');
-		html.push('		<div class="card" >');
+		html.push('		<div id="cardContFiles" class="card" >');
 		html.push('			<div class="card-body" > ');
 		html.push('				<h5>Archivos generados</h5>');
 		html.push('				<ul id="contFileList" class="list-group">');
@@ -480,6 +493,16 @@ const Requerimientos = function( dC ){ // dC = data constructor
         				//jQuery( "#" + cntContinuar  + ", .firmaOkCls"  ).hide('fast');
         				
         				documentosList( o['result'] );
+        				
+        				jQuery('html, body').animate({ 
+        					scrollTop: jQuery('#contFileList').offset().top - 100
+    					}, 800, function() { 
+    						$('#cardContFiles').addClass('blink-effect');
+    						setTimeout(function() {
+    							jQuery('#cardContFiles').removeClass('blink-effect'); 
+							}, 3000);  
+    					});
+        				
         				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
         			},
         			function ( err ) {

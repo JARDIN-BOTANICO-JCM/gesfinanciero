@@ -101,6 +101,87 @@ class Rest
         die("");
     }
     
+    
+    /**
+     *
+     * @param object $data
+     */
+    private static function tkn_GenerarToken( $data ){
+        try{
+            $ok = OperacionesCtrl::GenerarToken( $data );
+            echo json_encode($ok);
+        }catch (Exception $ex){
+            $er = array("err" => $ex->getMessage());
+            echo json_encode($er);
+        }
+        die("");
+    }
+    
+    /**
+     * Get header Authorization
+     * */
+    private static function getAuthorizationHeader(){
+        
+        if( isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ){
+            list($_SERVER['Authorization']) = array($_SERVER['REDIRECT_HTTP_AUTHORIZATION']);
+        }
+        
+        $headers = null;
+        if (isset($_SERVER['Authorization'])) {
+            $headers = trim($_SERVER["Authorization"]);
+        }
+        else if (isset($_SERVER['HTTP_AUTHORIZATION'])) { //Nginx or fast CGI
+            $headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
+        } elseif (function_exists('apache_request_headers')) {
+            $requestHeaders = apache_request_headers();
+            // Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
+            $requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
+            //print_r($requestHeaders);
+            if (isset($requestHeaders['Authorization'])) {
+                $headers = trim($requestHeaders['Authorization']);
+            }
+        }
+        
+        return $headers;
+    }
+    
+    /**
+     * get access token from header
+     * */
+    private static function getBearerToken() {
+        $headers = self::getAuthorizationHeader();
+        // HEADER: Get the access token from the header
+        if (!empty($headers)) {
+            $matches = null;
+            if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+                return $matches[1];
+            }
+        }
+        return null;
+    }
+    
+    /**
+     *
+     * @return array<u,c>   u = Usuario c = Clave
+     */
+    private static function getAuthBasic() {
+        if( isset( $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ) ){
+            list($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']) = explode(':', base64_decode(substr($_SERVER['REDIRECT_HTTP_AUTHORIZATION'], 6)));
+            //die( print_r( $_SERVER , true ) );
+            if (!isset($_SERVER['PHP_AUTH_USER'])) {
+                /*
+                 header('WWW-Authenticate: Basic realm="My Realm"');
+                 header('HTTP/1.0 401 Unauthorized');
+                 header('Content-Type: application/json');
+                 echo '{"err":"Ingrese usuario y clave"}';
+                 exit;
+                 */
+            } else {
+                return array('u' => $_SERVER['PHP_AUTH_USER'] , 'c' => $_SERVER['PHP_AUTH_PW']);
+            }
+        }
+    }
+    
     /**
      * Verifica comunicaciones para envío sin requerir autenticación.
      *

@@ -9595,8 +9595,27 @@ class OperacionesCtrl {
 	                try {
 	                    $resFir = $sam->firmarIncremental( $kFir );
 	                } catch (Exception $e) {
-	                    http_response_code( $e->getCode() );
-	                    return self::retorno([], $e->getCode(), $e->getMessage() );
+	                    
+	                    $newp12 = "";
+	                    // volver a crear el archivo .p12 su falla
+	                    if( $e->getCode() == SetAsign_Manage::ERR_COD_NOACCESIBLE_P12 ){
+	                        $usr['tipousuario'] = $tipousuario;
+	                        
+	                        if ( !isset( $usr['usuario_id'] ) ) {
+	                            $usr['usuario_id'] = $usr['id'];
+	                        }
+	                        try {
+	                            $newp12 = self::firmaspro_Helper_MkCert_p12( $usr );
+	                        } catch (Exception $eNew) {
+	                            http_response_code( $eNew->getCode() );
+	                            return self::retorno([], $eNew->getCode(), $eNew->getMessage() . " No se pudo crear el nuevo p12." );
+	                        }
+	                    }
+	                    
+	                    if ( $newp12 == "" ) {
+	                        http_response_code( $e->getCode() );
+	                        return self::retorno([], $e->getCode(), $e->getMessage() . " No se pudo volver a generar p12." );
+	                    }
 	                }
 	                
 	            }
@@ -9736,7 +9755,7 @@ class OperacionesCtrl {
                 $url = Utiles::getBaseUrl() . $rutafl_fir;
             }
             
-            return self::retorno([ 'url' => $url ], 0, '');
+            return self::retorno([ 'url' => preg_replace("/^http:/i", "https:", $url ) ], 0, '');
 	    }
 	}
 	
@@ -10253,7 +10272,10 @@ class OperacionesCtrl {
 	            
 	            if ( isset( $d['flogid'] ) ) {
 	                $saliQr = $salidabase . $salidacarpeta . $pdfName . '.png';
-	                $rQr = self::firmaspro_MkQR( array('qr' => $saliQr, 'data' => rtrim( Utiles::getBaseUrl(), "/" ) . "/index.php/Revisar/" . md5( $d['flogid'] ) . "" . $para_qrview , 'jpg' => false ) );
+	                
+	                $url = preg_replace("/^http:/i", "https:", Utiles::getBaseUrl() );
+	                
+	                $rQr = self::firmaspro_MkQR( array('qr' => $saliQr, 'data' => rtrim( $url , "/" ) . "/index.php/Revisar/" . md5( $d['flogid'] ) . "" . $para_qrview , 'jpg' => false ) );
 	                $tmpF = pathinfo($rQr);
 	                
 	                if ( $rQr ) {
@@ -14150,6 +14172,7 @@ EOD;
 	 * @throws Exception Si falla la autenticación, la obtención de datos o la persistencia (por ejemplo al llamar a métodos auxiliares), o si no existe el empleado.
 	 */
 	public static function paquetesrequ_Helper_Agregar( $d ){
+	    set_time_limit(0);
 	    self::authRequOff();
 	    
 	    $data = base64_decode( $d['data'] );
