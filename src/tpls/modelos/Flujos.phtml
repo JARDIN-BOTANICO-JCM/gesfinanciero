@@ -2,6 +2,16 @@
 use src\sistema\Menubar\Menubar;
 use src\sistema\Headerbar\Headerbar;
 
+$cfg = OperacionesCtrl::LeerConfigCorp();
+$_CFG_GA_ACTIVAR = filter_var( isset( $cfg[ OperacionesCtrl::CFG_GA_ACTIVAR ]) ? $cfg[ OperacionesCtrl::CFG_GA_ACTIVAR ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
+
+$colusr = "6";
+$colext = "2";
+if( $_CFG_GA_ACTIVAR ){
+    $colusr = "5";
+    $colext = "1";
+}
+
 $l_flujosroles_id = array();
 try {
     $l_flujosroles_id = OperacionesCtrl::flujosroles_Obtener( array( 'ordenasc' => 1 ) );
@@ -289,7 +299,7 @@ const btnAddCampos = function( o ){
 	btnsCtn.push('		</div>');
 	btnsCtn.push('	</div>');
 	
-    btnsCtn.push('	<div class="mb-3 col-md-6 usrinterno' + campos_i + '" >');
+    btnsCtn.push('	<div class="mb-3 col-md-<?php echo $colusr ; ?> usrinterno' + campos_i + '" >');
     btnsCtn.push('		<label class="form-label" for="usuarios_id_' + campos_i + '">Usuario *</label>');
     btnsCtn.push('		<select onchange="llenarDatos( this );" class="form-select" id="usuarios_id_' + campos_i + '" name="usuarios_id_' + campos_i + '" >');
 	btnsCtn.push('			<option value="" selected="selected" disabled="disabled" >Seleccione un usuario</option>');
@@ -304,7 +314,7 @@ const btnAddCampos = function( o ){
     btnsCtn.push('		<label class="form-label" for="nombre_' + campos_i + '">Etiqueta del campo *</label>');
     btnsCtn.push('		<input type="text" class="form-control" placeholder="Ejemplo: Pepito P&eacute;rez" id="nombre_' + campos_i + '" name="nombre_' + campos_i + '" required="required">');
     btnsCtn.push('	</div>');
-    btnsCtn.push('	<div class="mb-3 col-md-2 usrexterno' + campos_i + '" style="display: none;">');
+    btnsCtn.push('	<div class="mb-3 col-md-<?php echo $colext ; ?> usrexterno' + campos_i + '" style="display: none;">');
     btnsCtn.push('		<label class="form-label" for="correo_' + campos_i + '">E-mail *</label>');
     btnsCtn.push('		<input type="email" class="form-control" placeholder="Ejemplo: pepitoperez@correo.com" id="correo_' + campos_i + '" name="correo_' + campos_i + '" required="required">');
     btnsCtn.push('	</div>');
@@ -324,7 +334,17 @@ const btnAddCampos = function( o ){
     btnsCtn.push('			<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>');
 <?php endforeach; ?>
     btnsCtn.push('		</select>');
-    btnsCtn.push('	</div>');    
+    btnsCtn.push('	</div>');
+    
+<?php if( $_CFG_GA_ACTIVAR ) : ?>
+    btnsCtn.push('	<div class="mb-3 col-md-1">');
+    btnsCtn.push('		<label class="form-label" for="sincronizar_' + campos_i + '">Sinc. docs</label>');
+    btnsCtn.push('		<div class="form-check form-switch">');
+    btnsCtn.push('			<input class="form-check-input" type="checkbox" id="sincronizar_' + campos_i + '" name="sincronizar_' + campos_i + '" value="1">');
+    btnsCtn.push('		</div>');
+    btnsCtn.push('	</div>');
+<?php endif; ?>
+
     btnsCtn.push('	<div class="mb-3 col-md-2 usrexterno' + campos_i + '" style="display: none;">');
     btnsCtn.push('		<label class="form-label" for="tel_' + campos_i + '">Tel&eacute;fono</label>');
     btnsCtn.push('		<input type="tel" class="form-control" placeholder="Ejemplo: 3110000001" id="tel_' + campos_i + '" name="tel_' + campos_i + '">');
@@ -521,8 +541,14 @@ const btnModRegistro = function ( o ) {
                             		jQuery('#chkEsExterno' + idEl).trigger( 'click' );
                             	}
                             }
-                            
-                            jQuery('#' + kData + '_' + idEl).val( _data );
+                            if( kData == 'sincronizar'){
+                            	if( _data == 1 ){
+                            		jQuery('#sincronizar_' + idEl).prop( 'checked', true );
+                            	}
+                            }
+                            else{
+                            	jQuery('#' + kData + '_' + idEl).val( _data );
+                            }
                         }
                     }
                     

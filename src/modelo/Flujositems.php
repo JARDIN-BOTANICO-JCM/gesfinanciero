@@ -15,7 +15,29 @@ class Flujositems extends Clsdatos {
     private $flujosroles_id = 1;
     private $flujos_id = 1;
     private $usuarios_id = 0;
+    // TODO: Tarea 161 -  Crear el campo sincronizar en la tabla Flujositems
+    private $sincronizar = 0;
     
+    // TODO: Tarea 162 -  Crear el metodo de acceso para obtener sincronizar de la tabla Flujositems
+    /**
+     * @return number
+     */
+    public function getSincronizar()
+    {
+        return $this->sincronizar;
+    }
+
+    // TODO: Tarea 163 -  Crear el metodo de acceso para asignar sincronizar de la tabla Flujositems
+    /**
+     * @param number $sicronizar
+     */
+    public function setSincronizar($sincronizar): self
+    {
+        $this->sincronizar = $sincronizar;
+        
+        return $this;
+    }
+
     /**
      * Obtiene el identificador.
      * @return number
