@@ -17,6 +17,9 @@ $tmpanyoGbl = OperacionesCtrl::anyolectivo_Obtener();
 $GBL_anyolectivo_id = $tmpanyoGbl[0]['id'];
 
 $g_jsn = IndexCtrl::JS_Name_get();
+
+$d_maestrades = OperacionesCtrl::maestra_Virtual_Obtener( [] );
+
 ?>
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
 	<symbol id="gbl-check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
@@ -1402,6 +1405,8 @@ const Deducciones = function( ){
 	const self = this;
 	let ri = 0;
 	
+	const l_maestra = "<?php echo $d_maestrades; ?>";
+	
 	let tableId = "tbInt" + ut.GetUUID();
 	
 	self.totaldeduciones = 0;
@@ -1415,6 +1420,27 @@ const Deducciones = function( ){
 		if( jQuery( self.labeltotal ).length ){
 			jQuery( self.labeltotal ).html( "$ " + ut.intToPesos( self.totaldeduciones ,2,',','.') );
 		}
+	};
+	
+	const obtenerListaMaestra = function(){
+		const json = JSON.parse( ut.b64DecodeUnicode( l_maestra ) );
+		return json;
+	};
+	
+	self.calcularPre = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const deduc_desc = jQuery( dt['target_desc'] );
+		const deduc_perc = jQuery( dt['target_perc'] );
+		
+		const selEle = _o.find('option:selected');
+		const selElDt = jQuery( selEle ).data();
+		
+		deduc_perc.val( selElDt['cod_perc'] );
+		deduc_desc.val( selElDt['cod_desc'] );
+		
+		self.calcular( dt['target_perc'] );
 	};
 	
 	self.calcular = function( o ){
@@ -1485,11 +1511,31 @@ const Deducciones = function( ){
         html.push(`<div class="row mb-1" id="${idrow}" ${estilo} >`);
     
         if (campos.includes('cod')) {
+        
+        	const lsMs = obtenerListaMaestra();
+        
             html.push( '	<div class="col-md-' + ancho + '">' );
+            
             html.push( '		<div class="form-floating">' );
-            html.push( '			<input type="text" class="form-control" onkeyup="' + trigger + '" id="deduc_cod_' + ri + '" name="deduc_cod_' + ri + '" placeholder="Descripci&oacute;n" value="' + (d.cod || '') + '" ' + requ + ' >' );
+            html.push( '			<select class="form-select" data-target_desc="#deduc_desc_' + ri + '" data-target_perc="#deduc_perc_' + ri + '"  onchange="' + trigger + ' deducciones.calcularPre( this );" id="deduc_cod_' + ri + '" name="deduc_cod_' + ri + '"  aria-label="Lista de deducciones" ' + requ + '>' );
+            html.push( '				<option disabled="disabled" selected="selected" value="">Seleccione de la lista</option>' );
+            for (const k in lsMs ) {
+				if ( Object.hasOwnProperty.call( lsMs, k ) ) {
+					const _el = lsMs[ k ];
+					
+					if( !(_el['esiva'] == "si" || _el['esreteiva'] == "si") ){
+						let seltxt = '';
+    					if( d.cod == _el['cod_interno'] ){
+    						seltxt = 'selected="selected"';
+    					}
+    					html.push( '				<option ' + seltxt + ' value="' + _el['cod_interno'] + '" data-cod_perc="' + _el['porcentaje'] + '" data-cod_desc="' + _el['cod_desc'] + '">' + _el['cod_interno'] + ' (' + _el['cod_desc'] + ')</option>' );
+					}
+				}
+			}
+            html.push( '			</select>' );
             html.push( '			<label for="deduc_cod_' + ri + '">C&oacute;digo</label>' );
             html.push( '		</div>' );
+            
             html.push( '	</div >' );
 
         }
