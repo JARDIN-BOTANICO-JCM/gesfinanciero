@@ -3,6 +3,15 @@ use src\sistema\Menubar\Menubar;
 use src\sistema\Headerbar\Headerbar;
 use PhpOffice\PhpSpreadsheet\Style\Supervisor;
 
+$usu = null;
+if ( Seguridad::isLogin() ) {
+    $usu = $_SESSION["usu"];
+}
+
+$cfg = OperacionesCtrl::LeerConfigCorp();
+// GA Configuracion
+$_CFG_GA_ACTIVAR = filter_var( isset( $cfg[ OperacionesCtrl::CFG_GA_ACTIVAR ]) ? $cfg[ OperacionesCtrl::CFG_GA_ACTIVAR ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
+
 $usu = OperacionesCtrl::authRequ();
 // Esta variable almacena si es supervisor o no
 $essupervisor = $usu->getSupervisor();
@@ -139,6 +148,7 @@ if ( !$essupervisor ) {
 ?>
 
 let idMod = null;
+let radMod = null;
 
 const d_idempleados = <?php echo json_encode( $idempleados ); ?>;
 const d_paraRevisar = <?php echo json_encode( $paraRevisar ); ?>;
@@ -193,6 +203,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         		contCardProcs.show('fast');
         		
         		idMod = null;
+        		radMod = null;
     		} else {
     			alert("Debes guardar o descartar antes de continuar");
     		}
@@ -409,6 +420,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         
         const pieHtml = [];
         pieHtml.push('<div class="modal-footer">');
+        
         pieHtml.push('	<a href="' + _urlpdf + '" target="_blank" class="btn btn-outline-primary">');
         pieHtml.push('		Abrir en nueva pestaña');
         pieHtml.push('	</a>');
@@ -857,7 +869,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         	        
         	        const fancy = ( "" + fl['filename'] ).replace(/sig_/ig, "").replace(/_/ig," ");
         	        
-    				html.push('			<button data-url="' + _el['bs'] + '" data-firmantes="' + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + '" data-esfirmable="true" data-tipodoc="' + TIPODOCS_SIGNS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">');
+    				html.push('			<button data-radicado="' + radMod + '" data-url="' + _el['bs'] + '" data-firmantes="' + ut.b64EncodeUnicode( JSON.stringify( firmantes ) ) + '" data-esfirmable="true" data-tipodoc="' + TIPODOCS_SIGNS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">');
     				html.push('				' + fancy );
     				html.push('			</button>');
     			}
@@ -886,7 +898,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        	if( ("" +  jQuery.trim( _el['valor'] ) ).length > 0 ){
     	        		if( _el['valor'] !== "obligaciones" ){
     	        			confilesadj = true;
-	    	        		html.push('			<button data-id="' + _el['id'] + '" data-url="' + _el['valor'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_PACKS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _el['ref_label'] + '</button>');
+	    	        		html.push('			<button data-radicado="' + radMod + '" data-id="' + _el['id'] + '" data-url="' + _el['valor'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_PACKS + '" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _el['ref_label'] + '</button>');
     	        		}
     	        	}
     	        }
@@ -915,7 +927,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 	        
                 	        if( _eJs['file'] == 1 ){
                 	        	confiles = true
-                	        	lsadjuntosforms.push('			<button data-id="' + _el['id'] + '" data-url="' + _eJs['value'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_ATTACHED + '" data-paraforms="true" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _eJs['label'] + '</button>');
+                	        	lsadjuntosforms.push('			<button data-radicado="' + radMod + '" data-id="' + _el['id'] + '" data-url="' + _eJs['value'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_ATTACHED + '" data-paraforms="true" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _eJs['label'] + '</button>');
                 	        }
             	        }
         	        }
@@ -953,7 +965,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         		let btnFl = '';
         		if( ("" + _el['archivos']).length > 0 ){
         			const filei = ut.pathInfo( _el['archivos'] );
-        			btnFl  = '<button data-url="' + _el['archivos'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_OBLIG + '" onclick="reqs.verPdf( this );" type="button" class="btn btn-link">' + filei['filename'] + '</button>';
+        			btnFl  = '<button data-radicado="' + radMod + '" data-url="' + _el['archivos'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_OBLIG + '" onclick="reqs.verPdf( this );" type="button" class="btn btn-link">' + filei['filename'] + '</button>';
         		}
         		lsobli.push('			<td>' + btnFl + '</td>');
         		lsobli.push('		</tr>');
@@ -1024,6 +1036,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const dt = _o.data();
 		
 		idMod = dt['id'];
+		radMod = dt['radicado'];
 		
 		const paquetesestados_id = dt['paquetesestados_id'];
 		
@@ -1350,10 +1363,100 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		
 	};
 	
+	_this.getRadicado = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
 	
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_Gestordocumental_Mk_Radicado); ?>');
+		form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+		__TransportarData(
+			form_data,
+			function ( rDt ) {
+				const result = JSON.parse( rDt.result );
+				const objmdl2 = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Carga de datos', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdl2 + ' div.alert');
+				
+				if (Object.hasOwnProperty.call( result, "error" ) ) {
+					alerta.attr('class', 'alert alert-danger');
+					alerta.html('' + result['error'] );
+				}
+				else{
+					alerta.attr('class', 'alert alert-success');
+					alerta.html('Radicado: ' + result);
+				}
+
+				jQuery(objmdl2).modal('show');
+			},
+			function (err) {
+				const result = JSON.parse( err.responseText );
+			
+				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html( result.msj );
+
+				jQuery(objmdlErr).modal('show');
+			}
+		);
+	};
+	
+
+	_this.sincDocu = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+	
+		const form_data = new FormData();
+		form_data.append('ajax', '<?php echo md5(IndexCtrl::API_Gestordocumental_Mk_Radicado); ?>');
+		form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+		__TransportarData(
+			form_data,
+			function ( rDt ) {
+				const result = JSON.parse( rDt.result );
+				const objmdl2 = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Carga de datos', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdl2 + ' div.alert');
+				
+				if (Object.hasOwnProperty.call( result, "error" ) ) {
+					alerta.attr('class', 'alert alert-danger');
+					alerta.html('' + result['error'] );
+				}
+				else{
+					alerta.attr('class', 'alert alert-success');
+					alerta.html('Radicado: ' + result);
+				}
+
+				jQuery(objmdl2).modal('show');
+			},
+			function (err) {
+				const result = JSON.parse( err.responseText );
+			
+				const objmdlErr = mngModal.dibujar({ 'id': 'mdlError', 'title': 'Error', 'btnCerrarX': true, 'level': 'err', 'size': 'modal-sm' });
+				const alerta = jQuery(objmdlErr + ' div.alert');
+				alerta.attr('class', 'alert alert-danger');
+				alerta.html( result.msj );
+
+				jQuery(objmdlErr).modal('show');
+			}
+		);
+	};
+	
+	const btnRadicadoHtml = function( dtInfo ){
+		const html = [];
+<?php if( $_CFG_GA_ACTIVAR ) : ?>
+<?php   if ( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO ) : ?>
+    	html.push('<button onclick="reqs.getRadicado(this);" data-empleados_id="' + dtInfo.empleados_id + '" data-id="' + dtInfo.id + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" >');
+        html.push('	<i class="fas fa-fingerprint fs-5"></i>');
+        html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
+        html.push('		<h6 class="mb-0 text-white">Generar radicado</h6>');
+        html.push('	</div>');
+        html.push('</button>');
+<?php   endif; ?>
+<?php endif; ?>
+        return html.join('');
+	};
 	const btnInfoHtml = function( dtInfo ){
 		const html = [];
-    	html.push('<button onclick="reqs.modInfo(this);" data-paquetesestados_id="' + dtInfo.paquetesestados_id + '" data-mesaplica="' + dtInfo.mesaplica + '" data-flujos_id="' + dtInfo.flujos_id + '" data-empleados_id="' + dtInfo.empleados_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
+    	html.push('<button onclick="reqs.modInfo(this);" data-radicado="' + dtInfo.radicado + '" data-paquetesestados_id="' + dtInfo.paquetesestados_id + '" data-mesaplica="' + dtInfo.mesaplica + '" data-flujos_id="' + dtInfo.flujos_id + '" data-empleados_id="' + dtInfo.empleados_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
         html.push('	<i class="bi bi-eye-fill fs-5"></i>');
         html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
         html.push('		<h6 class="mb-0 text-white">Editar</h6>');
@@ -1466,10 +1569,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
                     width: '1%',
                     render: function(data, type, row) {
                     	const btnInfo = btnInfoHtml( row );
-                    	
+                    	const btnGetRadicado = btnRadicadoHtml( row );
                         return `
                         <div class="d-flex justify-content-start">
-                            ${btnInfo}
+                            ${btnInfo} ${btnGetRadicado}
                         </div>
                         `;
                     }

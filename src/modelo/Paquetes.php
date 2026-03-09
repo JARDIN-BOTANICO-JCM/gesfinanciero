@@ -17,6 +17,29 @@ class Paquetes extends Clsdatos {
     private $fechamodificado = "1900-01-01 00:00:00";
     private $flujos_id = 0;
     
+    // TODO: Tarea 164 - Agregar campo radicado a la tabla Paquetes
+    private $radicado = "";
+    
+    // TODO: Tarea 165 - Agregar acceso para obtener el campo radicado de la tabla Paquetes
+    /**
+     * @return string
+     */
+    public function getRadicado()
+    {
+        return $this->radicado;
+    }
+
+    // TODO: Tarea 166 - Agregar acceso para establecer el valor del campo radicado de la tabla Paquetes
+    /**
+     * @param string $radicado
+     */
+    public function setRadicado($radicado): self
+    {
+        $this->radicado = $radicado;
+        
+        return $this;
+    }
+
     /**
      * Obtiene el identificador del paquete.
      * @return number

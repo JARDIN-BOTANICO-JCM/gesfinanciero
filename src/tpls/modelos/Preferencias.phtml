@@ -7,8 +7,13 @@ $cfg = OperacionesCtrl::LeerConfigCorp();
 // Almacenamiento
 $_CFG_ALMACENAMIENTO_TAMANO = intval( isset( $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]) ? $cfg[ OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO ]["val"] : '5' );
 
-// Deducciones
-//$_CFG_DEDUCCIONES_DATA = intval( isset( $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]) ? $cfg[ OperacionesCtrl::CFG_DEDUCCIONES_DATA ]["val"] : base64_encode( '[]' ) );
+// GA Configuracion
+$_CFG_GA_ACTIVAR = filter_var( isset( $cfg[ OperacionesCtrl::CFG_GA_ACTIVAR ]) ? $cfg[ OperacionesCtrl::CFG_GA_ACTIVAR ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
+$_CFG_GA_IP = isset( $cfg[ OperacionesCtrl::CFG_GA_IP ] ) ? $cfg[ OperacionesCtrl::CFG_GA_IP ]["val"] : "";
+$_CFG_GA_LOGIN = isset( $cfg[ OperacionesCtrl::CFG_GA_LOGIN ] ) ? $cfg[ OperacionesCtrl::CFG_GA_LOGIN ]["val"] : "";
+$_CFG_GA_CLAVE = isset( $cfg[ OperacionesCtrl::CFG_GA_CLAVE ] ) ? $cfg[ OperacionesCtrl::CFG_GA_CLAVE ]["val"] : "";
+$_CFG_GA_JSON_TIPODOC = isset( $cfg[ OperacionesCtrl::CFG_GA_JSON_TIPODOC ] ) ? base64_decode( $cfg[ OperacionesCtrl::CFG_GA_JSON_TIPODOC ]["val"] ) : "[]";
+$_CFG_GA_ELIMINARFUENTE = filter_var( isset( $cfg[ OperacionesCtrl::CFG_GA_ELIMINARFUENTE ] ) ? $cfg[ OperacionesCtrl::CFG_GA_ELIMINARFUENTE ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
 
 $usu = null;
 if ( Seguridad::isLogin() ) {
@@ -203,6 +208,72 @@ table.dataTable.nowrap td {
                                         <input type="text" id="<?php echo OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO; ?>" value="<?php echo $_CFG_ALMACENAMIENTO_TAMANO; ?>" class="form-control" placeholder="Almacenamiento" aria-label="Almacenamiento" >
                                         <button class="btn btn-outline-primary" type="button" onclick="btnFirmCfgFrm('#<?php echo OperacionesCtrl::CFG_ALMACENAMIENTO_TAMANO; ?>');">Guardar</button>
                                     </div>
+                                </div>
+                            </div>
+                        
+                        </div>
+                	</div>
+                	<?php endif; ?>
+                	
+
+                	<?php if ( $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_SUPER_USUARIO || $usu->getPerfil_id() == OperacionesCtrl::USUARIOS_PERFIL_ADMINISTRADOR ) :?>
+                	<div class="row">
+                        <div class="col-12 mb-3" >
+                        
+                        	<div class="card">
+                                <div class="card-header border-bottom-0">
+                                    <h5>Configuraci&oacute;n Gestor documental</h5>
+                                    <p class="m-0">Seleccione el gestor documental que desea utilizar y agrege su configuraci&oacute;n.</p>
+                                </div>
+
+                                <!-- table  -->
+                                <div class="card-body pt-2" >
+                                    
+                                    <nav>
+                                        <div class="nav nav-tabs" id="nav-GestorDocumentaltab" role="tablist">
+                                        	<button class="nav-link active" id="nav-gd-orfeo-tab" data-bs-toggle="tab" data-bs-target="#nav-gd-orfeo" type="button" role="tab" aria-controls="nav-gd-orfeo" aria-selected="true">Orfeo</button>
+                                        </div>
+                                    </nav>
+                                    <div class="tab-content pt-3" id="nav-GestorDocumentaltabContent">
+										<div class="tab-pane fade show active" id="nav-gd-orfeo" role="tabpanel" aria-labelledby="nav-gd-orfeo-tab">
+    										<div class="form-check form-switch mb-3">
+                                        		<input onchange="btnFirmCfgFrm( this )" value="orfeo" class="form-check-input" type="checkbox" <?php echo ($_CFG_GA_ACTIVAR ? 'checked="checked"' : ""); ?> id="<?php echo OperacionesCtrl::CFG_GA_ACTIVAR ; ?>" name="<?php echo OperacionesCtrl::CFG_GA_ACTIVAR ; ?>">
+                                        		<label class="form-check-label" for="<?php echo OperacionesCtrl::CFG_GA_ACTIVAR ; ?>" >Activar Orfeo</label>
+                                        	</div>
+                                        	
+                                        	<div class="form-check form-switch mb-3">
+                                        		<input onchange="btnFirmCfgFrm( this )" value="eliminar" class="form-check-input" type="checkbox" <?php echo ($_CFG_GA_ELIMINARFUENTE ? 'checked="checked"' : ""); ?> id="<?php echo OperacionesCtrl::CFG_GA_ELIMINARFUENTE ; ?>" name="<?php echo OperacionesCtrl::CFG_GA_ELIMINARFUENTE ; ?>">
+                                        		<label class="form-check-label" for="<?php echo OperacionesCtrl::CFG_GA_ELIMINARFUENTE ; ?>" >Eliminar archivos al ser sincronizar</label>
+                                        	</div>
+                                        	
+                                        	<div class="input-group mb-3">
+                                            	<label for="<?php echo OperacionesCtrl::CFG_GA_IP; ?>" class="input-group-text" style="min-width: 150px;">URL API Orfeo</label>
+                                                <input type="text" id="<?php echo OperacionesCtrl::CFG_GA_IP; ?>" value="<?php echo $_CFG_GA_IP; ?>" class="form-control" placeholder="https://DNSORFEO/orfeo/api" aria-label="URL Orfeo" >
+                                                <button class="btn btn-outline-primary" type="button" onclick="btnFirmCfgFrm('#<?php echo OperacionesCtrl::CFG_GA_IP; ?>');">Guardar</button>
+                                            </div>
+                                            
+                                            <div class="input-group mb-3">
+                                            	<label for="<?php echo OperacionesCtrl::CFG_GA_LOGIN; ?>" class="input-group-text" style="min-width: 150px;">Login</label>
+                                                <input type="text" id="<?php echo OperacionesCtrl::CFG_GA_LOGIN; ?>" value="<?php echo $_CFG_GA_LOGIN; ?>" class="form-control" placeholder="Login" aria-label="Login Orfeo" >
+                                                <button class="btn btn-outline-primary" type="button" onclick="btnFirmCfgFrm('#<?php echo OperacionesCtrl::CFG_GA_LOGIN; ?>');">Guardar</button>
+                                            </div>
+                                            
+                                        	<div class="input-group mb-3">
+                                            	<label for="<?php echo OperacionesCtrl::CFG_GA_CLAVE; ?>" class="input-group-text" style="min-width: 150px;">Autorizaci&oacute;n</label>
+                                                <input type="password" id="<?php echo OperacionesCtrl::CFG_GA_CLAVE; ?>" value="<?php echo $_CFG_GA_CLAVE; ?>" class="form-control" placeholder="****" aria-label="Clave Orfeo" >
+                                                <button class="btn btn-outline-primary" type="button" onclick="btnFirmCfgFrm('#<?php echo OperacionesCtrl::CFG_GA_CLAVE; ?>');">Guardar</button>
+                                            </div>
+                                            
+                                            <div class="input-group">
+                                                <label class="input-group-text" for="<?php echo OperacionesCtrl::CFG_GA_JSON_TIPODOC; ?>" style="min-width: 150px;">Tipodoc (JSON)</label>
+                                                <textarea data-cifrar="true" class="form-control" id="<?php echo OperacionesCtrl::CFG_GA_JSON_TIPODOC; ?>" aria-label="JSON de equivalencia tipodoc"><?php echo trim($_CFG_GA_JSON_TIPODOC); ?></textarea>
+                                                <button class="btn btn-outline-primary" type="button" onclick="btnFirmCfgFrm('#<?php echo OperacionesCtrl::CFG_GA_JSON_TIPODOC; ?>');">Guardar</button>
+                                            </div>
+                                            <small class="text-muted mb-3">Ejemplo JSON: [ { 'idorfeo' : '35', 'idgestorfinanciero' : '1' } ]</small>
+                                        	
+										</div>
+                                    </div>
+                                    
                                 </div>
                             </div>
                         
@@ -1508,6 +1579,7 @@ const btnFirmCfgFrm = function( o ){
 
     var _o = jQuery( o );
     var id = _o.attr('id');
+    
     var vl = null;
     if( (""+_o.attr('type')).toLowerCase() == "checkbox" ){
     	vl = _o.is(':checked');
@@ -1515,6 +1587,17 @@ const btnFirmCfgFrm = function( o ){
     else{
     	vl = _o.val();
     }
+    
+    if( _o.attr('type') == "password" ){
+		vl = ut.b64EncodeUnicode( _o.val() );
+	}
+	
+	const dt = _o.data();
+	if ( Object.hasOwnProperty.call( dt, "cifrar" ) ) {
+		if( dt["cifrar"] == true ){
+			vl = ut.b64EncodeUnicode( _o.val() );
+		}
+	}
 
     const form_data = new FormData();
     form_data.append('id', id);

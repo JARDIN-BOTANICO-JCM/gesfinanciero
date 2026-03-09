@@ -81,9 +81,15 @@ class Utiles{
         $files = array();
         while (false !== ($filename = readdir($dh))) {
             $tmpFn = pathinfo( $filename );
+            
+            $agregarok = true;
+            if (self::ComienzaEn($filename, "._")) {
+                $agregarok = false;
+            }
+            
             $soloNombre = ($conextension) ? $tmpFn['basename'] : $tmpFn[ 'filename' ];
             $ext = $tmpFn['extension'];
-            if( !is_dir( $dir . DIRECTORY_SEPARATOR . $soloNombre) && strtolower( $ext ) == "php" && $este != ($dir . DIRECTORY_SEPARATOR . $soloNombre) ){
+            if( !is_dir( $dir . DIRECTORY_SEPARATOR . $soloNombre) && strtolower( $ext ) == "php" && $este != ($dir . DIRECTORY_SEPARATOR . $soloNombre) && $agregarok ){
                 $files[] = $soloNombre;
             }
         }

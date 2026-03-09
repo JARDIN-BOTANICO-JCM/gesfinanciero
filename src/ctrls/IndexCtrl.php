@@ -1232,6 +1232,11 @@ class IndexCtrl extends Pagina {
 	const API_empleadosdetallescontrato_Get = 'API_empleadosdetallescontrato_Get';
 	// empleadosdetallescontrato FIN
 
+	// Gestordocumental INI
+	const API_Gestordocumental_Mk_Radicado = 'API_Gestordocumental_Mk_Radicado';
+	const API_Gestordocumental_Sinc_docume = 'API_Gestordocumental_Sinc_docume';
+	// Gestordocumental FIN
+	
 	// HomeCtrls INI
 	// --Version2
 	/**
@@ -2760,6 +2765,33 @@ class IndexCtrl extends Pagina {
 				}
 
 				// empleadosdetallescontrato FIN
+				
+				
+				// Gestordocumental INI
+				
+				if ( $_POST["ajax"] == md5( self::API_Gestordocumental_Mk_Radicado )) {
+				    try {
+				        $ok = OperacionesCtrl::gestordocumental_Crear_Radicado($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				
+				if ( $_POST["ajax"] == md5( self::API_Gestordocumental_Sinc_docume )) {
+				    try {
+				        $ok = OperacionesCtrl::gestordocumental_Crear_Anexo($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Gestordocumental FIN
+				
 
 				// HomeCtrls INI
 
