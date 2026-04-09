@@ -2002,15 +2002,16 @@ const Deducciones = function( ){
                         html.push('     <h6 class="mb-0 text-white">Editar</h6> ');
                         html.push(' </div> ');
                         html.push('</button> ');
-                        
-                        <?php if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR || $usu->getPerfil_id() == IndexCtrl::PERFILES_FINANCIERO ) : ?>
+<?php               if( Seguridad::isLogin() ) : ?>
+<?php                   if ( $usu->getPerfil_id() == IndexCtrl::PERFILES_SUPER_USUARIO || $usu->getPerfil_id() == IndexCtrl::PERFILES_ADMINISTRADOR || $usu->getPerfil_id() == IndexCtrl::PERFILES_FINANCIERO ) : ?>
                         html.push('<button onclick="deducciones.eliminar_click(this);" data-id="' + data['firma'] + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover ms-3 texttooltip" data-template="two' + data['firma'] + '"> ');
                         html.push(' <i class="fe fe-trash-2 fs-5"></i> ');
                         html.push(' <div id="two' + data['firma'] + '" class="d-none"> ');
                         html.push('     <h6 class="mb-0 text-white">Eliminar</h6> ');
                         html.push(' </div> ');
                         html.push('</button> ');
-                        <?php endif; ?>
+<?php                   endif; ?>
+<?php               endif; ?>
                         
                 		return html.join('');
                 	}
