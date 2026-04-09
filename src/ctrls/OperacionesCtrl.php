@@ -8717,9 +8717,24 @@ class OperacionesCtrl {
 	                }
 	            }
 	            
-	            $valor = date( $formato , strtotime( $valor ) );
+	            $valorDef = date( $formato , strtotime( $valor ) );
 	            
-	            $html[] = trim($valor);
+	            if ( isset( $d['fechainibogdata'] )) {
+	                $fechainibogdata = $d['fechainibogdata'];
+	                if (isset( $d['esexcel'] ) ) {
+	                    if( $d['esexcel'] ){
+	                        $fechainibogdata = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format( $formato );
+	                    }
+	                }
+	                
+	                $anyomes = date( "Ym" , strtotime( $fechainibogdata ) );
+	                $actualmes = date( "Ym" , strtotime( $valor ) );
+	                if ( $anyomes == $actualmes ) {
+	                    $valorDef = date( $fechainibogdata , strtotime( $valor ) );
+	                }
+	            }
+	            
+	            $html[] = trim($valorDef);
 	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['mesesletras'] ) {
 	            $mes = intval( $d['mes'] );
@@ -8740,31 +8755,20 @@ class OperacionesCtrl {
 	            return $meses_es[ $mes ];
 	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['fechacontratocompleto'] ) {
-	            
-	            $fechaInicio = $d['fechainibogdata'];
+	            $dias = $d['dias'];
+	            $meses = $d['meses'];
+	            $fecha = new DateTime($d['fechainibogdata']);
 	            if ( isset( $d['esexcel'] ) ) {
 	                if ( $d['esexcel']  ) {
 	                    $fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
 	                }
 	            }
-	            try {
-	                $fechafinal = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechafinalbogdata'] )->format('Y-m-d');
-	            } catch (Exception $e) {
-	                throw new Exception('fechacontratocompleto: ' . $e->getMessage(), $e->getCode());
-	            }
 	            
+	            $intervalo = new DateInterval("P{$meses}M{$dias}D");
 	            
-	            $fecha = new DateTime( $fechaInicio );
-	            $primerDia = new DateTime($fecha->format("Y-m-01"));
-	            
-	            $diferencia = $primerDia->diff($fecha);
-	            $dias = $diferencia->days;
-	            
-	            $fechaFinal = new DateTime( $fechafinal );
-	            $fechaFinal->add(new DateInterval("P{$dias}D"));
-	            
-	            $html[] = $fechaFinal->format("Y-m-d");
-	            
+	            $fecha->add($intervalo);
+	            $fecha->modify('-1 day');
+	            $html[] = $fecha->format('Y-m-d');
 	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['valorpordia'] ) {
 	            //$fechaInicio = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] )->format('Y-m-d');
@@ -9186,21 +9190,26 @@ class OperacionesCtrl {
 	private static function editarPlantillas_Componente_EsMesDeInicio( $d ) {
 	    $mesaplica = date("Y-m-d", strtotime( $d['mesaplica'] ) );
 	    $mesaplicam = date("m", strtotime( $mesaplica ) );
+	    
+	    /*
 	    try {
 	        $fechabogdata = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( $d['fechainibogdata'] );
 	    } catch (Exception $e) {
 	        throw new Exception('editarPlantillas_Componente_EsMesDeInicio: ' . $e->getMessage(), $e->getCode() );
 	    }
+	    */
 	    
 	    $formato = 'Y-m-d';
 	    if ( isset( $d['formato'] ) ) {
 	        $formato = $d['formato'];
 	    }
-	    $xlsmes = date('m', strtotime( $fechabogdata->format( $formato ) ) );
+	    //$xlsmes = date('m', strtotime( $fechabogdata->format( $formato ) ) );
+	    $xlsmes = date('m', strtotime( $d['fechainibogdata'] ) );
 	    
 	    $def = $mesaplica;
 	    if ( $mesaplicam == $xlsmes ) {
-	        $def = $fechabogdata->format( $formato );
+	        //$def = $fechabogdata->format( $formato );
+	        $def = date('Y-m-d', strtotime( $d['fechainibogdata'] ) );
 	    }
 	    
 	    return $def;
@@ -13675,7 +13684,7 @@ EOD;
 	                    $radicado = $kEss['radicado'];
 	                }
 	                
-	                if( $kEss[ 'flujositems_sincronizar' ] == 1 || $modCfg['paquetesestados_id'] == 4 ){
+	                if( $kEss[ 'flujositems_sincronizar' ] == 1 || ( isset( $modCfg['paquetesestados_id'] ) && $modCfg['paquetesestados_id'] == 4) ){
 	                    $docs = self::flujositems_Archivos_Helper_Obtener( [
 	                        'documento' => $kEss[ 'empleados_documento' ],
 	                        'id' => $kEss['flujos_id'],
