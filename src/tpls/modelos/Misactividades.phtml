@@ -53,15 +53,31 @@ if ( !$essupervisor ) {
     } catch (Exception $e) {
         throw $e;
     }
+    
+    // TODO: Tarea 174 - Fixed Se debe primero revisar los flujos en los que el super visor participa para luego obtener los ids de los flujos
+    $rev_flujossup = [];
     foreach ( $misuper as $kMisup ) {
-        $paraRevisar[] = $kMisup['supervisor_id'];
+        $rev_flujossup[] = $kMisup['supervisor_id'];
     }
     
     $supervi = 0;
     foreach ( $idempleados as $kIdE ) {
         $supervi = $kIdE;
     }
-    $paraRevisar[] = $supervi;
+    $rev_flujossup[] = $supervi;
+    
+    $tempFlujos = [];
+    try {
+        $tempFlujos = OperacionesCtrl::flujositems_Obtener( [ 'w_usuarios_ids' => $rev_flujossup ] );
+    } catch (Exception $e) {
+        throw $e;
+    }
+    
+    // Ahora que ya tenemos los ids de los flujos que el supervisor tiene, si los asignamos a paraRevisar
+    foreach ($tempFlujos as $kSuFlu) {
+        $paraRevisar[] = $kSuFlu['id'];
+    }
+    
 }
 
 //die( "apoyos: <pre>" . print_r( $l_apoyos, true ) );

@@ -4498,7 +4498,7 @@ class OperacionesCtrl {
 	                            array( 'campo' => 'NRO_IDENTIFICACION', 'valor' => $js['reg_documento'] )
 	                        ]
 	                    )
-	                    );
+                    );
 	                
 	                $nwU = array(
 	                    "nombres" => $usr['nombre_bp_beneficiario'],
@@ -8366,7 +8366,7 @@ class OperacionesCtrl {
 	            $genpdf = self::firmaspro_Obtener( $dN, $dt );
 	        } catch (Exception $e) {
 	            http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
-	            throw new Exception( 'editarPlantillas_JBB_Mezclar_Crear - firmaspro_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
+	            throw new Exception( 'editarPlantillas_JBB_Mezclar_Crear - firmaspro_Obtener: ' . $e->getMessage() . '<br>(Plantilla: ' . $flid . ')' , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO);
 	        }
 	        
 	        if ( $genpdf !== "" ) {
@@ -9615,7 +9615,7 @@ class OperacionesCtrl {
 	                } catch (Exception $e) {
 	                    
 	                    $newp12 = "";
-	                    // volver a crear el archivo .p12 su falla
+	                    // volver a crear el archivo .p12 si falla
 	                    if( $e->getCode() == SetAsign_Manage::ERR_COD_NOACCESIBLE_P12 ){
 	                        $usr['tipousuario'] = $tipousuario;
 	                        
@@ -9669,8 +9669,23 @@ class OperacionesCtrl {
 	        return self::retorno( [ 'bs' => $resFir ], 0, '' );
 	    }
 	    else {
+	        // TODO: Tarea 173 - Crear la firma del usuario si por algun motivo no esta
+	        
+	        // volver a crear el archivo .p12 si no existe
+	        $usr['tipousuario'] = $tipousuario;
+	        
+	        if ( !isset( $usr['usuario_id'] ) ) {
+	            $usr['usuario_id'] = $usr['id'];
+	        }
+	        try {
+	            self::firmaspro_Helper_MkCert_p12( $usr );
+	        } catch (Exception $eNew) {
+	            http_response_code( $eNew->getCode() );
+	            return self::retorno([], $eNew->getCode(), $eNew->getMessage() . " No se pudo crear el nuevo p12." );
+	        }
+	        
 	        http_response_code(IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA);
-	        return self::retorno([], IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA, 'El certificado ' . $flp12 . ' no existe' );
+	        return self::retorno([], IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA, 'Error firmando. Haga clic nuevemente en firmar y seguramente ya no funciona.' );
 	    }
 	    
 	    return self::retorno([], IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA, 'Null = ' . $json['documento'] );
@@ -12460,7 +12475,7 @@ EOD;
             if( $d['sincronizar'] == 1){
                 $val = 1;
             }
-            $o->setSicronizar( $val ); 
+            $o->setSincronizar( $val ); 
 	    }
 	    
 	    $id = $o->saveData();
@@ -13162,8 +13177,13 @@ EOD;
 	    
 	    $_id = $json['id'];
 	    
-	    self::paquetesrequ_Modificar( array( 'w_flujositems_id' => $_id ) );
-	    self::paquetes_Modificar( array( 'w_flujositems_id' => $_id ) );
+	    
+	    // TODO: Tarea 175 - Fixed:Arreglar el eliminado de items de los flujos 
+	    $pack_para_del = self::paquetesrequ_Obtener( [ 'w_flujositems_id' => $_id ] );
+	    self::paquetesrequ_Eliminar( array( 'w_flujositems_id' => $_id ) );
+	    foreach ( $pack_para_del as $kPckDel ) {
+	        self::paquetes_Eliminar( [ 'id' => $kPckDel['paquetes_id'] ] );
+	    }
 	    self::flujositems_Eliminar( array( 'id' => $_id ) );
 	    
 	    return true;
@@ -13339,33 +13359,34 @@ EOD;
 	        $aSt['radicado'] = trim( (string) $d['radicado'] );
 	    }
 	    
-	    
-	    $pr = array();
-	    $wh  = '';
+	    $pr = [];
+	    $wh = [];
 	    if ( isset( $d['id'] ) ) {
-	        $wh  = 'id = ?';
-	        $pr = [ $d['id'] ];
+	        $wh[] = 'id = ?';
+	        $pr[] = $d['id'] ;
 	    }
 	    
 	    if ( isset( $d['w_flujositems_id'] ) ) {
-	        $wh  = 'flujositems_id = ?';
-	        $pr = [ $d['w_flujositems_id'] ];
+	        $wh[] = 'flujositems_id = ?';
+	        $pr[] = $d['w_flujositems_id'] ;
 	    }
 	    
-	    if ( $wh == '' ) {
+	    if ( count( $wh ) == 0 ) {
 	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
-	        throw new Exception( '[' . IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO . '] flujos_Modificar: Debe indicar un filtro para actualizar' );
+	        throw new Exception( '[' . IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO . '] paquetes_Modificar: Debe indicar un filtro para actualizar' );
 	    }
 	    
-	    $xt = $wh;
+	    $xt = implode(" AND ", $wh);
 	    
-	    //die('UPDATE ' . $tb . ' SET ' . $st . ' ' . $xt);
+	    //echo print_r( $pr , true );
+	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' WHERE ' . $xt);
 	    $cu = null;
 	    try {
 	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
 	    } catch (\Throwable $th) {
 	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
-	        throw new \Exception( 'flujos_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception( 'paquetes_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
 	    }
 	    
 	    return $cu;
@@ -14206,6 +14227,11 @@ EOD;
 	    if( isset( $d['w_paquetes_id'] ) ){
 	        $wh[] = "pkreq.`paquetes_id` = ?";
 	        $pr[] = $d['w_paquetes_id'];
+	    }
+	    
+	    if( isset( $d['w_flujositems_id'] ) ){
+	        $wh[] = "pkreq.`flujositems_id` = ?";
+	        $pr[] = $d['w_flujositems_id'];
 	    }
 	    
 	    $defWh = "";
