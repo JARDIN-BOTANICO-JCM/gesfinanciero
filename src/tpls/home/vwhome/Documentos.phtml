@@ -673,10 +673,10 @@ const Requerimientos = function( dC ){ // dC = data constructor
     						habilitado = 'disabled="disabled" ';
     					}
     					
-    					let btnFirTmp = '<button id="' + btnfirId + '" class="btn btn-sm py-1 ' + colorbtn + ' firmaNoCls" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button>';
+    					let btnFirTmp = '<button id="' + btnfirId + '" class="btn btn-sm py-1 ' + colorbtn + ' firmaNoCls ms-3" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" onclick="firmarPdf( this );" style="width: 92px;"><i class="bi bi-pen me-1"></i>Firmar</button>';
     					
     					if( habilitado != '' ){
-    						btnFirTmp = '<span data-toggle="tooltip" data-placement="top" title="Primero debe revisar el archivo \'' + fancy + '\'"><button id="' + btnfirId + '" class="btn btn-sm py-1 ' + colorbtn + ' firmaNoCls" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" onclick="firmarPdf( this );"><i class="bi bi-pen me-1"></i>Firmar</button></span>';
+    						btnFirTmp = '<span data-toggle="tooltip" data-placement="top" title="Primero debe revisar el archivo \'' + fancy + '\'"><button id="' + btnfirId + '" class="btn btn-sm py-1 ' + colorbtn + ' firmaNoCls ms-3" ' + habilitado + ' data-target="#' + btnfirDown + '" data-razon="Generador" data-fldcampo="FIRMA_CONTR_1" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_CONTRATISTA ?>" data-fldtipo="proceso" data-documento="' + url + '" onclick="firmarPdf( this );" style="width: 92px;"><i class="bi bi-pen me-1"></i>Firmar</button></span>';
     					}
     					
 						lidata.push('						' + btnFirTmp );
