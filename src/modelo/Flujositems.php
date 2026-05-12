@@ -18,6 +18,27 @@ class Flujositems extends Clsdatos {
     // TODO: Tarea 161 -  Crear el campo sincronizar en la tabla Flujositems
     private $sincronizar = 0;
     
+    // TODO: Tarea 181 -  Crear el campo interactuar en la tabla Flujositems
+    private $interactuar = 0;
+    
+    /**
+     * @return number
+     */
+    public function getInteractuar()
+    {
+        return $this->interactuar;
+    }
+
+    /**
+     * @param number $interactuar
+     */
+    public function setInteractuar($interactuar): self
+    {
+        $this->interactuar = $interactuar;
+        
+        return $this;
+    }
+
     // TODO: Tarea 162 -  Crear el metodo de acceso para obtener sincronizar de la tabla Flujositems
     /**
      * @return number

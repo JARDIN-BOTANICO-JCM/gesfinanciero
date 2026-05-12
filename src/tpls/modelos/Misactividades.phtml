@@ -42,12 +42,20 @@ try {
     throw $e;
 }
 
+$interaccionempleadoestadoslabel = [];
+try {
+    $interaccionempleadoestadoslabel = OperacionesCtrl::interaccionempleadoestadoslabel_Obtener( [] );
+} catch (Exception $e) {
+    throw $e;
+}
+
 $paraRevisar = [];
 foreach ($l_flujositems as $kFluI ) {
     $paraRevisar[] = $kFluI['id'];
 }
 
-if ( !$essupervisor ) {
+//if ( !$essupervisor ) {
+    $misuper = [];
     try {
         $misuper = OperacionesCtrl::apoyos_Obtener([ "asignado_id" => $usu->getId() ]);
     } catch (Exception $e) {
@@ -78,7 +86,7 @@ if ( !$essupervisor ) {
         $paraRevisar[] = $kSuFlu['id'];
     }
     
-}
+//}
 
 //die( "apoyos: <pre>" . print_r( $l_apoyos, true ) );
 
@@ -188,7 +196,14 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	let nextname = "";
 	let nextid = 0;
 	
+	const puedeinteractuar = {"interactuar" : false, "usuario" : [], "solicitante" : []};
+	
+	const FIR_REASON_SUPERVISOR = "Supervisor";
+	const FIR_REASON_APOYOSUPERVISOR = "Apoyo a supervisor";
+	
 	let indexCom = 0;
+	
+	let soyapoyo = false;
 	
 	let asignadosCache = {};
 	
@@ -196,6 +211,14 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	const TIPODOCS_PACKS = 1;
 	const TIPODOCS_ATTACHED = 2;
 	const TIPODOCS_OBLIG = 3;
+	
+	_this.getPuedeInteractuar = function(){
+		return puedeinteractuar;
+	};
+	
+	_this.getSoyapoyo = function(){
+		return soyapoyo;
+	};
 	
 	_this.dibujarTb = function(){
 		const html = [];
@@ -238,6 +261,11 @@ const Requerimientos = function( dC ){ // dC = data constructor
                     const objmdl = mngModal.dibujar( opc );
                     jQuery( objmdl ).modal('show');
                     
+                    if ( Object.hasOwnProperty.call( dt, "form" ) ) {
+                    	dt['sol_mensaje'] = jQuery('#sol_mensaje').val();
+                    	dt['sol_estado'] = jQuery('#sol_estado').val();
+                    }
+                    
                     const form_data = new FormData();
                     form_data.append('ajax', '<?php echo md5( IndexCtrl::API_PaquetesHelperMoveAdmin ); ?>');
                     form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
@@ -277,6 +305,58 @@ const Requerimientos = function( dC ){ // dC = data constructor
     
     	closeAllModal();
 		
+	};
+	
+	_this.solicitarAlContratista = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const target = dt['target'];
+		const msj = dt['msj'];
+		const nid = dt['nid'];
+		
+		const d_interaccionempleadoestadoslabel = <?php echo json_encode( $interaccionempleadoestadoslabel ) ?>;
+		
+		const solicitante = dt['solicitante'];
+		
+		const objmdl = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Solicitar a <span style="text-transform: capitalize;">' + solicitante + '</span>','btnCerrarX' : true, 'level' : 'err' } );
+        jQuery(objmdl + ' div.alert').remove();
+        const modalBody = jQuery( objmdl + ' .modal-body');
+        
+        const html = [];
+        
+        html.push('<form id="sol_form" class="sol_formCls"> ');
+        html.push('	<div class="mb-3"> ');        
+        html.push('		<div class="form-floating"> ');
+        html.push('			<textarea class="form-control" placeholder="Aqu&iacute; va el mensaje" id="sol_mensaje" name="sol_mensaje" style="height: 100px;"></textarea> ');
+        html.push('			<label for="sol_mensaje">Mensaje para <span style="text-transform: capitalize;">' + solicitante + '</span></label> ');
+        html.push('		</div> ');
+        html.push('	</div> ');
+
+		html.push('	<div class="mb-3"> ');        
+        html.push('		<div class="form-floating"> ');
+        html.push('			<select class="form-select" id="sol_estado" name="sol_estado" aria-label="Estado mostrado"> ');
+        
+        for ( const key in d_interaccionempleadoestadoslabel ) {
+            if ( Object.hasOwnProperty.call( d_interaccionempleadoestadoslabel, key ) ) {
+                const _el = d_interaccionempleadoestadoslabel[ key ];
+        		html.push('				<option value="' + _el['id'] + '">' + _el['nombre'] + '</option> ');
+        	}
+    	}
+    	
+        html.push('			</select> ');
+        html.push('			<label for="sol_estado">&iquest;Qu&eacute; estado debe aparecer?</label> ');
+        html.push('		</div> ');
+        html.push('	</div> ');
+
+        html.push('</form> ');
+        html.push('<div class="d-grid gap-2"> ');
+        html.push('	<button class="btn btn-primary" type="button" onclick="reqs.continuar( this );" data-form="#sol_form" data-target="#contProce" data-msj="Solicitar a ' + solicitante + '" data-nid="' + nextid + '" data-idMod="' + idMod + '"  data-interactuar="true" >Enviar y esperar respuesta</button> ');
+        html.push('</div > ');
+        
+        modalBody.html( html.join('') );
+
+        jQuery( objmdl ).modal('show');
 	};
 	
     _this.firmarPdf = function( o ){
@@ -441,7 +521,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         pieHtml.push('		Abrir en nueva pestaña');
         pieHtml.push('	</a>');
         if( _esfirmable ){
-        	pieHtml.push('	<button data-razon="' + flujosroles + '" data-fldcampo="FIRMA_' + nofirmante + '" data-fldtipo="proceso" data-documento="' + _urlpdf + '" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_ADMIN ?>" type="button" class="btn btn-primary" onclick="reqs.firmarPdf( this );" >Firmar</button>');
+        	pieHtml.push('	<button data-razon="' + flujosroles + '" data-fldcampo="FIRMA_' + nofirmante + '" data-fldtipo="proceso" data-documento="' + _urlpdf + '" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_ADMIN ?>" type="button" class="btn btn-primary" onclick="reqs.firmarPdf( this );" >Firmar ' + flujosroles + '</button>');
         }
         pieHtml.push('	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>');
 		pieHtml.push('</div>');
@@ -803,6 +883,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const soli = dt['solicitante'];
 		const olBreadcrumbFlujo = jQuery('#olBreadcrumbFlujo');
 		
+		const d_misuper = '<?php echo base64_encode( json_encode( $misuper ) ); ?>';
+		
 		const nombrefull = ( "" + jQuery.trim( soli['nombres'] + ' ' + soli['apellidos'] )).toLowerCase();
 		
 		const li = [];
@@ -827,12 +909,40 @@ const Requerimientos = function( dC ){ // dC = data constructor
     	        	nextfir = true;
     	        }
     	        
-    	        if( _el['usuarios_id'] == <?php echo $usu->getId() ?> ){
+    	        // revisar si es apoyo
+    	        const ls_supers = JSON.parse( ut.b64DecodeUnicode( d_misuper ) );
+    	        for ( const kS in ls_supers ) {
+            	    if ( Object.hasOwnProperty.call( ls_supers, kS ) ) {
+            	        const _eSup = ls_supers[ kS ];
+            	        if ( _eSup['supervisor_id'] == _el['usuarios_id'] ){
+            	        	soyapoyo = true;
+            	        }
+        	        }
+    	        }
+        		
+    	        if( _el['usuarios_id'] == <?php echo $usu->getId() ?> || soyapoyo ){
     	        	nofirmante = tmpnofir;
     	        	flujosroles = _el['flujosroles'];
     	        	flujosroles_id = _el['flujosroles_id'];
+    	        	
+<?php               if ( !$essupervisor ) : ?>
+    	        	if( soyapoyo ){
+    	        		flujosroles = FIR_REASON_APOYOSUPERVISOR;
+    	        		flujosroles_id = <?php echo $usu->getId() ?>;
+    	        	}
+<?php               endif; ?>
+
+                    if( _el['interactuar'] == 1 || _el['interactuar'] == true ){
+						puedeinteractuar['interactuar'] = true;
+    					puedeinteractuar['usuario'] = { 'id' : <?php echo $usu->getId() ?> };
+    					puedeinteractuar['solicitante'] = soli;
+                    }
+
     	        }
     	        tmpnofir++;
+    	        
+    	        // Nuevamente asignamos soy apoyo a falso
+    	        soyapoyo = false;
     	        
     	        li.push( '<li class="breadcrumb-item">' + txt + '</li>' );
 	        }
@@ -864,7 +974,25 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('			<div style="display: none;" id="lblDevolver" class="alert alert-warning" >Esperando ajustes de <span style="text-transform: capitalize;">' + nombrefull + '</span></div>');
 		html.push('		</div>');
 		html.push('		<div class="">');
-		html.push('			<button style="display: none;" id="btnContinuar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
+		
+		if( puedeinteractuar['interactuar'] ){
+			const tmpsol = puedeinteractuar['solicitante'];
+			const tmpfullname = (tmpsol['nombres'] + ' ' + tmpsol['apellidos']).toLowerCase() ;
+
+            html.push('			<div class="btn-group">');
+            html.push('				<button style="display: none;" id="btnContinuar" class="btn btn-outline-warning" onclick="reqs.solicitarAlContratista( this );" data-solicitante="' + tmpfullname + '" data-target="#contProce" data-msj="Solicitar a ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Solicitar a <span style="text-transform: capitalize;">' + tmpfullname + '</span></button>');
+            html.push('				<button type="button" class="btn btn-outline-warning dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">');
+            html.push('					<span class="visually-hidden">Toggle Dropdown</span>');
+            html.push('				</button>');
+            html.push('				<ul class="dropdown-menu">');
+            html.push('					<li><button class="dropdown-item" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button></li>');
+            html.push('				</ul>');
+            html.push('			</div>');
+
+		}else{
+			html.push('			<button style="display: none;" id="btnContinuar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
+		}
+		
 		html.push('			<button style="display: none;" id="btnDevolver" class="btn btn-outline-danger" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Devolver esta solicitud" data-nid="' + nextid + '" data-idMod="' + idMod + '" data-rechazar="true" >Devolver solicitud</button>');
 		html.push('			<button style="display: none;" id="btnFinalizar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Finalizar solicitud" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
 		html.push('		</div>');
@@ -1492,7 +1620,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
                 url: './index.php',
                 data : function(d){
                 	d.ajax = '<?php echo md5( IndexCtrl::API_PaquetesGetAjax ); ?>';
-                	d.columns[ 6 ]['search']['value'] = [ 2, 5 ];
+                	d.columns[ 6 ]['search']['value'] = [ 2, 5, 7 ];
                 	if( d_paraRevisar.length > 0 ){
                 		d.columns[ 4 ]['search']['value'] = d_paraRevisar;
 <?php                   if( !$essupervisor ) : ?>

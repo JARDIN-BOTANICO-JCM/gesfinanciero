@@ -363,43 +363,43 @@ class OperacionesCtrl {
 	    }
 		
 		else {
-			$m = "POST";
-			$url = rtrim($_CFG_SMTP_TFSERVICEURL, "/") . "/" . md5('Api/Servidor/NotificaByMail');
+		    $flRuta = '';
+		    if ( isset( $d['adjuntofull'] ) ) {
+		        $flRuta = $d['adjuntofull'];
+		    }
 			
-			$flRuta = '';
-			if ( isset( $d['adjuntofull'] ) ) {
-			    $flRuta = $d['adjuntofull'];
+			$_CFG_AUTH20_CLIENTID = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_CLIENTID ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_CLIENTID ]["val"] : "";
+			$_CFG_AUTH20_SECRET = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_SECRET ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_SECRET ]["val"] : "";
+			$_CFG_AUTH20_TENANTID = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_TENANTID ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_TENANTID ]["val"] : "";
+			$_CFG_AUTH20_MAILSENDER = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_MAILSENDER ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_MAILSENDER ]["val"] : "";
+			
+			include_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "libs" . DIRECTORY_SEPARATOR . "MicrosoftGraphMail/MicrosoftGraphMail.php";
+			
+			$clientId = $_CFG_AUTH20_CLIENTID;
+			$clientSecret = $_CFG_AUTH20_SECRET;
+			$tenantId = $_CFG_AUTH20_TENANTID;
+			$mailsender = $_CFG_AUTH20_MAILSENDER;
+			$mailer = new MicrosoftGraphMail($clientId, $clientSecret, $tenantId, $mailsender);
+			
+			$att = [];
+			if ( sizeof( $flRuta ) > 0 ) {
+			    $att = array( $flRuta );
 			}
 			
-			$_dominio = parse_url(Utiles::getBaseUrl());
-			$idcli_prt = explode(".", $_dominio["host"]);
-			
-			/*
-			$instancia_partes = explode( DIRECTORY_SEPARATOR , dirname( __FILE__ ) );
-			$instancia = $instancia_partes[ count( $instancia_partes ) - 3 ];
-			*/
-			
-			//$txtTit = mb_convert_encoding( $titulo , "utf8", "iso-8859-1");
-			$jsonMail = '{"destino" : "' . $dest1 . '","titulo64" : "' . base64_encode( $titulo ) . '","mensaje" : "' . base64_encode( $mensaje ) . '","adjuntofull" : "' . $flRuta . '", "idserver":"' . $idcli_prt[0] . '","cliente" : "' . $_CFG_SMTP_TFSCLIID . '"}';
-			//die( "jsonMail: " . $jsonMail );
-			$data = array(
-			    "u" => $_CFG_SMTP_TFSAPITOKEN
-				,"data" => base64_encode( $jsonMail )
-			);
-			//die( "data: " . print_r( $data ) );
-			
-			$opts = array(
-			    CURLOPT_HTTPHEADER => array(
-			        'Content-Type: application/json',
-			        'User-Agent: nuevapp/1.0'
-			    )
-			);
-			
+			$msj = "Error al enviar el correo.";
+			$renvio = false;
 			try {
-			    $rSend = json_decode( self::CallAPI($m, $url, $data, $opts ) , true );
-			} catch (Exception $e2) {
-				throw new Exception( "enviarCustomEmail: " . $e2->getMessage() );
+			    $renvio = $mailer->sendMail( $dest1, $titulo, $mensaje , [], [], $att );
+			} catch (Exception $e) {
+			    return self::retorno( [], $e->getCode(), $e->getMessage());
 			}
+			
+			if ( $renvio ) {
+			    $msj = "Correo enviado correctamente.";
+			}
+			
+			return self::retorno( [ 'data' => true ], '', $msj);
+			
 		}
 		
 		if ( isset( $rSend['err'] ) ){ 
@@ -478,6 +478,51 @@ class OperacionesCtrl {
 	    
 	    return $rsend;
 	}
+	
+	// MS Smtp INI
+	public static function msServicioSmtp_view( $d ){
+	    $cfg = self::LeerConfigCorp();
+	    
+	    $_CFG_AUTH20_CLIENTID = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_CLIENTID ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_CLIENTID ]["val"] : "";
+	    $_CFG_AUTH20_SECRET = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_SECRET ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_SECRET ]["val"] : "";
+	    $_CFG_AUTH20_TENANTID = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_TENANTID ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_TENANTID ]["val"] : "";
+	    $_CFG_AUTH20_MAILSENDER = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_MAILSENDER ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_MAILSENDER ]["val"] : "";
+	    
+	    
+	    include_once dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "libs" . DIRECTORY_SEPARATOR . "MicrosoftGraphMail/MicrosoftGraphMail.php";
+	    
+	    $clientId = $_CFG_AUTH20_CLIENTID;
+	    $clientSecret = $_CFG_AUTH20_SECRET;
+	    $tenantId = $_CFG_AUTH20_TENANTID;
+	    $mailsender = $_CFG_AUTH20_MAILSENDER;
+	    $mailer = new MicrosoftGraphMail($clientId, $clientSecret, $tenantId, $mailsender);
+	    
+	    $html = array();
+	    $html[] = "Hola a todos!";
+	    $html[] = "Queda confirmada la configuraci&oacute;n del servicio para el env&iacute;o de correos electr&oacute;nicos desde gestorfinanciero";
+	    $html[] = "<br />Cordial saludo,";
+	    $html[] = "Yeicot Alfonso";
+	    
+	    $emailto = "";
+	    if ( isset( $d['email'] ) ) {
+	        $emailto = $d['email'];
+	        
+	        $msj = "Correo enviado correctamente a " . $emailto . ".";
+	        try {
+	            if ( !( $mailer->sendMail( $emailto, "Asunto de prueba", implode("<br />", $html) ) ) ) {
+	                $msj = "Error al enviar el correo a " . $emailto . ".";
+	            }
+	        } catch (Exception $e) {
+	            return self::retorno( [], $e->getCode(), $e->getMessage());
+	        }
+	        
+	        return self::retorno( [ 'data' => true ], '', $msj);
+	    }
+	    
+	    return self::retorno( [ 'data' => false ], '', '');
+	    
+	}
+	// MS Smtp FIN
 	/**
 	 * Autentica usuarios del sistema mediante datos codificados en Base64
 	 * 
@@ -1203,36 +1248,15 @@ class OperacionesCtrl {
      * @var string
      * @values 'true'|'false' Se almacena como string booleano
      */
-	const CFG_SMTP_TFSERVICE = 'cfgsmtptfservice'; // tipo de
-	/**
-     * URL del servicio externo de correo
-     * 
-     * URL base del API del servicio externo utilizado para el envío de correos
-     * cuando CFG_SMTP_TFSERVICE está habilitado.
-     * 
-     * @var string
-     */
-	const CFG_SMTP_TFSERVICEURL = 'cfgsmtptfserviceurl'; // tf service url
-	/**
-     * Token de API del servicio externo
-     * 
-     * Token de autenticación para acceder al API del servicio externo de correo.
-     * Se almacena en formato base64 para mayor seguridad.
-     * 
-     * @var string
-     * @security Se almacena en base64, se decodifica antes del uso
-     */
-	const CFG_SMTP_TFSAPITOKEN = 'cfgsmtptfsapitoken'; // tfs api token
-	 /**
-     * ID del cliente en el servicio externo
-     * 
-     * Identificador único del cliente en el servicio externo de correo.
-     * Se utiliza para identificar la instancia específica del sistema
-     * en el servicio externo.
-     * 
-     * @var string
-     */
-	const CFG_SMTP_TFSCLIID = 'cfgsmtptfscliid';   // Id del cliente en el servicio TFServices
+	const CFG_SMTP_TFSERVICE = 'cfgsmtptfservice'; // tipo de envio de correos
+	
+	// TODO: Tarea 182 - Crear las constantes que almacenan la configuracion con el envio de correo de office
+	// Const MS AUTH 2.0 INI
+	const CFG_AUTH20_CLIENTID = 'cfgauth20clientid';
+	const CFG_AUTH20_SECRET = 'cfgauth20secret';
+	const CFG_AUTH20_TENANTID = 'cfgauth20tenantid';
+	const CFG_AUTH20_MAILSENDER = 'cfgauth20mailsender';
+	// Const MS AUTH 2.0 FIN
 	
 	// Espacio almacenamiento
 	/**
@@ -1819,7 +1843,7 @@ class OperacionesCtrl {
 	    $defname = "";
 	    if( !isset( $_FILES[ $nombrecampo ] ) ){
 	        $fl = print_r($_FILES, true);
-	        throw new Exception( 'SubirArchivo, Error indice "file" no existe: ' . $fl );
+	        throw new Exception( 'SubirArchivo, Error indice "' . $nombrecampo . '" no existe: ' . $fl );
 	    }
 	    if ( 0 < $_FILES[ $nombrecampo ]['error'] ) {
 	        if ( $_FILES[ $nombrecampo ]['error'] === 1 ) {
@@ -3237,7 +3261,21 @@ class OperacionesCtrl {
 			}
 		}
 		elseif ( $perfil == self::USUARIOS_PERFIL_ADMINISTRADOR || $perfil == self::USUARIOS_PERFIL_SUPERVISOR || $perfil == self::USUARIOS_PERFIL_SUPERVISORADM || $perfil == self::USUARIOS_PERFIL_PROVEEDOR || $perfil == self::USUARIOS_PERFIL_API || $perfil == self::USUARIOS_PERFIL_SOPORTE ) {
-			try {
+			
+		    // TODO: Tarea 179 - Agregar revision previa de tipo de documento y documento para evitar agregar varias veces la misma persona
+		    $usrExiste = [];
+		    try {
+		        $usrExiste = self::usuarios_Obtener( [ 'w_tipodoc_id' => $_d['tipodoc_id'], 'w_documento' => $_d['documento'] ] );
+		    } catch (Exception $e) {
+		        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+		        throw new Exception ( 'mnguserAdd_Helper - usuarios_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+		    }
+		    if( count( $usrExiste ) > 0 ){
+		        http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+		        throw new Exception ( 'mnguserAdd_Helper: El tipo y n&uacute;mero de documento ya existen.', IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+		    }
+		    
+		    try {
 				$idUsr = self::usuarios_Agregar( $_d );
 			} catch (\Throwable $th) {
 				throw new \Exception ( $th->getMessage() );
@@ -4661,6 +4699,10 @@ class OperacionesCtrl {
 	    if( isset( $d['w_empleados_id'] ) ){
 	        $wh[] = "eobj.empleados_id = ?";
 	        $pr[] = $d['w_empleados_id'];
+	    }
+	    if( isset( $d['w_vigencia'] ) ){
+	        $wh[] = "eobj.vigencia = ?";
+	        $pr[] = $d['w_vigencia'];
 	    }
 	    
 	    $defWh = "";
@@ -6197,6 +6239,14 @@ class OperacionesCtrl {
 		
 		if( isset( $d['w_supervisor'] ) ){
 		    $wh = 'where estu.supervisor = ' . $d['w_supervisor'] . ' ';
+		}
+		
+		if( isset( $d['w_tipodoc_id'] ) && isset( $d['w_documento'] ) ){
+		    $wh = 'where estu.tipodoc_id = ' . $d['w_tipodoc_id'] . ' AND estu.documento = ' . $d['w_documento'] . ' ';
+		}
+		
+		if( isset( $d['w_estado_id'] ) ){
+		    $wh = 'where estu.estado_id = ' . $d['w_estado_id'] . ' ';
 		}
 
 		if ( isset( $d['perfil_id']) ) {
@@ -9527,6 +9577,9 @@ class OperacionesCtrl {
 	        $usr['tipodoc'] = $tps[0]['nombre'];
 	        $usr['perfil_id'] = $usu->getPerfil_id();
 	        
+	        // TODO: Tarea 177 - Debe agregar el correo electronico a las variables de usuario
+	        $usr['mail'] = $usu->getMail();
+	        
 	        $u = [];
 	        $u['fullname'] = trim((string)$usu->getNombres() . " " . $usu->getApellidos());
 
@@ -9565,6 +9618,10 @@ class OperacionesCtrl {
 	        $locator = new PdfTextLocator();
 	        $locator->setSearchTerms( [ $fldcampo ] );
 	        $firmaOpcs = $locator->findInPdf( $flinput );
+	        
+	        if (empty($firmaOpcs)) {
+	            return self::retorno([], 1, "No se encontr&oacute; el campo de firma: " . $fldcampo);
+	        }
 	        
 	        /*
 	        echo "Busca: " . $fldcampo . "\n";
@@ -9685,7 +9742,7 @@ class OperacionesCtrl {
 	        }
 	        
 	        http_response_code(IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA);
-	        return self::retorno([], IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA, 'Error firmando. Haga clic nuevemente en firmar y seguramente ya no funciona.' );
+	        return self::retorno([], IndexCtrl::ERR_COD_USUARIO_O_CLAVE_INVALIDA, 'Ocurri&oacute; un error durante el firmando. Haga clic nuevemente en firmar.' );
 	    }
 	    
 	    return self::retorno([], IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA, 'Null = ' . $json['documento'] );
@@ -12154,6 +12211,15 @@ EOD;
 	                }
 	            }
 	            
+	            $sincronizar_dt = 0;
+	            if ( isset ( $json[ 'sincronizar_' . end($partes) ] ) ) {
+	                $sincronizar_dt = $json[ 'sincronizar_' . end($partes) ];
+	            }
+	            $interactuar_dt = 0;
+	            if ( isset ( $json[ 'interactuar_' . end($partes) ] ) ) {
+	                $interactuar_dt = $json[ 'interactuar_' . end($partes) ];
+	            }
+	            
 	            $newjson = array(
 	                "correo" => $json[ 'correo_' . end($partes) ],
 	                "flujos_id" => $tpls_id,
@@ -12164,7 +12230,8 @@ EOD;
 	                "tel" => $json[ 'tel_' . end($partes) ],
 	                "usuarios_id" => $json[ 'usuarios_id_' . end($partes) ],
 	                "id" => $modId,
-	                "sincronizar" => $json[ 'sincronizar_' . end($partes) ]
+	                "sincronizar" => $sincronizar_dt,
+	                "interactuar" => $interactuar_dt
 	            );
 	            //die( print_r( $newjson , true  ) );
 	            if ( $modId > 0 ) {
@@ -12411,6 +12478,9 @@ EOD;
 	    if ( isset( $d['sincronizar'] ) ) {
 	        $aSt['sincronizar'] = ( $d['sincronizar'] == 1 ? 1 : 0 ) ;
 	    }
+	    if ( isset( $d['interactuar'] ) ) {
+	        $aSt['interactuar'] = ( $d['interactuar'] == 1 ? 1 : 0 ) ;
+	    }
 	    
 	    $id = 0;
 	    $wh  = '';
@@ -12426,7 +12496,11 @@ EOD;
 	    
 	    $xt = $wh;
 	    $pr = [ $id ];
-	    //die('UPDATE ' . $tb . ' SET ' . $st . ' ' . $xt);
+	    
+	    //echo print_r( $pr , true );
+	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' WHERE ' . $xt);
+	    
 	    $cu = null;
 	    try {
 	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt, $pr);
@@ -12471,11 +12545,18 @@ EOD;
 	    if (isset( $d['tel'] ) ) { $o->setTel( $d['tel'] ); }
 	    if (isset( $d['usuarios_id'] ) ) { $o->setUsuarios_id( $d['usuarios_id'] ); }
 	    if (isset( $d['sincronizar'] ) ) {
-            $val = 0;
-            if( $d['sincronizar'] == 1){
-                $val = 1;
-            }
-            $o->setSincronizar( $val ); 
+	        $val = 0;
+	        if( $d['sincronizar'] == 1){
+	            $val = 1;
+	        }
+	        $o->setSincronizar( $val );
+	    }
+	    if (isset( $d['interactuar'] ) ) {
+	        $val = 0;
+	        if( $d['interactuar'] == 1){
+	            $val = 1;
+	        }
+	        $o->setInteractuar( $val );
 	    }
 	    
 	    $id = $o->saveData();
@@ -12587,7 +12668,7 @@ EOD;
 	    $vr  = "flui.`id`, flui.`nombre`, flui.`correo`, flui.`tel`, flui.`requerimientos`, flui.`orden`, ";
 	    $vr .= "flui.`flujositemestados_id`, flui.`flujosroles_id`, flurol.nombre as flujosroles, flui.`flujos_id`, ";
 	    $vr .= "flu.nombre as flujos_nombre, flu.descripcion as flujos_descripcion, flui.`usuarios_id`, trim(concat(usr.nombres, ' ', usr.apellidos)) as usuarios, ";
-	    $vr .= "flui.`sincronizar` ";
+	    $vr .= "flui.`sincronizar`, flui.`interactuar` ";
 	    
 	    $tb  = '`flujositems` as flui ';
 	    
@@ -12879,7 +12960,8 @@ EOD;
                 'actual' => $actual,
 	            'flujosroles' => $kItem['flujosroles'],
 	            'flujosroles_id' => $kItem['flujosroles_id'],
-	            'sincronizar' => $kItem['sincronizar']
+	            'sincronizar' => $kItem['sincronizar'],
+	            'interactuar' => $kItem['interactuar']
             ];
 	        
 	        $usrs[] = $usractual;
@@ -13471,9 +13553,6 @@ EOD;
 	public static function paquetes_Helper_Agregar( $d ){
 	    date_default_timezone_set('America/Bogota');
 	    
-	    $cfg = self::LeerConfigCorp();
-	    $_CFG_GA_ACTIVAR = filter_var( isset( $cfg[ self::CFG_GA_ACTIVAR ]) ? $cfg[ self::CFG_GA_ACTIVAR ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
-	    
 	    $data = base64_decode( $d[ 'data' ] );
 	    $json = json_decode( $data, true );
 	    
@@ -13512,6 +13591,37 @@ EOD;
 	    if ( count( $objPaquetesFechaUnica ) > 0 ) { 
 	        http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
 	        throw new Exception('No es posible radicar una solicitud en el mismo proceso y en el mismo mes', IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+	    }
+	    
+	    // TODO: Tarea 176 - Crear un proceso que permita confirmar si el contratista no tiene obligaciones y desde el momento que cree una solicitud importe obligaciones
+	    $lsobli = [];
+	    try {
+	        $lsobli = self::empleadosobjetivos_Obtener( [ 'w_empleados_id' => $empleadosinfo['id'] , 'vigencia' => date("Y", strtotime( $mesaplica ) ) ] );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA );
+	        throw new Exception('paquetes_Helper_Agregar: ' . $e->getMessage(), IndexCtrl::ERR_COD_RESPUESTA_SQL_VACIA );
+	    }
+	    
+	    // Si el usuario no tiene obligaciones cargadas, se traen del archivo de obligaciones
+	    if ( count( $lsobli ) == 0 ) {
+	        $obligaciones = self::empleados_Procesar_Archivos(
+	            array(
+	                'w_nombre' => 'obligaciones',
+	                'buscarpor' => [
+	                    array( 'campo' => 'NRO_IDENTIFICACION', 'valor' => $empleadosinfo['documento'] )
+	                ]
+	            )
+            );
+	        foreach ($obligaciones as $oBli) {
+	            $nwObli = [
+	                'descripcion' => $oBli['obligacion'],
+	                'empleados_id' => $empleadosinfo['id'],
+	                'empleadosobjetivosestados_id' => 1,
+	                'vigencia' => $oBli['vigencia'],
+	                'orden' => $oBli['orden']
+	            ];
+	            self::empleadosobjetivos_Agregar( $nwObli );
+	        }
 	    }
 	    
 	    // Aqui va el radicado que entrega el gestor documental
@@ -13641,6 +13751,8 @@ EOD;
 	    
 	    $debesinc = true;
 	    
+	    $debeinteractuar = false;
+	    
 	    $modCfg = [];
 	    if ( isset( $json['fin'] ) ) {
 	        if( $json['fin'] ) {
@@ -13659,6 +13771,18 @@ EOD;
 	            $modCfg['usuariosmod'] = $usuariosmod;
 	            $modCfg['fechamodificado'] = date("Y-m-d H:i:s");
 	            $debesinc = false;
+	        }
+	    }
+	    elseif ( isset( $json['interactuar'] ) ) {
+	        if( $json['interactuar'] ) {
+	            $modCfg = [];
+	            $modCfg['paquetesestados_id'] = 7;
+	            $modCfg['id'] = $idMod;
+	            $modCfg['usuariosmod'] = $usuariosmod;
+	            $modCfg['fechamodificado'] = date("Y-m-d H:i:s");
+	            $debesinc = false;
+	            
+	            $debeinteractuar = true;
 	        }
 	    }
 	    else {
@@ -13738,6 +13862,10 @@ EOD;
 	    } catch (Exception $e) {
 	        http_response_code( $e->getCode() );
 	        return self::retorno([], $e->getCode(), 'paquetes_Helper_MoverAdmin - paquetes_Modificar: ' . $e->getMessage());
+	    }
+	    
+	    if ( $debeinteractuar ) {
+	        self::interaccionempleado_Helper_Agregar( $d );
 	    }
 	    
 	    return self::retorno([ 'data' => $json ], 0, '');
@@ -17740,6 +17868,404 @@ EOD;
 	    
 	}
 	// Gestordocumental FIN
+	
+	// Interaccionempleado INI
+	// TODO: Tarea 186 - Crea el metodo de acceso ajax para obtener por el home
+	public static function interaccionempleado_Helper_Ajax_Obtener( $d ) {
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+        $r = [];
+	    try {
+	        $r = self::interaccionempleado_Obtener( [ 'w_empleados_id_md5' => $json['id'], 'interaccionempleadoestados_id' => 1 ] );
+	    } catch (Exception $e) {
+	        throw new Exception( 'interaccionempleado_Helper_Ajax_Obtener - interaccionempleado_Obtener: ' . $e->getMessage() , $e->getCode() );
+	    }
+	    
+	    $resultado = array_map(function($item) {
+	        return [
+	            'id'                                           => $item['id'],
+	            'paquetes_id'                                  => $item['paquetes_id'],
+	            'mensaje'                                      => $item['mensaje'],
+	            'respuesta'                                    => $item['respuesta'],
+	            'adjuntos'                                     => $item['adjuntos'],
+	            'fecha'                                        => $item['fecha'],
+	            'usuarios'                                     => $item['usuarios'],
+	            'interaccionempleadoestadoslabel_nombre'       => $item['interaccionempleadoestadoslabel_nombre']
+	        ];
+	    }, $r);
+	    
+        return base64_encode( json_encode( $resultado ) );
+	}
+	
+	// TODO: Tarea 183 - Crea el metodo de acceso a los datos de la tabla interaccionempleado
+    public static function interaccionempleado_Obtener( $d ) {
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    
+	    $vr  = "intera.`id`, intera.`paquetes_id`, pk.empleados_id as paquetes_empleados_id, pk.empleados as paquetes_empleados, ";
+	    $vr .= "pk.flujos_id as paquetes_flujos_id, intera.`mensaje`, intera.`respuesta`, intera.`adjuntos`, intera.`fechaempleado`, ";
+	    $vr .= "intera.`usuarios`, intera.`usuarios_id`, intera.`fecha`, intera.`interaccionempleadoestados_id`, intest.nombre as interaccionempleadoestados_nombre, ";
+	    $vr .= "intera.interaccionempleadoestadoslabel_id, intlbl.nombre as interaccionempleadoestadoslabel_nombre ";
+	    
+	    $tb  = '`interaccionempleado` as intera ';
+	    
+	    $jn  = 'LEFT JOIN paquetes as pk on intera.paquetes_id = pk.id ';
+	    $jn .= 'LEFT JOIN interaccionempleadoestados as intest on intera.interaccionempleadoestados_id = intest.id ';
+	    $jn .= 'LEFT JOIN interaccionempleadoestadoslabel as intlbl on intera.interaccionempleadoestadoslabel_id = intlbl.id ';
+	    
+	    $pr = [];
+	    $wh  = array();
+	    if( isset( $d['id'] ) ){
+	        $wh[] = "intera.`id` = ? ";
+	        $pr[] = $d['id'] ;
+	    }
+	    if( isset( $d['w_paquetes_id'] ) ){
+	        $wh[] = "intera.`paquetes_id` = ? ";
+	        $pr[] = $d['w_paquetes_id'] ;
+	    }
+	    
+	    if( isset( $d['w_empleados_id_md5'] ) ){
+	        $wh[] = "md5(pk.`empleados_id`) = ? ";
+	        $pr[] = $d['w_empleados_id_md5'] ;
+	    }
+	    
+	    $defWh = "";
+	    if ( count( $wh ) > 0 ) {
+	        $defWh = "WHERE (" . implode(") AND (", $wh) . ") ";
+	    }
+	    
+	    $orden = 'ORDER BY 1 desc ';
+	    if (isset( $d['ordendesc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordendesc'] . " desc ";
+	    }
+	    if (isset( $d['ordenasc'] ) ) {
+	        $orden = "ORDER BY " . $d['ordenasc'] . " asc ";
+	    }
+	    
+	    $limite = "";
+	    if ( isset( $d['limite'] ) ) {
+	        $limite = "LIMIT " . intval( $d['limite'] ) . " ";
+	    }
+	    
+	    $xt  = $jn . $defWh . $orden . $limite;
+	    
+	    $sql = "SELECT " . $vr . "FROM " . $tb . " " . $xt;
+	    //die( $sql );
+	    $r = array();
+	    try {
+	        $r = Singleton::_safeRawQuery($sql, $pr);
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( 'formularios_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN);
+	    }
+	    
+	    return $r;
+	}
+	// TODO: Tarea 187 - Crea el metodo helper para agregar datos para la tabla interaccionempleado
+	public static function interaccionempleado_Helper_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $existe = self::interaccionempleado_Obtener( [ 'w_paquetes_id' => $json['idmod'] ] );
+	    
+	    $idr = 0;
+	    if ( count( $existe ) > 0 ) {
+	        $regInte = $existe[0];
+	        $cfg = [
+	            "id" => $regInte['id'],
+	            "mensaje" => $json['sol_mensaje'],
+	            "interaccionempleadoestados_id" => 1
+	        ];
+	        try {
+	            $idr = self::interaccionempleado_Modificar( $cfg );
+	        } catch (Exception $e) {
+	            return self::retorno([], $e->getCode(), $e->getMessage() );
+	        }
+	        
+	    }
+	    else{
+	        $cfg = [
+	            "paquetes_id" => $json['idmod'],
+	            "mensaje" => $json['sol_mensaje'],
+	            "usuarios" => $usu->getNombres() . ' ' . $usu->getApellidos(),
+	            "usuarios_id" => $usu->getId()
+	        ];
+	        
+	        try {
+	            $idr = self::interaccionempleado_Agregar( $cfg );
+	        } catch (Exception $e) {
+	            return self::retorno([], $e->getCode(), $e->getMessage() );
+	        }
+	    }
+	    
+	    return self::retorno( ['data' => $idr ], 0 , "Creaci&oacute;n exitosa" );
+	}
+	// TODO: Tarea 188 - Crea el metodo helper que permite responder al contratista y almacenar los datos en la tabla interaccionempleado
+	public static function interaccionempleado_Helper_Respuesta_Agregar( $d ) {	    
+	    date_default_timezone_set('America/Bogota');
+
+	    $anyo = OperacionesCtrl::anyolectivo_Obtener();
+	    $c_anyo = $anyo[ 0 ];
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $tokenb64 = base64_decode( $json['token'] );
+	    $token = json_decode( $tokenb64, true );
+	    
+	    $jslgnb64 = base64_decode( $token['jslgn'] );
+	    $jslgnb = json_decode( $jslgnb64, true );
+	    
+	    $documento_limpio = preg_replace('/\D/', '', $jslgnb['documento']);
+	    $fld_base = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . "repo" . DIRECTORY_SEPARATOR . "anexos" . DIRECTORY_SEPARATOR;
+	    $fld_alum = $fld_base . $c_anyo['id'] . "/" . $documento_limpio ;
+	    
+	    if ( !file_exists( $fld_alum ) ) {
+	        mkdir($fld_alum);
+	    }
+	    
+	    $fld_alum_pks = $fld_alum . DIRECTORY_SEPARATOR . "packs";
+	    
+	    if ( !file_exists( $fld_alum_pks ) ) {
+	        mkdir($fld_alum_pks);
+	    }
+	    
+	    $relativepath = "repo" . DIRECTORY_SEPARATOR . "anexos" . DIRECTORY_SEPARATOR . $c_anyo['id'] . "/" . $documento_limpio . "/packs";
+	    
+	    $adjuntos = [];
+	    if ( file_exists( $fld_alum ) ) {
+	        $idjson = 1;
+	        foreach ( $_FILES as $kFl => $vFl) {
+	            $pin = pathinfo( $vFl['name'] );
+	            $nombre = $pin['filename'];
+	            $nombre = preg_replace('/[^A-Za-z0-9]/', ' ', $nombre);
+	            $nombre = trim(preg_replace('/\s+/', ' ', $nombre));
+	            $nombre = str_replace(' ', '_', $nombre);
+	            
+	            $resAdj = "";
+	            
+	            $rUp = "";
+	            try {
+	                $rUp = self::SubirArchivo($nombre, $fld_alum_pks, $kFl );
+	            } catch (Exception $e) {
+	                $resAdj = $e->getMessage();
+	            }
+	            
+	            $adjuntos[] = [
+	                "id" => $idjson,
+	                "ruta" => $relativepath . DIRECTORY_SEPARATOR . $rUp,
+	                "sinc" => "",
+	                "err" => $resAdj
+	            ];
+	            $idjson++;
+	        }
+	    }
+	    
+	    $cfg = [
+	        "id" => $json['interac_id'],
+	        "respuesta" => $json['interac_respuesta'],
+	        "interaccionempleadoestados_id" => 2,
+	        "fechaempleado" => date('Y-m-d H:i:s')
+	    ];
+	    
+	    if( count( $adjuntos ) > 0 ){
+	        $cfg['adjuntos'] = json_encode( $adjuntos );
+	    }
+	    
+	    $idr = 0;
+	    try {
+	        $idr = self::interaccionempleado_Modificar( $cfg );
+	    } catch (Exception $e) {
+	        return self::retorno([], $e->getCode(), 'interaccionempleado_Helper_Respuesta_Agregar - interaccionempleado_Modificar:' . $e->getMessage() );
+	    }
+	    
+	    return self::retorno( ['data' => $idr ], 0 , "Creaci&oacute;n exitosa" );
+	}
+	// TODO: Tarea 189 - Crea el metodo helper que permite eliminar archivos del contratista y actualizar los datos en la tabla interaccionempleado
+	public static function interaccionempleado_Helper_Respuesta_Eliminar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $data = base64_decode( $d[ 'data' ] );
+	    $json = json_decode( $data, true );
+	    
+	    $regid = $json['id'];
+	    
+	    $rDt = [];
+	    try {
+	        $rDt = self::interaccionempleado_Obtener( [ "id" => $regid ] );
+	    } catch (Exception $e) {
+	        return self::retorno([], $e->getCode(), 'interaccionempleado_Helper_Respuesta_Eliminar - interaccionempleado_Obtener: ' . $e->getMessage() );
+	    }
+	    
+	    $rid = $json['resid'];
+	    
+	    $newadjn = [];
+	    $adjuntos = [];
+	    foreach ( $rDt as $k ) {
+	        if( strlen( $k['adjuntos'] ) > 0 ){
+	            $adjuntos = json_decode( $k['adjuntos'] , true );
+	            
+	            foreach ( $adjuntos as $kAdj ) {
+	                if( $kAdj[ "id" ] != $rid ){
+	                    $newadjn[] = $kAdj;
+	                }
+	            }
+	            
+	        }
+	    }
+	    
+	    $cfg = [
+	        'adjuntos' => json_encode( $newadjn ),
+	        'id' => $regid
+	    ];
+	    
+	    $idr = 0;
+	    try {
+	        $idr = self::interaccionempleado_Modificar( $cfg );
+	    } catch (Exception $e) {
+	        return self::retorno([], $e->getCode(), 'interaccionempleado_Helper_Respuesta_Agregar - interaccionempleado_Modificar:' . $e->getMessage() );
+	    }
+	    
+	    return self::retorno( ['data' => $idr ], 0 , "Eliminaci&oacute;n exitosa" );
+	}
+	// TODO: Tarea 184 - Crea el metodo de insercion a los datos de la tabla interaccionempleado
+	public static function interaccionempleado_Agregar( $d ) {
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $o = new Interaccionempleado();
+	    if (isset( $d['paquetes_id'] ) ) {
+	        $o->setPaquetes_id( $d['paquetes_id'] );
+	    }
+	    if (isset( $d['mensaje'] ) ) {
+	        $o->setMensaje( $d['mensaje'] );
+	    }
+	    if (isset( $d['respuesta'] ) ) {
+	        $o->setRespuesta( $d['respuesta'] );
+	    }
+	    if (isset( $d['adjuntos'] ) ) {
+	        $o->setAdjuntos( $d['adjuntos'] );
+	    }
+	    if (isset( $d['fechaempleado'] ) ) {
+	        $o->setFechaempleado( $d['fechaempleado'] );
+	    }
+	    if (isset( $d['usuarios'] ) ) {
+	        $o->setUsuarios( $d['usuarios'] );
+	    }
+	    if (isset( $d['usuarios_id'] ) ) {
+	        $o->setUsuarios_id( $d['usuarios_id'] );
+	    }
+	    if (isset( $d['interaccionempleadoestados_id'] ) ) {
+	        $o->setInteraccionempleadoestados_id( $d['interaccionempleadoestados_id'] );
+	    }
+	    if (isset( $d['interaccionempleadoestadoslabel_id'] ) ) {
+	        $o->setInteraccionempleadoestadoslabel_id( $d['interaccionempleadoestadoslabel_id'] );
+	    }
+	    
+	    $o->setFecha( date('Y-m-d H:i:s') );
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception($o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    if( $id > 0){
+	        return $id;
+	    }
+	    else {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	}
+	// TODO: Tarea 185 - Crea el metodo de modificacion a los datos de la tabla interaccionempleado
+	public static function interaccionempleado_Modificar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    
+	    $tb  = "interaccionempleado ";
+	    $aSt = array();
+	    if ( isset( $d['mensaje'] ) ) {
+	        $aSt['mensaje'] = $d['mensaje'] ;
+	    }
+	    if ( isset( $d['respuesta'] ) ) {
+	        $aSt['respuesta'] = $d['respuesta'] ;
+	    }
+	    if ( isset( $d['adjuntos'] ) ) {
+	        $aSt['adjuntos'] = $d['adjuntos'] ;
+	    }
+	    if ( isset( $d['interaccionempleadoestados_id'] ) ) {
+	        $aSt['interaccionempleadoestados_id'] = $d['interaccionempleadoestados_id'] ;
+	    }
+	    if ( isset( $d['interaccionempleadoestadoslabel_id'] ) ) {
+	        $aSt['interaccionempleadoestadoslabel_id'] = $d['interaccionempleadoestadoslabel_id'] ;
+	    }
+	    if ( isset( $d['fechaempleado'] ) ) {
+	       $aSt['fechaempleado'] = date('Y-m-d H:i:s') ;
+	    }
+	    
+	    $pr = [];
+	    $wh  = '';
+	    if ( isset( $d['id'] ) ) {
+	        $wh  = 'id = ?';
+	        $pr[]  = $d['id'];
+	    }
+	    if ( $wh == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new Exception( 'Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    
+	    $xt = $wh;
+	    
+	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' ' . $xt);
+	    $cu = null;
+	    try {
+	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception( $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    
+	    return $cu;
+	}
+	// Interaccionempleado FIN
+	
+	// Interaccionempleadoestados INI
+	public static function interaccionempleadoestados_Obtener ( $d ){
+	    $d['tabla'] = 'interaccionempleadoestados';
+	    //$d['debug'] = true;
+	    $r = Singleton::_readEstado( $d );
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    return $r;
+	}
+	// Interaccionempleadoestados FIN
+	
+	// Interaccionempleadoestadoslabel INI
+	public static function interaccionempleadoestadoslabel_Obtener ( $d ){
+	    $d['tabla'] = 'interaccionempleadoestadoslabel';
+	    //$d['debug'] = true;
+	    $r = Singleton::_readEstado( $d );
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    return $r;
+	}
+	// Interaccionempleadoestados FIN
 	
 	// Version 2 FIN
 	
