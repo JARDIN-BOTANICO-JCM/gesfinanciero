@@ -28,7 +28,7 @@ try {
 
 $l_usuarios_id = array();
 try {
-    $l_usuarios_id = OperacionesCtrl::usuarios_Obtener( array( 'ordenasc' => 1 ) );
+    $l_usuarios_id = OperacionesCtrl::usuarios_Obtener( array( 'w_estado_id' => 1, 'ordenasc' => 1 ) );
 } catch (Exception $e) {
     throw $e;
 }
@@ -292,13 +292,17 @@ const btnAddCampos = function( o ){
 	const btnsCtn = [];
 	btnsCtn.push('<div id="cntArrFields' + campos_i + '" class="row border rounded py-2 mb-1 dragActivo bg-white" >');
 	
-	btnsCtn.push('	<div class="mb-3 col-md-1 d-flex justify-content-center align-items-center" >');
-	
+<?php
+// TODO: Tarea 178 - Retirar el checkbox de los items de flujos
+/*
+ *
+    btnsCtn.push('	<div class="mb-3 col-md-1 d-flex justify-content-center align-items-center" >');
 	btnsCtn.push('		<div class="form-check mt-4">');
 	btnsCtn.push('			<input id="chkEsExterno' + campos_i + '" class="form-check-input" data-id="' + campos_i + '" onclick="mostrarExternos( this );" type="checkbox" value="" id="esexterno' + campos_i + '">');
 	btnsCtn.push('		</div>');
 	btnsCtn.push('	</div>');
-	
+*/
+?>	
     btnsCtn.push('	<div class="mb-3 col-md-<?php echo $colusr ; ?> usrinterno' + campos_i + '" >');
     btnsCtn.push('		<label class="form-label" for="usuarios_id_' + campos_i + '">Usuario *</label>');
     btnsCtn.push('		<select onchange="llenarDatos( this );" class="form-select" id="usuarios_id_' + campos_i + '" name="usuarios_id_' + campos_i + '" >');
@@ -344,6 +348,14 @@ const btnAddCampos = function( o ){
     btnsCtn.push('		</div>');
     btnsCtn.push('	</div>');
 <?php endif; ?>
+
+<?php // TODO: Tarea 180 - Agregar opcion en la vista Flujos para indicar que debe esperar interaccion del contratista ?>
+    btnsCtn.push('	<div class="mb-3 col-md-1">');
+    btnsCtn.push('		<label class="form-label" for="interactuar_' + campos_i + '">Ir Contratista</label>');
+    btnsCtn.push('		<div class="form-check form-switch">');
+    btnsCtn.push('			<input class="form-check-input" type="checkbox" id="interactuar_' + campos_i + '" name="interactuar_' + campos_i + '" value="1">');
+    btnsCtn.push('		</div>');
+    btnsCtn.push('	</div>');
 
     btnsCtn.push('	<div class="mb-3 col-md-2 usrexterno' + campos_i + '" style="display: none;">');
     btnsCtn.push('		<label class="form-label" for="tel_' + campos_i + '">Tel&eacute;fono</label>');
@@ -544,6 +556,11 @@ const btnModRegistro = function ( o ) {
                             if( kData == 'sincronizar'){
                             	if( _data == 1 ){
                             		jQuery('#sincronizar_' + idEl).prop( 'checked', true );
+                            	}
+                            }
+                            if( kData == 'interactuar'){
+                            	if( _data == 1 ){
+                            		jQuery('#interactuar_' + idEl).prop( 'checked', true );
                             	}
                             }
                             else{

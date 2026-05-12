@@ -234,7 +234,7 @@ class Menubar {
         {
             $m1 = new MenubarEntity();
             $m1->setId( self::SISTEMA_EMAILCFG );
-            $m1->setNombre('SMTP');
+            $m1->setNombre('Notificaciones');
             $m1->setSlug( $meG->getCodigo() . '-emailconfig');
             $m1->setGrupo( $meG );
             $m1->setUrl('./index.php?pageid=modelos/Emailconfig.phtml');

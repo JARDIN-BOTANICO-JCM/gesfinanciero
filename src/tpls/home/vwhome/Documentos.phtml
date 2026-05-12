@@ -215,7 +215,7 @@ const btnAgregarReg = function(){
 	jQuery( _m ).modal('show');	
 };
 
-const btnOkFirma = function( colorbtn ){
+const btnOkFirma = function( colorbtn ){ya 
 	return '<div class="text-success"><i class="bi bi-check-circle me-1"></i> Firmado</div>';
 	//return '<button class="btn ' + colorbtn + ' flex-grow-1 firmaOkCls" ><i class="bi bi-check-circle me-1"></i>Documento firmado</button>';
 };
@@ -232,6 +232,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	const tablaCont = dC['tableContainer'];
 	let tbInter = null;
 	let tableId = dC['tableId'] || "tbInt" + ut.GetUUID();
+	
+	let interaclist = [];
 	
 	_this.dibujarTb = function(){
 		const html = [];
@@ -264,6 +266,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const requs = res['requs'];
 		const resul = res['res'];
 		const comentarios = res['comentarios'];
+		const pkestado_id = data['paquetesestados_id'];
 		
 		const html = [];
 		html.push('<div class="d-flex justify-content-between">');
@@ -282,7 +285,23 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			
 		html.push('<div class="row" id="contTb">');
 		html.push('	<div class="col-8">');
-		html.push('		' + formRequsHtml( requs, resul, comentarios ) );
+		if( pkestado_id == 7 ){
+		
+			let objinterac = [];
+			for ( const key in interaclist ) {
+        	    if ( Object.hasOwnProperty.call( interaclist, key ) ) {
+        	        const _el = interaclist[ key ];
+        	        if( _el['paquetes_id'] == data['id'] ){
+        	        	objinterac = _el;
+        	        }
+    	        }
+	        }
+			html.push('		' + formInteracHtml( objinterac ) );
+		}
+		else{
+			html.push('		' + formRequsHtml( requs, resul, comentarios ) );
+		}
+		
 		html.push('	</div>');
 		html.push('	<div class="col-4" >');
 		html.push('		<div id="cardContFiles" class="card" >');
@@ -372,6 +391,89 @@ const Requerimientos = function( dC ){ // dC = data constructor
         return grppcoms;
 	};
 	
+	const formInteracHtml = function( objinterac ){
+		const cardHtml = [];
+		cardHtml.push( '	<div class="card">' );
+		cardHtml.push( '		<div class="card-header d-flex justify-content-between">' );
+		cardHtml.push( '			<h4 class="">' + objinterac['usuarios'] + ' est&aacute; haciendo esta solicitud</h4>' );
+		cardHtml.push( '			<span>Creado el ' + objinterac['fecha'] + '</span>' );
+		cardHtml.push( '		</div>' );
+		cardHtml.push( '		<div class="card-body" >' );
+		cardHtml.push( '			<h5 class="text-black">' + objinterac['mensaje'] + '</h5>' );
+		cardHtml.push( '			<form id="frmval" class="frmvalobjcls">' );
+		
+		cardHtml.push( '				<div class="mb-3"> ');
+		cardHtml.push( '					<div class="input-group"> ');
+		cardHtml.push( '						<label class="input-group-text" for="interac_adjuntos">Adjunte si es requerido:</label> ');
+		cardHtml.push( '						<input type="file" class="form-control" id="interac_adjuntos" name="interac_adjuntos" multiple="multiple" > ');
+		cardHtml.push( '					</div> ');
+		cardHtml.push( '				</div> ');
+		
+		if( ("" + objinterac['adjuntos' ]).length > 0 ){
+    		const adjuntos = JSON.parse( objinterac[ 'adjuntos' ] );
+    		
+    		cardHtml.push( '				<div class="mb-3 d-flex"> ');
+    		for (const kAdj in adjuntos) {
+        	    if (Object.hasOwnProperty.call( adjuntos, kAdj ) ) {
+        	        const _elAdj = adjuntos[ kAdj ];
+        	        
+        	        let ico = "far fa-file";
+        	        
+        	        const fl = ut.pathInfo( _elAdj['ruta'] );
+        	        if( ("" + fl['extension']).toLowerCase() == "jpg" || ("" + fl['extension']).toLowerCase() == "jpeg" || ("" + fl['extension']).toLowerCase() == "gif" || ("" + fl['extension']).toLowerCase() == "png" ){
+        	        	ico = "far fa-file-image";
+        	        }
+        	        else if( ("" + fl['extension']).toLowerCase() == "txt" ){
+        	        	ico = "far fa-file-alt";
+        	        }
+        	        else if( ("" + fl['extension']).toLowerCase() == "pdf" ){
+        	        	ico = "far fa-file-pdf";
+        	        }
+        	        
+        	        let fllabel = fl['basename'];
+        	        if( fl['basename'].length >= 18 ){
+        	        	const initxt = ("" + fl['basename']).substr(0,7);
+        	        	const fintxt = ("" + fl['basename']).substr(-7);
+        	        	fllabel = initxt + "..." + fintxt;
+        	        }
+        	        
+        	        cardHtml.push( '					<div id="res_' + _elAdj['id'] + '" class="text-black fs-1 img-thumbnail w-15 text-center me-2 pb-2" style="line-height: 0px;"> ');
+    	        	cardHtml.push( '						<i class="' + ico + ' my-2"></i> ');
+    	        	cardHtml.push( '						<span style="font-size: 10px;" data-toggle="tooltip" data-placement="top" title="' + fl['basename'] + '">' + fllabel + '</span>');
+    	        	
+					cardHtml.push( '						<div class="btn-toolbar mt-3" role="toolbar" aria-label="Toolbar with button groups"> ');
+					cardHtml.push( '							<div class="btn-group me-2" role="group" aria-label="Ver datos"> ');
+					cardHtml.push( '								<a href="' + _elAdj['ruta'] + '" target="prev_img" class="btn btn-primary p-0" style="height: 20px; width: 20px; font-size: 10px;" ><i class="fas fa-external-link-alt"></i></a> ');
+					cardHtml.push( '							</div> ');
+					cardHtml.push( '							<div class="btn-group me-2" role="group" aria-label="Eliminar registros"> ');
+					cardHtml.push( '								<button type="button" onclick="reqs.responderDelRes( this );" data-id="' + objinterac['id'] + '" data-resid="' + _elAdj['id'] + '" data-file="' + fl['basename'] + '" class="btn btn-primary p-0" style="height: 20px; width: 20px; font-size: 10px;"><i class="fas fa-trash-alt"></i></button> ');
+					cardHtml.push( '							</div> ');
+					cardHtml.push( '						</div> ');
+    	        	
+    	        	cardHtml.push( '					</div> ');
+    	        }
+	        }
+	        cardHtml.push( '				</div > ');
+		}
+		
+        cardHtml.push( '				<div class="mb-3"> ');        
+        cardHtml.push( '					<div class="form-floating"> ');
+        cardHtml.push( '						<textarea class="form-control" placeholder="Comentarios" id="interac_respuesta" name="interac_respuesta" style="height: 100px;">' + objinterac['respuesta'] + '</textarea> ');
+        cardHtml.push( '						<label for="interac_respuesta">Deje sus comentarios para <span style="text-transform: capitalize;">' + ( objinterac['usuarios'] ).toLowerCase() + '</span></label> ');
+        cardHtml.push( '					</div> ');
+        cardHtml.push( '				</div> ');
+        cardHtml.push( '				<input type="hidden" name="interac_id" name="interac_id" value="' + objinterac['id'] + '" >');
+
+		cardHtml.push( '			</form>' );
+		cardHtml.push( '			<div class="d-grid gap-2">');
+		cardHtml.push( '				<button type="button" data-formid="frmvalobjcls" onclick="reqs.responderInteraccion( this );" class="btn btn-primary" >Responder y adjuntar solicitado</button>');
+		cardHtml.push( '			</div >');
+		cardHtml.push( '		</div>' );
+		cardHtml.push( '	</div>' );
+		
+		return cardHtml.join('');
+	};
+	
 	const formRequsHtml = function( d, vals, comms ){
 		const html = [];
 		
@@ -447,6 +549,91 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		formu.push('	</div >');
 		
 		return formu.join('');
+	};
+	
+	_this.responderInteraccion = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+		
+		home.navUser(function( uDt ){
+			ut.validarFrm( dt['formid'], function ( r ) {
+				r['token'] = uDt;
+				
+            	closeAllModal();
+                
+                const form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5( IndexCtrl::API_interaccionempleado_Helper_Respuesta_Add ); ?>');
+                form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( r ) ) );
+                
+				const archivos = jQuery('#interac_adjuntos').prop('files');
+                if (archivos.length > 0) {
+					for (let i = 0; i < archivos.length; i++) {
+						form_data.append('adjuntos_' + i, archivos[i]);
+                    }
+                }
+        
+        		__TransportarData(
+        			form_data,
+        			function( o ) {        				
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			},
+        			function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+        
+                        jQuery( objmdlErr ).modal('show');
+        				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+        			}
+        		);
+            	
+            	
+        	});
+		});
+	};
+	
+	_this.responderDelRes = function( o ){
+		const _o = jQuery( o );
+		const dt = _o.data();
+		
+		if( confirm("Desea eliminar " + dt['file'] + "?") ){
+		
+			const opc = { 'id' : 'ajaxldr' };
+            const objmdl = mngModal.dibujar( opc );
+            jQuery( objmdl ).modal('show');
+    		
+    		closeAllModal();
+                    
+            const form_data = new FormData();
+            form_data.append('ajax', '<?php echo md5( IndexCtrl::API_interaccionempleado_Helper_Respuesta_DelRes ); ?>');
+            form_data.append('data', ut.b64EncodeUnicode( JSON.stringify( dt ) ) );
+            
+    		__TransportarData(
+    			form_data,
+    			function( oDt ) {
+    				const obj = jQuery( "#res_" + dt['resid'] );
+    				obj.hide("fast", function(){
+    					obj.remove();
+    				});
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			},
+    			function ( err ) {
+                    const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                    const alerta = jQuery(objmdlErr + ' div.alert');
+                    alerta.attr('class','alert alert-danger');
+                    alerta.html( err.responseText );
+    
+                    jQuery( objmdlErr ).modal('show');
+    				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+    			}
+    		);
+		
+		}
 	};
 	
 	_this.guardaFormulario = function( o ){
@@ -871,6 +1058,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
         				
         				vistaPorEstado();
         				
+        				jQuery('[data-toggle="tooltip"]').tooltip();
             		});
             		
     				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
@@ -891,12 +1079,13 @@ const Requerimientos = function( dC ){ // dC = data constructor
 	
 	const btnInfoHtml = function( dtInfo ){
 		const html = [];
-    	html.push('<button onclick="reqs.modInfo(this);" data-paquetesestados_id="' + dtInfo.paquetesestados_id + '" data-flujos_id="' + dtInfo.flujos_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
+		html.push('<button onclick="reqs.modInfo(this);" data-paquetesestados_id="' + dtInfo.paquetesestados_id + '" data-flujos_id="' + dtInfo.flujos_id + '" data-id="' + dtInfo.id + '" data-flujositems_id="' + dtInfo.flujositems_id + '" data-target="#contCardProcs" data-nombre="' + dtInfo.nombre + '" class="btn m-0 px-1 py-0 text-muted text-primary-hover" data-template="modTpl' + dtInfo.id + '">');
         html.push('	<i class="bi bi-eye-fill fs-5"></i>');
         html.push('	<div id="modTpl' + dtInfo.id + '" class="d-none">');
         html.push('		<h6 class="mb-0 text-white">Editar</h6>');
         html.push('	</div>');
         html.push('</button>');
+        
         return html.join('');
 	};
 	
@@ -909,6 +1098,23 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		tbInter = jQuery( '#' + tableId ).DataTable({
             processing: true,
             serverSide: true,
+            drawCallback: function( settings ) {
+                _this.obtenerInteracciones( uDt , function( oR ){
+                	interaclist = JSON.parse( ut.b64DecodeUnicode( oR ) );
+                	
+                	for ( const key in interaclist ) {
+                	    if ( Object.hasOwnProperty.call( interaclist, key ) ) {
+                	        const _el = interaclist[ key ];
+                	        
+                	        if( jQuery("#estadotag_" + _el['paquetes_id'] + "_7" ).length ){
+                	        	const eTag = jQuery("#estadotag_" + _el['paquetes_id'] + "_7" );
+                	        	eTag.html( _el['interaccionempleadoestadoslabel_nombre'] );
+                	        }
+            	        }
+        	        }
+                	
+                });
+            },
             ajax: {
                 url: './index.php',
                 data : function(d){
@@ -971,7 +1177,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
                     	        	else if( data == 5 ){
                     	        		bgcolor = 'bg-danger text-light';
                     	        	}
-                    	        	txt = '<span class="badge ' + bgcolor + '">' + _el['nombre'] + '</span>';
+                    	        	txt = '<span id="estadotag_' + row['id'] + '_' + data + '" class="badge ' + bgcolor + '">' + _el['nombre'] + '</span>';
                     	        }
                     	        
                 	        }
@@ -1009,6 +1215,33 @@ const Requerimientos = function( dC ){ // dC = data constructor
 			tbInter.ajax.reload(null, false);
         }
     };
+    
+    _this.obtenerInteracciones = function( uDt , fn ){		    	
+		const opc = { 'id' : 'ajaxldr' };
+        const objmdl = mngModal.dibujar( opc );
+        jQuery( objmdl ).modal('show');
+        
+        const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_interaccionempleado_Helper_Ajax_Get ); ?>');
+        form_data.append('data', uDt );
+
+		__TransportarData(
+			form_data,
+			function( o ) {
+				fn( o );
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			},
+			function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+
+                jQuery( objmdlErr ).modal('show');
+				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
+			}
+		);
+    };
 };
 
 /**
@@ -1019,6 +1252,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
 const vistaPorEstado = function(){
 	if( idPqEst == 2 || idPqEst == 4 ){
 		jQuery('#' + btnEditarForms + ', #' + btnEnviarRevisar ).remove();
+	}
+	else if( idPqEst == 7 ){
+		jQuery('#' + btnEditarForms ).remove();
 	}
 };
 
@@ -1194,7 +1430,7 @@ let reqs = null;
 const listaProcesos = function(){
 	home.navUser(function( uDt ){
 		const dataConstruct = {
-    	'tableContainer' : '#contTb'
+    		'tableContainer' : '#contTb'
         };
     	reqs = new Requerimientos ( dataConstruct );
     	reqs.dibujarDataTable( uDt );

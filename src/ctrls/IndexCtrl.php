@@ -371,6 +371,12 @@ class IndexCtrl extends Pagina {
 	 * @const string API_LoginSystemAjax El endpoint de API para login AJAX
 	 */
 	const API_LoginSystemAjax = 'API_LoginSystemAjax';
+	
+	/**
+	 * Constante que representa el endpoint de API para enviar un test de correo
+	 * @const string API_EmailconfigSendTest El endpoint de API para enviar un email test con MSAuth2.0
+	 */
+	const API_EmailconfigSendTest = 'API_EmailconfigSendTest';
 
 	// Listas principales INI
 	/**
@@ -1237,6 +1243,13 @@ class IndexCtrl extends Pagina {
 	const API_Gestordocumental_Sinc_docume = 'API_Gestordocumental_Sinc_docume';
 	// Gestordocumental FIN
 	
+	// TODO: Tarea 183 - Agregar constante que permita acceder a el listado de registros para interaccion con el contratista
+	// Interaccionempleado INI
+	const API_interaccionempleado_Helper_Ajax_Get = 'API_interaccionempleado_Helper_Ajax_Get';
+	const API_interaccionempleado_Helper_Respuesta_Add = 'API_interaccionempleado_Helper_Respuesta_Add';
+	const API_interaccionempleado_Helper_Respuesta_DelRes = 'API_interaccionempleado_Helper_Respuesta_DelRes';
+	// Interaccionempleado FIN
+	
 	// HomeCtrls INI
 	// --Version2
 	/**
@@ -1477,6 +1490,17 @@ class IndexCtrl extends Pagina {
 			if (isset($_POST["ajax"])) {
 				if (!isset($_SESSION)) {
 					session_start();
+				}
+				
+				if ($_POST["ajax"] == md5(self::API_EmailconfigSendTest)) {
+				    try {
+				        $ok = OperacionesCtrl::msServicioSmtp_view($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
 				}
 
 				if ($_POST["ajax"] == md5(self::API_AgregarConfigCorp)) {
@@ -2792,7 +2816,40 @@ class IndexCtrl extends Pagina {
 				}
 				// Gestordocumental FIN
 				
+				// Interaccionempleado INI
+				if ( $_POST["ajax"] == md5( self::API_interaccionempleado_Helper_Ajax_Get )) {
+				    try {
+				        $ok = OperacionesCtrl::interaccionempleado_Helper_Ajax_Obtener($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_interaccionempleado_Helper_Respuesta_Add )) {
+				    try {
+				        $ok = OperacionesCtrl::interaccionempleado_Helper_Respuesta_Agregar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				if ( $_POST["ajax"] == md5( self::API_interaccionempleado_Helper_Respuesta_DelRes )) {
+				    try {
+				        $ok = OperacionesCtrl::interaccionempleado_Helper_Respuesta_Eliminar($_POST);
+				        echo json_encode($ok);
+				    } catch (Exception $ex) {
+				        $er = array("err" => $ex->getMessage());
+				        echo json_encode($er);
+				    }
+				    die("");
+				}
+				// Interaccionempleado FIN
 
+				
 				// HomeCtrls INI
 
 				// Recuperar cuenta

@@ -10,11 +10,13 @@ $_CFG_SMTP_PORT = isset( $cfg[ OperacionesCtrl::CFG_SMTP_PORT ]) ? $cfg[ Operaci
 $_CFG_SMTP_USER = isset( $cfg[ OperacionesCtrl::CFG_SMTP_USER ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_USER ]["val"] : "";
 $_CFG_SMTP_PASS = isset( $cfg[ OperacionesCtrl::CFG_SMTP_PASS ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_PASS ]["val"] : "";
 $_CFG_SMTP_SECURE = isset( $cfg[ OperacionesCtrl::CFG_SMTP_SECURE ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_SECURE ]["val"] : "";
-$_CFG_SMTP_TFSERVICE = filter_var( isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICE ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICE ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
-$_CFG_SMTP_TFSERVICEURL = isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICEURL ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICEURL ]["val"] : "";
-$_CFG_SMTP_TFSAPITOKEN = isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSAPITOKEN ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSAPITOKEN ]["val"] : "";
-$_CFG_SMTP_TFSCLIID = isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSCLIID ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSCLIID ]["val"] : "";
 
+$_CFG_SMTP_TFSERVICE = filter_var( isset( $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICE ]) ? $cfg[ OperacionesCtrl::CFG_SMTP_TFSERVICE ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
+
+$_CFG_AUTH20_CLIENTID = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_CLIENTID ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_CLIENTID ]["val"] : "";
+$_CFG_AUTH20_SECRET = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_SECRET ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_SECRET ]["val"] : "";
+$_CFG_AUTH20_TENANTID = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_TENANTID ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_TENANTID ]["val"] : "";
+$_CFG_AUTH20_MAILSENDER = isset( $cfg[ OperacionesCtrl::CFG_AUTH20_MAILSENDER ]) ? $cfg[ OperacionesCtrl::CFG_AUTH20_MAILSENDER ]["val"] : "";
 
 $usu = null;
 if ( Seguridad::isLogin() ) {
@@ -78,7 +80,7 @@ $ver_contconfigtfservices = ( $_CFG_SMTP_TFSERVICE ? '' : 'display: none;' );
                                         <div class="flex-fill mb-3 me-3" >
                                             <div class="form-check form-switch">
                                                 <input onchange="btnCfgTFServices(this);" class="form-check-input" type="checkbox" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICE; ?>" <?php echo ($_CFG_SMTP_TFSERVICE ? 'checked="checked"' : '' ) ?> >
-                                                <label class="form-check-label" for="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICE; ?>">Activar TF-Services para env&iacute;o de correos</label>
+                                                <label class="form-check-label" for="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICE; ?>">Env&iacute;o de correos por Auth2.0 de Microsoft</label>
                                             </div>
                                         </div>
                                     </div>
@@ -164,36 +166,50 @@ $ver_contconfigtfservices = ( $_CFG_SMTP_TFSERVICE ? '' : 'display: none;' );
                                 
                                 <div id="contconfigtfservices" class="card-body pt-2" style="<?php echo $ver_contconfigtfservices; ?>" >
                                 
-                                    <div class="d-flex">
-                                    	<div class="flex-fill mb-3 me-3" >
-                                        	<div class="form-floating mb-3">
-                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICEURL; ?>" placeholder="Url de TF-Services" value="<?php echo $_CFG_SMTP_TFSERVICEURL; ?>" >
-                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICEURL; ?>">Url de TF-Services</label>
+									<div class="d-flex">
+                                    	<div class="flex-fill mb-3 " >
+                                        	<div class="form-floating ">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_AUTH20_CLIENTID; ?>" placeholder="Client ID" value="<?php echo $_CFG_AUTH20_CLIENTID; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_AUTH20_CLIENTID; ?>">Application Id (Cliente Id)</label>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="d-flex">
-                                    	<div class="flex-fill mb-3 me-3" >
-                                        	<div class="form-floating mb-3">
-                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSCLIID; ?>" placeholder="Url de TF-Services" value="<?php echo $_CFG_SMTP_TFSCLIID; ?>" >
-                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_TFSCLIID; ?>">Cliente ID en TF-Services</label>
+                                    	<div class="flex-fill mb-3 " >
+                                        	<div class="form-floating ">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_AUTH20_SECRET; ?>" placeholder="Secret" value="<?php echo $_CFG_AUTH20_SECRET; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_AUTH20_SECRET; ?>">Secret</label>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="d-flex">
-                                    	<div class="flex-fill mb-3 me-3" >
-                                        	<div class="form-floating mb-3">
-                                                <input type="password" class="form-control" id="<?php echo OperacionesCtrl::CFG_SMTP_TFSAPITOKEN; ?>" placeholder="Url de TF-Services" value="<?php echo $_CFG_SMTP_TFSAPITOKEN; ?>" >
-                                            	<label for="<?php echo OperacionesCtrl::CFG_SMTP_TFSAPITOKEN; ?>">Token</label>
+                                    	<div class="flex-fill mb-3 " >
+                                        	<div class="form-floating ">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_AUTH20_TENANTID; ?>" placeholder="Tenant Id" value="<?php echo $_CFG_AUTH20_TENANTID; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_AUTH20_TENANTID; ?>">Directory Id (Tenant Id)</label>
                                             </div>
                                         </div>
+                                    </div>
+                                    
+                                    <div class="d-flex">
+                                    	<div class="flex-fill mb-3 " >
+                                        	<div class="form-floating ">
+                                                <input type="text" class="form-control" id="<?php echo OperacionesCtrl::CFG_AUTH20_MAILSENDER; ?>" placeholder="Mail Sender" value="<?php echo $_CFG_AUTH20_MAILSENDER; ?>" >
+                                            	<label for="<?php echo OperacionesCtrl::CFG_AUTH20_MAILSENDER; ?>">Correo de env&iacute;os</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="emailauth_res" class="d-flex mb-3"></div>
+                                    <div class="mb-3 d-grid gap-2">
+                                        <button class="btn btn-outline-primary" onclick="testEmail();">Enviar test</button>
                                     </div>
                                     
                                     <div class="d-flex">
                                         <div class="flex-fill mb-3 me-3" >
-                                            <div class="form-floating mb-3">
+                                            <div class="form-floating ">
                                                 <button class="btn btn-primary" onclick="save_Handler();">Guardar</button>
                                             </div>
                                         </div>
@@ -236,9 +252,10 @@ const save_Handler = function(){
     if( passMod ){
     	objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_PASS; ?>'});
     }
-    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_TFSERVICEURL; ?>'});
-    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_TFSAPITOKEN; ?>'});
-    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_SMTP_TFSCLIID; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_AUTH20_CLIENTID; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_AUTH20_SECRET; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_AUTH20_TENANTID; ?>'});
+    objs.push({'id':'#<?php echo OperacionesCtrl::CFG_AUTH20_MAILSENDER; ?>'});
     
     const opc = { 'id' : 'ajaxldr','size' : 'modal-sm' };
     const objmdl = mngModal.dibujar( opc );
@@ -252,14 +269,68 @@ const save_Handler = function(){
     		btnSaveCfgFrm( oEl );
     	}
     	else{
-        	//if( ( "" + jQuery.trim( oEl.val() ) ).length > 0 ){
-        		btnSaveCfgFrm( oEl );
-        	//}
+        	btnSaveCfgFrm( oEl );
     	}
     	
     }
     setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
     
+};
+
+/**
+ * Maneja la acción de prueba de correo.
+ *
+ * Se encarga de enviar un correo de prueba con los datos configurados.
+ *
+ * @returns {void}
+ */
+const testEmail = function( d ){
+	const email = prompt('Indique el correo de destino');
+
+	if( !( email == null ) ){
+	
+		if( ( "" + email).length > 3){
+		
+			const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    		if( re.test(String(email).toLowerCase()) ){
+    		
+    			jQuery('#emailauth_res').html( validadorGlob.ajaxspinner() );
+    		
+    			const form_data = new FormData();
+                form_data.append('ajax', '<?php echo md5(IndexCtrl::API_EmailconfigSendTest); ?>');
+                form_data.append('email', 'yeicot@gmail.com');
+            
+                __TransportarData(
+                    form_data,
+                    function( o ) {
+                        //fn( o );
+                        jQuery('#emailauth_res').html( JSON.stringify( o ) );
+                    },
+                    function ( err ) {
+                        const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-sm' } );
+                        const alerta = jQuery(objmdlErr + ' div.alert');
+                        alerta.attr('class','alert alert-danger');
+                        alerta.html( err.responseText );
+            
+            			jQuery('#emailauth_res').html('<b>Error:</b><p>' + err.responseText + '</p>');
+                        jQuery( objmdlErr ).modal('show');
+                    }
+                );
+    		}
+    		else{
+    			alert('El formato de correo no es correcto');
+    		}
+		
+		}
+		else{
+			alert('El campo debe contener por lo menos 5 caracteres');
+		}
+	
+	}
+	else{
+		alert('El campo no puede estar sin datos');
+	}
+
 };
 
 /**

@@ -1307,41 +1307,6 @@ if ( isset( $_SESSION['usu'] ) ) {
         
     
     </script>
-
-    <script type="application/javascript">
-
-    /**
-     * Maneja el clic para evaluar un carnet.
-     *
-     * @param {Object} o Parámetros o evento relacionado con la evaluación.
-     * @returns {void}
-     */
-    const evaluarCarnet_Click = function( o ){
-    	const _o = jQuery( o );
-    	const dt = _o.data();
-    	
-    	const nm = dt['nombre'];
-    	const dc = dt['documento'];
-    	const td = dt['tipodoc_id'];
-    	const fl = td + '_' + dc + '.png';
-    	const al = <?php echo $GBL_anyolectivo_id ?>;
-    	
-    	const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : nm,'btnCerrarX' : true, 'level' : 'err', 'size' : 'modal-lg' } );
-        const alerta = jQuery(objmdlErr + ' div.alert');
-        const cuerpo = alerta.parent();
-        alerta.remove();
-        
-        const htmlC = [];
-        htmlC.push( '<div id="card-vprevia" class="card" style="">' );
-    	htmlC.push( '	<div class="card-body text-center">' );
-    	htmlC.push( '		<img id="imgpreview" src="repo/carnets/' + al + '/' + fl + '" class="card-img-top" alt="" style="width: 100%; max-width: 600px;">' );
-    	htmlC.push( '	</div>' );
-    	htmlC.push( '</div>' );
-    	
-    	cuerpo.html( htmlC.join('') );
-    	jQuery( objmdlErr ).modal('show');
-    };
-    </script>
     
 <script type="application/javascript">
 
