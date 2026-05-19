@@ -310,7 +310,7 @@ const btnAddCampos = function( o ){
 <?php foreach( $l_usuarios_id as $v ) : ?>
     btnsCtn.push('			<option value="<?php echo $v['id'] ?>" data-id="' + campos_i + '" data-nombres="<?php echo trim( $v['nombres'] . ' ' . $v['apellidos']) ?>" data-email="<?php echo trim( $v['mail']) ?>" data-tel="<?php echo trim( $v['tel']) ?>"><?php echo trim( $v['nombres'] . ' ' . $v['apellidos']) ?></option>');
 <?php endforeach; ?>
-	btnsCtn.push('			<option data-id="' + campos_i + '" value="0">Usuario externo</option>');
+	//btnsCtn.push('			<option data-id="' + campos_i + '" value="0">Usuario externo</option>');
     btnsCtn.push('		</select>');
     btnsCtn.push('	</div>');
     
