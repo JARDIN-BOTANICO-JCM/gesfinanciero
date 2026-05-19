@@ -432,6 +432,13 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const _urlpdf = dt['url'];
 		const _esfirmable = dt['esfirmable'];
 		
+		let _connotas = true;
+		if( Object.hasOwnProperty.call( dt, 'connotas' ) ){
+			if( dt['connotas'] == "false" ||  dt['connotas'] == false ){
+				_connotas = false;
+			} 
+		}
+		
 		const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Vista previa','btnCerrarX' : true, 'level' : 'l1', 'size' : 'modal-xl' } );
         const cuerpo = jQuery(objmdlErr + ' .modal-body');
         
@@ -466,45 +473,47 @@ const Requerimientos = function( dC ){ // dC = data constructor
 <?php // TODO: Tarea 45 - Agregar soporte en el front para comentarios en documentos subidos ?>
         _html.push( '		<div id="comdivcont_coms" class="col-3" >' );
         
-        _html.push( '			<div class="d-flex d-flex justify-content-between">' );
-        _html.push( '				<div>' );
-        _html.push( '					<h5>Notas</h5>' );
-        _html.push( '				</div>' );
-        _html.push( '				<div>');
-        _html.push( '					<a id="comdivcont_btnmin" data-maximiza="#comdivcont_pdf" data-ocultar="#comdivcont_coms" data-minimizar="true" data-hideobj=".comdivcontcls" data-target="#comdivcont_btnmax" class="p-0 m-0 btn-sm" href="#" onclick="reqs.mincomentarios( this );"> ');
-        _html.push( '						<i class="far fa-minus-square"></i>');
-        _html.push( '					</a> ');
-        _html.push( '					<a id="comdivcont_btnmax" data-maximiza="#comdivcont_pdf" data-ocultar="#comdivcont_coms" data-minimizar="false" data-hideobj=".comdivcontcls" data-target="#comdivcont_btnmin" class="p-0 m-0 btn-sm" style="display: none;" href="#" onclick="reqs.mincomentarios( this );"> ');
-        _html.push( '						<i class="far fa-window-maximize"></i>');
-        _html.push( '					</a> ');
-        _html.push( '				</div>' );
-        _html.push( '			</div>' );
+        if( _connotas ){
+            _html.push( '			<div class="d-flex d-flex justify-content-between">' );
+            _html.push( '				<div>' );
+            _html.push( '					<h5>Notas</h5>' );
+            _html.push( '				</div>' );
+            _html.push( '				<div>');
+            _html.push( '					<a id="comdivcont_btnmin" data-maximiza="#comdivcont_pdf" data-ocultar="#comdivcont_coms" data-minimizar="true" data-hideobj=".comdivcontcls" data-target="#comdivcont_btnmax" class="p-0 m-0 btn-sm" href="#" onclick="reqs.mincomentarios( this );"> ');
+            _html.push( '						<i class="far fa-minus-square"></i>');
+            _html.push( '					</a> ');
+            _html.push( '					<a id="comdivcont_btnmax" data-maximiza="#comdivcont_pdf" data-ocultar="#comdivcont_coms" data-minimizar="false" data-hideobj=".comdivcontcls" data-target="#comdivcont_btnmin" class="p-0 m-0 btn-sm" style="display: none;" href="#" onclick="reqs.mincomentarios( this );"> ');
+            _html.push( '						<i class="far fa-window-maximize"></i>');
+            _html.push( '					</a> ');
+            _html.push( '				</div>' );
+            _html.push( '			</div>' );
         
-        _html.push( '			<ul class="list-group mb-3 comdivcontcls">' );
-		_html.push( '				<li class="list-group-item p-0">' );
-		_html.push( '					<div class="form-floating">' );
-		_html.push( '						<textarea class="form-control" placeholder="Comentario aqu&iacute;" id="comdivcont_comentario"></textarea>' );
-		_html.push( '  						<label for="comdivcont_comentario">Comentario</label>' );
-		_html.push( '					</div>' );
-		_html.push( '				</li>' );
-		_html.push( '				<li class="list-group-item p-0 mt-1">' );
-		if( dt['tipodoc'] == TIPODOCS_PACKS || dt['tipodoc'] == TIPODOCS_ATTACHED ){
-		
-			let flid_txt = "";
-			if ( Object.hasOwnProperty.call( dt, 'paraforms' ) ) {
-				if( dt['paraforms'] === "true" || dt['paraforms'] == true ){
-					const cltxturl = ("" + ut.b64EncodeUnicode( dt['url'] ) ).replace("==","").replace("=","");
-					flid_txt = 'data-flid_id="' + cltxturl + '"';
-				}
-			}
-		
-			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " ' + flid_txt + ' data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetesrequ_id="' + dt['id'] + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+            _html.push( '			<ul class="list-group mb-3 comdivcontcls">' );
+    		_html.push( '				<li class="list-group-item p-0">' );
+    		_html.push( '					<div class="form-floating">' );
+    		_html.push( '						<textarea class="form-control" placeholder="Comentario aqu&iacute;" id="comdivcont_comentario"></textarea>' );
+    		_html.push( '  						<label for="comdivcont_comentario">Comentario</label>' );
+    		_html.push( '					</div>' );
+    		_html.push( '				</li>' );
+    		_html.push( '				<li class="list-group-item p-0 mt-1">' );
+    		if( dt['tipodoc'] == TIPODOCS_PACKS || dt['tipodoc'] == TIPODOCS_ATTACHED ){
+    		
+    			let flid_txt = "";
+    			if ( Object.hasOwnProperty.call( dt, 'paraforms' ) ) {
+    				if( dt['paraforms'] === "true" || dt['paraforms'] == true ){
+    					const cltxturl = ("" + ut.b64EncodeUnicode( dt['url'] ) ).replace("==","").replace("=","");
+    					flid_txt = 'data-flid_id="' + cltxturl + '"';
+    				}
+    			}
+    		
+    			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " ' + flid_txt + ' data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetesrequ_id="' + dt['id'] + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+    		}
+    		else if( dt['tipodoc'] == TIPODOCS_SIGNS ){
+    			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetes_id="' + idMod + '" data-url="' + _urlpdf + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
+    		}
+    		_html.push( '				</li>' );
+    		_html.push( '			</ul>' );
 		}
-		else if( dt['tipodoc'] == TIPODOCS_SIGNS ){
-			_html.push( '					<button id="comdivcont_btnadd" class="btn btn-sm btn-primary w-100 " data-target="#comdivcont_listcom" data-texto="#comdivcont_comentario" data-paquetes_id="' + idMod + '" data-url="' + _urlpdf + '" data-tipodoc="' + dt['tipodoc'] + '" onclick="reqs.comentarios_Agregar_Click( this );" >Agregar</button>' );
-		}
-		_html.push( '				</li>' );
-		_html.push( '			</ul>' );
 		
 		_html.push( '			<ul id="comdivcont_listcom" class="list-group comdivcontcls overflow-auto" style="height: 34vh;"></ul>' );
         
@@ -958,6 +967,7 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const solicitante = res['solicitante'];
 		const pks = res['paquete'];
 		const oblis = res['obligaciones'];
+		const intera = res['interaccion'];
 		
 		const nombrefull = ( "" + jQuery.trim( solicitante['nombres'] + ' ' + solicitante['apellidos'] )).toLowerCase();
 		
@@ -998,6 +1008,44 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		</div>');
 		html.push('	</div>');
 		
+		if( intera.length > 0 ){
+			
+			const rIntera = intera[ 0 ];
+			const rInterAdjuntos = JSON.parse( rIntera['adjuntos'] );
+			const rInterRespuesta = rIntera['respuesta'];
+			const rInterMensaje = rIntera['mensaje'];
+			
+			html.push('	<div class="card shadow-lg mt-3">');
+			html.push('		<div class="card-body">');
+			html.push('			<h4 class="card-title">La respuesta a "' + rInterMensaje + '" fue:</h4>');
+			html.push('			<div class="alert alert-success">');
+			html.push('				<span class="text-black">' + rInterRespuesta + '</span>');
+			html.push('			</div>');
+			
+			if( rInterAdjuntos.length > 0 ){
+				html.push('		<div class="list-group">');
+    			for (const kIAdj in rInterAdjuntos) {
+            	    if (Object.hasOwnProperty.call( rInterAdjuntos, kIAdj ) ) {
+            	        const _elAdj = rInterAdjuntos[ kIAdj ];
+            	        const _elFl = ut.pathInfo( _elAdj['ruta'] );
+        				html.push('			<button data-radicado="' + radMod + '" data-id="' + _elAdj['id'] + '" data-url="' + _elAdj['ruta'] + '" data-esfirmable="false" data-tipodoc="' + TIPODOCS_PACKS + '" data-connotas="false" onclick="reqs.verPdf( this );" type="button" class="list-group-item list-group-item-action">' + _elFl['basename'] + '</button>');
+        	        }
+    	        }
+    			html.push('		</div>');
+			}
+			else{
+				html.push('		<div class="list-group">');
+				html.push('			<li class="list-group-item">');
+				html.push('				<svg class="bi flex-shrink-0 me-2" width="16" height="16" role="img" aria-label="Success:"><use xlink:href="#gbl-info-fill"/></svg>');
+				html.push('				El usuario no adjunt&oacute; archivos');
+				html.push('			</li>');
+				html.push('		</div>');
+			}
+			
+			html.push('		</div>');
+			html.push('	</div>');
+		}
+		
 		html.push('	<div class="mt-3">');
 		html.push('		<h4 class="mb-2">Documentos para Firmar</h4>');
 		html.push('		<div class="list-group">');
@@ -1023,7 +1071,8 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		else{
 			html.push('			<li class="list-group-item ">');
 			html.push('				<svg class="bi flex-shrink-0 me-2" width="16" height="16" role="img" aria-label="Success:"><use xlink:href="#gbl-info-fill"/></svg>');
-			html.push('				Esperando correcci&oacute;n de documentos</li>');
+			html.push('				Esperando correcci&oacute;n de documentos');
+			html.push('			</li>');
 		}
 		
 		html.push('		</div>');
@@ -1754,7 +1803,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
     				for (const key in oR) {
                 	    if (Object.hasOwnProperty.call( oR, key ) ) {
                 	        const _el = oR[key];
-                	        asignadosCache[ _el['empleados_id'] ] = _el;
+                	        if( _el['usuarios_id'] == <?php echo $usu->getId() ?> ){
+                	        	asignadosCache[ _el['empleados_id'] ] = _el;
+                	        }
             	        }
         	        }
         

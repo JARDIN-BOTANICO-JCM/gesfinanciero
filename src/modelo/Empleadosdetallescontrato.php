@@ -20,7 +20,28 @@ class Empleadosdetallescontrato extends Clsdatos {
 	private $fechainicio = "1900-01-01 00:00:00";
 	private $fileactaini = "";
 	private $fileactainivalorgestor = "";
+	//TODO: Tarea 193 - Agregar el campo honorarios en la tabla empleadosdetallescontrato
+	// ALTER TABLE `empleadosdetallescontrato` ADD COLUMN `honorarios` DECIMAL(11,2) NOT NULL AFTER `fileactainivalorgestor`;
+	private $honorarios = 0;
 	
+    /**
+     * @return number
+     */
+    public function getHonorarios()
+    {
+        return $this->honorarios;
+    }
+
+    /**
+     * @param number $honorarios
+     */
+    public function setHonorarios($honorarios): self
+    {
+        $this->honorarios = $honorarios;
+        
+        return $this;
+    }
+
     /**
      * Obtiene la fecha de inicio del contrato.
      * @return string

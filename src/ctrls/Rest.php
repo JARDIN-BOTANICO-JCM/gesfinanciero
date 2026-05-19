@@ -70,6 +70,17 @@ class Rest
 
     
     // VERSION 2
+    private static function notkn_Firmatexto ( $data ) {
+        OperacionesCtrl::authRequOff();
+        try{
+            $ok = OperacionesCtrl::firmasTest_viewText( $data );
+            echo json_encode($ok);
+        }catch (Exception $ex){
+            $er = array("err" => $ex->getMessage());
+            echo json_encode($er);
+        }
+        die("");
+    }
     private static function notkn_CheckComm ( $data ) {
         OperacionesCtrl::authRequOff();
         try{

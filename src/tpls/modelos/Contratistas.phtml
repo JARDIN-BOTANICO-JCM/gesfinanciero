@@ -335,15 +335,21 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
                     </div> 
                 </div>
                 <div class="row">
-                    <div class="mb-3 col-md-6">
-						<label for="fechainicio" class="form-label">Fecha de inicio</label>
+					<div class="mb-3 col-md-4">
+						<label for="fileactaini" class="form-label">Acta de inicio</label>
+						<input accept=".pdf,application/pdf" type="file" class="form-control" id="fileactaini" name="fileactaini" id="fileactaini" placeholder="Acta de inicio">
+					</div>
+					<div class="mb-3 col-md-4">
+						<label for="honorarios" class="form-label">Honorarios</label>
+						<div class="input-group me-3  ">
+							<input type="text" class="form-control" id="honorarios" name="honorarios" placeholder="Honorarios">
+						</div>
+					</div>
+					<div class="mb-3 col-md-4">
+						<label for="fechainicio" class="form-label">Fecha de inicio *</label>
 						<div class="input-group me-3  ">
 							<input type="text" class="form-control" id="fechainicio" name="fechainicio" required placeholder="Fecha de inicio">
 						</div>
-					</div>
-					<div class="mb-3 col-md-6">
-						<label for="fileactaini" class="form-label">Acta de inicio</label>
-						<input required accept=".pdf,application/pdf" type="file" class="form-control" id="fileactaini" name="fileactaini" id="fileactaini" placeholder="Acta de inicio">
 					</div>
                 </div>
                 
@@ -791,7 +797,9 @@ const btnModRegistro = function ( o ) {
                                 	const fp = document.querySelector('#' + key)._flatpickr;
                                     fp.set('dateFormat', 'Y-m-d');
                                     fp.set('enableTime', false);
-                                    fp.setDate( txt[0] );
+                                    if( !(txt[0] == null || txt[0] == "null") ){
+                                    	fp.setDate( txt[0] );
+                                    }
                                 }
                                 else if ( key == 'foto' ) {
                                     if( ("" + _elDiv).length > 0 ){
@@ -800,6 +808,9 @@ const btnModRegistro = function ( o ) {
                                 }
                                 else if ( key == 'fileactaini' ) {
                                 	// pendiente
+                                }
+                                else if ( key == 'honorarios' ) {
+                                	jQuery('#honorarios').val( parseInt( _elDiv ) );
                                 }
                                 else{
                                     jQuery('#' + key).val( _elDiv );
