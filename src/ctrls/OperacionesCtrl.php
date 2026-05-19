@@ -325,10 +325,7 @@ class OperacionesCtrl {
 	    
 	    $cfg = self::LeerConfigCorp();
 	    $_CFG_SMTP_TFSERVICE = filter_var( isset( $cfg[ self::CFG_SMTP_TFSERVICE ]) ? $cfg[ self::CFG_SMTP_TFSERVICE ]["val"] : false , FILTER_VALIDATE_BOOLEAN);
-	    $_CFG_SMTP_TFSERVICEURL = isset( $cfg[ self::CFG_SMTP_TFSERVICEURL ]) ? $cfg[ self::CFG_SMTP_TFSERVICEURL ]["val"] : "";
-	    $_CFG_SMTP_TFSAPITOKEN = isset( $cfg[ self::CFG_SMTP_TFSAPITOKEN ]) ? base64_decode( $cfg[ self::CFG_SMTP_TFSAPITOKEN ]["val"] ) : "";
-	    $_CFG_SMTP_TFSCLIID = isset( $cfg[ self::CFG_SMTP_TFSCLIID ]) ? $cfg[ self::CFG_SMTP_TFSCLIID ]["val"] : "";
-
+	    
 	    $rSend = null;
 	    
 	    $dest1 = $d['para'];
@@ -363,7 +360,7 @@ class OperacionesCtrl {
 	    }
 		
 		else {
-		    $flRuta = '';
+		    $flRuta = [];
 		    if ( isset( $d['adjuntofull'] ) ) {
 		        $flRuta = $d['adjuntofull'];
 		    }
@@ -523,6 +520,166 @@ class OperacionesCtrl {
 	    
 	}
 	// MS Smtp FIN
+	// Firmas Test INI
+	public static function firmasTest_viewText( $d ){
+	    include_once dirname(dirname(__FILE__)) . "/libs/setasign/SetAsign_Manage.php";
+	    include_once dirname(dirname(__FILE__)) . "/libs/setasign/PdfTextLocator.php";
+
+	    return ['data'=> true];
+	    /*
+	    if( isset( $d['archivo'] ) ){
+	        $archivo = $d[ 0 ];
+	        
+	        // repo/recursos/test/<pdf>
+	        $bs = dirname(dirname(dirname(__FILE__))) . DIRECTORY_SEPARATOR . Config::CARPETA_REPOSITORIOS . DIRECTORY_SEPARATOR . "debug" . DIRECTORY_SEPARATOR;
+	        $flinput = $bs . $archivo;
+	        
+	        
+	        if ( file_exists( $flinput ) ) {
+	            
+	            if ( isset( $d[ 1 ] ) ) {
+	                $fldcampo = $d[ 1 ];
+	                
+	                $locator = new PdfTextLocator();
+	                $locator->setSearchTerms( [ $fldcampo ] );
+	                $firmaOpcs = $locator->findInPdf( $flinput );
+	                
+	            }
+	            else{
+	                // -
+	            }
+	            
+	        }
+	        else{
+	            // -
+	        }
+	        
+	        echo "</pre>";
+	    }
+	    */
+	    
+	    $url = Utiles::getBaseUrl();
+	    $urlbase = rtrim( (string) $url, "index.php/" );
+	    
+	    $html =<<<HTML
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="author" content="yalfonso">
+        <title>Lectura campo de firma</title>
+    
+        <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/sign-in/">
+    	<link rel="stylesheet" href="{$urlbase}/temas/js/bootstrap-5.2.0-dist/css/bootstrap.min.css">
+    
+        <style>
+        html, body {
+            height: 100%;
+        }
+        
+        body {
+            display: flex;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+            background-color: #f5f5f5;
+        }
+        
+        .form-signin {
+            width: 100%;
+            max-width: 330px;
+            padding: 15px;
+            margin: auto;
+        }
+        
+        .form-signin .checkbox {
+            font-weight: 400;
+        }
+        
+        .form-signin .form-floating:focus-within {
+            z-index: 2;
+        }
+        
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            user-select: none;
+        }
+        
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+              font-size: 3.5rem;
+            }
+        }
+        </style>
+    </head>
+    <body class="text-center">
+    
+        <main class="form-signin">
+            <form method="post" action="{$url}firmaTexto">
+                <div class="input-group">
+                    <input type="file" class="form-control" id="archivo" aria-describedby="archivoAddon" aria-label="Upload">
+                    <button class="btn btn-outline-secondary" type="button" id="archivoAddon" onclick="enviarArchivoAlServidor('archivo');">Subir</button>
+                </div>
+            </form>
+        </main>
+    
+        <script type="application/javascript">
+        const enviarArchivoAlServidor = async (inputId) => {
+            const fileInput = document.getElementById(inputId);
+        
+            if (!fileInput || fileInput.files.length === 0) {
+                console.error("Error: No se ha seleccionado ningún archivo.");
+                alert("Por favor, selecciona un archivo antes de continuar.");
+                return;
+            }
+        
+            const archivo = fileInput.files[0];
+        
+            const MAX_SIZE = 5 * 1024 * 1024; 
+            if (archivo.size > MAX_SIZE) {
+                alert("El archivo es demasiado grande. El límite es de 5MB.");
+                return;
+            }
+        
+            const formData = new FormData();
+            formData.append("archivo", archivo);
+        
+            try {
+                const response = await fetch("{$url}firmaTexto", {
+                    method: "POST",
+                    body: formData,headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    mode: "cors"
+                });
+                if (resultado.err) {
+                    throw new Error(resultado.err);
+                }
+        
+                console.log("Servidor responde:", resultado);
+                alert("Archivo procesado: " + JSON.stringify(resultado));
+        
+            } catch (error) {
+                console.error("Error al enviar el archivo:", error);
+                alert("Hubo un fallo en la conexión o el servidor no respondió correctamente.");
+            }
+        };
+    
+        </script>
+
+    </body>
+</html>
+HTML;
+	    echo $html;
+	    
+	    return "";
+	}
+	// Firmas Test FIN
 	/**
 	 * Autentica usuarios del sistema mediante datos codificados en Base64
 	 * 
@@ -3528,7 +3685,6 @@ class OperacionesCtrl {
 	 *                   ocurridos al procesar/guardar el detalle del contrato.
 	 */
 	public static function empleados_Helper_Modificar( $d ){
-	    self::authRequOff();
 	    $r = null;
 	    
 	    $cfg = $d;
@@ -3566,8 +3722,9 @@ class OperacionesCtrl {
     				'meses' => isset($d['empleadosdetallescontrato_meses']) ? intval($d['empleadosdetallescontrato_meses']) : 0,
     				'dias' => isset($d['empleadosdetallescontrato_dias']) ? intval($d['empleadosdetallescontrato_dias']) : 0,
     				'empleados_id' => $d['id'],
-    				'fechainicio' => $d['fechainicio'] ?? null,
-    				'fileactaini' => $d['fileactaini'] ?? null
+				    'fechainicio' => $d['fechainicio'] ?? null,
+				    'fileactaini' => $d['fileactaini'] ?? null,
+				    'honorarios' => $d['honorarios'] ?? 0
     			);
     			if ( isset( $d['contrato'] ) ) {
     			    $detalleContrato['contrato'] = $d['contrato'] ;
@@ -3578,10 +3735,10 @@ class OperacionesCtrl {
     					json_encode($detalleContrato, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE)
     				)
     			];
-
+    			
 				self::empleadosdetallescontrato_Helper_Agregar($payload);
 			} catch (\Throwable $th) {
-				throw new \Exception('empleados_Helper_Modificar - empleadosdetallescontrato_modificar: ' . $th->getMessage());
+				throw new \Exception('empleadosdetallescontrato_Helper_Agregar - empleadosdetallescontrato_modificar: ' . $th->getMessage());
 			}
 		}
 	    
@@ -4182,7 +4339,7 @@ class OperacionesCtrl {
 		$vr .= "edc.dias as empleadosdetallescontrato_dias, ";
 		$vr .= "edc.fileactaini as fileactaini,";
 		$vr .= "edc.fechainicio as fechainicio, ";
-		$vr .= "edc.contrato ";
+		$vr .= "edc.contrato, edc.honorarios ";
 
 		$tb  = '`empleados` as empl ';
 		
@@ -4519,66 +4676,73 @@ class OperacionesCtrl {
 	    
 	    if ( count( $usrArr ) > 0 ) {
 	        $idMngUsr = 0;
+	        $primero = true;
 	        foreach ( $usrArr as $usr ) {
-	            self::authRequOff();
-	            $usrExiste = self::empleados_Obtener(array('w_documento' => $identif ) );
-	            
-	            if ( count( $usrExiste ) > 0 ) {
-	                http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
-	                $msjr = self::retorno([], IndexCtrl::ERR_COD_REGISTRO_EXISTENTE,'Usuario ya existe');
-	                throw new Exception( json_encode( $msjr ), IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
-	            }
-	            else {
-	                $obligaciones = self::empleados_Procesar_Archivos(
-	                    array(
-	                        'w_nombre' => 'obligaciones',
-	                        'buscarpor' => [
-	                            array( 'campo' => 'NRO_IDENTIFICACION', 'valor' => $js['reg_documento'] )
-	                        ]
-	                    )
-                    );
+	            if( $primero ){
 	                
-	                $nwU = array(
-	                    "nombres" => $usr['nombre_bp_beneficiario'],
-	                    'tipodoc_id' => $tipodoc_id,
-	                    'documento' => $identif,
-	                    'mail' => $correoe,
-	                    'clave' => $clave,
-	                    'obligaciones' => $obligaciones
-	                );
-	                try {
-	                    $idMngUsr = self::mnguserAdd_Helper( $nwU , self::USUARIOS_PERFIL_EMPLEADOS );
-	                } catch (Exception $e) {
-	                    $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - mnguserAdd_Helper: ' . $e->getMessage() );
-	                    throw new Exception( json_encode( $msjr ), $e->getCode() );
+	                self::authRequOff();
+	                $usrExiste = self::empleados_Obtener(array('w_documento' => $identif ) );
+	                
+	                if ( count( $usrExiste ) > 0 ) {
+	                    http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+	                    $msjr = self::retorno([], IndexCtrl::ERR_COD_REGISTRO_EXISTENTE,'Usuario ya existe');
+	                    throw new Exception( json_encode( $msjr ), IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
+	                }
+	                else {
+	                    $obligaciones = self::empleados_Procesar_Archivos(
+	                        array(
+	                            'w_nombre' => 'obligaciones',
+	                            'buscarpor' => [
+	                                array( 'campo' => 'NRO_IDENTIFICACION', 'valor' => $js['reg_documento'] )
+	                            ]
+	                        )
+	                        );
+	                    
+	                    $nwU = array(
+	                        "nombres" => $usr['nombre_bp_beneficiario'],
+	                        'apellidos' => "",
+	                        'tipodoc_id' => $tipodoc_id,
+	                        'documento' => $identif,
+	                        'mail' => $correoe,
+	                        'clave' => $clave,
+	                        'obligaciones' => $obligaciones
+	                    );
+	                    try {
+	                        $idMngUsr = self::mnguserAdd_Helper( $nwU , self::USUARIOS_PERFIL_EMPLEADOS );
+	                    } catch (Exception $e) {
+	                        $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - mnguserAdd_Helper: ' . $e->getMessage() );
+	                        throw new Exception( json_encode( $msjr ), $e->getCode() );
+	                    }
+	                    
+	                    try {
+	                        self::asignaciones_Modificar( [ 'empleados_id' => $idMngUsr['id'], 'w_documento' => $identif, 'w_tipodoc_id' => $tipodoc_id, 'actualizatercero' => false ] );
+	                    } catch (Exception $e) {
+	                        $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - asignaciones_Modificarv: ' . $e->getMessage() );
+	                        throw new Exception( json_encode( $msjr ), $e->getCode() );
+	                    }
+	                    
+	                    // mk p12
+	                    $reqP12 = $nwU;
+	                    $reqP12['tipousuario'] = self::FIRMASPRO_TIPOUSUARIO_CONTRATISTA;
+	                    $reqP12['usuario_id'] = $idMngUsr['id'];
+	                    $reqP12['clave'] = md5( $clave );
+	                    try {
+	                        self::firmaspro_Helper_MkCert_p12( $reqP12 );
+	                    } catch (Exception $e) {
+	                        $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - firmaspro_Helper_MkCert_p12: ' . $e->getMessage() );
+	                        throw new Exception( json_encode( $msjr ), $e->getCode() );
+	                    }
+	                    
 	                }
 	                
-	                try {
-	                    self::asignaciones_Modificar( [ 'empleados_id' => $idMngUsr['id'], 'w_documento' => $identif, 'w_tipodoc_id' => $tipodoc_id, 'actualizatercero' => false ] );
-	                } catch (Exception $e) {
-	                    $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - asignaciones_Modificarv: ' . $e->getMessage() );
-	                    throw new Exception( json_encode( $msjr ), $e->getCode() );
-	                }
-	                
-	                // mk p12
-	                $reqP12 = $nwU;
-	                $reqP12['tipousuario'] = self::FIRMASPRO_TIPOUSUARIO_CONTRATISTA;
-	                $reqP12['usuario_id'] = $idMngUsr['id'];
-	                $reqP12['clave'] = md5( $clave );
-	                try {
-	                    self::firmaspro_Helper_MkCert_p12( $reqP12 );
-	                } catch (Exception $e) {
-	                    $msjr = self::retorno([], $e->getCode(),'empleados_Home_Helper_Add - firmaspro_Helper_MkCert_p12: ' . $e->getMessage() );
-	                    throw new Exception( json_encode( $msjr ), $e->getCode() );
-	                }
-	                
+	                $primero = false;
 	            }
 	        }
 	        
 	        if ($idMngUsr > 0 ) {
 	            $d_notify = array(
 	                'tpl' => 'nuevaclave.html',
-	                'campos' => array( 'USUARIO_TMP' => $tipodoc_id . $identif, 'CLAVE_TMP' => $clave ),
+	                'campos' => array( 'USUARIO_TMP' => $tipodoc_id . $identif,  'DOCUMENTO_TMP' => $identif, 'CLAVE_TMP' => $clave ),
 	                'para' => $correoe
 	            );
 	            
@@ -5065,19 +5229,21 @@ class OperacionesCtrl {
 	    ];
 	    $bs = dirname(dirname(dirname( __FILE__ ))) . DIRECTORY_SEPARATOR  . 'repo/anexos/' . $c_anyo . '/'  . $upfl['usr'] . '/' . self::PAQUETES_FLDS_NAME[ $upfl['carpeta'] ];
 	    
-	    if ( isset( $_FILES [$idfileadjunto]) && is_array( $_FILES [$idfileadjunto] ) && $_FILES [$idfileadjunto]['size'] > 0 ) {
-	        foreach(scandir( $bs ) as $file ){
-	            $pifl = pathinfo( $file );
-	            if ( $pifl['filename'] == $idfileadjunto ) {
-	                $oblifiledel = $bs . '/' . $pifl['basename'];
-	                if ( file_exists( $oblifiledel ) ) {
-	                    unlink( $oblifiledel );
+	    if ( file_exists( $bs ) ) {
+	        if ( isset( $_FILES [$idfileadjunto]) && is_array( $_FILES [$idfileadjunto] ) && $_FILES [$idfileadjunto]['size'] > 0 ) {
+	            foreach(scandir( $bs ) as $file ){
+	                $pifl = pathinfo( $file );
+	                if ( $pifl['filename'] == $idfileadjunto ) {
+	                    $oblifiledel = $bs . '/' . $pifl['basename'];
+	                    if ( file_exists( $oblifiledel ) ) {
+	                        unlink( $oblifiledel );
+	                    }
 	                }
 	            }
+	            
+	            $flsRes = self::paquetesrequ_Helper_Files( $upfl );
+	            $archivos = $flsRes['path'];
 	        }
-	        
-	        $flsRes = self::paquetesrequ_Helper_Files( $upfl );
-	        $archivos = $flsRes['path'];
 	    }
 	    
 	    return $archivos;
@@ -8194,6 +8360,8 @@ class OperacionesCtrl {
 	        $cargasoloheads = $d['soloencabezados'];
 	    }
 	    
+	    $campostaticos = [];
+	    
 	    $empleados = array();
 	    if ( isset( $d['empleado'] ) ) {
 	        $empleados = $d['empleado'];
@@ -8205,7 +8373,8 @@ class OperacionesCtrl {
 	        $bind += $nwempl;
 	        $bind['documento'] = $empleados['documento'];
 	    }
-	    
+	    //echo "pasa:\n" . print_r($d , true );
+	    //die();
 	    if ( isset( $d['paquetesrequ'] ) ) {
 	        $paquetesrequ = $d['paquetesrequ'];
 	        
@@ -8237,6 +8406,12 @@ class OperacionesCtrl {
 	                        
 	                        $bind['frmlbl_' . $newRefId . '_' . $kJsFrm['field'] ] = $kJsFrm['label'];
 	                        $bind['frmvlr_' . $newRefId . '_' . $kJsFrm['field'] ] = $valor;
+	                        
+	                        if( isset( $kJsFrm['staticfield'] ) ){
+	                            if( strlen( trim( (string) $kJsFrm['staticfield'] ) ) > 0 ){
+	                                $bind[ 'fldstatic_' . $kJsFrm['staticfield'] ] = $valor;
+	                            }
+	                        }
 	                        
 	                        $jsfullfrm[] = [ 'label' => $kJsFrm['label'], "value" => $valor ];
 	                    }
@@ -8271,6 +8446,10 @@ class OperacionesCtrl {
 	    foreach(scandir( $fld_base ) as $file ){
 	        if( !is_dir($file) )
 	        {
+	            if( Utiles::ComienzaEn( $file, '._') ){
+	                continue;
+	            }
+	            
 	            $fldt = pathinfo( $file );
 	            $flParts = trim( $fldt['filename'] );
 	            
@@ -8278,7 +8457,7 @@ class OperacionesCtrl {
 	                $opc =['w_nombre' => $flParts,'soloencabezados' => true ];
 	                $xls = array();
 	                if ( $cargasoloheads ) {
-	                    $xls = OperacionesCtrl::empleados_Procesar_Archivos( $opc );
+	                    $xls = self::empleados_Procesar_Archivos( $opc );
 	                    
 	                    foreach ( $xls as $kJs ) {
 	                        if ( strlen( trim( $kJs['raw'] ) ) > 0 ) {
@@ -8293,7 +8472,7 @@ class OperacionesCtrl {
 	                        'buscarpor' => $porbuscar
 	                    ];
 	                    
-	                    $xls = OperacionesCtrl::empleados_Procesar_Archivos( $opc );
+	                    $xls = self::empleados_Procesar_Archivos( $opc );
 	                    if (count( $xls ) > 0 ) {
 	                        $r_xls = $xls[ 0 ];
 	                        foreach ( $r_xls as $kJs =>  $vJs ) {
@@ -8312,6 +8491,31 @@ class OperacionesCtrl {
 	        $bind += $res ;
 	    }
 	    
+	    // TODO: Tarea 195 - Obtener los campos estaticos unicos de para la lista de variables
+	    if( isset( $d['soloencabezados'] ) ){
+	        if ( $d['soloencabezados'] ) {
+	            $frms = [];
+	            try {
+	                $frms = self::formularios_Obtener( [ 'w_formulariosestados_id' => 1] );
+	            } catch (Exception $e) {
+	                //
+	            }
+	            $campostaticos = [];
+	            foreach ( $frms as $kFrm ) {
+	                $frmJson = json_decode( $kFrm['json'] , true );
+	                foreach ( $frmJson as $kFld ) {
+	                    if( isset( $kFld['staticfield'] ) ){
+	                        if( strlen( trim( (string) $kFld['staticfield'] ) ) > 0 ){
+	                            $campostaticos[ 'fldstatic_' . $kFld['staticfield'] ] = '';
+	                        }
+	                    }
+	                }
+	            }
+	            if ( count( $campostaticos ) >  0 ) {
+	                $bind += $campostaticos ;
+	            }
+	        }
+	    }
 	    return $bind;
 	}
 	
@@ -13063,13 +13267,28 @@ EOD;
 	        }
 	    }
 	    
+	    $interaccionempleado = [];
+	    try {
+	        $interaccionempleado = self::interaccionempleado_Obtener( [ 'w_paquetes_id' => $json['id'], 'interaccionempleadoestados_id' => 2 ] );
+	    } catch (Exception $e) {
+	        throw new Exception( 'flujositems_Helper_ObtenerRevisorData - interaccionempleado_Obtener: ' . $e->getMessage() , $e->getCode() );
+	    }
+	    $interaccion = array_map(function($item) {
+	        return [
+	            'mensaje'                                      => $item['mensaje'],
+	            'respuesta'                                    => $item['respuesta'],
+	            'adjuntos'                                     => $item['adjuntos']
+	        ];
+	    }, $interaccionempleado);
+	    
 	    $result = [
 	        'docs' => $docs,
 	        'firmantes' => $usrs,
 	        'solicitante' => $user,
 	        'paquete' => $pkreq,
 	        'datosmes' => $mesAplica,
-	        'obligaciones' => $tempobl
+	        'obligaciones' => $tempobl,
+	        'interaccion' => $interaccion
 	    ];
 	    
 	    return self::retorno($result, 0, '');
@@ -13793,6 +14012,14 @@ EOD;
 	            'fechamodificado' => date("Y-m-d H:i:s"),
 	            'id' => $idMod
 	        ];
+	        
+	        // TODO: Tarea 190 - Asignar el siguiente usuario al usuario q diga el flujo
+	        $cfg_asignaciones = [
+	            'paquetes_id' => $idMod,
+	            'flujositems_id' => $nid
+	        ];
+	        $objNext = self::asignaciones_Helper_Agregar_Por_Sistema( $cfg_asignaciones );
+	        
 	    }
 	    
 	    if( $debesinc ){
@@ -14078,7 +14305,7 @@ EOD;
 	    $r::$lnk->query( self::SQL_BIG_SELECTS );
 	    
 	    $vr  = "paqs.`id`, paqs.`nombre`, paqs.`empleados_id`, trim(concat(emple.nombres, ' ', emple.apellidos)) as empleados_nombre, ";
-	    $vr .= "emple.documento as empleados_documento, paqs.`empleados`, paqs.`mesaplica`, paqs.`fecha`, paqs.`flujositems_id`, ";
+	    $vr .= "emple.documento as empleados_documento, emple.tipodoc_id as empleados_tipodoc_id, paqs.`empleados`, paqs.`mesaplica`, paqs.`fecha`, paqs.`flujositems_id`, ";
 	    $vr .= "fluitems.nombre as flujositems, fluitems.sincronizar as flujositems_sincronizar, paqs.`usuariosmod`, paqs.`fechamodificado`, ";
 	    $vr .= "paqs.`paquetesestados_id`, paqsest.nombre as paquetesestados, paqs.`flujos_id`, flu.nombre as flujos, ";
 	    $vr .= "paqs.`radicado` ";
@@ -15924,7 +16151,13 @@ EOD;
 	        $o->setEmpleados_id( $d['empleados_id'] );
 	    }
 	    $o->setAsignador_id( $usu->getId() );
+	    if (isset( $d['asignador_id'] ) ) {
+	        $o->setAsignador_id( $d['asignador_id'] );
+	    }
 	    $o->setAsignador( $usu->getNombres() . " " . $usu->getApellidos() );
+	    if (isset( $d['asignador'] ) ) {
+	        $o->setAsignador( $d['asignador'] );
+	    }
 	    $o->setFecha( date('Y-m-d H:i:s'));
 	    $o->setFechamodifica( date('Y-m-d H:i:s') );
 	    
@@ -15999,6 +16232,10 @@ EOD;
 	        foreach ( $ids as $vPr ) {
 	            $pr[] = $vPr;
 	        }
+	    }
+	    if( isset( $d['w_documento'] ) ){
+	        $wh[] = "asig.`documento` = ?";
+	        $pr[] = $d['w_documento'];
 	    }
 	    if( isset( $d['w_documentos'] ) ){
 	        $ids = $d['w_documentos'];
@@ -16093,9 +16330,11 @@ EOD;
 	        }
 	    }
 	    if ($actualizatercero) {
-	        $aSt['asignador_id'] = $usu->getId();
-	        $aSt['asignador'] = $usu->getNombres() . " " . $usu->getApellidos();
-	        $aSt['fechamodifica'] = date('Y-m-d H:i:s');
+	        if( $usu != null ){
+	            $aSt['asignador_id'] = $usu->getId();
+	            $aSt['asignador'] = $usu->getNombres() . " " . $usu->getApellidos();
+	            $aSt['fechamodifica'] = date('Y-m-d H:i:s');
+	        }
 	    }
 	    
 	    $pr = [];
@@ -16323,6 +16562,49 @@ EOD;
 	    
 	    return self::retorno($result, 0, "") ;
 	}
+	
+	/**
+	* @author yalfonso
+	*
+	* TODO: Tarea 191 - Crear helper para asignar empleados a usuarios que requiere el flujo
+	*/
+	public static function asignaciones_Helper_Agregar_Por_Sistema( $d ){
+	    $paquetes_id = $d['paquetes_id'];
+	    $flujositems = $d['flujositems_id'];
+	    
+	    $packs = self::paquetes_Obtener( [ 'id' => $paquetes_id ] );
+	    $fluitem = self::flujositems_Obtener( [ "id" => $flujositems ] );
+	    
+	    $f_packs = $packs[0];
+	    $f_fluitem = $fluitem[0];
+	    
+	    //echo 'f_packs: ' . print_r( $f_packs , true ) . "\n";
+	    //echo 'f_fluitem: ' . print_r( $f_fluitem , true );
+	    //die();
+	    
+	    $qryunico = [
+	        'w_usuarios_id' => $f_fluitem['usuarios_id'],
+	        'w_empleados_id' => $f_packs['empleados_id'],
+	        'ordenasc' => 1
+	    ];
+	    $asigs = self::asignaciones_Obtener( $qryunico );
+	    
+	    $id_reg = 0;
+	    if( count( $asigs ) == 0 ){
+	        $cfgadd = [
+	            'usuarios_id' => $f_fluitem['usuarios_id'],
+	            'tipodoc_id' => $f_packs['empleados_tipodoc_id'],
+	            'documento' => $f_packs['empleados_documento'],
+	            'empleados_id' => $f_packs['empleados_id'],
+	            'asignador_id' => 0,
+	            'asignador' => 'AUTOMATICO'
+	        ];
+	        self::asignaciones_Agregar( $cfgadd );
+	    }
+	    
+	    return self::retorno( [ 'id' => $id_reg , 'next' => $f_fluitem, 'solicitante' => $f_packs ] , 0, "");
+	}
+	
 	/**
 	 * @author yalfonso
 	 *
@@ -16352,11 +16634,16 @@ EOD;
 	        }
 	    }
 	    
-	    $asigs = self::asignaciones_Obtener( [ 'w_documentos' => $documentos ] );
+	    $asigs = self::asignaciones_Obtener( [ 'w_documentos' => $documentos, 'ordenasc' => 1 ] );
 	    // indexar
 	    $asigInd = [];
 	    foreach ($asigs as $kAsig) {
 	        $idarr = $kAsig['tipodoc_id'] . $kAsig['documento'];
+	        
+	        if( isset( $asigInd[ $idarr ] ) ){
+	            self::asignaciones_Eliminar( [ 'id' => $kAsig['id'] ] );
+	        }
+	        
 	        $asigInd[ $idarr ] = $kAsig;
 	    }
 	    
@@ -16526,7 +16813,7 @@ EOD;
 
 		$anyo = OperacionesCtrl::anyolectivo_Obtener();
 		$c_anyo = $anyo[ 0 ];
-		
+
 		foreach ($items as $it) {
 			if (!is_numeric($it['tipodoc_id'] )) {
 				$it['tipodoc_id'] = array_search(strtoupper(trim($it['tipodoc_id'])), self::TIPODOC_DOS_LETRAS, true);
@@ -16535,14 +16822,18 @@ EOD;
 			$doc = trim((string)$it['documento']) ?? '';
 			$it['meses'] = isset($it['meses']) ? (int)$it['meses'] : 0;
     		$it['dias']  = isset($it['dias'])  ? (int)$it['dias']  : 0;
+    		$it['honorarios']  = isset($it['honorarios'])  ? $it['honorarios']  : 0;
 
 			$usrExiste = self::empleados_Obtener(['w_documento' => $doc]);
-			
+
 			if (!empty($usrExiste) && isset($usrExiste[0]['id'])) {
 				$it['empleados_id'] = $usrExiste[0]['id'];
     		}
 
-			$contExiste = self::empleadosdetallescontrato_Obtener(['documento' => $doc ] );	
+			$contExiste = self::empleadosdetallescontrato_Obtener(['documento' => $doc ] );
+			
+			//die( "contExiste:\n" . print_r( $contExiste, true ) );
+			
 			try {
     			if ( count( $contExiste ) > 0 ) {
     				//Modificación
@@ -16551,7 +16842,8 @@ EOD;
     					'w_tipodoc_id' => $it['tipodoc_id'],
     					'meses' => $it['meses'],
     					'dias' => $it['dias'],
-    					'fechainicio' => $it['fechainicio'] ?? '1900-01-01 00:00:00'
+    					'fechainicio' => $it['fechainicio'] ?? '1900-01-01 00:00:00',
+    				    'honorarios' => $it['honorarios']
     				);
     				
                     if (isset($it['empleados_id'])) {
@@ -16590,7 +16882,7 @@ EOD;
     		    return self::retorno([], $th->getCode(), $th->getMessage());
     		}
 		}
-		return self::retorno('ok', 'Contratos procesados correctamente', null);
+		return self::retorno('ok', 0, "Contratos procesados correctamente");
 		
 	}
 	
@@ -16661,7 +16953,11 @@ EOD;
 		if (isset( $d['fileactainivalorgestor'] ) ) {
 			$o->setFileactainivalorgestor( $d['fileactainivalorgestor'] );
 		}
-
+		// TODO: Tarea 194 - Agregar el control de insercion del campo honorarios
+		if (isset( $d['honorarios'] ) ) {
+		    $o->setHonorarios( $d['honorarios'] );
+		}
+		
 		$id = $o->saveData();
 		
 		if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
@@ -16699,7 +16995,7 @@ EOD;
 		    $usu = self::authRequ();
 		} catch (\Exception $e) {
 		    http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
-		    throw new \Exception( "empleadosdetallescontrato_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+		    throw new \Exception( "empleadosdetallescontrato_Modificar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
 		}
 		
 		$tb = 'empleadosdetallescontrato ';
@@ -16723,9 +17019,10 @@ EOD;
 		if ( isset( $d['dias'] ) ) {
 			$aSt['dias'] = $d['dias'] ;
 		}
-
-		$aSt['usuario'] = trim( $usu->getNombres() . " " . $usu->getApellidos() );
 		
+		if( method_exists($usu, "getId") ){
+		  $aSt['usuario'] = trim( $usu->getNombres() . " " . $usu->getApellidos() );
+		}
 		$aSt['fechamodifica'] = date("Y-m-d H:i:s") ;
 		
 		if ( isset( $d['fileactaini'] ) ) {
@@ -16735,10 +17032,11 @@ EOD;
 			$aSt['fechainicio'] = $d['fechainicio'] ;
 		}
 		if ( isset( $d['fileactainivalorgestor'] ) ) {
-			$aSt['fileactainivalorgestor'] = $d['fileactainivalorgestor'] ;
+		    $aSt['fileactainivalorgestor'] = $d['fileactainivalorgestor'] ;
 		}
-
-		
+		if ( isset( $d['honorarios'] ) ) {
+		    $aSt['honorarios'] = $d['honorarios'] ;
+		}
 
         $pr = [];
 	    $wh  = '';
@@ -16760,7 +17058,9 @@ EOD;
 
 		$xt = $wh;
 	    $cu = null;
-
+	    
+	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
+	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' ' . $xt);
 		 try {
 	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
 	    } catch (\Throwable $th) {
@@ -16788,8 +17088,9 @@ EOD;
 		$vr  = 'empdetcont.`id`, empdetcont.`tipodoc_id`, tipod.nombre as tipodoc_nombre, ';
 		$vr .= 'empdetcont.`documento`, empdetcont.`empleados_id`, concat(emple.nombres, " ", emple.apellidos) as empleados_full, ';
 		$vr .= 'empdetcont.`contrato`, empdetcont.`meses`, empdetcont.`dias`, empdetcont.`fecha`, empdetcont.`usuario`, ';
-		$vr .= 'empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, empdetcont.`fileactaini`, empdetcont.`fechainicio`, empdetcont.`fileactainivalorgestor` ';
-
+		$vr .= 'empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, empdetcont.`fileactaini`, empdetcont.`fechainicio`, empdetcont.`fileactainivalorgestor`, ';
+		$vr .= 'empdetcont.`honorarios` ';
+		
 		$tb  = '`empleadosdetallescontrato` as empdetcont ';
 
 		$jn  = 'LEFT JOIN empleados as emple on emple.id = empdetcont.empleados_id ';
@@ -16822,8 +17123,6 @@ EOD;
 		if (isset($d['ordenasc'])) {
 			$orden = "ORDER BY " . $d['ordenasc'] . " ASC";
 		}
-
-		
 
 		$limite = "";
 		if (isset($d['limite'])) {
@@ -17086,6 +17385,10 @@ EOD;
 	            $wh[] = "JSON_SEARCH(frm.json, 'one', '', NULL, '$[*].staticfield') IS NOT NULL";
 	            //$pr[] = $d['w_nombre'] ;
 	        }
+	    }
+	    if( isset( $d['w_formulariosestados_id'] ) ){
+	        $wh[] = "frm.`formulariosestados_id` = ? ";
+	        $pr[] = $d['w_formulariosestados_id'] ;
 	    }
 	    
 	    $defWh = "";

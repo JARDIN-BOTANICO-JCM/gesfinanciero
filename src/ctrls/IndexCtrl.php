@@ -1636,6 +1636,8 @@ class IndexCtrl extends Pagina {
 					die("");
 				}
 				if ($_POST["ajax"] == md5(self::API_EmpleadosHomeMod)) {
+				    // TODO: Tarea 192 - Debe deshabilitar inicio de sesion obligatoria
+				    OperacionesCtrl::authRequOff();
 				    try {
 				        $_POST["home"] = true;
 				        $ok = OperacionesCtrl::Empleados_Helper_Modificar($_POST);
