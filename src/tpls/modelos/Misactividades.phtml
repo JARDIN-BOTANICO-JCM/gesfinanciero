@@ -429,6 +429,9 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		const _o = jQuery( o );
 		const dt = _o.data();
 		
+<?php // TODO: Tarea 196 - Agregar un cacheBuster para los documentos pdf e imagenes ?>
+        const cacheBuster = new Date().getTime();
+		
 		const _urlpdf = dt['url'];
 		const _esfirmable = dt['esfirmable'];
 		
@@ -455,14 +458,14 @@ const Requerimientos = function( dC ){ // dC = data constructor
         
 <?php // TODO: Tarea 87 - Agregar soporte de documentos tipo imagen, pdf y textos ?>
         if( laExt == "pdf" ){
-        	_html.push( '			<iframe src="' + _urlpdf + '#toolbar=1" style="width:100%; height:100%; border:none;"  allowfullscreen ></iframe>' );
+        	_html.push( '			<iframe src="' + _urlpdf + '?v=' + cacheBuster + '#toolbar=1" style="width:100%; height:100%; border:none;"  allowfullscreen ></iframe>' );
         }
         else if( laExt == "txt" || laExt == "csv" ){
         	estxt = true;
         	_html.push( '			<pre id="cp_multiviewer" class="form-control" style="width:100%; height:100%;"></pre>' );
         }
         else if( laExt == "gif" || laExt == "jpg" || laExt == "jpeg" || laExt == "png" ){
-        	_html.push( '			<img src="' + _urlpdf + '" id="cp_multiviewer" class="form-control" style="width:100%;" />' );
+        	_html.push( '			<img src="' + _urlpdf + '?v=' + cacheBuster + '" id="cp_multiviewer" class="form-control" style="width:100%;" />' );
         }
         else{
         	_html.push( '			<div class="form-control d-flex justify-content-center" style="width:100%; height:100%;"><svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#gbl-info-fill"/></svg> El archivo ' + laExt + ' no se reconoce</div>' );
