@@ -1,13 +1,4 @@
-<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
-	<tbody>
-		<tr>
-			<td style="width:20%"><img height="50" src="temas/img/jbb_negro.png" /></td>
-			<td style="text-align:right; width:80%"><strong>INFORME DE PAGO - PERSONA NATURAL - JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</strong></td>
-		</tr>
-	</tbody>
-</table>
-
-<p>&nbsp;</p>
+<p><strong>INFORME DE PAGO - PERSONA NATURAL - JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</strong></p>
 
 <table border="1" cellpadding="1" cellspacing="1" style="width:100%">
 	<tbody>
@@ -47,7 +38,7 @@
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha inicial del contrato</span></strong></th>
 			<td><span style="font-size:11px">[fecha valor={$empl_fechainicio}&nbsp;esexcel=false]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Fecha final del contrato</span></strong></th>
-			<td><span style="font-size:11px">[fechacontratocompleto fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} dias={$empl_empleadosdetallescontrato_dias} meses={$empl_empleadosdetallescontrato_meses} esexcel=false]</span></td>
+			<td><span style="font-size:11px">[fechacontratocompleto fechainibogdata={$empl_fechainicio} fechafinalbogdata={$bogdata_fecha_final} esexcel=false]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Correo electr&oacute;nico</span></strong></th>
 			<td><span style="font-size:11px">{$empl_mail}</span></td>
 		</tr>
@@ -77,15 +68,11 @@
 	<tbody>
 		<tr>
 			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Periodo objeto del informe</span></strong></th>
-			<td style="width:16%">
-			<p><span style="font-size:11px">Informe No. [nofactura mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} fechafinalbogdata={$bogdata_fecha_final}]</span></p>
-
-			<p><span style="font-size:11px">[fechaxls mesaplica={$mesaplica} fechainibogdata={$empl_fechainicio} formato=Y-m-d] hasta [fecha valor={$mesaplica} formato=Y-m-t]</span></p>
-			</td>
+			<td style="width:16%"><span style="font-size:11px">[fechaxls mesaplica={$mesaplica} fechainibogdata={$bogdata_fecha_de_entrada} formato=Y-m-d] hasta [fecha valor={$mesaplica} formato=Y-m-t]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Fecha inicial informe</span></strong></th>
-			<td style="width:16%"><span style="font-size:11px">[fecha valor={$mesaplica} fechainibogdata={$empl_fechainicio} esexcel=false]</span></td>
+			<td style="width:16%"><span style="font-size:11px">[fecha valor={$empl_fechainicio} esexcel=false]</span></td>
 			<th style="background-color:#bbbbbb; text-align:left; width:16%"><strong><span style="font-size:11px">Fecha final informe</span></strong></th>
-			<td style="width:20%"><span style="font-size:11px">[fecha valor={$mesaplica} esexcel=false formato=Y-m-t]</span></td>
+			<td style="width:20%"><span style="font-size:11px">[fecha valor={$empl_fechainicio} esexcel=false formato=Y-m-t]</span></td>
 		</tr>
 	</tbody>
 </table>
@@ -107,7 +94,7 @@
 	<tbody>
 		<tr>
 			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Plazo inicial del contrato</span></strong></th>
-			<td style="width:12%"><span style="font-size:11px">{$empl_empleadosdetallescontrato_meses} meses y {$empl_empleadosdetallescontrato_dias} d&iacute;as</span></td>
+			<td style="width:12%">&nbsp;</td>
 			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Plazo adicional</span></strong></th>
 			<td style="width:12%"><span style="font-size:11px">0</span></td>
 			<th style="background-color:#bbbbbb; text-align:left; width:12%"><strong><span style="font-size:11px">Valor mensual del contrato</span></strong></th>
@@ -151,10 +138,10 @@
 			<td style="text-align:left"><span style="font-size:11px">3 - Aportes seguridad social</span></td>
 		</tr>
 		<tr>
-			<td style="text-align:left"><strong>{$frmlbl_8_field_0_11}:</strong> {$frmvlr_8_field_0_11}</td>
+			<td style="text-align:left"><b>{$frmlbl_8_field_0_11}:</b> {$frmvlr_8_field_0_11}</td>
 		</tr>
 		<tr>
-			<td style="text-align:left"><strong>{$frmlbl_8_field_1_11}:</strong> {$frmvlr_8_field_1_11}</td>
+			<td style="text-align:left"><b>{$frmlbl_8_field_1_11}:</b> {$frmvlr_8_field_1_11}</td>
 		</tr>
 	</tbody>
 </table>
@@ -184,7 +171,7 @@
 			<th style="background-color:#bbbbbb; text-align:left"><strong><span style="font-size:11px">Total Pagado Seguridad Social</span></strong></th>
 		</tr>
 		<tr>
-			<td style="text-align:left">{$frmvlr_8_field_2_11}</td>
+			<td style="text-align:left">[fecha valor={$mesaplica} formato=m]</td>
 			<td style="text-align:left">{$frmvlr_8_field_11_11}</td>
 			<td style="text-align:left">{$frmvlr_8_field_8_11}</td>
 			<td style="text-align:left">{$frmvlr_8_field_6_11}</td>
@@ -254,16 +241,7 @@
 	</tbody>
 </table>
 
-<div style="page-break-after:always"><span style="display:none">&nbsp;</span></div>
-
-<table border="0" cellpadding="1" cellspacing="1" style="width:100%">
-	<tbody>
-		<tr>
-			<td style="width:20%"><img height="50" src="temas/img/jbb_negro.png" /></td>
-			<td style="text-align:right; width:80%"><strong>INFORME DE PAGO - PERSONA NATURAL - JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</strong></td>
-		</tr>
-	</tbody>
-</table>
+<p>&nbsp;</p>
 
 <p>Firma:</p>
 
@@ -283,7 +261,7 @@
 		</tr>
 		<tr>
 			<td style="vertical-align:top">
-			<p>El/la contratista, <span style="font-size:11px">{$empl_nombres}</span>&nbsp;<span style="font-size:11px">{$empl_apellidos}</span> cumpli&oacute; con las obligaciones contra&iacute;das en el contrato <span style="font-size:11px">JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</span> presentando el respectivo informe de actividades desarrolladas, productos y dem&aacute;s obligaciones pactadas en el contrato y en el per&iacute;odo se&ntilde;alado en el concepto del pago, correspondiente al contrato principal.&nbsp;</p>
+			<p>El/la contratista, <span style="font-size:11px">{$empl_nombres}</span>&nbsp;cumpli&oacute; con las obligaciones contra&iacute;das en el contrato <span style="font-size:11px">JBB-CTO-{$bogdata_no_compromiso}-{$bogdata_vigencia}</span> presentando el respectivo informe de actividades desarrolladas, productos y dem&aacute;s obligaciones pactadas en el contrato y en el per&iacute;odo se&ntilde;alado en el concepto del pago, correspondiente al contrato principal.&nbsp;</p>
 
 			<p>Igualmente se certifica que de conformidad con las disposiciones legales efectu&oacute; el pago a los aportes respectivos al sistema de seguridad social integral en salud y pensiones y/o aportes parafiscales. (Se anexan comprobantes de pago de los aportes).&nbsp;</p>
 
@@ -295,14 +273,20 @@
 
 <p>Firmas:</p>
 
+<p>&nbsp;</p>
+
 <table border="0" cellpadding="1" cellspacing="1" style="width:100%">
 	<tbody>
 		<tr>
-			<td style="width:50%">[campofirma valor=FIRMA_2 ]</td>
-			<td style="width:50%">[campofirma valor=FIRMA_1 ]</td>
+			<td>[campofirma valor=FIRMA_2 ]<br />
+			<strong>Aprobador</strong></td>
+			<td>[campofirma valor=FIRMA_1 ]<br />
+			<strong>Revisor</strong></td>
 		</tr>
 	</tbody>
 </table>
+
+<p>&nbsp;</p>
 
 <p>&nbsp;</p>
 
@@ -316,8 +300,4 @@
 	</tbody>
 </table>
 
-<p>Firma:</p>
-
 <p>&nbsp;</p>
-
-<p>[campofirma valor=FIRMA_4&nbsp;]</p>

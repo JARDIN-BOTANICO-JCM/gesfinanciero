@@ -533,7 +533,15 @@ const Requerimientos = function( dC ){ // dC = data constructor
         pieHtml.push('		Abrir en nueva pestaña');
         pieHtml.push('	</a>');
         if( _esfirmable ){
-        	pieHtml.push('	<button data-razon="' + flujosroles + '" data-fldcampo="FIRMA_' + nofirmante + '" data-fldtipo="proceso" data-documento="' + _urlpdf + '" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_ADMIN ?>" type="button" class="btn btn-primary" onclick="reqs.firmarPdf( this );" >Firmar ' + flujosroles + '</button>');
+        /* es = <?php echo $usu->getSupervisor() ?> */
+<?php   // TODO: Tarea 197 - Agregar al documento PDF otro texto llamado FIRMA_SUPERVISOR para que solo pueda ser firmado por el supervisor ?>
+<?php   // Si el usuario es supervisor solo puede firmar en el campo SUPERVISOR ?>
+<?php   if( $usu->getSupervisor() == 1 ) : ?>
+            const fldcampo = "FIRMA_SUPERVISOR";
+<?php   else : ?>
+            const fldcampo = "FIRMA_" + nofirmante;
+<?php   endif; ?>
+        	pieHtml.push('	<button data-razon="' + flujosroles + '" data-fldcampo="' + fldcampo + '" data-fldtipo="proceso" data-documento="' + _urlpdf + '" data-tipousuario="<?php echo OperacionesCtrl::FIRMASPRO_TIPOUSUARIO_ADMIN ?>" type="button" class="btn btn-primary" onclick="reqs.firmarPdf( this );" >Firmar ' + flujosroles + '</button>');
         }
         pieHtml.push('	<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>');
 		pieHtml.push('</div>');
@@ -988,26 +996,85 @@ const Requerimientos = function( dC ){ // dC = data constructor
 		html.push('		</div>');
 		html.push('		<div class="">');
 		
+		let first_r = true;
+		const posibles_back = [];
+		for (const kF in firmantes) {
+    	    if (Object.hasOwnProperty.call( firmantes, kF ) ) {
+    	        const _elBack = firmantes[ kF ];
+    	        
+    	        if ( first_r ){
+        			first_r = false;
+        			if( _elBack[ 'actual' ] ){
+    	        		break;
+        	        }
+	        	}
+    	        else{
+    	        	if( _elBack[ 'actual' ] ){
+    	        		break;
+        	        }
+    	        }
+    	        posibles_back.push( _elBack );
+	        }
+        }
+		
 		if( puedeinteractuar['interactuar'] ){
 			const tmpsol = puedeinteractuar['solicitante'];
 			const tmpfullname = (tmpsol['nombres'] + ' ' + tmpsol['apellidos']).toLowerCase() ;
 
-            html.push('			<div class="btn-group">');
-            html.push('				<button style="display: none;" id="btnContinuar" class="btn btn-outline-warning" onclick="reqs.solicitarAlContratista( this );" data-solicitante="' + tmpfullname + '" data-target="#contProce" data-msj="Solicitar a ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Solicitar a <span style="text-transform: capitalize;">' + tmpfullname + '</span></button>');
+            html.push('			<div class="btn-group" style="display: none;" id="btnContinuar">');
+            html.push('				<button class="btn btn-outline-warning" onclick="reqs.solicitarAlContratista( this );" data-solicitante="' + tmpfullname + '" data-target="#contProce" data-msj="Solicitar a ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Solicitar a <span style="text-transform: capitalize;">' + tmpfullname + '</span></button>');
             html.push('				<button type="button" class="btn btn-outline-warning dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">');
             html.push('					<span class="visually-hidden">Toggle Dropdown</span>');
             html.push('				</button>');
             html.push('				<ul class="dropdown-menu">');
             html.push('					<li><button class="dropdown-item" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button></li>');
+            for (const kPb in posibles_back) {
+        	    if (Object.hasOwnProperty.call( posibles_back, kPb ) ) {
+        	        const _elPb = posibles_back[ kPb ];
+            		html.push('					<li><button class="dropdown-item" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + _elPb['nombre'] + '" data-nid="' + _elPb['id'] + '" data-idMod="' + idMod + '" >Volver a ' + _elPb['nombre'] + '</button></li>');
+            	}
+        	}
             html.push('				</ul>');
             html.push('			</div>');
 
 		}else{
-			html.push('			<button style="display: none;" id="btnContinuar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
+			html.push('			<div style="display: none;" id="btnContinuar" class="btn-group">');
+            html.push('				<button type="button" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + nextname + '" data-nid="' + nextid + '" data-idMod="' + idMod + '" >Continuar con ' + nextname + '</button>');
+            if( posibles_back.length > 0 ){
+                html.push('				<button type="button" class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">');
+                html.push('					<span class="visually-hidden">Toggle Dropdown</span>');
+                html.push('				</button>');
+                html.push('				<ul class="dropdown-menu">');
+                for (const kPb in posibles_back) {
+            	    if (Object.hasOwnProperty.call( posibles_back, kPb ) ) {
+            	        const _elPb = posibles_back[ kPb ];
+                		html.push('					<li><button class="dropdown-item" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + _elPb['nombre'] + '" data-nid="' + _elPb['id'] + '" data-idMod="' + idMod + '" >Devolver a ' + _elPb['nombre'] + '</button></li>');
+                	}
+            	}
+                html.push('				</ul>');
+            }
+            html.push('			</div>');
 		}
+
+		html.push('			<button style="display: none;" id="btnDevolver" class="btn btn-outline-danger" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Devolver esta solicitud" data-nid="' + nextid + '" data-idMod="' + idMod + '" data-rechazar="true" >Devolver solicitud a contratista</button>');
 		
-		html.push('			<button style="display: none;" id="btnDevolver" class="btn btn-outline-danger" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Devolver esta solicitud" data-nid="' + nextid + '" data-idMod="' + idMod + '" data-rechazar="true" >Devolver solicitud</button>');
-		html.push('			<button style="display: none;" id="btnFinalizar" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Finalizar solicitud" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
+		html.push('			<div style="display: none;" id="btnFinalizar" class="btn-group">');
+        html.push('				<button type="button" class="btn btn-outline-success" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Finalizar solicitud" data-idMod="' + idMod + '" data-fin="true">Finalizar solicitud</button>');
+        if( posibles_back.length > 0 ){
+            html.push('				<button type="button" class="btn btn-outline-success dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">');
+            html.push('					<span class="visually-hidden">Toggle Dropdown</span>');
+            html.push('				</button>');
+            html.push('				<ul class="dropdown-menu">');
+            for (const kPb in posibles_back) {
+        	    if (Object.hasOwnProperty.call( posibles_back, kPb ) ) {
+        	        const _elPb = posibles_back[ kPb ];
+            		html.push('					<li><button class="dropdown-item" onclick="reqs.continuar( this );" data-target="#contProce" data-msj="Continuar con ' + _elPb['nombre'] + '" data-nid="' + _elPb['id'] + '" data-idMod="' + idMod + '" >Volver a ' + _elPb['nombre'] + '</button></li>');
+            	}
+        	}
+            html.push('				</ul>');
+        }        
+        html.push('			</div>');
+		
 		html.push('		</div>');
 		html.push('	</div>');
 		

@@ -696,7 +696,21 @@ const Requerimientos = function( dC ){ // dC = data constructor
                         const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
                         const alerta = jQuery(objmdlErr + ' div.alert');
                         alerta.attr('class','alert alert-danger');
-                        alerta.html( err.responseText );
+        
+                        let mensajeError = err.responseText;
+                        try {
+                            const jsonRespuesta = JSON.parse(err.responseText);
+                            
+                            if (jsonRespuesta && jsonRespuesta.err) {
+                                mensajeError = jsonRespuesta.err;
+                            } else if (jsonRespuesta && jsonRespuesta.mensaje) { 
+                                mensajeError = jsonRespuesta.mensaje; 
+                            }
+                        } catch (e) {
+                            
+                        }
+                        
+                        alerta.html( mensajeError );
         
                         jQuery( objmdlErr ).modal('show');
         				setTimeout(function(){ jQuery( objmdl ).modal('hide'); }, <?php echo IndexCtrl::TIEMPO_AJAX_LDN ?>);
@@ -704,6 +718,15 @@ const Requerimientos = function( dC ){ // dC = data constructor
         		);
     
     		});
+			
+			const _primerError = jQuery('form :invalid').first();
+            if (_primerError.length > 0) {
+                $('html, body').animate({
+                    scrollTop: _primerError.offset().top - 100
+                }, 500, function() {
+                    _primerError.focus();
+                });
+            }
 			
 		});
 		

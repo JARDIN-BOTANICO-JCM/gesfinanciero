@@ -2034,10 +2034,10 @@ HTML;
 	                }
 	            }
 	            else{
-	               throw new Exception( 'tmp, Error creando archivo temporal' );
+	               throw new Exception( 'tmp, Error creando archivo temporal' , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
 	            }
 	        }else {
-	            throw new Exception( 'Error SubirArchivo: La extensi&oacute;n ' . $permitidos . ' no est&aacute; permitido' );
+	            throw new Exception( 'Error SubirArchivo: La extensi&oacute;n ' . $permitidos . ' no est&aacute; permitido' , IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
 	        }
 	    }
 	    return $defname;
@@ -8409,6 +8409,7 @@ HTML;
 	                        
 	                        if( isset( $kJsFrm['staticfield'] ) ){
 	                            if( strlen( trim( (string) $kJsFrm['staticfield'] ) ) > 0 ){
+	                                $bind[ 'fldstaticlbl_' . $kJsFrm['staticfield'] ] = $kJsFrm['label'];
 	                                $bind[ 'fldstatic_' . $kJsFrm['staticfield'] ] = $valor;
 	                            }
 	                        }
@@ -8506,6 +8507,7 @@ HTML;
 	                foreach ( $frmJson as $kFld ) {
 	                    if( isset( $kFld['staticfield'] ) ){
 	                        if( strlen( trim( (string) $kFld['staticfield'] ) ) > 0 ){
+	                            $campostaticos[ 'fldstaticlbl_' . $kFld['staticfield'] ] = '';
 	                            $campostaticos[ 'fldstatic_' . $kFld['staticfield'] ] = '';
 	                        }
 	                    }
@@ -14961,7 +14963,14 @@ EOD;
 	        }
 	        
 	        // Formularios
-	        $frms = self::paquetesrequ_Helper_Forms( $json, $empleado['documento'] );
+	        $frms = [];
+	        try {
+	            $frms = self::paquetesrequ_Helper_Forms( $json, $empleado['documento'] );
+	        } catch (Exception $e) {
+	            http_response_code( $e->getCode() );
+	            throw new Exception( $e->getMessage(), $e->getCode() );
+	        }
+	        
 	        if ( count( $frms ) > 0 ) {
 	            foreach ( $frms as $kFrm ) {
 	                $data = $kFrm['data'];
@@ -16878,7 +16887,7 @@ EOD;
     				// Nuevo registro
     				self::empleadosdetallescontrato_agregar($it);
     			}
-    		} catch (\Throwable $th) {
+			} catch (\Throwable $th) {
     		    return self::retorno([], $th->getCode(), $th->getMessage());
     		}
 		}
