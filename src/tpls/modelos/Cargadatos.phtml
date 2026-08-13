@@ -169,8 +169,7 @@ $tipodocrev = array_flip ( OperacionesCtrl::TIPODOC_DOS_LETRAS );
 					<form id="frmcont" class="row g-3 frmcontCls">
 						<div class="col-md-4">
 							<label class="form-label" for="tipodoc_id">Tipo de documento</label>
-							<select class="form-select" aria-label="Default select example" id="tipodoc_id"
-								name="tipodoc_id" required="">
+							<select class="form-select" aria-label="Default select example" id="tipodoc_id" name="tipodoc_id" required="">
 								<option value="" disabled selected>Seleccione</option>
 								<?php foreach ($d_tipodoc as $v): ?>
 									<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
@@ -211,9 +210,8 @@ $tipodocrev = array_flip ( OperacionesCtrl::TIPODOC_DOS_LETRAS );
 								placeholder="Acta de inicio">
 						</div>
 						<div class="col-12 d-flex gap-2">
-							<button type="submit" class="btn btn-primary" onclick="guardarEmpleado();"
-								id="pc_btnGuardar"> Guardar </button> <button type="button" class="btn btn-light"
-								onclick="limpiarPreCarga();"> Limpiar </button>
+							<button type="submit" class="btn btn-primary" onclick="guardarEmpleado();" id="pc_btnGuardar"> Guardar </button>
+							<button type="button" class="btn btn-light" onclick="limpiarPreCarga();"> Limpiar </button>
 						</div>
 					</form>
 				</div>
