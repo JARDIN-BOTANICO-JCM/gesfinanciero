@@ -23,7 +23,28 @@ class Empleadosdetallescontrato extends Clsdatos {
 	//TODO: Tarea 193 - Agregar el campo honorarios en la tabla empleadosdetallescontrato
 	// ALTER TABLE `empleadosdetallescontrato` ADD COLUMN `honorarios` DECIMAL(11,2) NOT NULL AFTER `fileactainivalorgestor`;
 	private $honorarios = 0;
+	private $crp = 0;
+	private $empleadosdetallescontratoestados_id = 0;
+	private $totalcontrato = 0;
 	
+    /**
+     * @return number
+     */
+    public function getTotalcontrato()
+    {
+        return $this->totalcontrato;
+    }
+
+    /**
+     * @param number $totalcontrato
+     */
+    public function setTotalcontrato($totalcontrato): self
+    {
+        $this->totalcontrato = $totalcontrato;
+        
+        return $this;
+    }
+
     /**
      * @return number
      */
@@ -292,6 +313,46 @@ class Empleadosdetallescontrato extends Clsdatos {
     public function setFileactainivalorgestor($fileactainivalorgestor)
     {
         $this->fileactainivalorgestor = $fileactainivalorgestor;
+    }
+
+    /**
+     * Obtiene el CRP del detalle del contrato.
+     * @return number
+     */
+    public function getCrp()
+    {
+        return $this->crp;
+    }
+
+    /**
+     * Establece el CRP del detalle del contrato.
+     * @param number $crp
+     */
+    public function setCrp($crp): self
+    {
+        $this->crp = $crp;
+        
+        return $this;
+    }
+
+    /**
+     * Obtiene el identificador del estado del detalle del contrato.
+     * @return number
+     */
+    public function getEmpleadosdetallescontratoestados_id()
+    {
+        return $this->empleadosdetallescontratoestados_id;
+    }
+
+    /**
+     * Establece el identificador del estado del detalle del contrato.
+     * @param number $empleadosdetallescontratoestados_id
+     */
+    public function setEmpleadosdetallescontratoestados_id($empleadosdetallescontratoestados_id): self
+    {
+        $this->empleadosdetallescontratoestados_id = $empleadosdetallescontratoestados_id;
+        
+        return $this;
     }
 	
 } 

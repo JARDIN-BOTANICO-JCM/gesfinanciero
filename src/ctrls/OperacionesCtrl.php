@@ -3374,14 +3374,17 @@ HTML;
 			 *   1. Valida que $d tiene empleadosdetallescontrato_meses, empleadosdetallescontrato_dias
 			 *   2. Como esta funcion (mnguserAdd_Helper) solo es para creacion, entonces utiliza la funcion q creaste (empleadosdetallescontrato_agregar) para agregar los meses y los dias
 			 *   3. Usa la variable $idUsr para el campo empleados_id  
+			 *   
+			 * @yalfonso
+			 * Actualizacion
 			 */
-			
 			if (isset($d['empleadosdetallescontrato_meses']) && isset($d['empleadosdetallescontrato_dias']) || isset($d['fechainicio']) && isset($d['fileactaini'])) {
 				$payload = array(
 					'empleados_id' => $idUsr['id'],
 					'meses' => intval($d['empleadosdetallescontrato_meses']),
 					'dias'  => intval($d['empleadosdetallescontrato_dias']),
-					'fechainicio' => $d['fechainicio'] ?? '1900-01-01 00:00:00'
+					'fechainicio' => $d['fechainicio'] ?? '1900-01-01 00:00:00',
+				    'totalcontrato' => ( isset( $d['totalcontrato'] ) ? $d['totalcontrato'] : 0 )
 				);
 				if ( isset( $_FILES['fileactaini'] ) ) {
 				    if ( isset( $_FILES['filename'] ) ) {
@@ -3712,7 +3715,11 @@ HTML;
 	     *   3. Usa la variable $d['id'] para el campo empleados_id
 	     *   4. Utiliza try/catch
 	     */
-
+	    
+	    /*
+	     * @yalfonso
+	     * Arreglando
+	     */ 
 			
 		if ( isset($d['empleadosdetallescontrato_meses']) || isset($d['empleadosdetallescontrato_dias']) || isset($d['fechainicio']) || isset($d['fileactaini']) ) {
 			try {
@@ -3728,6 +3735,9 @@ HTML;
     			);
     			if ( isset( $d['contrato'] ) ) {
     			    $detalleContrato['contrato'] = $d['contrato'] ;
+    			}
+    			if ( isset( $d['totalcontrato'] ) ) {
+    			    $detalleContrato['totalcontrato'] = $d['totalcontrato'] ;
     			}
     
     			$payload = [
@@ -4339,7 +4349,7 @@ HTML;
 		$vr .= "edc.dias as empleadosdetallescontrato_dias, ";
 		$vr .= "edc.fileactaini as fileactaini,";
 		$vr .= "edc.fechainicio as fechainicio, ";
-		$vr .= "edc.contrato, edc.honorarios ";
+		$vr .= "edc.contrato, edc.honorarios, edc.totalcontrato ";
 
 		$tb  = '`empleados` as empl ';
 		
@@ -8581,6 +8591,7 @@ HTML;
 	    
 	    $id_pack = 0;
 	    $mesaplica = "1900-01-01 00:00:00";
+	    $empleadosdetallescontrato_id = 0;
 	    
 	    $r = array();
 	    foreach ( $docs as $kFlujos ) {
@@ -8592,9 +8603,17 @@ HTML;
 	            });
 	        }
 	        $mesaplica = $kFlujos['mesaplica'];
+	        $empleadosdetallescontrato_id = $kFlujos['empleadosdetallescontrato_id'];
 	        $id_pack = $kFlujos['id'];
 	    }
 	    $bind['mesaplica'] = $mesaplica;
+	    $bind['empleadosdetallescontrato_id'] = $empleadosdetallescontrato_id;
+	    
+	    // se crean ids para las variables de las novedades de contratos
+	    $emplcontract = $d['emplcontract'];
+	    foreach ( $emplcontract as $kEmpC => $vEmpC ) {
+	        $bind['nov_' . $kEmpC] = $vEmpC;
+	    }
 	    
 	    if ( isset( $d['obligaciones'] ) ) {
 	        $bind['obligaciones'] = $d['obligaciones'];
@@ -8829,7 +8848,8 @@ HTML;
 	    'flujofinanciero' => 'flujofinanciero',
 	    'campofirma' => 'campofirma',
 	    'obligaciones' => 'obligaciones',
-	    'mesesletras' => 'mesesletras'
+	    'mesesletras' => 'mesesletras',
+	    'parsemeses' => 'parsemeses'
 	];
 
 	/**
@@ -9177,6 +9197,7 @@ HTML;
 	            $html[] = self::editarPlantillas_Moneda($d);
 	        }
 	        elseif ( self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['flujofinanciero'] ) { 
+	            
 	            $crp = $d['crp'];
 	            $fondos = $d['fondos'];
 	            $fondosdesc = $d['fondosdesc'];
@@ -9228,6 +9249,9 @@ HTML;
 	                $calc[] = [ 'comprometido' => $valorContrato, 'pagar' => $valpago, 'ejecutado' => $_ejecutado, 'porejecutado' => $_porejecutar ];
 	            }
 	            
+	            // pago novedad
+	            $pagnov = 0;
+	            
 	            $tbCont = array();
 	            $sobrante = 0;
 	            $vcomprometido = 0;
@@ -9241,10 +9265,12 @@ HTML;
 	                $tbCont[] = '          <td>' . $rubro . " - " . $rubrodesc . '</td>';
 	                $tbCont[] = '          <td>' . ($kCalc + 1) . '</td>';
 	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['comprometido'] ]) . '</td>';
-	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' =>$vCalc['pagar'] ]) . '</td>';
-	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' =>$vCalc['ejecutado'] ]) . '</td>';
-	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' =>$vCalc['porejecutado'] ]) . '</td>';
+	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['pagar'] ]) . '</td>';
+	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['ejecutado'] ]) . '</td>';
+	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['porejecutado'] ]) . '</td>';
 	                $tbCont[] = '      </tr>';
+	                
+	                $pagnov = $vCalc['pagar'];
 	                
 	                $vcomprometido = $vCalc['comprometido'];
 	                $vejecutado = $vCalc['ejecutado'];
@@ -9263,7 +9289,57 @@ HTML;
 	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vejecutado + $sobrante ]) . '</td>';
 	                $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => 0 ]) . '</td>';
 	                $tbCont[] = '      </tr>';
+	                
+	                $pagnov -= $sobrante;
 	            }
+	            
+	            $novtotalcontrato = (isset($d['novtotalcontrato']) && is_numeric($d['novtotalcontrato'])) ? (float)$d['novtotalcontrato'] : 0;
+	            $novcrp = (isset($d['novcrp']) && !empty($d['novcrp'])) ? $d['novcrp'] : '';
+	            $novhonorarios = (isset($d['novhonorarios']) && !empty($d['novhonorarios'])) ? $d['novhonorarios'] : 0;
+	            
+	            if ($novtotalcontrato > 0) {
+	                
+	                $calcNov = array();
+	                $calcNov[] = [
+	                    'comprometido' => $novtotalcontrato, 
+	                    'pagar' => $pagnov, 
+	                    'ejecutado' => $pagnov, 
+	                    'porejecutado' => $novtotalcontrato - $pagnov 
+	                ];
+	                
+	                do {
+	                    $pagnov = $novhonorarios;
+	                    
+	                    $saldopore = $calcNov[count($calcNov) - 1]['porejecutado'] - $pagnov;
+	                    if ($saldopore < 0 ) {
+	                        //$pagnov += $saldopore;
+	                        $saldopore = 0;
+	                    }
+                        $calcNov[] = [ 
+                            'comprometido' => $novtotalcontrato, 
+                            'pagar' => $pagnov, 
+                            'ejecutado' => $calcNov[count($calcNov) - 1]['ejecutado'] + $pagnov, 
+                            'porejecutado' => $saldopore
+                        ];
+                        
+                    } while ($calcNov[count($calcNov) - 1]['porejecutado'] > 0);
+                    
+                    foreach ( $calcNov as $kCalc => $vCalc ) {
+                        $tbCont[] = '      <tr>';
+                        $tbCont[] = '          <td>' . $novcrp . '</td>';
+                        $tbCont[] = '          <td>' . $fondos . " - " . $fondosdesc . '</td>';
+                        $tbCont[] = '          <td>' . $tiporegistro . '</td>';
+                        $tbCont[] = '          <td>' . $rubro . " - " . $rubrodesc . '</td>';
+                        $tbCont[] = '          <td>' . (++$noInf) . '</td>';
+                        $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['comprometido'] ]) . '</td>';
+                        $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['pagar'] ]) . '</td>';
+                        $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['ejecutado'] ]) . '</td>';
+                        $tbCont[] = '          <td>$ ' . self::editarPlantillas_Moneda( [ 'valor' => $vCalc['porejecutado'] ]) . '</td>';
+                        $tbCont[] = '      </tr>';
+                    }
+                    
+	            }
+	            
 	            
 	            $tbhtml = array();
 	            $tbhtml[] = '<table border="1" cellpadding="1" cellspacing="1" style="width:100%; font-size: 11px;">';
@@ -9326,6 +9402,26 @@ HTML;
 	            }
 	            $html[] = implode("", $tbhtml);
 	        }
+	        elseif (self::COMPONENTES_TAGS[ $tipo ] == self::COMPONENTES_TAGS['parsemeses'] ) {
+	            $diasPorMes = 30;
+	            
+	            $diasTotales = 0;
+	            if (isset($d['dias'])) {
+	                if ( is_numeric( $d['dias'] ) ) {
+	                    $diasTotales = $d['dias'];
+	                }
+	            }
+	            
+	            $meses = intdiv($diasTotales, $diasPorMes);
+	            $diasRestantes = $diasTotales % $diasPorMes;
+	            
+	            if( $diasTotales > 0 ){
+	               $html[] = $meses . " meses y " . $diasRestantes . " d&iacute;as";
+	            }
+	            else{
+	                $html[] = "";
+	            }
+	        }
 	    }
 	    
 	    //return json_encode( $d , JSON_UNESCAPED_SLASHES);
@@ -9345,7 +9441,20 @@ HTML;
 	 * @return string Valor formateado.
 	 */
 	private static function editarPlantillas_Moneda( $d ) {
-	    $valor = $d['valor'];
+	    $valor = 0;
+	    if ( isset( $d['valor'] ) ) {
+	        if ( is_numeric( $d['valor'] ) ) {
+	            $valor = $d['valor'];
+	        }
+	    }
+	    
+	    if ( isset( $d['suma'] ) ) {
+	        if ( is_numeric( $d['suma'] ) ) {
+	            $valor += $d['suma'];
+	        }
+	        
+	    }
+	    
 	    $decimalseparado = ",";
 	    if (isset( $d['decimalseparado'] ) ) {
 	        $decimalseparado = $d['decimalseparado'];
@@ -13780,6 +13889,11 @@ EOD;
 	    $flujos_id = $json['flujos_id'];
 	    $mesaplica = $json['mesaplica'] . '-01 00:00:00';
 	    
+	    $empleadosdetallescontrato_id = 0;
+	    if ( isset( $json['empleadosdetallescontrato_id'] ) ) {
+	        $empleadosdetallescontrato_id = $json['empleadosdetallescontrato_id'];
+	    }
+	    
 	    $objFlujo = array();
 	    try {
 	        $objFlujo = self::flujos_Obtener( array( 'id' => $flujos_id ) );
@@ -13813,7 +13927,7 @@ EOD;
 	        http_response_code( IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
 	        throw new Exception('No es posible radicar una solicitud en el mismo proceso y en el mismo mes', IndexCtrl::ERR_COD_REGISTRO_EXISTENTE );
 	    }
-	    
+
 	    // TODO: Tarea 176 - Crear un proceso que permita confirmar si el contratista no tiene obligaciones y desde el momento que cree una solicitud importe obligaciones
 	    $lsobli = [];
 	    try {
@@ -13860,7 +13974,8 @@ EOD;
 	            'flujositems_id' => $flujositemsinfo['id'],
 	            'flujos_id' => $json['flujos_id'],
 	            'paquetesestados_id' => 1,
-	            'radicado' => $radicado
+	            'radicado' => $radicado,
+	            'empleadosdetallescontrato_id' => $empleadosdetallescontrato_id
 	        );
 	        //die( print_r( $cfgTpls , true ) );
 	        $tpls_id = 0;
@@ -14222,9 +14337,13 @@ EOD;
 	    if (isset( $d['flujos_id'] ) ) {
 	        $o->setFlujos_id( $d['flujos_id'] );
 	    }
-	    if (isset( $d['radicado'] ) ) {
-	        $o->setRadicado( $d['radicado'] );
-	    }
+        if (isset( $d['radicado'] ) ) {
+          $o->setRadicado( $d['radicado'] );
+        }
+        // Nuevo campo: empleadosdetallescontrato_id (FK a detalle de contrato)
+        if (isset( $d['empleadosdetallescontrato_id'] ) ) {
+          $o->setEmpleadosdetallescontrato_id( $d['empleadosdetallescontrato_id'] );
+        }
 	    
 	    
 	    $id = $o->saveData();
@@ -14310,7 +14429,7 @@ EOD;
 	    $vr .= "emple.documento as empleados_documento, emple.tipodoc_id as empleados_tipodoc_id, paqs.`empleados`, paqs.`mesaplica`, paqs.`fecha`, paqs.`flujositems_id`, ";
 	    $vr .= "fluitems.nombre as flujositems, fluitems.sincronizar as flujositems_sincronizar, paqs.`usuariosmod`, paqs.`fechamodificado`, ";
 	    $vr .= "paqs.`paquetesestados_id`, paqsest.nombre as paquetesestados, paqs.`flujos_id`, flu.nombre as flujos, ";
-	    $vr .= "paqs.`radicado` ";
+			  $vr .= "paqs.`radicado`, paqs.`empleadosdetallescontrato_id` ";
 	    
 	    $tb  = '`paquetes` as paqs ';
 	    
@@ -14777,8 +14896,6 @@ EOD;
 	        //die( print_r( $empleado, true ) );
 	        //die( print_r( $json, true ) );
 	        
-	        //$empleadosContract = self::empleadosdetallescontrato_Obtener( [ 'empleados_id' => $empleado['id'] ] );
-	        
 	        $requerimientostplsitems = self::requerimientostplsitems_Obtener( [] );
 	        $paquetereqtipos_by_nombre = array();
 	        foreach ( $requerimientostplsitems as $kItem ) {
@@ -14801,9 +14918,19 @@ EOD;
 	        } catch (Exception $e) {
 	            throw new Exception ( 'paquetesrequ_Helper_Agregar: ' . $e->getMessage(), $e->getCode() );
 	        }
-	        
 	        //echo "json:\n" . print_r( $json, true );
 	        //die( 'flujositems_flujos_id: ' . print_r( $flujositems_flujos_id , true ) );
+	        
+	        $empleadosContract = [];
+	        if ( count( $paquetes_flujos_id ) > 0) {
+	            $tmp_pack = $paquetes_flujos_id[0];
+	            $empleadosContract_tmp = self::empleadosdetallescontratonovedades_Obtener( [ 'w_empleadosdetallescontrato_id' => $tmp_pack['empleadosdetallescontrato_id'] ] );
+	            
+	            if (count( $empleadosContract_tmp ) > 0) {
+	                $empleadosContract = $empleadosContract_tmp[0];
+	            }
+	        }
+	        
 	        
 	        /*
 	        $addnuevo = true;
@@ -15038,10 +15165,13 @@ EOD;
 	            };
 	        }
 	        
+	        // Novedades en contratos
+	        
+	        
 	        $docsgen = self::editarPlantillas_JBB_Mezclar_Crear( [
 	            'documentos' => $paquetes_flujos_id, 
 	            'empleado' => $empleado, 
-	            //'emplcontract' => $empleadosContract,
+	            'emplcontract' => $empleadosContract,
 	            'paquetesrequ' => $paquetesrequ_exists,
 	            'obligaciones' => base64_encode( json_encode( $obligaciones ) )
 	        ] );
@@ -16822,7 +16952,7 @@ EOD;
 
 		$anyo = OperacionesCtrl::anyolectivo_Obtener();
 		$c_anyo = $anyo[ 0 ];
-
+		
 		foreach ($items as $it) {
 			if (!is_numeric($it['tipodoc_id'] )) {
 				$it['tipodoc_id'] = array_search(strtoupper(trim($it['tipodoc_id'])), self::TIPODOC_DOS_LETRAS, true);
@@ -16860,6 +16990,9 @@ EOD;
                     }
     				if (isset($it['contrato']) && trim((string)$it['contrato']) !== '') {
     					$detalleContrato['contrato'] = trim((string)$it['contrato']);
+    				}
+    				if (isset($it['totalcontrato']) ) {
+    				    $detalleContrato['totalcontrato'] = $it['totalcontrato'];
     				}
     				
     				if ( isset( $_FILES['fileactaini'] ) ) {
@@ -16967,7 +17100,17 @@ EOD;
 		    $o->setHonorarios( $d['honorarios'] );
 		}
 		
-		$id = $o->saveData();
+		if (isset( $d['totalcontrato'] ) ) {
+		    $o->setTotalcontrato( $d['totalcontrato'] );
+		}
+		
+		$o->setEmpleadosdetallescontratoestados_id( 1 );
+		if ( isset( $d['empleadosdetallescontrato_id'] ) ) {
+		    $o->setEmpleadosdetallescontratoestados_id( $d['empleadosdetallescontrato_id'] );
+		}
+		
+		echo print_r( $o, true );
+		$id = $o->saveData();die( 'id: ' . $id );
 		
 		if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
 			http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
@@ -17044,7 +17187,15 @@ EOD;
 		    $aSt['fileactainivalorgestor'] = $d['fileactainivalorgestor'] ;
 		}
 		if ( isset( $d['honorarios'] ) ) {
-		    $aSt['honorarios'] = $d['honorarios'] ;
+		    if ( floatval($d['honorarios']) > 0 ) {
+		        $aSt['honorarios'] = $d['honorarios'] ;
+		    }
+		}
+		
+		if ( isset( $d['totalcontrato'] ) ) {
+		    if ( floatval($d['totalcontrato']) > 0 ) {
+		        $aSt['totalcontrato'] = $d['totalcontrato'] ;
+		    }
 		}
 
         $pr = [];
@@ -17069,7 +17220,7 @@ EOD;
 	    $cu = null;
 	    
 	    //$sqlPart = implode(', ', array_map(function($k, $v) {return $k . " = '" . addslashes($v) . "'";}, array_keys($aSt), $aSt));
-	    //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' ' . $xt);
+        //die('UPDATE ' . $tb . ' SET ' . $sqlPart . ' ' . $xt);
 		 try {
 	        $cu = Singleton::_safeUpdate(trim($tb),$aSt,$xt,$pr);
 	    } catch (\Throwable $th) {
@@ -17098,7 +17249,7 @@ EOD;
 		$vr .= 'empdetcont.`documento`, empdetcont.`empleados_id`, concat(emple.nombres, " ", emple.apellidos) as empleados_full, ';
 		$vr .= 'empdetcont.`contrato`, empdetcont.`meses`, empdetcont.`dias`, empdetcont.`fecha`, empdetcont.`usuario`, ';
 		$vr .= 'empdetcont.`fechamodifica`, empdetcont.`anyolectivo_id`, empdetcont.`fileactaini`, empdetcont.`fechainicio`, empdetcont.`fileactainivalorgestor`, ';
-		$vr .= 'empdetcont.`honorarios` ';
+		$vr .= 'empdetcont.`honorarios`, empdetcont.`totalcontrato` ';
 		
 		$tb  = '`empleadosdetallescontrato` as empdetcont ';
 
@@ -17141,6 +17292,7 @@ EOD;
 		$xt = $jn . $defWh . $orden . $limite;
 
 		$sql = "SELECT " . $vr . " FROM " . $tb . " " . $xt;
+		//die( $sql . "\n" . print_r($pr, true) );
 
 		$r = [];
 		try {
@@ -17153,6 +17305,250 @@ EOD;
 		return $r;
 	}
 	// empleadosdetallescontrato FIN
+	
+	// empleadosdetallescontratoestados INI
+	/**
+	 * Obtiene registros de la tabla 'empleadosdetallescontratoestados'.
+	 *
+	 * Requiere sesión activa y delega la lectura a Singleton::_readEstado.
+	 *
+	 * @param array $d Parámetros de entrada para la consulta.
+	 * @return array Resultado devuelto por Singleton::_readEstado.
+	 */
+	public static function empleadosdetallescontratoestados_Obtener( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA);
+	    }
+	    $d['tabla'] = 'empleadosdetallescontratoestados';
+	    $r = Singleton::_readEstado( $d );
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    return $r;
+	}
+	// empleadosdetallescontratoestados FIN
+	
+	// empleadosdetallescontratonovedadesestados INI
+	/**
+	 * Obtiene registros de la tabla 'empleadosdetallescontratonovedadesestados'.
+	 *
+	 * Requiere sesión activa y delega la lectura a Singleton::_readEstado.
+	 *
+	 * @param array $d Parámetros de entrada para la consulta.
+	 * @return array Resultado devuelto por Singleton::_readEstado.
+	 */
+	public static function empleadosdetallescontratonovedadesestados_Obtener( $d ){
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA);
+	    }
+	    $d['tabla'] = 'empleadosdetallescontratonovedadesestados';
+	    $r = Singleton::_readEstado( $d );
+	    if ( isset( $r['err_info'] )) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( $r['err_info'] , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    return $r;
+	}
+	// empleadosdetallescontratonovedadesestados FIN
+	
+	// empleadosdetallescontratonovedades INI
+	/**
+	 * Agrega una novedad asociada a un detalle de contrato de empleado.
+	 *
+	 * Campos aceptados en $d: contrato, meses, dias, fechainicio, honorarios, crp,
+	 * empleadosdetallescontrato_id, empleadosdetallescontratonovedadesestados_id
+	 *
+	 * @param array $d Datos de la novedad.
+	 * @return int ID del registro insertado.
+	 */
+	public static function empleadosdetallescontratonovedades_Agregar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    $usu = null;
+	    try {
+	        $usu = self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( "empleadosdetallescontratonovedades_Agregar: " . $e->getMessage(), IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    $o = new Empleadosdetallescontratonovedades();
+	    if ( isset( $d['contrato'] ) ) $o->setContrato( $d['contrato'] );
+	    if ( isset( $d['meses'] ) ) $o->setMeses( $d['meses'] );
+	    if ( isset( $d['dias'] ) ) $o->setDias( $d['dias'] );
+	    if ( isset( $d['fechainicio'] ) ) $o->setFechainicio( $d['fechainicio'] );
+	    // fecha de registro
+	    $o->setFecha( date('Y-m-d H:i:s') );
+	    if ( method_exists($usu, 'getNombres') ) $o->setUsuario( trim($usu->getNombres() . ' ' . $usu->getApellidos()) );
+	    $o->setFechamodifica( date('Y-m-d H:i:s') );
+	    if ( isset( $d['honorarios'] ) ) $o->setHonorarios( $d['honorarios'] );
+	    if ( isset( $d['crp'] ) ) $o->setCrp( $d['crp'] );
+	    if ( isset( $d['empleadosdetallescontrato_id'] ) ) $o->setEmpleadosdetallescontrato_id( $d['empleadosdetallescontrato_id'] );
+	    if ( isset( $d['empleadosdetallescontratonovedadesestados_id'] ) ) $o->setEmpleadosdetallescontratonovedadesestados_id( $d['empleadosdetallescontratonovedadesestados_id'] );
+	    	    
+	    if ( isset( $d['totalcontrato'] ) ) $o->setTotalcontrato( $d['totalcontrato'] );
+	    
+	    $id = $o->saveData();
+	    if ( strlen( trim( $o->obtenerError() ) ) > 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( 'empleadosdetallescontratonovedades_Agregar: ' . $o->obtenerError() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    if ( $id > 0 ) return $id;
+	    http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    throw new \Exception( 'empleadosdetallescontratonovedades_Agregar: Respuesta no implementada', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	}
+
+	/**
+	 * Modifica una novedad de detalle de contrato.
+	 *
+	 * Acepta campos opcionales y requiere un filtro (id o w_empleadosdetallescontrato_id).
+
+	 * @param array $d Datos y filtros.
+	 * @return mixed Resultado de la actualización.
+	 */
+	public static function empleadosdetallescontratonovedades_Modificar( $d ){
+	    date_default_timezone_set('America/Bogota');
+	    try {
+	        self::authRequ();
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_SESION_INACTIVA );
+	        throw new \Exception( $e->getMessage() , IndexCtrl::ERR_COD_SESION_INACTIVA );
+	    }
+	    $tb = 'empleadosdetallescontratonovedades';
+	    $aSt = array();
+	    if ( isset( $d['contrato'] ) ) $aSt['contrato'] = $d['contrato'];
+	    if ( isset( $d['meses'] ) ) $aSt['meses'] = $d['meses'];
+	    if ( isset( $d['dias'] ) ) $aSt['dias'] = $d['dias'];
+	    if ( isset( $d['fechainicio'] ) ) $aSt['fechainicio'] = $d['fechainicio'];
+	    if ( isset( $d['fecha'] ) ) $aSt['fecha'] = $d['fecha'];
+	    if ( isset( $d['usuario'] ) ) $aSt['usuario'] = $d['usuario'];
+	    $aSt['fechamodifica'] = date('Y-m-d H:i:s');
+	    if ( isset( $d['honorarios'] ) ) $aSt['honorarios'] = $d['honorarios'];
+	    if ( isset( $d['crp'] ) ) $aSt['crp'] = $d['crp'];
+	    if ( isset( $d['empleadosdetallescontrato_id'] ) ) $aSt['empleadosdetallescontrato_id'] = $d['empleadosdetallescontrato_id'];
+	    if ( isset( $d['empleadosdetallescontratonovedadesestados_id'] ) ) $aSt['empleadosdetallescontratonovedadesestados_id'] = $d['empleadosdetallescontratonovedadesestados_id'];
+	    if ( isset( $d['totalcontrato'] ) ) $aSt['totalcontrato'] = $d['totalcontrato'];
+	    
+	    if ( count( $aSt ) == 0 ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'empleadosdetallescontratonovedades_Modificar: No hay campos para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    $pr = [];
+	    $wh = '';
+	    if ( isset( $d['id'] ) ) { $wh = 'id = ?'; $pr[] = $d['id']; }
+	    if ( isset( $d['w_empleadosdetallescontrato_id'] ) ) { $wh = 'empleadosdetallescontrato_id = ?'; $pr[] = $d['w_empleadosdetallescontrato_id']; }
+	    if ( $wh == '' ) {
+	        http_response_code( IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	        throw new \Exception( 'empleadosdetallescontratonovedades_Modificar: Debe indicar un filtro para actualizar', IndexCtrl::ERR_COD_CAMPO_OBLIGATORIO );
+	    }
+	    try {
+	        $res = Singleton::_safeUpdate($tb, $aSt, $wh, $pr);
+	    } catch (\Throwable $th) {
+	        http_response_code( IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	        throw new \Exception( 'empleadosdetallescontratonovedades_Modificar: ' . $th->getMessage() , IndexCtrl::ERR_COD_ACTUALIZACION_SQL );
+	    }
+	    return $res;
+	}
+
+	/**
+	 * Obtiene novedades del detalle de contrato con filtros opcionales.
+	 *
+	 * Filtros: id, empleadosdetallescontrato_id, empleadosdetallescontratonovedadesestados_id, orden, limite
+	 *
+	 * @param array $d Filtros y opciones.
+	 * @return array Filas encontradas.
+	 */
+	public static function empleadosdetallescontratonovedades_Obtener( $d ){
+	    $r = new Singleton();
+	    $r::$lnk->query( self::SQL_BIG_SELECTS );
+	    $vr  = 'nd.`id`, nd.`contrato`, nd.`meses`, nd.`dias`, nd.`fechainicio`, nd.`fecha`, nd.`usuario`, nd.`fechamodifica`, ';
+	    $vr .= 'nd.`honorarios`, nd.`crp`, nd.`empleadosdetallescontrato_id`, emdet.documento as empleadosdetallescontrato_documento, ';
+	    $vr .= 'nd.`empleadosdetallescontratonovedadesestados_id`, nd.`totalcontrato` ';
+	    $tb  = '`empleadosdetallescontratonovedades` as nd ';
+	    $jn  = 'LEFT JOIN empleadosdetallescontratonovedadesestados as es on es.id = nd.empleadosdetallescontratonovedadesestados_id ';
+	    $jn .= 'LEFT JOIN empleadosdetallescontrato as emdet on emdet.id = nd.empleadosdetallescontrato_id ';
+	    
+	    $pr  = [];
+	    $wh  = [];
+	    if ( isset( $d['id'] ) ) { $wh[] = 'nd.`id` = ?'; $pr[] = $d['id']; }
+	    if ( isset( $d['w_empleadosdetallescontrato_id'] ) ) { 
+	        $wh[] = 'nd.`empleadosdetallescontrato_id` = ?'; 
+	        $pr[] = $d['w_empleadosdetallescontrato_id']; 
+	    }
+	    if ( isset( $d['w_empleadosdetallescontratonovedadesestados_id'] ) ) { 
+	        $wh[] = 'nd.`empleadosdetallescontratonovedadesestados_id` = ?'; 
+	        $pr[] = $d['w_empleadosdetallescontratonovedadesestados_id']; 
+	    }
+	    if ( isset( $d['w_empleadosdetallescontrato_documento'] ) ) {
+	        $wh[] = 'emdet.documento = ?';
+	        $pr[] = $d['w_empleadosdetallescontrato_documento'];
+	    }
+	    
+	    $defWh = '';
+	    if ( count( $wh ) > 0 ) $defWh = 'WHERE (' . implode(') AND (', $wh) . ') ';
+	    $orden = 'ORDER BY nd.`id` DESC';
+	    if ( isset( $d['ordendesc'] ) ) $orden = 'ORDER BY ' . $d['ordendesc'] . ' DESC';
+	    if ( isset( $d['ordenasc'] ) ) $orden = 'ORDER BY ' . $d['ordenasc'] . ' ASC';
+	    $limite = '';
+	    if ( isset( $d['limite'] ) ) $limite = 'LIMIT ' . intval( $d['limite'] );
+	    $xt = $jn . $defWh . ' ' . $orden . ' ' . $limite;
+	    $sql = 'SELECT ' . $vr . ' FROM ' . $tb . ' ' . $xt;
+	    
+	    //die( $sql . "\n" . print_r( $pr, true ) );
+	    
+	    try {
+	        $res = Singleton::_safeRawQuery($sql, $pr);
+	    } catch (\Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	        throw new \Exception( 'empleadosdetallescontratonovedades_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    return $res;
+	}
+	
+	public static function empleadosdetallescontratonovedades_Helper_Obtener( $d ) {
+	    $data = base64_decode( $d['data'] );
+	    $json = json_decode( $data , true );
+	    
+	    $items = (isset($json[0]) && is_array($json[0])) ? $json : [$json];
+	    
+	    $jslgn = [];
+	    if ( isset( $items[0]['jslgn'] ) ) {
+	        $jslgn_tmp = base64_decode( $items[0]['jslgn'] );
+	        $jslgn = json_decode( $jslgn_tmp, true );
+	    }
+	    
+	    // consultar novedades
+	    $nove = [];
+	    try {
+	        $nove = self::empleadosdetallescontratonovedades_Obtener( [
+	            'w_empleadosdetallescontrato_documento' => $jslgn['documento']
+	        ] );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+            throw new \Exception( 'empleadosdetallescontratonovedades_Helper_Obtener - empleadosdetallescontratonovedades_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    // consultar los contratos activos
+	    $cont = [];
+	    try {
+	        $cont = self::empleadosdetallescontrato_Obtener( [
+                'documento' => $jslgn['documento']
+            ] );
+	    } catch (Exception $e) {
+	        http_response_code( IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+            throw new \Exception( 'empleadosdetallescontratonovedades_Helper_Obtener - empleadosdetallescontrato_Obtener: ' . $e->getMessage() , IndexCtrl::ERR_COD_MSJ_ERR_COMUN );
+	    }
+	    
+	    $r = self::retorno( ['novedades' => $nove, 'contratos' => $cont], 0, '' );
+	    
+	    return $r;
+	}
+	// empleadosdetallescontratonovedades FIN
 	
 	// Formularios INI
 	const FORMULARIOS_FIELD_TYPES = array( 

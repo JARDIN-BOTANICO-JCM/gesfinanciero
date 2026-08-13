@@ -356,11 +356,17 @@ if ( isset( $_REQUEST['verpapelera']  ) ) {
 <?php // TODO: Tarea 112 - Agregar el select para la lista de dependencias en Contratistas.phtml ?>
                 <div class="row">
                 	
-                	<div class="mb-3 col-md-6">
+                	<div class="mb-3 col-md-4">
                         <label class="form-label" for="contrato">No. Contrato</label>
                         <input type="text" class="form-control" placeholder="No. de contrato" id="contrato" name="contrato" >
                     </div>
-                    <div class="mb-3 col-md-6">
+                    <div class="mb-3 col-md-4">
+						<label for="totalcontrato" class="form-label">Valor total contrato</label>
+						<div class="input-group me-3  ">
+							<input type="text" class="form-control" id="totalcontrato" name="totalcontrato" placeholder="Valor total del contrato">
+						</div>
+					</div>
+                    <div class="mb-3 col-md-4">
 						<label for="dependencias_id" class="form-label">Dependencia</label>
 						<select class="form-select" aria-label="Default select example" id="dependencias_id" name="dependencias_id" >
 <?php                   foreach( $d_dependencias as $v ) : ?>
@@ -811,6 +817,9 @@ const btnModRegistro = function ( o ) {
                                 }
                                 else if ( key == 'honorarios' ) {
                                 	jQuery('#honorarios').val( parseInt( _elDiv ) );
+                                }
+                                else if ( key == 'totalcontrato' ) {
+                                	jQuery('#totalcontrato').val( parseInt( _elDiv ) );
                                 }
                                 else{
                                     jQuery('#' + key).val( _elDiv );

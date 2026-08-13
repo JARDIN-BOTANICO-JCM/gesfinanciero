@@ -114,20 +114,29 @@ try {
                         <label class="form-label" for="flujos_id">Indique el tipo de solicitud que va a crear</label>
                         <select class="form-select" id="flujos_id" name="flujos_id" required="required">
                         	<option value="" disabled="disabled" selected="selected">Seleccione un tipo de solicitud</option>
-<?php foreach( $l_flujos_id as $v ) : ?>
+<?php                       foreach( $l_flujos_id as $v ) : ?>
                         	<option value="<?php echo $v['id'] ?>"><?php echo $v['nombre'] ?></option>
-<?php endforeach; ?>
+<?php                       endforeach; ?>
                         </select>
-                        
                     </div>
+                    
+					<div class="mb-3 col-md-12">
+                    	<label class="form-label" for="empleadosdetallescontrato_id">Contrato</label>
+                        <select class="form-select" id="empleadosdetallescontrato_id" name="empleadosdetallescontrato_id" required="required">
+                        	<option value="" disabled="disabled" selected="selected">Seleccione un contrato</option>
+                        </select>
+            		</div>
+
+                    <div class="mb-3 col-md-12">
+                    	<label class="form-label" for="mesaplica">Mes de afectaci&oacute;n</label>
+                        <div class="input-group me-3 ">
+                            <input id="mesaplica" name="mesaplica" value="<?php echo date("Y-m") . "-01"; ?>" class="form-control" type="text" >
+                            <span class="input-group-text text-muted" id="desde"><i class="fe fe-calendar"></i></span>
+                        </div>
+            		</div>
+            		
                 </div>
-                <div class="mb-3 col-md-12">
-                	<label class="form-label" for="mesaplica">Mes de afectaci&oacute;n</label>
-                    <div class="input-group me-3 ">
-                        <input id="mesaplica" name="mesaplica" value="<?php echo date("Y-m") . "-01"; ?>" class="form-control" type="text" >
-                        <span class="input-group-text text-muted" id="desde"><i class="fe fe-calendar"></i></span>
-                    </div>
-        		</div>
+                
             </div>
         </div>
     </form>
@@ -212,7 +221,44 @@ const btnAgregarReg = function(){
 		dateFormat: "Y-m"
 	});
 	
-	jQuery( _m ).modal('show');	
+	home.navUser(function( uDt ){
+        const form_data = new FormData();
+        form_data.append('ajax', '<?php echo md5( IndexCtrl::API_empleadosdetallescontratonovedades_Helper_Get ); ?>');
+        form_data.append('data', uDt );
+        
+        __TransportarData(
+        	form_data,
+        	function( o ) {
+        		if( o['error'] == 0 ){
+        			const res = o['result'];
+        			const contratos = res['contratos'];
+        			
+        			const sel = jQuery('#empleadosdetallescontrato_id');
+        			sel.html('<option value="" disabled="disabled" selected="selected">Seleccione un contrato</option>');
+        			
+        			for (const key in contratos) {
+                	    if (Object.hasOwnProperty.call( contratos, key ) ) {
+                	        const _el = contratos[key];
+                	        sel.append('<option value="' + _el['id'] + '">' + _el['contrato'] + ' - ' + _el['empleados_full'] + '</option>');
+                	    }
+                    }
+        		}
+        		else{
+        			alert("Error al obtener los contratos: " + o['msj']);
+        		}
+        	},
+        	function ( err ) {
+                const objmdlErr = mngModal.dibujar( { 'id' : 'mdlError', 'title' : 'Error','btnCerrarX' : true, 'level' : 'err' } );
+                const alerta = jQuery(objmdlErr + ' div.alert');
+                alerta.attr('class','alert alert-danger');
+                alerta.html( err.responseText );
+        
+                jQuery( objmdlErr ).modal('show');
+        	}
+        );
+	});
+	
+	jQuery( _m ).modal('show');
 };
 
 const btnOkFirma = function( colorbtn ){

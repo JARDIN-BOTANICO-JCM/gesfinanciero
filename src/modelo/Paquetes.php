@@ -20,6 +20,8 @@ class Paquetes extends Clsdatos {
     // TODO: Tarea 164 - Agregar campo radicado a la tabla Paquetes
     private $radicado = "";
     
+    private $empleadosdetallescontrato_id = 0;
+    
     // TODO: Tarea 165 - Agregar acceso para obtener el campo radicado de la tabla Paquetes
     /**
      * @return string
@@ -36,6 +38,26 @@ class Paquetes extends Clsdatos {
     public function setRadicado($radicado): self
     {
         $this->radicado = $radicado;
+        
+        return $this;
+    }
+
+    /**
+     * Obtiene el identificador del detalle del contrato del empleado asociado al paquete.
+     * @return number
+     */
+    public function getEmpleadosdetallescontrato_id()
+    {
+        return $this->empleadosdetallescontrato_id;
+    }
+
+    /**
+     * Establece el identificador del detalle del contrato del empleado asociado al paquete.
+     * @param number $empleadosdetallescontrato_id
+     */
+    public function setEmpleadosdetallescontrato_id($empleadosdetallescontrato_id): self
+    {
+        $this->empleadosdetallescontrato_id = $empleadosdetallescontrato_id;
         
         return $this;
     }
