@@ -3,6 +3,6 @@ namespace src ;
 
 class Version {
     // front.back.db.compilado
-    const VERSION = 'v1.21.7.50';
+    const VERSION = 'v1.30.2.0'; // 2026-08-13
 }
 ?>
